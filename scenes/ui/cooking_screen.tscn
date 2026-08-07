@@ -1,0 +1,186 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/cooking_frame.png" id="1_frame"]
+[ext_resource type="Script" path="res://scripts/ui/cooking_screen.gd" id="2_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_close.png" id="3_close"]
+[ext_resource type="Texture2D" path="res://assets/ui/pot.png" id="4_pot"]
+[ext_resource type="Texture2D" path="res://assets/ui/slot_hotbar.png" id="5_slot"]
+[ext_resource type="Texture2D" path="res://assets/ui/cooking_inventory.png" id="6_inv"]
+[ext_resource type="Texture2D" path="res://assets/ui/frame_9slice.png" id="7_frame_9slice"]
+
+[node name="CookingScreen" type="Control"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -24.0
+offset_right = 40.0
+offset_bottom = 24.0
+pivot_offset = Vector2(40, 24)
+scale = Vector2(2.5, 2.5)
+script = ExtResource("2_script")
+
+[node name="Background" type="TextureRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("1_frame")
+
+[node name="Pot" type="TextureButton" parent="Background"]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 48.0
+offset_bottom = 48.0
+pivot_offset = Vector2(24, 24)
+texture_normal = ExtResource("4_pot")
+disabled = true
+
+[node name="SlotA" type="TextureButton" parent="Background/Pot"]
+offset_left = 9.0
+offset_top = 29.0
+offset_right = 17.0
+offset_bottom = 37.0
+pivot_offset = Vector2(4, 4)
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("5_slot")
+
+[node name="Icon" type="TextureRect" parent="Background/Pot/SlotA" groups=["_always_ignore_mouse"]]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SlotB" type="TextureButton" parent="Background/Pot"]
+offset_left = 31.0
+offset_top = 29.0
+offset_right = 39.0
+offset_bottom = 37.0
+pivot_offset = Vector2(4, 4)
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("5_slot")
+
+[node name="Icon" type="TextureRect" parent="Background/Pot/SlotB" groups=["_always_ignore_mouse"]]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RatPoisonToggle" type="TextureButton" parent="Background/Pot"]
+offset_left = 20.0
+offset_top = 15.0
+offset_right = 28.0
+offset_bottom = 23.0
+pivot_offset = Vector2(4, 4)
+ignore_texture_size = true
+stretch_mode = 5
+toggle_mode = true
+
+[node name="InventoryPanel" type="NinePatchRect" parent="Background"]
+offset_left = 48.0
+offset_top = 0.0
+offset_right = 76.0
+offset_bottom = 47.0
+texture = ExtResource("6_inv")
+patch_margin_left = 4
+patch_margin_top = 6
+patch_margin_right = 4
+patch_margin_bottom = 7
+
+[node name="InventoryScroll" type="ScrollContainer" parent="Background/InventoryPanel"]
+offset_left = 4.0
+offset_top = 6.0
+offset_right = -4.0
+offset_bottom = -7.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+horizontal_scroll_mode = 0
+
+[node name="InventoryGrid" type="GridContainer" parent="Background/InventoryPanel/InventoryScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+columns = 3
+theme_override_constants/h_separation = 1
+theme_override_constants/v_separation = 1
+
+[node name="CloseButton" type="TextureButton" parent="Background"]
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = -14.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = 14.0
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("3_close")
+
+[node name="ConfirmPopup" type="Control" parent="."]
+offset_right = 200.0
+offset_bottom = 120.0
+scale = Vector2(0.4, 0.4)
+
+[node name="Dim" type="ColorRect" parent="ConfirmPopup"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.6)
+
+[node name="Panel" type="NinePatchRect" parent="ConfirmPopup"]
+mouse_filter = 2
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 190.0
+offset_bottom = 110.0
+texture = ExtResource("7_frame_9slice")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="Margin" type="MarginContainer" parent="ConfirmPopup/Panel"]
+mouse_filter = 2
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="VBox" type="VBoxContainer" parent="ConfirmPopup/Panel/Margin"]
+mouse_filter = 2
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ConfirmLabel" type="Label" parent="ConfirmPopup/Panel/Margin/VBox"]
+mouse_filter = 2
+layout_mode = 2
+size_flags_vertical = 3
+autowrap_mode = 3
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1.0)
+theme_override_font_sizes/font_size = 6
+text = "요리에 쥐약을 넣으시겠습니까?
+이 선택은 NPC에게 안 좋은 결과를 불러오며, 되돌릴 수 없습니다."
+
+[node name="ButtonRow" type="HBoxContainer" parent="ConfirmPopup/Panel/Margin/VBox"]
+mouse_filter = 2
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 20
+
+[node name="YesButton" type="Button" parent="ConfirmPopup/Panel/Margin/VBox/ButtonRow"]
+custom_minimum_size = Vector2(48, 18)
+layout_mode = 2
+theme_override_font_sizes/font_size = 7
+text = "예"
+
+[node name="NoButton" type="Button" parent="ConfirmPopup/Panel/Margin/VBox/ButtonRow"]
+custom_minimum_size = Vector2(48, 18)
+layout_mode = 2
+theme_override_font_sizes/font_size = 7
+text = "아니오"

@@ -1,0 +1,126 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/frame_9slice.png" id="1_frame"]
+[ext_resource type="Script" path="res://scripts/ui/shop_screen.gd" id="2_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_close.png" id="3_close"]
+
+[node name="ShopScreen" type="Control"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -75.0
+offset_right = 100.0
+offset_bottom = 75.0
+script = ExtResource("2_script")
+
+[node name="Background" type="NinePatchRect" parent="."]
+texture_filter = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("1_frame")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="Margin" type="MarginContainer" parent="Background"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBox" type="VBoxContainer" parent="Background/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="RowsScroll" type="ScrollContainer" parent="Background/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="RowsMargin" type="MarginContainer" parent="Background/Margin/VBox/RowsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_right = 6
+
+[node name="Rows" type="VBoxContainer" parent="Background/Margin/VBox/RowsScroll/RowsMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="MessageLabel" type="Label" parent="Background/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 7
+
+[node name="CloseButton" type="TextureButton" parent="Background"]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -14.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = 14.0
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("3_close")
+
+[node name="StallPicker" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Dim" type="ColorRect" parent="StallPicker"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.6)
+
+[node name="Panel" type="NinePatchRect" parent="StallPicker"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -70.0
+offset_top = -35.0
+offset_right = 70.0
+offset_bottom = 35.0
+texture = ExtResource("1_frame")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="Margin" type="MarginContainer" parent="StallPicker/Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+
+[node name="VBox" type="VBoxContainer" parent="StallPicker/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="MessageLabel" type="Label" parent="StallPicker/Panel/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 7
+text = "어느 칸에 배치할까요?"
+
+[node name="StallRow" type="HBoxContainer" parent="StallPicker/Panel/Margin/VBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 4
+
+[node name="CancelButton" type="Button" parent="StallPicker/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 7
+text = "취소"

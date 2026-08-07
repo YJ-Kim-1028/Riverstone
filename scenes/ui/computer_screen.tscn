@@ -1,0 +1,58 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/computer_screen.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/computer_background.png" id="2_background"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_computer_email.png" id="3_email_icon"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_computer_shop.png" id="4_shop_icon"]
+[ext_resource type="PackedScene" path="res://scenes/ui/mail_app.tscn" id="5_mail_app"]
+[ext_resource type="PackedScene" path="res://scenes/ui/online_shop_panel.tscn" id="6_shop_panel"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_computer_onoff.png" id="7_onoff_icon"]
+
+[node name="ComputerScreen" type="Control"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -24.0
+offset_right = 40.0
+offset_bottom = 24.0
+pivot_offset = Vector2(40, 24)
+scale = Vector2(3, 3)
+script = ExtResource("1_script")
+
+[node name="Desktop" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Background" type="TextureRect" parent="Desktop"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("2_background")
+
+[node name="EmailIcon" type="TextureButton" parent="Desktop"]
+offset_left = 5.0
+offset_top = 7.0
+offset_right = 17.0
+offset_bottom = 14.0
+texture_normal = ExtResource("3_email_icon")
+
+[node name="ShopIcon" type="TextureButton" parent="Desktop"]
+offset_left = 5.0
+offset_top = 19.0
+offset_right = 16.0
+offset_bottom = 29.0
+texture_normal = ExtResource("4_shop_icon")
+
+[node name="OnOffButton" type="TextureButton" parent="Desktop"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = -10.0
+offset_right = 10.0
+offset_bottom = -4.0
+texture_normal = ExtResource("7_onoff_icon")
+
+[node name="MailWindow" parent="." instance=ExtResource("5_mail_app")]
+
+[node name="ShopWindow" parent="." instance=ExtResource("6_shop_panel")]

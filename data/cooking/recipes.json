@@ -1,0 +1,128 @@
+{
+    "grilled_fish": {
+        "name": "생선 구이",
+        "ingredient_pairs": [["cooked_mackerel", "cooked_mackerel"], ["cooked_mackerel", "cooked_salmon"], ["cooked_salmon", "cooked_salmon"]],
+        "price": 100,
+        "description": "고등어나 연어를 구운 담백한 요리.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 8,
+        "icon_row": 1
+    },
+    "salmon_salad": {
+        "name": "연어 샐러드",
+        "ingredient_pairs": [["cooked_salmon", "salad_greens"]],
+        "price": 90,
+        "description": "연어와 상추로 만든 샐러드.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 7,
+        "icon_row": 1
+    },
+    "grilled_squid": {
+        "name": "오징어구이",
+        "ingredient_pairs": [["cooked_squid", "cooked_squid"]],
+        "price": 130,
+        "description": "오징어를 구운 요리.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 9,
+        "icon_row": 1
+    },
+    "fish_and_chips": {
+        "name": "피쉬 앤 칩스",
+        "ingredient_pairs": [["cooked_mackerel", "cooked_potato"], ["cooked_salmon", "cooked_potato"]],
+        "price": 100,
+        "description": "생선과 감자튀김을 곁들인 요리.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 10,
+        "icon_row": 1
+    },
+    "grilled_vegetables": {
+        "name": "구운 채소",
+        "ingredient_pairs": [["cooked_potato", "cooked_potato"], ["cooked_potato", "cooked_corn"], ["cooked_corn", "cooked_corn"]],
+        "price": 60,
+        "description": "감자와 옥수수를 구운 소박한 요리.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 0,
+        "icon_row": 1
+    },
+    "potato_salad": {
+        "name": "감자 샐러드",
+        "ingredient_pairs": [["cooked_potato", "salad_greens"]],
+        "price": 75,
+        "description": "감자와 상추로 만든 샐러드.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 1,
+        "icon_row": 1
+    },
+    "chop_steak": {
+        "name": "찹 스테이크",
+        "ingredient_pairs": [["cooked_beef", "cooked_potato"], ["cooked_beef", "cooked_corn"]],
+        "price": 150,
+        "description": "소고기와 채소로 만든 스테이크.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 4,
+        "icon_row": 1
+    },
+    "barbecue": {
+        "name": "바베큐",
+        "ingredient_pairs": [["cooked_beef", "cooked_pork"]],
+        "price": 200,
+        "description": "소고기와 돼지고기를 함께 구운 요리.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 3,
+        "icon_row": 1
+    },
+    "grilled_pork_belly": {
+        "name": "삼겹살 구이",
+        "ingredient_pairs": [["cooked_pork", "cooked_pork"]],
+        "price": 130,
+        "description": "돼지고기를 구운 요리.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 3,
+        "icon_row": 2
+    },
+    "seafood_set": {
+        "name": "바다 정식",
+        "ingredient_pairs": [["cooked_squid", "cooked_mackerel"], ["cooked_squid", "cooked_salmon"]],
+        "price": 120,
+        "description": "오징어와 생선을 함께 낸 정식.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 11,
+        "icon_row": 1
+    },
+    "meat_salad": {
+        "name": "고기 샐러드",
+        "ingredient_pairs": [["cooked_pork", "salad_greens"], ["cooked_beef", "salad_greens"]],
+        "price": 100,
+        "description": "고기와 상추로 만든 샐러드.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 2,
+        "icon_row": 1
+    },
+    "yogurt_smoothie": {
+        "name": "요거트 스무디",
+        "ingredient_pairs": [["smoothie", "smoothie"]],
+        "price": 50,
+        "description": "우유로 만든 스무디.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 6,
+        "icon_row": 1
+    },
+    "strawberry_smoothie": {
+        "name": "딸기 스무디",
+        "ingredient_pairs": [["mashed_berry", "smoothie"]],
+        "price": 50,
+        "description": "베리와 우유로 만든 스무디.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 5,
+        "icon_row": 1
+    },
+    "weird_dish": {
+        "name": "괴상한 요리",
+        "ingredient_pairs": [],
+        "price": 20,
+        "description": "레시피에 없는 조합으로 만들어진 정체불명의 요리. NPC들은 이 요리를 좋아하지 않는다.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 0,
+        "icon_row": 2
+    }
+}

@@ -1,0 +1,102 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/frame_fishing.png" id="1_frame"]
+[ext_resource type="Script" path="res://scripts/ui/fishing_screen.gd" id="2_script"]
+[ext_resource type="Script" path="res://scripts/ui/fishing_time_bar.gd" id="4_timebar"]
+[ext_resource type="Script" path="res://scripts/ui/fishing_fish.gd" id="5_fish"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_fish.png" id="6_fish_icon"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fish"]
+
+[node name="FishingScreen" type="Control"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -80.0
+offset_top = -50.0
+offset_right = 80.0
+offset_bottom = 50.0
+clip_contents = true
+script = ExtResource("2_script")
+
+[node name="Background" type="TextureRect" parent="."]
+texture_filter = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("1_frame")
+
+[node name="HitLabel" type="Label" parent="Background"]
+offset_left = 10.0
+offset_top = 8.0
+offset_right = 70.0
+offset_bottom = 20.0
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+text = "0 / 6"
+
+[node name="TimeBar" type="Control" parent="Background"]
+offset_left = 84.0
+offset_top = 10.0
+offset_right = 144.0
+offset_bottom = 16.0
+custom_minimum_size = Vector2(60, 6)
+script = ExtResource("4_timebar")
+
+[node name="SpawnPoints" type="Control" parent="Background"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="SpawnPoint1" type="Control" parent="Background/SpawnPoints"]
+position = Vector2(16, 26)
+
+[node name="SpawnPoint2" type="Control" parent="Background/SpawnPoints"]
+position = Vector2(66, 60)
+
+[node name="SpawnPoint3" type="Control" parent="Background/SpawnPoints"]
+position = Vector2(116, 26)
+
+[node name="SpawnPoint4" type="Control" parent="Background/SpawnPoints"]
+position = Vector2(41, 60)
+
+[node name="SpawnPoint5" type="Control" parent="Background/SpawnPoints"]
+position = Vector2(91, 26)
+
+[node name="Fish" type="Button" parent="Background"]
+custom_minimum_size = Vector2(28, 12)
+position = Vector2(16, 26)
+size = Vector2(28, 12)
+theme_override_styles/normal = SubResource("StyleBoxEmpty_fish")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_fish")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_fish")
+script = ExtResource("5_fish")
+
+[node name="Icon" type="TextureRect" parent="Background/Fish"]
+texture_filter = 1
+mouse_filter = 2
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("6_fish_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ResultIcon" type="TextureRect" parent="Background"]
+custom_minimum_size = Vector2(24, 24)
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -12.0
+offset_top = 22.0
+offset_right = 12.0
+offset_bottom = 46.0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ResultLabel" type="Label" parent="Background"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 48.0
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "결과"

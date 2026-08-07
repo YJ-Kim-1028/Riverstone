@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="13" height="13" tilewidth="16" tileheight="16" infinite="0" nextlayerid="11" nextobjectid="16">
+ <tileset firstgid="1" source="UI_Component.tsx"/>
+ <tileset firstgid="257" source="cowshed.tsx"/>
+ <tileset firstgid="513" source="generalStore.tsx"/>
+ <tileset firstgid="769" source="farmStore.tsx"/>
+ <tileset firstgid="1025" source="cafe.tsx"/>
+ <layer id="2" name="Tile" width="13" height="13" locked="1">
+  <data encoding="csv">
+579,579,579,579,579,579,579,579,579,579,579,579,579,
+579,579,579,579,579,579,579,579,579,579,579,579,579,
+579,579,579,579,579,579,579,579,579,579,579,579,579,
+579,579,579,579,579,579,579,579,579,579,579,579,579,
+579,579,579,579,579,579,579,579,579,579,579,579,579,
+579,579,579,579,579,579,579,579,579,579,579,579,579,
+579,579,579,579,579,579,579,579,579,579,579,579,579,
+579,579,579,579,579,579,579,579,579,579,579,579,579,
+579,579,579,579,579,579,579,579,579,579,579,579,579,
+579,579,579,579,579,579,579,579,579,579,579,579,579,
+579,579,579,579,579,579,579,579,579,579,579,579,579,
+579,579,579,579,579,579,579,579,579,579,579,579,579,
+579,579,579,579,579,579,579,579,579,579,579,579,579
+</data>
+ </layer>
+ <layer id="6" name="Carpet" width="13" height="13" locked="1">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,570,571,571,571,571,572,0,0,0,0,0,0,
+0,586,587,587,587,587,588,0,0,0,0,0,0,
+0,586,587,587,587,587,588,0,0,0,0,0,0,
+0,586,587,587,587,587,588,0,0,0,0,0,0,
+0,602,603,603,603,603,604,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <layer id="1" name="Wall" width="13" height="13" locked="1">
+  <data encoding="csv">
+113,114,114,114,114,114,114,114,114,114,114,114,115,
+129,548,549,549,549,549,550,273,548,549,549,550,211,
+129,564,565,565,565,565,566,273,564,565,565,566,211,
+129,580,581,581,581,581,582,273,580,581,581,582,211,
+129,0,0,0,0,0,0,273,0,0,0,0,211,
+129,0,0,0,0,0,0,273,0,0,0,0,211,
+129,0,0,0,0,0,0,148,149,149,149,149,150,
+129,0,0,0,0,0,0,548,549,549,549,550,211,
+129,0,0,0,0,0,0,564,565,565,565,566,211,
+129,0,0,0,0,0,0,580,581,581,581,582,211,
+129,0,0,0,0,0,0,0,0,0,0,0,211,
+129,0,0,0,0,0,0,0,0,0,0,0,211,
+225,226,226,226,98,0,0,97,226,226,226,226,227
+</data>
+ </layer>
+ <layer id="3" name="Furniture" width="13" height="13" locked="1">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,1175,1176,0,0,0,515,516,0,
+0,833,835,836,0,1191,1192,0,0,0,531,532,0,
+0,849,851,852,0,0,0,0,0,534,535,536,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,545,546,547,0,0,0,0,0,0,
+0,0,0,0,561,562,563,0,0,0,0,0,0,
+0,545,546,547,0,0,0,0,0,0,0,0,0,
+0,561,562,563,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <layer id="4" name="Deco" width="13" height="13" locked="1">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,551,552,0,0,
+0,0,0,0,0,1137,1138,0,0,567,568,0,0,
+0,769,770,0,0,1153,1154,0,0,0,0,0,0,
+0,785,786,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,537,0,0,0,0,0,0,
+0,0,0,0,539,538,553,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,513,514,0,0,0,
+0,522,523,524,0,0,0,0,529,530,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <layer id="5" name="Light" width="13" height="13" locked="1">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,517,0,
+0,0,0,578,0,0,0,0,0,0,0,533,0,
+0,0,0,594,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,517,0,
+0,0,0,0,0,0,0,0,0,0,0,533,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <objectgroup id="7" name="Warp" visible="0" locked="1">
+  <object id="1" name="general_out" x="80" y="191.75" width="32.25" height="16">
+   <properties>
+    <property name="target_map" value="plaza4"/>
+    <property name="target_spawn" value="general_exit"/>
+   </properties>
+  </object>
+  <object id="6" name="room_in_general" x="143" y="166.5">
+   <properties>
+    <property name="target_map" value="general_interior"/>
+    <property name="target_spawn" value="general_room_enterance"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="8" name="Spawn" visible="0" locked="1">
+  <object id="3" name="general_working" x="32" y="72"/>
+  <object id="4" name="general_looking" x="48" y="176"/>
+  <object id="5" name="general_room_enterance" x="144" y="80"/>
+  <object id="7" name="general_enterance" x="104" y="197.5"/>
+ </objectgroup>
+ <objectgroup id="9" name="Interactable" visible="0" locked="1">
+  <object id="8" name="cash_register" x="24" y="89.75" width="16" height="16">
+   <properties>
+    <property name="shop_id" value="marr_shop"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="10" name="YSortAnchor" visible="0" locked="1">
+  <object id="9" name="wall1" x="16" y="16" width="176" height="48">
+   <properties>
+    <property name="layer" value="Wall,Deco,Light"/>
+   </properties>
+  </object>
+  <object id="10" name="wall2" x="112" y="112" width="80" height="48"/>
+  <object id="11" name="light1" x="176" y="144" width="16" height="32"/>
+  <object id="12" name="desk1" x="16" y="48" width="48" height="48">
+   <properties>
+    <property name="layer" value="Deco,Furniture,Light"/>
+   </properties>
+  </object>
+  <object id="13" name="desk2" x="64" y="96" width="48" height="48"/>
+  <object id="14" name="desk3" x="16" y="144" width="48" height="32"/>
+  <object id="15" name="desk4" x="80" y="32" width="32" height="48"/>
+ </objectgroup>
+</map>

@@ -1,0 +1,129 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/mail_compose_panel.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/frame_computer_titlebox.png" id="2_titlebox"]
+[ext_resource type="Texture2D" path="res://assets/ui/frame_computer_contentbox.png" id="3_contentbox"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_disabled_overlay"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0, 0, 0, 0.15)
+expand_margin_left = 0.0
+expand_margin_top = 0.0
+expand_margin_right = 0.0
+expand_margin_bottom = 0.0
+
+[node name="ComposePanel" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_script")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/separation = 3
+
+[node name="ModeRow" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="GreetingModeButton" type="Button" parent="VBox/ModeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.356863, 0.27451, 0.211765, 1)
+theme_override_font_sizes/font_size = 6
+text = "안부 메일"
+
+[node name="InviteModeButton" type="Button" parent="VBox/ModeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.356863, 0.27451, 0.211765, 1)
+theme_override_font_sizes/font_size = 6
+text = "초대장"
+
+[node name="NpcPicker" type="HBoxContainer" parent="VBox"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="PrevButton" type="Button" parent="VBox/NpcPicker"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 5
+text = "<"
+
+[node name="NpcNameLabel" type="Label" parent="VBox/NpcPicker"]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 5
+
+[node name="NextButton" type="Button" parent="VBox/NpcPicker"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.356863, 0.27451, 0.211765, 1)
+theme_override_font_sizes/font_size = 5
+text = ">"
+
+[node name="TitleBox" type="Control" parent="VBox"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="Background" type="TextureRect" parent="VBox/TitleBox"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("2_titlebox")
+
+[node name="TitleEdit" type="LineEdit" parent="VBox/TitleBox"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_uneditable_color = Color(0, 0, 0, 1)
+theme_override_colors/font_placeholder_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 6
+theme_override_styles/normal = SubResource("StyleBoxEmpty_1")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_1")
+theme_override_styles/read_only = SubResource("StyleBoxFlat_disabled_overlay")
+placeholder_text = "제목"
+
+[node name="ContentBox" type="Control" parent="VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Background" type="TextureRect" parent="VBox/ContentBox"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("3_contentbox")
+
+[node name="ContentEdit" type="TextEdit" parent="VBox/ContentBox"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_readonly_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 6
+theme_override_styles/normal = SubResource("StyleBoxEmpty_1")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_1")
+theme_override_styles/read_only = SubResource("StyleBoxFlat_disabled_overlay")
+wrap_mode = 1
+
+[node name="BottomRow" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="DateLabel" type="Label" parent="VBox/BottomRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 5
+
+[node name="FeedbackLabel" type="Label" parent="VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 5

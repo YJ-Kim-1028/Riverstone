@@ -1,0 +1,107 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/frame_inventory_9slice.png" id="1_frame"]
+[ext_resource type="Script" path="res://scripts/ui/status_screen.gd" id="2_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/equipment_panel.tscn" id="3_equipment"]
+[ext_resource type="PackedScene" path="res://scenes/ui/affection_panel.tscn" id="4_affection"]
+[ext_resource type="PackedScene" path="res://scenes/ui/settings_panel.tscn" id="12_settings"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_close.png" id="5_close"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_equipment.png" id="6_equipment_icon"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_affection.png" id="7_affection_icon"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_settings.png" id="8_settings_icon"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_equipment_hover.png" id="9_equipment_hover"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_affection_hover.png" id="10_affection_hover"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_settings_hover.png" id="11_settings_hover"]
+
+[node name="StatusScreen" type="Control"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -72.0
+offset_right = 120.0
+offset_bottom = 72.0
+clip_contents = true
+script = ExtResource("2_script")
+
+[node name="Background" type="NinePatchRect" parent="."]
+texture_filter = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("1_frame")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="CloseButton" type="TextureButton" parent="Background"]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -14.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = 14.0
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("5_close")
+
+[node name="Margin" type="MarginContainer" parent="Background"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="HBox" type="HBoxContainer" parent="Background/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ContentArea" type="Control" parent="Background/Margin/HBox"]
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+clip_contents = true
+
+[node name="EquipmentPanel" parent="Background/Margin/HBox/ContentArea" instance=ExtResource("3_equipment")]
+layout_mode = 1
+
+[node name="AffectionPanel" parent="Background/Margin/HBox/ContentArea" instance=ExtResource("4_affection")]
+layout_mode = 1
+
+[node name="SettingsPanel" parent="Background/Margin/HBox/ContentArea" instance=ExtResource("12_settings")]
+layout_mode = 1
+
+[node name="TabButtons" type="VBoxContainer" parent="Background/Margin/HBox"]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="EquipmentTabButton" type="TextureButton" parent="Background/Margin/HBox/TabButtons"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("6_equipment_icon")
+texture_hover = ExtResource("9_equipment_hover")
+
+[node name="AffectionTabButton" type="TextureButton" parent="Background/Margin/HBox/TabButtons"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("7_affection_icon")
+texture_hover = ExtResource("10_affection_hover")
+
+[node name="SettingsTabButton" type="TextureButton" parent="Background/Margin/HBox/TabButtons"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("8_settings_icon")
+texture_hover = ExtResource("11_settings_hover")

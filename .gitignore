@@ -1,0 +1,9 @@
+# Godot editor cache (regenerated automatically, don't need version control)
+.godot/
+
+# Bundled Godot engine executable (not project source)
+Godot_v4.7.1/
+export_templates/
+
+# Stray duplicate folder with no unique content (project.godot + cache copy only)
+Game/

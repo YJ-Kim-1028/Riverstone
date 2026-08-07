@@ -1,0 +1,199 @@
+extends Node
+
+## Coordinates high-level game state that doesn't belong to any single
+## system: the player's display name, accumulated play time, and which map
+## is currently loaded. SaveManager needs current_map_id to know where to
+## resume the player; main.gd is expected to call set_current_map() on
+## every map load/warp.
+
+signal map_changed(map_id: String)
+
+const DEFAULT_PLAYER_NAME := "Player"
+## title_screen.md 캐릭터 생성 화면이 생기기 전까지 mail_compose_panel.gd가
+## 초대장 문구에 임시로 박아 쓰던 값과 동일 - 이제 실제 화면이 생겼으니 그
+## 자리표시자 대신 이 필드를 참조하게 바꿨다.
+const DEFAULT_RESTAURANT_NAME := "우리 레스토랑"
+
+var player_name := DEFAULT_PLAYER_NAME
+var restaurant_name := DEFAULT_RESTAURANT_NAME
+var play_time_seconds := 0.0
+var current_map_id := ""
+## 캐릭터 생성 화면에서 고른 외형. 전부 한 장짜리 시트(player_hair.png/
+## player_outfit.png/player_shoes.png/player_accessory.png)에서 고른 "줄 번호"를
+## 문자열로 담는다(hair_id는 "0"=대머리, accessory_id는 "0"=없음, outfit_id/
+## shoe_id는 "없음" 개념이 없어서 "0"도 그냥 첫 번째 정식 스타일).
+var hair_id := ""
+var outfit_id := ""
+var shoe_id := ""
+var accessory_id := ""
+## 피부색/눈동자색 - hair_color_1/2/3와 같은 형식(HTML 헥스 문자열). 색상환
+## (SVSquare+HueStrip)에서 자유롭게 고른 색을 그대로 담는다 - 고정 목록
+## 인덱스가 아니다(사용자 확정: 프리셋 방식에서 자유 색상 선택으로 변경).
+var skin_color := "f8e7da"
+var eye_color := "38b57a"
+## 볼터치 - 위와 같은 형식. 실제 기획 기본값을 아직 못 받아서 임시값.
+var cheek_color := "f4a6b3"
+## 머리 시트에 표식으로 그려둔 색1/색2/색3(#D8D8D8/#9A9A9A/#565656 원본
+## 표식과 같은 순서)을 사용자가 어떤 색으로 바꿨는지 - HTML 헥스 문자열
+## (예: "9a9a9a"). 표식 색 그대로면 리컬러가 안 일어난 것과 동일.
+var hair_color_1 := "d8d8d8"
+var hair_color_2 := "9a9a9a"
+var hair_color_3 := "565656"
+## 옷 시트에 표식으로 그려둔 색1/색2(#9A9A9A/#565656)를 사용자가 어떤
+## 색으로 바꿨는지 - "상의"/"하의"라는 UI 이름표가 붙어있지만 실제로는
+## 그림 속 부위가 아니라 이 마커 2개에 대응한다(사용자 확정).
+var outfit_color_1 := "9a9a9a"
+var outfit_color_2 := "565656"
+## 신발 시트(player_shoes.png)에 그려둔 마커(#9A9A9A) 색.
+var shoe_color := "9a9a9a"
+## 장신구 시트(player_accessory.png)에 그려둔 마커(#9A9A9A) 색.
+var accessory_color := "9a9a9a"
+## TimeManager.is_running과 같은 이유의 같은 문제 - 오토로드라 부팅 즉시
+## _process가 돌아서, 타이틀/캐릭터생성 화면에 머무는 동안에도 플레이타임이
+## 쌓이면 안 된다. main.gd._ready()가 실제 게임플레이 시작 시점에
+## start_play_timer()를 호출해야 카운트가 시작된다.
+var _play_timer_running := false
+
+
+## Godot의 전역 random 함수(randi()/randf()/randi_range() 등)는 randomize()를
+## 한 번 호출해주기 전까지 항상 같은 고정 시드로 시작한다 - 그래서 이걸 아무도
+## 호출한 적 없던 지금까지는, 낚시 어종 추첨/요일별 대사 선정/날씨 굴림/이메일
+## 발송 확률/만능 레시피 무작위 선택 등 이 프로젝트의 모든 랜덤 로직이 실행할
+## 때마다(엔진을 새로 켤 때마다) 항상 똑같은 결과만 내고 있었다(사용자 리포트 -
+## recipe_random이 매번 "피쉬앤칩스"만 나옴). GameManager가 project.godot
+## 오토로드 목록 맨 앞이라 가장 먼저 실행되므로, 다른 어떤 랜덤 로직보다도
+## 먼저 여기서 한 번 시드를 흩뿌린다.
+func _ready() -> void:
+	randomize()
+
+
+func _process(delta: float) -> void:
+	if _play_timer_running:
+		play_time_seconds += delta
+
+
+func start_play_timer() -> void:
+	_play_timer_running = true
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F11:
+		_toggle_fullscreen()
+	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F8:
+		_debug_give_test_equipment()
+	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F9:
+		_debug_give_test_ingredients()
+	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F10:
+		_debug_open_restaurant_with_guests()
+	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F12:
+		_debug_give_test_emails()
+	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F7:
+		_debug_give_test_storage_boxes()
+
+
+func _toggle_fullscreen() -> void:
+	var window := get_window()
+	if window.mode == Window.MODE_FULLSCREEN or window.mode == Window.MODE_EXCLUSIVE_FULLSCREEN:
+		window.mode = Window.MODE_WINDOWED
+	else:
+		window.mode = Window.MODE_FULLSCREEN
+
+
+## Debug-only (F8, editor/debug builds only): gives the fishing_rod so the
+## 상태창 장비 탭 "손" 슬롯 drag-to-equip flow와 낚시 시스템을 바로 테스트할
+## 수 있다. 원래는 test_hat/test_shoes를 줬음(여전히 data/items/items.json에
+## 있는 placeholder 아이템 - 모자/신발 슬롯 테스트가 다시 필요하면 그때
+## add_item으로 넣으면 됨).
+func _debug_give_test_equipment() -> void:
+	InventoryManager.add_item("fishing_rod", 1)
+
+
+## Debug-only (F9, editor/debug builds only): fills the inventory with a
+## batch of raw cooking materials plus rat poison, so the cooking screen can
+## be tested without grinding out fishing/farming/foraging first. Covers at
+## least one raw ingredient per cooking_stations.json tool (냄비/프라이팬/
+## 도마/믹서기) so every station's drag-and-drop flow can be tried.
+func _debug_give_test_ingredients() -> void:
+	for item_id in ["corn", "potato", "pork", "beef", "salmon", "mackerel", "squid", "lettuce", "berry", "milk"]:
+		InventoryManager.add_item(item_id, 5)
+	InventoryManager.add_item("rat_poison", 1)
+
+
+## Debug-only (F10, editor/debug builds only): force-opens the restaurant and
+## seats an NPC at every cooking station, since cook_and_serve() refuses to
+## work at a station with nobody sitting there - without this, testing the
+## cooking screen requires waiting for a real customer to be seated.
+func _debug_open_restaurant_with_guests() -> void:
+	RestaurantManager.is_open = true
+	var npc_ids := NPCManager.get_all_ids()
+	for i in RestaurantManager.STATION_COUNT:
+		if i < npc_ids.size():
+			RestaurantManager._seat_npc(i, npc_ids[i])
+
+
+## Debug-only (F12, editor/debug builds only): drops 5 test emails straight
+## into the inbox so the mail app's 수신함 list can be tested without waiting
+## on the (still-placeholder) daily auto-send logic to actually fire one.
+func _debug_give_test_emails() -> void:
+	var npc_ids := NPCManager.get_all_ids()
+	for i in range(min(5, npc_ids.size())):
+		var npc_id: String = npc_ids[i]
+		EmailManager._add_mail(npc_id, "greeting", "테스트 메일 %d" % (i + 1), ["테스트용 내용입니다."])
+
+
+## Debug-only (F7, editor/debug builds only): 상점 구매 없이 바로 설치 흐름을
+## 테스트할 수 있게 보관함 3개를 인벤토리에 지급한다(F8의 낚싯대 지급과 동일한
+## 목적).
+func _debug_give_test_storage_boxes() -> void:
+	InventoryManager.add_item("storage_box", 3)
+
+
+func set_current_map(map_id: String) -> void:
+	if map_id == current_map_id:
+		return
+	current_map_id = map_id
+	map_changed.emit(map_id)
+
+
+func get_save_data() -> Dictionary:
+	return {
+		"player_name": player_name,
+		"restaurant_name": restaurant_name,
+		"play_time_seconds": play_time_seconds,
+		"current_map_id": current_map_id,
+		"hair_id": hair_id,
+		"hair_color_1": hair_color_1,
+		"hair_color_2": hair_color_2,
+		"hair_color_3": hair_color_3,
+		"skin_color": skin_color,
+		"eye_color": eye_color,
+		"cheek_color": cheek_color,
+		"outfit_color_1": outfit_color_1,
+		"outfit_color_2": outfit_color_2,
+		"shoe_color": shoe_color,
+		"accessory_color": accessory_color,
+		"outfit_id": outfit_id,
+		"shoe_id": shoe_id,
+		"accessory_id": accessory_id,
+	}
+
+
+func load_save_data(data: Dictionary) -> void:
+	player_name = String(data.get("player_name", DEFAULT_PLAYER_NAME))
+	restaurant_name = String(data.get("restaurant_name", DEFAULT_RESTAURANT_NAME))
+	play_time_seconds = float(data.get("play_time_seconds", 0.0))
+	current_map_id = String(data.get("current_map_id", ""))
+	hair_id = String(data.get("hair_id", ""))
+	hair_color_1 = String(data.get("hair_color_1", "d8d8d8"))
+	hair_color_2 = String(data.get("hair_color_2", "9a9a9a"))
+	hair_color_3 = String(data.get("hair_color_3", "565656"))
+	skin_color = String(data.get("skin_color", "f8e7da"))
+	eye_color = String(data.get("eye_color", "38b57a"))
+	cheek_color = String(data.get("cheek_color", "f4a6b3"))
+	outfit_color_1 = String(data.get("outfit_color_1", "9a9a9a"))
+	outfit_color_2 = String(data.get("outfit_color_2", "565656"))
+	shoe_color = String(data.get("shoe_color", "9a9a9a"))
+	accessory_color = String(data.get("accessory_color", "9a9a9a"))
+	outfit_id = String(data.get("outfit_id", ""))
+	shoe_id = String(data.get("shoe_id", ""))
+	accessory_id = String(data.get("accessory_id", ""))

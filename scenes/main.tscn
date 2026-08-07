@@ -1,0 +1,140 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/home_map.tscn" id="1_home_map"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
+[ext_resource type="Script" path="res://scripts/main.gd" id="3_main"]
+[ext_resource type="Script" path="res://scripts/npc_world_manager.gd" id="4_npc_world_manager"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="5_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/shop_screen.tscn" id="7_shop_screen"]
+[ext_resource type="Script" path="res://scripts/weather_overlay.gd" id="8_weather_overlay"]
+[ext_resource type="Texture2D" path="res://assets/ui/rain_drop.png" id="9_rain_drop"]
+[ext_resource type="PackedScene" path="res://scenes/ui/cooking_screen.tscn" id="10_cooking_screen"]
+[ext_resource type="Script" path="res://scripts/restaurant_dish_layer.gd" id="11_restaurant_dish_layer"]
+[ext_resource type="PackedScene" path="res://scenes/ui/computer_screen.tscn" id="12_computer_screen"]
+[ext_resource type="PackedScene" path="res://scenes/ui/sleep_confirm_popup.tscn" id="13_sleep_confirm_popup"]
+[ext_resource type="Script" path="res://scripts/lighting_layer.gd" id="14_lighting_layer"]
+[ext_resource type="PackedScene" path="res://scenes/ui/collection_screen.tscn" id="15_collection_screen"]
+[ext_resource type="PackedScene" path="res://scenes/ui/dialogue_screen.tscn" id="16_dialogue_screen"]
+[ext_resource type="PackedScene" path="res://scenes/ui/status_screen.tscn" id="17_status_screen"]
+[ext_resource type="PackedScene" path="res://scenes/ui/kitchen_screen.tscn" id="18_kitchen_screen"]
+[ext_resource type="PackedScene" path="res://scenes/ui/serving_screen.tscn" id="19_serving_screen"]
+[ext_resource type="Script" path="res://scripts/kitchen_progress_layer.gd" id="20_kitchen_progress_layer"]
+[ext_resource type="PackedScene" path="res://scenes/ui/restaurant_confirm_popup.tscn" id="21_restaurant_confirm_popup"]
+[ext_resource type="PackedScene" path="res://scenes/ui/fishing_screen.tscn" id="22_fishing_screen"]
+[ext_resource type="PackedScene" path="res://scenes/ui/livestock_confirm_popup.tscn" id="23_livestock_confirm_popup"]
+[ext_resource type="PackedScene" path="res://scenes/ui/book_screen.tscn" id="24_book_screen"]
+[ext_resource type="PackedScene" path="res://scenes/ui/storage_screen.tscn" id="25_storage_screen"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("3_main")
+
+[node name="HomeMap" parent="." instance=ExtResource("1_home_map")]
+
+[node name="RestaurantSign" type="Sprite2D" parent="HomeMap"]
+visible = false
+z_index = 0
+
+[node name="Player" parent="HomeMap" instance=ExtResource("2_player")]
+position = Vector2(320, 300)
+
+[node name="NPCLayer" type="Node2D" parent="HomeMap"]
+script = ExtResource("4_npc_world_manager")
+
+[node name="RestaurantDishLayer" type="Node2D" parent="."]
+script = ExtResource("11_restaurant_dish_layer")
+
+[node name="KitchenProgressLayer" type="Node2D" parent="."]
+script = ExtResource("20_kitchen_progress_layer")
+
+[node name="LightingLayer" type="Node2D" parent="."]
+script = ExtResource("14_lighting_layer")
+
+[node name="CanvasModulate" type="CanvasModulate" parent="LightingLayer"]
+color = Color(1, 1, 1, 1)
+
+[node name="WeatherLayer" type="CanvasLayer" parent="."]
+layer = 1
+script = ExtResource("8_weather_overlay")
+
+[node name="Darken" type="ColorRect" parent="WeatherLayer"]
+mouse_filter = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0)
+
+[node name="Rain" type="CPUParticles2D" parent="WeatherLayer"]
+position = Vector2(160, -10)
+emitting = false
+amount = 40
+lifetime = 1.2
+preprocess = 1.2
+texture = ExtResource("9_rain_drop")
+direction = Vector2(0, 1)
+spread = 8.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 150.0
+initial_velocity_max = 180.0
+emission_shape = 3
+emission_rect_extents = Vector2(160, 1)
+
+[node name="UI" type="CanvasLayer" parent="."]
+layer = 2
+
+[node name="Dim" type="ColorRect" parent="UI"]
+mouse_filter = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0)
+
+[node name="HUD" parent="UI" instance=ExtResource("5_hud")]
+
+[node name="ShopScreen" parent="UI" instance=ExtResource("7_shop_screen")]
+
+[node name="CookingScreen" parent="UI" instance=ExtResource("10_cooking_screen")]
+
+[node name="ComputerScreen" parent="UI" instance=ExtResource("12_computer_screen")]
+
+[node name="SleepConfirmPopup" parent="UI" instance=ExtResource("13_sleep_confirm_popup")]
+
+[node name="RestaurantConfirmPopup" parent="UI" instance=ExtResource("21_restaurant_confirm_popup")]
+
+[node name="CollectionScreen" parent="UI" instance=ExtResource("15_collection_screen")]
+
+[node name="DialogueScreen" parent="UI" instance=ExtResource("16_dialogue_screen")]
+
+[node name="StatusScreen" parent="UI" instance=ExtResource("17_status_screen")]
+
+[node name="KitchenScreen" parent="UI" instance=ExtResource("18_kitchen_screen")]
+
+[node name="ServingScreen" parent="UI" instance=ExtResource("19_serving_screen")]
+
+[node name="FishingScreen" parent="UI" instance=ExtResource("22_fishing_screen")]
+
+[node name="LivestockConfirmPopup" parent="UI" instance=ExtResource("23_livestock_confirm_popup")]
+
+[node name="BookScreen" parent="UI" instance=ExtResource("24_book_screen")]
+
+[node name="StorageScreen" parent="UI" instance=ExtResource("25_storage_screen")]
+
+[node name="TransitionLayer" type="CanvasLayer" parent="."]
+layer = 3
+
+[node name="Fade" type="ColorRect" parent="TransitionLayer"]
+mouse_filter = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0)
+
+[node name="DayLabel" type="Label" parent="TransitionLayer"]
+mouse_filter = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+modulate = Color(1, 1, 1, 0)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+vertical_alignment = 1

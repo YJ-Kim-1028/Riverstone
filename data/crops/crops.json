@@ -1,0 +1,26 @@
+{
+    "potato": {
+        "name": "감자",
+        "seed_item_id": "potato_seed",
+        "produce_item_id": "potato",
+        "produce_count": 2,
+        "waterings_required": 5,
+        "sprite_index": {"seed": 2, "sprout": 3, "grown": 4}
+    },
+    "corn": {
+        "name": "옥수수",
+        "seed_item_id": "corn_seed",
+        "produce_item_id": "corn",
+        "produce_count": 3,
+        "waterings_required": 6,
+        "sprite_index": {"seed": 5, "sprout": 6, "grown": 7}
+    },
+    "lettuce": {
+        "name": "상추",
+        "seed_item_id": "lettuce_seed",
+        "produce_item_id": "lettuce",
+        "produce_count": 1,
+        "waterings_required": 3,
+        "sprite_index": {"seed": 8, "sprout": 9, "grown": 10}
+    }
+}

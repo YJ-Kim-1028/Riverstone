@@ -1,0 +1,105 @@
+{
+    "id": "poli",
+    "name": "폴리",
+    "name_en": "Poli",
+    "gender": "남성",
+    "age": "50대",
+    "job": "경찰",
+    "npc_type": "story",
+    "can_die": false,
+    "is_stalker": false,
+    "personality": [
+        "책임감이 강하다.",
+        "타인의 안전을 중요하게 생각한다.",
+        "자신을 무능하다고 생각한다.",
+        "사건을 해결하지 못하는 것에 강한 죄책감을 느낀다."
+    ],
+    "preferred_food": ["돼지고기"],
+    "disliked_food": ["소고기"],
+    "special_notes": [
+        "마을의 유일한 경찰이며, 시체 발견 위치/시각/요일, NPC 알리바이, 과거 사건 기록을 제공하는 정보원 NPC이다.",
+        "항상 가장 먼저 시체를 발견하지만, 정작 사건 당일 밤의 기억이 없다는 이상현상을 자각하고 있다.",
+        "과거 스토킹 사건(피해자 플로라, 범인 모카의 남편)에서 정당방위로 범인을 사살한 경험이 있다.",
+        "3번째 살인 사건 직전 현장에 도착해 범인을 체포하려 하지만, 범인은 그 자리에서 스스로 목숨을 끊는다."
+    ],
+    "memento_item": {
+        "name": "오래된 낡은 명찰",
+        "description": "폴리가 경찰이 된 첫날 지급받은 명찰. 수많은 사건 현장을 함께한 물건으로, 모서리가 닳아 있다.",
+        "lore_lines": []
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/poli_port.png",
+        "happy": "res://assets/npc/portrait/poli_happy.png",
+        "sad": "res://assets/npc/portrait/poli_sad.png",
+        "angry": "res://assets/npc/portrait/poli_angry.png"
+    },
+    "sprite": "res://assets/npc/sprite/poliSprite.png",
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "police_working"},
+                {"time": "12:00", "state": "police_standing"},
+                {"time": "15:00", "state": "plaza1_police_office_standing"},
+                {"time": "18:00", "state": "farm_standing"},
+                {"time": "21:00", "state": "police_working"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "police_working"},
+                {"time": "12:00", "state": "police_standing"},
+                {"time": "15:00", "state": "plaza1_police_office_standing"},
+                {"time": "18:00", "state": "hospital_sitting"},
+                {"time": "21:00", "state": "police_working"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "police_working"},
+                {"time": "12:00", "state": "police_standing"},
+                {"time": "15:00", "state": "plaza1_police_office_standing"},
+                {"time": "18:00", "state": "cafe_standing"},
+                {"time": "21:00", "state": "police_working"}
+            ]
+        }
+    },
+    "affection_events": [
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "낡은 경찰 명찰을 건네준다.",
+            "lines": [
+                "항상 맛있는 음식을 대접해주는 자네에게 큰 고마움을 느끼고 있어.",
+                "특히나 자네가 해주는 돼지고기 요리는 정말 기억에 남을만큼 훌륭한 요리야.",
+                "나도 자네에게 특별한 선물을 주고 싶은데,",
+                "이걸 받아주겠나? 내가 처음 이 일을 시작했을 때 부여받은 명찰이라네.",
+                "앞으로 나와 함께 이 마을의 평화를 지켜보도록 함세."
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "first_murder_occurred": {
+            "description": "자신이 그 날 밤 아무런 기억이 나지 않는다고 플레이어에게 자백하고, 모카의 남편 사건에 대해 털어놓는다.",
+            "lines": []
+        }
+    },
+    "dialogue": {
+        "daily": {
+            "mon_wed_thu": {"low": [], "mid": [], "high": []},
+            "tue_fri": {"low": [], "mid": [], "high": []},
+            "weekend": {"low": [], "mid": [], "high": []}
+        },
+        "rain_conversation": [],
+        "horror_conversation": []
+    },
+    "emails": {
+        "greeting": [],
+        "event_invite": [],
+        "gift_thanks": [],
+        "story_progress": {},
+        "special_day": {}
+    }
+}

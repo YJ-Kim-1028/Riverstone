@@ -1,0 +1,96 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/equipment_panel.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/equipment_slot.tscn" id="2_slot"]
+[ext_resource type="Script" path="res://scripts/ui/player_preview.gd" id="3_preview"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_sort.png" id="4_sort"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_sort_hover.png" id="5_sort_hover"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_trash.png" id="6_trash"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_trash_hover.png" id="7_trash_hover"]
+
+[node name="EquipmentPanel" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_script")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/separation = 8
+
+[node name="TopRow" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 6
+
+[node name="PlayerPreview" type="Control" parent="VBox/TopRow"]
+custom_minimum_size = Vector2(40, 44)
+layout_mode = 2
+size_flags_vertical = 0
+script = ExtResource("3_preview")
+
+[node name="SlotsVBox" type="VBoxContainer" parent="VBox/TopRow"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 4
+
+[node name="HatSlot" parent="VBox/TopRow/SlotsVBox" instance=ExtResource("2_slot")]
+layout_mode = 2
+slot_name = "hat"
+
+[node name="HandSlot" parent="VBox/TopRow/SlotsVBox" instance=ExtResource("2_slot")]
+layout_mode = 2
+slot_name = "hand"
+
+[node name="ShoesSlot" parent="VBox/TopRow/SlotsVBox" instance=ExtResource("2_slot")]
+layout_mode = 2
+slot_name = "shoes"
+
+[node name="ButtonsVBox" type="VBoxContainer" parent="VBox/TopRow"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 4
+
+[node name="SortButton" type="TextureButton" parent="VBox/TopRow/ButtonsVBox"]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("4_sort")
+texture_hover = ExtResource("5_sort_hover")
+
+[node name="DiscardButton" type="TextureButton" parent="VBox/TopRow/ButtonsVBox"]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("6_trash")
+texture_hover = ExtResource("7_trash_hover")
+
+[node name="InventoryScroll" type="ScrollContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="GridMargin" type="MarginContainer" parent="VBox/InventoryScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_right = 6
+
+[node name="InventoryGrid" type="GridContainer" parent="VBox/InventoryScroll/GridMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 3
+theme_override_constants/v_separation = 3
+columns = 6
+
+[node name="MessageLabel" type="Label" parent="."]
+visible = false
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -14.0
+theme_override_font_sizes/font_size = 8
+theme_override_colors/font_color = Color(0.7, 0.15, 0.15, 1)
+horizontal_alignment = 1

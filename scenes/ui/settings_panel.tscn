@@ -1,0 +1,95 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/settings_panel.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/sliderbar.png" id="2_sliderbar"]
+[ext_resource type="Texture2D" path="res://assets/ui/slider_btn.png" id="3_slider_btn"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_track"]
+content_margin_top = 3.0
+content_margin_bottom = 3.0
+texture = ExtResource("2_sliderbar")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fill"]
+bg_color = Color(0.55, 0.4, 0.25, 0.9)
+
+[node name="SettingsPanel" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_script")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+anchor_right = 1.0
+offset_left = 4.0
+offset_top = 6.0
+offset_right = -4.0
+theme_override_constants/separation = 12
+
+[node name="BgmRow" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="NameLabel" type="Label" parent="VBox/BgmRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(32, 0)
+theme_override_font_sizes/font_size = 7
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "브금"
+
+[node name="Slider" type="HSlider" parent="VBox/BgmRow"]
+texture_filter = 1
+custom_minimum_size = Vector2(90, 6)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/slider = SubResource("StyleBoxTexture_track")
+theme_override_styles/grabber_area = SubResource("StyleBoxFlat_fill")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxFlat_fill")
+theme_override_icons/grabber = ExtResource("3_slider_btn")
+theme_override_icons/grabber_highlight = ExtResource("3_slider_btn")
+theme_override_icons/grabber_disabled = ExtResource("3_slider_btn")
+min_value = 0.0
+max_value = 150.0
+step = 1.0
+value = 100.0
+
+[node name="ValueLabel" type="Label" parent="VBox/BgmRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(20, 0)
+theme_override_font_sizes/font_size = 7
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+horizontal_alignment = 2
+text = "100%"
+
+[node name="SfxRow" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="NameLabel" type="Label" parent="VBox/SfxRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(32, 0)
+theme_override_font_sizes/font_size = 7
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "효과음"
+
+[node name="Slider" type="HSlider" parent="VBox/SfxRow"]
+texture_filter = 1
+custom_minimum_size = Vector2(90, 6)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/slider = SubResource("StyleBoxTexture_track")
+theme_override_styles/grabber_area = SubResource("StyleBoxFlat_fill")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxFlat_fill")
+theme_override_icons/grabber = ExtResource("3_slider_btn")
+theme_override_icons/grabber_highlight = ExtResource("3_slider_btn")
+theme_override_icons/grabber_disabled = ExtResource("3_slider_btn")
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 100.0
+
+[node name="ValueLabel" type="Label" parent="VBox/SfxRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(20, 0)
+theme_override_font_sizes/font_size = 7
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+horizontal_alignment = 2
+text = "100%"

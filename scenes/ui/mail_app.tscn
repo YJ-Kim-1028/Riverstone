@@ -1,0 +1,199 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/mail_app.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/computer_window.png" id="2_window"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_computer_close.png" id="3_close"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_computer_back.png" id="4_back"]
+[ext_resource type="Texture2D" path="res://assets/ui/frame_computer_leftbox.png" id="5_leftbox"]
+[ext_resource type="PackedScene" path="res://scenes/ui/mail_list_panel.tscn" id="6_list"]
+[ext_resource type="PackedScene" path="res://scenes/ui/mail_detail_panel.tscn" id="7_detail"]
+[ext_resource type="PackedScene" path="res://scenes/ui/mail_compose_panel.tscn" id="8_compose"]
+[ext_resource type="Texture2D" path="res://assets/ui/frame_9slice.png" id="9_frame_9slice"]
+
+[node name="MailWindow" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("2_window")
+
+[node name="CloseButton" type="TextureButton" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -7.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = 7.0
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("3_close")
+
+[node name="BackButton" type="TextureButton" parent="."]
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 7.0
+offset_bottom = 7.0
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("4_back")
+
+[node name="ScaledContent" type="Control" parent="."]
+offset_left = 6.0
+offset_top = 10.0
+offset_right = 210.0
+offset_bottom = 100.0
+scale = Vector2(0.333333, 0.333333)
+
+[node name="Margin" type="MarginContainer" parent="ScaledContent"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+
+[node name="HBox" type="HBoxContainer" parent="ScaledContent/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Sidebar" type="Control" parent="ScaledContent/Margin/HBox"]
+custom_minimum_size = Vector2(54, 0)
+layout_mode = 2
+
+[node name="SidebarBackground" type="TextureRect" parent="ScaledContent/Margin/HBox/Sidebar"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("5_leftbox")
+stretch_mode = 0
+
+[node name="NavVBox" type="VBoxContainer" parent="ScaledContent/Margin/HBox/Sidebar"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_top = 3.0
+offset_right = -3.0
+offset_bottom = -3.0
+theme_override_constants/separation = 6
+
+[node name="InboxButton" type="Button" parent="ScaledContent/Margin/HBox/Sidebar/NavVBox"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.356863, 0.27451, 0.211765, 1)
+theme_override_font_sizes/font_size = 5
+text = "수신함"
+
+[node name="SentButton" type="Button" parent="ScaledContent/Margin/HBox/Sidebar/NavVBox"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.356863, 0.27451, 0.211765, 1)
+theme_override_font_sizes/font_size = 5
+text = "발신함"
+
+[node name="InviteHistoryButton" type="Button" parent="ScaledContent/Margin/HBox/Sidebar/NavVBox"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.356863, 0.27451, 0.211765, 1)
+theme_override_font_sizes/font_size = 5
+text = "초대 내역"
+
+[node name="ComposeButton" type="Button" parent="ScaledContent/Margin/HBox/Sidebar/NavVBox"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.356863, 0.27451, 0.211765, 1)
+theme_override_font_sizes/font_size = 5
+text = "메일쓰기"
+
+[node name="ComposeVBox" type="VBoxContainer" parent="ScaledContent/Margin/HBox/Sidebar"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_top = 3.0
+offset_right = -3.0
+offset_bottom = -3.0
+
+[node name="SendButton" type="Button" parent="ScaledContent/Margin/HBox/Sidebar/ComposeVBox"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.356863, 0.27451, 0.211765, 1)
+theme_override_colors/font_disabled_color = Color(0.356863, 0.27451, 0.211765, 1)
+theme_override_font_sizes/font_size = 5
+text = "전송"
+
+[node name="PortraitBox" type="TextureRect" parent="ScaledContent/Margin/HBox/Sidebar"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_top = 3.0
+offset_right = -3.0
+offset_bottom = -3.0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ContentArea" type="Control" parent="ScaledContent/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ListPanel" parent="ScaledContent/Margin/HBox/ContentArea" instance=ExtResource("6_list")]
+layout_mode = 1
+
+[node name="DetailPanel" parent="ScaledContent/Margin/HBox/ContentArea" instance=ExtResource("7_detail")]
+layout_mode = 1
+
+[node name="ComposePanel" parent="ScaledContent/Margin/HBox/ContentArea" instance=ExtResource("8_compose")]
+layout_mode = 1
+
+[node name="InfoPopup" type="Control" parent="ScaledContent"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Dim" type="ColorRect" parent="ScaledContent/InfoPopup"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.6)
+
+[node name="Panel" type="NinePatchRect" parent="ScaledContent/InfoPopup"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+texture = ExtResource("9_frame_9slice")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="Margin" type="MarginContainer" parent="ScaledContent/InfoPopup/Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="VBox" type="VBoxContainer" parent="ScaledContent/InfoPopup/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="MessageLabel" type="Label" parent="ScaledContent/InfoPopup/Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+autowrap_mode = 3
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+theme_override_font_sizes/font_size = 6
+
+[node name="OkButtonRow" type="HBoxContainer" parent="ScaledContent/InfoPopup/Panel/Margin/VBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="OkButton" type="Button" parent="ScaledContent/InfoPopup/Panel/Margin/VBox/OkButtonRow"]
+custom_minimum_size = Vector2(40, 14)
+layout_mode = 2
+theme_override_font_sizes/font_size = 6
+text = "확인"

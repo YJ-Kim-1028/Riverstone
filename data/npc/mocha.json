@@ -1,0 +1,104 @@
+{
+    "id": "mocha",
+    "name": "모카",
+    "name_en": "Mocha",
+    "gender": "여성",
+    "age": "40대",
+    "job": "카페 운영",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "친절하다.",
+        "어른스럽다.",
+        "현실적이다.",
+        "감정 표현이 솔직하다.",
+        "죄책감이 적다.",
+        "자신의 선택에 책임을 진다."
+    ],
+    "preferred_food": ["베리"],
+    "disliked_food": ["감자"],
+    "special_notes": [
+        "카페 운영 NPC. 버프 아이템(모카의 커피)을 제공/판매한다.",
+        "호감도가 일정 수치 이상이면 커피를 선물한다.",
+        "마을 여자들을 별로 좋아하지 않는다.",
+        "전남편의 불륜 피해자였으나, 현재 벨제의 연인인 셰퍼드와 불륜 관계이다."
+    ],
+    "buff_item": {
+        "name": "모카의 커피",
+        "effect": "이동속도 +10%",
+        "duration": "3분",
+        "line": "오늘은 좀 바빠 보이네. 이거 마시고 다녀."
+    },
+    "memento_item": {
+        "name": "전 남편과 찍은 사진",
+        "description": "모카와 전남편이 젊은 시절 함께 찍은 사진. 사진 속 두 사람은 행복하게 웃고 있다.",
+        "lore_lines": [
+            "버리려고 몇 번이나 했어.",
+            "근데 사진 속 내가 생각보다 행복해 보여서."
+        ]
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/mocha_port.png",
+        "happy": "res://assets/npc/portrait/mocha_happy.png",
+        "sad": "res://assets/npc/portrait/mocha_sad.png",
+        "angry": "res://assets/npc/portrait/mocha_angry.png"
+    },
+    "sprite": "res://assets/npc/sprite/mokaSprite.png",
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "cafe_working"},
+                {"time": "14:00", "state": "cafe_sitting"},
+                {"time": "18:00", "state": "hospital_sitting"},
+                {"time": "21:00", "state": "cafe_working"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "cafe_working"},
+                {"time": "18:00", "state": "furniture_looking"},
+                {"time": "21:00", "state": "cafe_working"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "cafe_working"}
+            ]
+        }
+    },
+    "affection_events": [
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "오래된 사진을 건네준다.",
+            "lines": [
+                "이 사진 가져.",
+                "내가 누군가를 진심으로 사랑했던 시절의 증거야.",
+                "나에게 아주 소중한 것이지.",
+                "그런데 이제 더 소중한 게 생겼거든.",
+                "셰퍼드야."
+            ]
+        }
+    ],
+    "story_dialogue": {},
+    "dialogue": {
+        "daily": {
+            "mon_wed_thu": {"low": [], "mid": [], "high": []},
+            "tue_fri": {"low": [], "mid": [], "high": []},
+            "weekend": {"low": [], "mid": [], "high": []}
+        },
+        "rain_conversation": [],
+        "horror_conversation": []
+    },
+    "emails": {
+        "greeting": [],
+        "event_invite": [],
+        "gift_thanks": [],
+        "story_progress": {},
+        "special_day": {}
+    }
+}

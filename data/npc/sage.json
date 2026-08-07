@@ -1,0 +1,107 @@
+{
+    "id": "sage",
+    "name": "세이지",
+    "name_en": "Sage",
+    "gender": "여성",
+    "age": "20대",
+    "job": "무녀",
+    "npc_type": "story",
+    "can_die": false,
+    "is_stalker": false,
+    "personality": [
+        "무뚝뚝하다.",
+        "감정 표현과 말수가 적다.",
+        "차가운 인상을 준다."
+    ],
+    "preferred_food": ["우유"],
+    "disliked_food": ["베리"],
+    "special_notes": [
+        "오늘의 운세를 봐주며, 신사를 관리한다.",
+        "영적인 존재를 볼 수 있으며, 살인 사건의 전조를 간접적으로 경고해준다.",
+        "플레이어와 친해지면 말수가 늘어난다.",
+        "첫 번째 살인 사건 이후 플레이어 곁의 정체불명 영혼을 보기 시작한다."
+    ],
+    "memento_item": {
+        "name": "액막이 부적",
+        "description": "세이지가 직접 만든 부적. 평소에는 절대 남에게 주지 않지만, 플레이어에게만 건네준다.",
+        "lore_lines": []
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/sage_port.png",
+        "happy": "res://assets/npc/portrait/sage_port.png",
+        "sad": "res://assets/npc/portrait/sage_sad.png",
+        "angry": "res://assets/npc/portrait/sage_sad.png"
+    },
+    "sprite": "res://assets/npc/sprite/sageSprite.png",
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "plaza5_standing"},
+                {"time": "16:00", "state": "shrine_sitting"},
+                {"time": "21:00", "state": "shrine_standing"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "shrine_standing_next"},
+                {"time": "16:00", "state": "shrine_sitting"},
+                {"time": "21:00", "state": "shrine_standing"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "shrine_sitting"},
+                {"time": "12:00", "state": "furniture_sitting"},
+                {"time": "16:00", "state": "furniture_looking"},
+                {"time": "18:00", "state": "plaza1_flower_standing"},
+                {"time": "21:00", "state": "shrine_sitting"}
+            ]
+        }
+    },
+    "affection_events": [
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "액막이 부적을 건네준다.",
+            "lines": [
+                "느낌이 좋지 않아. 뭐라도 일어날 거 같은 기분이야.",
+                "부적이 모든 걸 막아주지는 않지만,",
+                "적어도 네가 무사하길 바라는 마음이야."
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "post_first_murder_soul_sight": [
+            "그 사건 이후로 네 옆에 어떤 영혼이 보여.",
+            "누구냐고?... 나도 여러번 물어봤지만 돌아오는 대답이 없어.",
+            "아마 너와 깊은 연관이 있는 거 같은데."
+        ],
+        "murder_warning_examples": [
+            ["오늘은 일찍 집에 들어가.", "괜히 밖을 돌아다니지 말고."],
+            ["오늘 점괘가 좋지 않아.", "누군가가 울고 있는 모습이 보여."]
+        ],
+        "player_poisoned_innocent_npc": [
+            "너 해서는 안될 일을 했구나.",
+            "네 곁에 아주 분노한 영혼이 하나 있어."
+        ]
+    },
+    "dialogue": {
+        "daily": {
+            "mon_wed_thu": {"low": [], "mid": [], "high": []},
+            "tue_fri": {"low": [], "mid": [], "high": []},
+            "weekend": {"low": [], "mid": [], "high": []}
+        },
+        "rain_conversation": [],
+        "horror_conversation": []
+    },
+    "emails": {
+        "greeting": [],
+        "event_invite": [],
+        "gift_thanks": [],
+        "story_progress": {},
+        "special_day": {}
+    }
+}

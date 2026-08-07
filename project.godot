@@ -1,0 +1,65 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
+[application]
+
+config/name="Healing Horror Simulation"
+run/main_scene="res://scenes/ui/title_screen.tscn"
+config/features=PackedStringArray("4.7")
+
+[autoload]
+
+GameManager="*res://scripts/autoload/game_manager.gd"
+AudioManager="*res://scripts/autoload/audio_manager.gd"
+EventManager="*res://scripts/autoload/event_manager.gd"
+TimeManager="*res://scripts/autoload/time_manager.gd"
+WeatherManager="*res://scripts/autoload/weather_manager.gd"
+NPCManager="*res://scripts/autoload/npc_manager.gd"
+InventoryManager="*res://scripts/autoload/inventory_manager.gd"
+EconomyManager="*res://scripts/autoload/economy_manager.gd"
+CookingManager="*res://scripts/autoload/cooking_manager.gd"
+KitchenManager="*res://scripts/autoload/kitchen_manager.gd"
+RestaurantManager="*res://scripts/autoload/restaurant_manager.gd"
+MurderManager="*res://scripts/autoload/murder_manager.gd"
+HorrorEventManager="*res://scripts/autoload/horror_event_manager.gd"
+ShopManager="*res://scripts/autoload/shop_manager.gd"
+CollectionManager="*res://scripts/autoload/collection_manager.gd"
+EmailManager="*res://scripts/autoload/email_manager.gd"
+EquipmentManager="*res://scripts/autoload/equipment_manager.gd"
+FishingManager="*res://scripts/autoload/fishing_manager.gd"
+LivestockManager="*res://scripts/autoload/livestock_manager.gd"
+FarmingManager="*res://scripts/autoload/farming_manager.gd"
+StorageBoxManager="*res://scripts/autoload/storage_box_manager.gd"
+BookManager="*res://scripts/autoload/book_manager.gd"
+SaveManager="*res://scripts/autoload/save_manager.gd"
+
+[display]
+
+window/size/viewport_width=320
+window/size/viewport_height=180
+window/size/mode=3
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+
+[gui]
+
+timers/tooltip_delay_sec=0.0
+theme/custom="res://theme/ui_theme.tres"
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

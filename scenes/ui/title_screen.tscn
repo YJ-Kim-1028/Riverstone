@@ -1,0 +1,72 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/title_screen.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/bg_mainmenu.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/ui/logo.png" id="3_logo"]
+[ext_resource type="PackedScene" path="res://scenes/ui/slot_picker_screen.tscn" id="4_slot_picker"]
+[ext_resource type="PackedScene" path="res://scenes/ui/character_creation_screen.tscn" id="5_character_creation"]
+[ext_resource type="PackedScene" path="res://scenes/ui/language_settings_screen.tscn" id="6_language_settings"]
+
+[node name="TitleScreen" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Logo" type="TextureRect" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -80.0
+offset_top = 14.0
+offset_right = 80.0
+offset_bottom = 46.0
+texture = ExtResource("3_logo")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ButtonColumn" type="VBoxContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -35.0
+offset_top = -98.0
+offset_right = 35.0
+offset_bottom = -34.0
+theme_override_constants/separation = 5
+
+[node name="StartButton" type="Button" parent="ButtonColumn"]
+custom_minimum_size = Vector2(70, 16)
+layout_mode = 2
+theme_override_font_sizes/font_size = 7
+text = "시작하기"
+
+[node name="ContinueButton" type="Button" parent="ButtonColumn"]
+custom_minimum_size = Vector2(70, 16)
+layout_mode = 2
+theme_override_font_sizes/font_size = 7
+text = "이어하기"
+
+[node name="LanguageButton" type="Button" parent="ButtonColumn"]
+custom_minimum_size = Vector2(70, 16)
+layout_mode = 2
+theme_override_font_sizes/font_size = 7
+text = "언어"
+
+[node name="QuitButton" type="Button" parent="ButtonColumn"]
+custom_minimum_size = Vector2(70, 16)
+layout_mode = 2
+theme_override_font_sizes/font_size = 7
+text = "종료"
+
+[node name="SlotPickerScreen" parent="." instance=ExtResource("4_slot_picker")]
+
+[node name="CharacterCreationScreen" parent="." instance=ExtResource("5_character_creation")]
+
+[node name="LanguageSettingsScreen" parent="." instance=ExtResource("6_language_settings")]

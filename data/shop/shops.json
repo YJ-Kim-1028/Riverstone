@@ -1,0 +1,98 @@
+{
+    "marr_shop": {
+        "name": "잡화점",
+        "map_id": "general_interior",
+        "owner_npc_ids": ["marr"],
+        "stock": [
+            {"item_id": "rat_poison", "price": 1000, "purchase_limit": 1},
+            {"item_id": "teddy_bear", "price": 1500},
+            {"item_id": "wildflower_bouquet", "price": 500},
+            {"item_id": "rose_bouquet", "price": 800},
+            {"item_id": "perfume_blue_de_ocean", "price": 2000},
+            {"item_id": "perfume_mr_lilac", "price": 2000},
+            {"item_id": "perfume_pale_light", "price": 2000},
+            {"item_id": "inventory_expansion"}
+        ],
+        "planned_stock": ["gift_items (선물용 아이템, 구체적인 목록 미정)"]
+    },
+    "flora_shop": {
+        "name": "농가게",
+        "map_id": "farm_interior",
+        "owner_npc_ids": ["flora"],
+        "stock": [
+            {"item_id": "potato_seed", "price": 30},
+            {"item_id": "corn_seed", "price": 50},
+            {"item_id": "lettuce_seed", "price": 20}
+        ],
+        "planned_stock": []
+    },
+    "belje_shop": {
+        "name": "목장가게",
+        "map_id": "pasture_interior",
+        "owner_npc_ids": ["belje", "shepherd"],
+        "stock": [
+            {"item_id": "bucket", "price": 1000, "purchase_limit": 1},
+            {"item_id": "animal_feed", "price": 10},
+            {"item_id": "small_knife", "price": 1000},
+            {"item_id": "livestock:cow", "price": 400},
+            {"item_id": "livestock:pig", "price": 300}
+        ],
+        "planned_stock": []
+    },
+    "roshi_shop": {
+        "name": "낚시가게",
+        "map_id": "fish_interior",
+        "owner_npc_ids": ["roshi", "marin"],
+        "stock": [
+            {"item_id": "fishing_rod", "price": 500, "purchase_limit": 1},
+            {"item_id": "bait", "price": 10}
+        ],
+        "planned_stock": []
+    },
+    "woody_shop": {
+        "name": "가구점",
+        "map_id": "furniture_interior",
+        "owner_npc_ids": ["woody"],
+        "stock": [
+            {"item_id": "storage_box", "price": 1000}
+        ],
+        "planned_stock": ["chair", "bookshelf", "flowerpot"]
+    },
+    "usher_shop": {
+        "name": "서점",
+        "map_id": "book_interior",
+        "owner_npc_ids": ["usher"],
+        "stock": [
+            {"item_id": "recipe_random", "price": 1000, "purchase_limit": 2},
+            {"item_id": "book_beyond_the_door", "price": 200, "purchase_limit": 1},
+            {"item_id": "book_perfect_alibi", "price": 200, "purchase_limit": 1},
+            {"item_id": "book_life_as_a_cat", "price": 200, "purchase_limit": 1},
+            {"item_id": "book_culprit_is_here", "price": 200, "purchase_limit": 1},
+            {"item_id": "book_love_in_three_seconds", "price": 200, "purchase_limit": 1},
+            {"item_id": "book_resolve_before_death", "price": 200, "purchase_limit": 1},
+            {"item_id": "book_last_summer", "price": 200, "purchase_limit": 1},
+            {"item_id": "book_detectives_last_trace", "price": 200, "purchase_limit": 1},
+            {"item_id": "book_unsent_letter", "price": 200, "purchase_limit": 1},
+            {"item_id": "book_girl_in_the_alley", "price": 200, "purchase_limit": 1}
+        ],
+        "planned_stock": ["music (음악, 세부 미정, 오디오 시스템 자체가 없음)"]
+    },
+    "isha_shop": {
+        "name": "병원",
+        "map_id": "hospital_interior",
+        "owner_npc_ids": ["isha"],
+        "stock": [
+            {"item_id": "energy_tonic", "price": 1000}
+        ],
+        "planned_stock": []
+    },
+    "mocha_shop": {
+        "name": "카페",
+        "map_id": "cafe_interior",
+        "owner_npc_ids": ["mocha"],
+        "stock": [
+            {"item_id": "americano", "price": 100}
+        ],
+        "planned_stock": []
+    }
+}

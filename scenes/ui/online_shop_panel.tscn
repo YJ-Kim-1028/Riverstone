@@ -1,0 +1,56 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/online_shop_panel.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/computer_window.png" id="2_window"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_computer_close.png" id="3_close"]
+
+[node name="OnlineShopPanel" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("2_window")
+
+[node name="CloseButton" type="TextureButton" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -7.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = 7.0
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("3_close")
+
+[node name="ScaledContent" type="Control" parent="."]
+offset_left = 5.0
+offset_top = 10.0
+offset_right = 212.0
+offset_bottom = 100.0
+scale = Vector2(0.333333, 0.333333)
+
+[node name="Margin" type="MarginContainer" parent="ScaledContent"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="ScaledContent/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="RowsScroll" type="ScrollContainer" parent="ScaledContent/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Rows" type="VBoxContainer" parent="ScaledContent/Margin/VBox/RowsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 9
+
+[node name="MessageLabel" type="Label" parent="ScaledContent/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 6

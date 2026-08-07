@@ -1,0 +1,33 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/player/player.gd" id="1_player"]
+
+[node name="Player" type="Node2D"]
+texture_filter = 1
+z_index = 0
+script = ExtResource("1_player")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(0, -8)
+enabled = true
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+limit_left = 0
+limit_top = 0
+limit_right = 640
+limit_bottom = 512
+
+[node name="InteractionPrompt" type="Label" parent="."]
+visible = false
+position = Vector2(-50, -50)
+size = Vector2(100, 20)
+mouse_filter = 2
+theme_override_font_sizes/font_size = 7
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+text = "E 이동"

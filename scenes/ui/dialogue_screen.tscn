@@ -1,0 +1,87 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/dialogue_screen.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/frame_9slice.png" id="2_frame_9slice"]
+[ext_resource type="FontFile" path="res://assets/fonts/Galmuri/Galmuri11.ttf" id="3_font"]
+
+[node name="DialogueScreen" type="Control"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -60.0
+offset_top = -40.0
+offset_right = 60.0
+offset_bottom = -8.0
+pivot_offset = Vector2(60, 32)
+scale = Vector2(2.5, 2.5)
+script = ExtResource("1_script")
+
+[node name="Background" type="NinePatchRect" parent="."]
+mouse_filter = 2
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("2_frame_9slice")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="Portrait" type="TextureRect" parent="Background"]
+mouse_filter = 2
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 26.0
+offset_bottom = 26.0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TextArea" type="Control" parent="Background"]
+mouse_filter = 2
+offset_left = 30.0
+offset_top = 6.0
+offset_right = 240.0
+offset_bottom = 56.0
+scale = Vector2(0.4, 0.4)
+
+[node name="VBox" type="VBoxContainer" parent="Background/TextArea"]
+mouse_filter = 2
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/separation = 5
+
+[node name="NameLabel" type="Label" parent="Background/TextArea/VBox"]
+mouse_filter = 2
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1.0)
+theme_override_font_sizes/font_size = 8
+text = "이름"
+
+[node name="TextLabel" type="Label" parent="Background/TextArea/VBox"]
+mouse_filter = 2
+layout_mode = 2
+size_flags_vertical = 3
+autowrap_mode = 3
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1.0)
+theme_override_font_sizes/font_size = 5
+text = ""
+
+[node name="AdvanceHintArea" type="Control" parent="Background"]
+mouse_filter = 2
+offset_left = 104.0
+offset_top = 24.0
+offset_right = 134.0
+offset_bottom = 39.0
+scale = Vector2(0.4, 0.4)
+
+[node name="AdvanceHint" type="Label" parent="Background/AdvanceHintArea"]
+mouse_filter = 2
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1.0)
+theme_override_font_sizes/font_size = 6
+horizontal_alignment = 2
+text = "E ▶"

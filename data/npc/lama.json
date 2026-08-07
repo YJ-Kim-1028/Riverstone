@@ -1,0 +1,108 @@
+{
+    "id": "lama",
+    "name": "라마",
+    "name_en": "Lama",
+    "gender": "남성",
+    "age": "30대",
+    "job": "스님",
+    "npc_type": "story",
+    "can_die": false,
+    "is_stalker": false,
+    "personality": [
+        "느긋하다.",
+        "능청스럽다.",
+        "현실적이다.",
+        "사람을 쉽게 신뢰하지 않는다."
+    ],
+    "preferred_food": ["소고기"],
+    "disliked_food": ["돼지고기"],
+    "special_notes": [
+        "절 운영 NPC. 소위 '땡중'으로, 종종 시주를 핑계로 음식값을 내지 않는다.",
+        "꾸미는 것을 좋아한다.",
+        "이샤를 좋아하지만(후원금 때문), 세이지를 좋아하고 세이지에게는 미움받는다.",
+        "마을 사람 모두를 좋아하지만 아무도 완전히 믿지는 않는다."
+    ],
+    "memento_item": {
+        "name": "묵주",
+        "description": "라마가 오랫동안 사용한 묵주. 특별한 사연이 있는 물건은 아니다.",
+        "lore_lines": [
+            "줄 만한 게 없어서.",
+            "아, 너무 실망한 표정 짓지 말고."
+        ]
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/lama_port.png",
+        "happy": "res://assets/npc/portrait/lama_happy.png",
+        "sad": "res://assets/npc/portrait/lama_angry.png",
+        "angry": "res://assets/npc/portrait/lama_angry.png"
+    },
+    "sprite": "res://assets/npc/sprite/ramaSprite.png",
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "temple_sitting"},
+                {"time": "12:00", "state": "plaza3_standing"},
+                {"time": "16:00", "state": "book_standing"},
+                {"time": "18:00", "state": "hospital_lying"},
+                {"time": "21:00", "state": "temple_sitting"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "temple_sitting"},
+                {"time": "12:00", "state": "plaza4_standing"},
+                {"time": "16:00", "state": "plaza5_standing"},
+                {"time": "18:00", "state": "furniture_looking"},
+                {"time": "21:00", "state": "temple_sitting"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "temple_sitting"}
+            ]
+        }
+    },
+    "affection_events": [
+        {
+            "threshold": 60,
+            "type": "confession",
+            "description": "소고기를 좋아한다고 고백한다.",
+            "lines": [
+                "중이 육식을 해도 되냐고?",
+                "뭐 어때.",
+                "내가 죽인 것도 아닌데."
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "묵주를 건네준다.",
+            "lines": [
+                "이거 가져.",
+                "묵주야.",
+                "엄청 특별한 물건은 아니고.",
+                "그냥 오래 가지고 다녀서 정은 들었네."
+            ]
+        }
+    ],
+    "story_dialogue": {},
+    "dialogue": {
+        "daily": {
+            "mon_wed_thu": {"low": [], "mid": [], "high": []},
+            "tue_fri": {"low": [], "mid": [], "high": []},
+            "weekend": {"low": [], "mid": [], "high": []}
+        },
+        "rain_conversation": [],
+        "horror_conversation": []
+    },
+    "emails": {
+        "greeting": [],
+        "event_invite": [],
+        "gift_thanks": [],
+        "story_progress": {},
+        "special_day": {}
+    }
+}

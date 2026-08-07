@@ -1,0 +1,110 @@
+{
+    "id": "flora",
+    "name": "플로라",
+    "name_en": "Flora",
+    "gender": "여성",
+    "age": "20대",
+    "job": "농가게 운영",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "감정 기복이 심하다.",
+        "외로움을 많이 탄다.",
+        "불안형 애착 성향을 가지고 있다.",
+        "무의식적으로 타인에게 상처를 줄 때가 있다.",
+        "자신이 예쁘다는 걸 알고 있다."
+    ],
+    "preferred_food": ["상추"],
+    "disliked_food": ["우유"],
+    "special_notes": [
+        "마을에서 가장 아름답다는 평가를 받는다.",
+        "남성 NPC에게 의존적인 모습을 보인다.",
+        "이샤와 매우 친하고, 폴리를 절대적으로 신뢰한다.",
+        "과거 모카의 남편과 불륜 관계였으며, 이후 그에게 스토킹당한 사건의 피해자로 알려져 있다. 진실 여부는 불명."
+    ],
+    "memento_item": {
+        "name": "목걸이",
+        "description": "플로라가 가장 소중하게 여기는 목걸이. 오래되어 광택은 사라졌지만, 늘 몸에 지니고 다닌다.",
+        "lore_lines": []
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/flora_port.png",
+        "happy": "res://assets/npc/portrait/flora_happy.png",
+        "sad": "res://assets/npc/portrait/flora_sad.png",
+        "angry": "res://assets/npc/portrait/flora_angry.png"
+    },
+    "sprite": "res://assets/npc/sprite/floraSprite.png",
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "farm_working"},
+                {"time": "12:00", "state": "general_looking"},
+                {"time": "16:00", "state": "plaza4_standing"},
+                {"time": "20:00", "state": "fish_standing"},
+                {"time": "21:00", "state": "farm_working"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "farm_working"},
+                {"time": "16:00", "state": "book_standing"},
+                {"time": "18:00", "state": "farm_looking"},
+                {"time": "21:00", "state": "farm_working"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "farm_working"},
+                {"time": "12:00", "state": "general_looking"},
+                {"time": "16:00", "state": "cafe_standing"},
+                {"time": "18:00", "state": "cafe_sitting"},
+                {"time": "21:00", "state": "farm_working"}
+            ]
+        }
+    },
+    "affection_events": [
+        {
+            "threshold": 80,
+            "type": "dialogue",
+            "description": "불안한 속마음을 고백한다.",
+            "lines": [
+                "난 있지...",
+                "누군가가 날 싫어하게 되는 게 제일 무서워.",
+                "그래서 다들 내 곁에 있었으면 좋겠어."
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "은빛 목걸이를 건네준다.",
+            "lines": [
+                "예전에 좋아했던 사람이 선물해 준 거야.",
+                "이 목걸이를 받을 때 난 정말 행복했는데.",
+                "그런데 누구를 사랑한다는 게, 항상 그 사람을 행복하게 만들어주는 건 아니더라.",
+                "지금은 어디있냐구? 하하... 그런 걸 물어보면 실례인 거 몰라?",
+                "지금은 이 목걸이보다 네가 나를 더 행복하게 만들어주니까. 이젠 목걸이 따위는 놓아주기로 했어!"
+            ]
+        }
+    ],
+    "story_dialogue": {},
+    "dialogue": {
+        "daily": {
+            "mon_wed_thu": {"low": [], "mid": [], "high": []},
+            "tue_fri": {"low": [], "mid": [], "high": []},
+            "weekend": {"low": [], "mid": [], "high": []}
+        },
+        "rain_conversation": [],
+        "horror_conversation": []
+    },
+    "emails": {
+        "greeting": [],
+        "event_invite": [],
+        "gift_thanks": [],
+        "story_progress": {},
+        "special_day": {}
+    }
+}

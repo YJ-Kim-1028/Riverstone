@@ -1,0 +1,42 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/mail_detail_panel.gd" id="1_script"]
+
+[node name="DetailPanel" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_script")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/separation = 3
+
+[node name="TitleLabel" type="Label" parent="VBox"]
+layout_mode = 2
+autowrap_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 7
+
+[node name="PersonLabel" type="Label" parent="VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 5
+
+[node name="ContentScroll" type="ScrollContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ContentLabel" type="Label" parent="VBox/ContentScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 5
+
+[node name="DateLabel" type="Label" parent="VBox"]
+layout_mode = 2
+horizontal_alignment = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 5

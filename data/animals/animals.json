@@ -1,0 +1,18 @@
+{
+    "cow": {
+        "name": "소",
+        "price": 400,
+        "growth_feedings": 5,
+        "milk_item_id": "milk",
+        "meat_item_id": "beef",
+        "meat_count": 3
+    },
+    "pig": {
+        "name": "돼지",
+        "price": 300,
+        "growth_feedings": 4,
+        "milk_item_id": "",
+        "meat_item_id": "pork",
+        "meat_count": 2
+    }
+}

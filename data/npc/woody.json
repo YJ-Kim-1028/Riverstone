@@ -1,0 +1,120 @@
+{
+    "id": "woody",
+    "name": "우디",
+    "name_en": "Woody",
+    "gender": "여성",
+    "age": "20대",
+    "job": "목수",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "밝고 털털하다.",
+        "정이 많다.",
+        "거짓말을 잘 못한다.",
+        "사람을 잘 믿는다.",
+        "의외로 사람 보는 눈이 좋다.",
+        "부끄러움을 많이 탄다.",
+        "낯가림이 없어서 플레이어와 처음부터 반말을 사용한다."
+    ],
+    "preferred_food": [],
+    "disliked_food": [],
+    "special_notes": [
+        "가구점 운영 NPC로 인테리어 아이템을 판매한다.",
+        "십자수가 취미지만 여성적인 취미를 들키는 것을 매우 부끄러워한다. 벨제와 이샤만 이 사실을 안다.",
+        "마을 사람들 사이에서 '아들처럼 자란 아이'로 인식된다.",
+        "선호/비선호 재료는 기획 문서에 명시되지 않음."
+    ],
+    "memento_item": {
+        "name": "십자수",
+        "description": "우디가 처음으로 완성한 십자수 작품. 서툴지만 작은 들꽃이 수놓아져 있다. 아무에게도 보여준 적이 없다.",
+        "lore_lines": [
+            "진짜 안 웃을 거지?",
+            "약속해.",
+            "...웃으면 망치로 때려버린다."
+        ]
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/woody_port.png",
+        "happy": "res://assets/npc/portrait/woody_happy.png",
+        "sad": "res://assets/npc/portrait/woody_sad.png",
+        "angry": "res://assets/npc/portrait/woody_angry.png"
+    },
+    "sprite": "res://assets/npc/sprite/woodySprite.png",
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "furniture_working"},
+                {"time": "18:00", "state": "shrine_standing"},
+                {"time": "21:00", "state": "furniture_working"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "furniture_working"},
+                {"time": "14:00", "state": "pasture_looking"},
+                {"time": "18:00", "state": "general_looking"},
+                {"time": "21:00", "state": "furniture_working"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "furniture_working"},
+                {"time": "12:00", "state": "furniture_looking"},
+                {"time": "14:00", "state": "plaza4_pond_sitting"},
+                {"time": "18:00", "state": "farm_looking"},
+                {"time": "21:00", "state": "furniture_working"}
+            ]
+        }
+    },
+    "affection_events": [
+        {
+            "threshold": 60,
+            "type": "confession",
+            "description": "사실은 귀여운 것을 좋아한다고 털어놓는다.",
+            "lines": [
+                "가끔은.",
+                "나도 치마를 입고 싶을 때가 있어.",
+                "어울리지 않는 거 같아서 못입겠어~"
+            ]
+        },
+        {
+            "threshold": 80,
+            "type": "confession",
+            "description": "셰퍼드를 처음부터 좋아하지 않았다고 이야기한다.",
+            "lines": []
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "직접 만든 십자수를 건네준다.",
+            "lines": [
+                "이거 내가 만든 거야.",
+                "어때? 이상하지 않지?",
+                "사실 내가 이런 취미를 가지는 건 어색하니까... 이런 취미는 플로라 같은 아이가 어울려.",
+                "그래도 너니까 주는 거야!",
+                "난 네가 좋으니까!"
+            ]
+        }
+    ],
+    "story_dialogue": {},
+    "dialogue": {
+        "daily": {
+            "mon_wed_thu": {"low": [], "mid": [], "high": []},
+            "tue_fri": {"low": [], "mid": [], "high": []},
+            "weekend": {"low": [], "mid": [], "high": []}
+        },
+        "rain_conversation": [],
+        "horror_conversation": []
+    },
+    "emails": {
+        "greeting": [],
+        "event_invite": [],
+        "gift_thanks": [],
+        "story_progress": {},
+        "special_day": {}
+    }
+}

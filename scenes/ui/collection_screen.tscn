@@ -1,0 +1,103 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/collection_screen.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/frame_book.png" id="2_frame"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_book_prev.png" id="3_prev"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_book_next.png" id="4_next"]
+
+[node name="CollectionScreen" type="Control"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -24.0
+offset_right = 40.0
+offset_bottom = 24.0
+pivot_offset = Vector2(40, 24)
+scale = Vector2(3, 3)
+script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("2_frame")
+
+[node name="ScaledContent" type="Control" parent="."]
+offset_right = 80.0
+offset_bottom = 48.0
+scale = Vector2(0.333333, 0.333333)
+
+[node name="RecipeLabel" type="Label" parent="ScaledContent"]
+offset_left = 15.0
+offset_top = 18.0
+offset_right = 114.0
+offset_bottom = 36.0
+theme_override_colors/font_color = Color(0.42, 0.27, 0.15, 1)
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+text = "[레시피]"
+
+[node name="MementoLabel" type="Label" parent="ScaledContent"]
+offset_left = 126.0
+offset_top = 18.0
+offset_right = 225.0
+offset_bottom = 36.0
+theme_override_colors/font_color = Color(0.42, 0.27, 0.15, 1)
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+text = "[추억의 물건]"
+
+[node name="RecipeGrid" type="GridContainer" parent="."]
+offset_left = 10.5
+offset_top = 13.0
+offset_right = 32.5
+offset_bottom = 35.0
+theme_override_constants/h_separation = 2
+theme_override_constants/v_separation = 2
+columns = 3
+
+[node name="MementoGrid" type="GridContainer" parent="."]
+offset_left = 47.5
+offset_top = 13.0
+offset_right = 69.5
+offset_bottom = 35.0
+theme_override_constants/h_separation = 2
+theme_override_constants/v_separation = 2
+columns = 3
+
+[node name="RecipePrevButton" type="TextureButton" parent="."]
+offset_left = 10.5
+offset_top = 38.0
+offset_right = 14.5
+offset_bottom = 42.4
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("3_prev")
+
+[node name="RecipeNextButton" type="TextureButton" parent="."]
+offset_left = 28.5
+offset_top = 38.0
+offset_right = 32.5
+offset_bottom = 42.4
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("4_next")
+
+[node name="MementoPrevButton" type="TextureButton" parent="."]
+offset_left = 47.5
+offset_top = 38.0
+offset_right = 51.5
+offset_bottom = 42.4
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("3_prev")
+
+[node name="MementoNextButton" type="TextureButton" parent="."]
+offset_left = 65.5
+offset_top = 38.0
+offset_right = 69.5
+offset_bottom = 42.4
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("4_next")

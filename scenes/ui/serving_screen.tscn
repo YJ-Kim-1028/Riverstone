@@ -1,0 +1,189 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/frame_inventory_9slice.png" id="1_frame"]
+[ext_resource type="Script" path="res://scripts/ui/serving_screen.gd" id="2_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_close.png" id="3_close"]
+[ext_resource type="Texture2D" path="res://assets/ui/slot_hotbar.png" id="4_slot"]
+[ext_resource type="Texture2D" path="res://assets/ui/frame_9slice.png" id="5_frame_9slice"]
+
+[node name="ServingScreen" type="Control"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -72.0
+offset_right = 120.0
+offset_bottom = 72.0
+clip_contents = true
+script = ExtResource("2_script")
+
+[node name="Background" type="NinePatchRect" parent="."]
+texture_filter = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("1_frame")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="CloseButton" type="TextureButton" parent="Background"]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -14.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = 14.0
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("3_close")
+
+[node name="Margin" type="MarginContainer" parent="Background"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBox" type="VBoxContainer" parent="Background/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PlateRow" type="HBoxContainer" parent="Background/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 6
+
+[node name="SlotA" type="TextureButton" parent="Background/Margin/VBox/PlateRow"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("4_slot")
+
+[node name="Icon" type="TextureRect" parent="Background/Margin/VBox/PlateRow/SlotA" groups=["_always_ignore_mouse"]]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SlotB" type="TextureButton" parent="Background/Margin/VBox/PlateRow"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("4_slot")
+
+[node name="Icon" type="TextureRect" parent="Background/Margin/VBox/PlateRow/SlotB" groups=["_always_ignore_mouse"]]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RatPoisonToggle" type="TextureButton" parent="Background/Margin/VBox/PlateRow"]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+toggle_mode = true
+
+[node name="CompleteButton" type="Button" parent="Background/Margin/VBox/PlateRow"]
+custom_minimum_size = Vector2(50, 20)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 7
+text = "완성"
+
+[node name="GridScroll" type="ScrollContainer" parent="Background/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="GridMargin" type="MarginContainer" parent="Background/Margin/VBox/GridScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_right = 6
+
+[node name="Grid" type="GridContainer" parent="Background/Margin/VBox/GridScroll/GridMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 3
+theme_override_constants/v_separation = 3
+columns = 6
+
+[node name="ConfirmPopup" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Dim" type="ColorRect" parent="ConfirmPopup"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.6)
+
+[node name="Panel" type="NinePatchRect" parent="ConfirmPopup"]
+mouse_filter = 2
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -80.0
+offset_top = -35.0
+offset_right = 80.0
+offset_bottom = 35.0
+texture = ExtResource("5_frame_9slice")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="Margin" type="MarginContainer" parent="ConfirmPopup/Panel"]
+mouse_filter = 2
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="VBox" type="VBoxContainer" parent="ConfirmPopup/Panel/Margin"]
+mouse_filter = 2
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ConfirmLabel" type="Label" parent="ConfirmPopup/Panel/Margin/VBox"]
+mouse_filter = 2
+layout_mode = 2
+size_flags_vertical = 3
+autowrap_mode = 3
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1.0)
+theme_override_font_sizes/font_size = 6
+text = "요리에 쥐약을 넣으시겠습니까?
+이 선택은 NPC에게 안 좋은 결과를 불러오며, 되돌릴 수 없습니다."
+
+[node name="ButtonRow" type="HBoxContainer" parent="ConfirmPopup/Panel/Margin/VBox"]
+mouse_filter = 2
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 20
+
+[node name="YesButton" type="Button" parent="ConfirmPopup/Panel/Margin/VBox/ButtonRow"]
+custom_minimum_size = Vector2(48, 18)
+layout_mode = 2
+theme_override_font_sizes/font_size = 7
+text = "예"
+
+[node name="NoButton" type="Button" parent="ConfirmPopup/Panel/Margin/VBox/ButtonRow"]
+custom_minimum_size = Vector2(48, 18)
+layout_mode = 2
+theme_override_font_sizes/font_size = 7
+text = "아니오"

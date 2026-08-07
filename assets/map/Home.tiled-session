@@ -1,0 +1,386 @@
+{
+    "activeFile": "",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/GPT.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/UI_Component.tsx": {
+            "scaleInDock": 1.5,
+            "scaleInEditor": 1
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/bookStore.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/book_interior.tmx": {
+            "expandedObjectLayers": [
+                6,
+                7
+            ],
+            "scale": 2,
+            "selectedLayer": 8,
+            "viewCenter": {
+                "x": 160.5,
+                "y": 102.25
+            }
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/cafe.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/cafe_interior.tmx": {
+            "expandedObjectLayers": [
+                6
+            ],
+            "scale": 2,
+            "selectedLayer": 8,
+            "viewCenter": {
+                "x": 122.5,
+                "y": 128.75
+            }
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/cowshed.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/cowshed_interior.tmx": {
+            "expandedObjectLayers": [
+                9,
+                8
+            ],
+            "scale": 2,
+            "selectedLayer": 8,
+            "viewCenter": {
+                "x": 170,
+                "y": 81.25
+            }
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/farmStore.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/farm_interior.tmx": {
+            "expandedObjectLayers": [
+                7
+            ],
+            "scale": 2,
+            "selectedLayer": 7,
+            "viewCenter": {
+                "x": 182,
+                "y": 155.25
+            }
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/fishHouse.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/fish_interior.tmx": {
+            "expandedObjectLayers": [
+                7,
+                8
+            ],
+            "scale": 3,
+            "selectedLayer": 8,
+            "viewCenter": {
+                "x": 123.33333333333333,
+                "y": 102.5
+            }
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/furnitureStore.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/furniture_interior.tmx": {
+            "expandedObjectLayers": [
+                7
+            ],
+            "scale": 2,
+            "selectedLayer": 8,
+            "viewCenter": {
+                "x": 145,
+                "y": 140.75
+            }
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/generalStore.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/general_interior.tmx": {
+            "expandedObjectLayers": [
+                7
+            ],
+            "scale": 2,
+            "selectedLayer": 7,
+            "viewCenter": {
+                "x": 103,
+                "y": 119.75
+            }
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/home.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/home_interior.tmx": {
+            "expandedObjectLayers": [
+                11,
+                12
+            ],
+            "scale": 2,
+            "selectedLayer": 7,
+            "viewCenter": {
+                "x": 128,
+                "y": 110.75
+            }
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/hospital.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/hospital_interior.tmx": {
+            "expandedObjectLayers": [
+                9,
+                8
+            ],
+            "scale": 2,
+            "selectedLayer": 8,
+            "viewCenter": {
+                "x": 140,
+                "y": 145.25
+            }
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/pasture_interior.tmx": {
+            "expandedObjectLayers": [
+                7
+            ],
+            "scale": 2,
+            "selectedLayer": 8,
+            "viewCenter": {
+                "x": 183,
+                "y": 99.75
+            }
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/policeOffice.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/police_interior.tmx": {
+            "expandedObjectLayers": [
+                10,
+                9
+            ],
+            "scale": 2,
+            "selectedLayer": 9,
+            "viewCenter": {
+                "x": 100.5,
+                "y": 112.25
+            }
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/restaurant.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/restaurant_interior.tmx": {
+            "expandedObjectLayers": [
+                11,
+                12
+            ],
+            "scale": 2,
+            "selectedLayer": 11,
+            "viewCenter": {
+                "x": 185,
+                "y": 159.25
+            }
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/shrine.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/shrine_interior.tmx": {
+            "expandedObjectLayers": [
+                11,
+                10
+            ],
+            "scale": 3,
+            "selectedLayer": 10,
+            "viewCenter": {
+                "x": 99.33333333333333,
+                "y": 105.16666666666667
+            }
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/temper.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/temper_interior.tmx": {
+            "scale": 2,
+            "selectedLayer": 3,
+            "viewCenter": {
+                "x": 105,
+                "y": 152.75
+            }
+        },
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/temple_interior.tmx": {
+            "expandedObjectLayers": [
+                9
+            ],
+            "scale": 2.9915865384615383,
+            "selectedLayer": 3,
+            "viewCenter": {
+                "x": 103.95821615106469,
+                "y": 104.12535154680597
+            }
+        },
+        "Home.tmx": {
+            "expandedObjectLayers": [
+                18,
+                19
+            ],
+            "scale": 1,
+            "selectedLayer": 12,
+            "viewCenter": {
+                "x": 302,
+                "y": 248.5
+            }
+        },
+        "buildings.tsx": {
+            "scaleInDock": 1
+        },
+        "deco_col.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "gg.tsx": {
+            "scaleInDock": 1
+        },
+        "pasture.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "plaza.tmx": {
+            "scale": 0.89990234375,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 216.69017905588717,
+                "y": 88.34291915355396
+            }
+        },
+        "plaza1.tmx": {
+            "expandedObjectLayers": [
+                9,
+                8
+            ],
+            "scale": 1.5,
+            "selectedLayer": 6,
+            "viewCenter": {
+                "x": 260,
+                "y": 294.3333333333333
+            }
+        },
+        "plaza2.tmx": {
+            "expandedObjectLayers": [
+                10,
+                9
+            ],
+            "scale": 1,
+            "selectedLayer": 8,
+            "viewCenter": {
+                "x": 281,
+                "y": 175.5
+            }
+        },
+        "plaza3.tmx": {
+            "scale": 1,
+            "selectedLayer": 9,
+            "viewCenter": {
+                "x": 108,
+                "y": 134.5
+            }
+        },
+        "plaza4.tmx": {
+            "expandedObjectLayers": [
+                11
+            ],
+            "scale": 1,
+            "selectedLayer": 10,
+            "viewCenter": {
+                "x": 159,
+                "y": 251.5
+            }
+        },
+        "plaza5.tmx": {
+            "scale": 2,
+            "selectedLayer": 9,
+            "viewCenter": {
+                "x": 104.5,
+                "y": 141.25
+            }
+        },
+        "plaza_2.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 108,
+                "y": 75.33333333333337
+            }
+        },
+        "plaza_3.tmx": {
+            "scale": 1.0284598214285714,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 241.1372761801411,
+                "y": 192.03472599023337
+            }
+        },
+        "plaza_4.tmx": {
+            "scale": 1.5,
+            "selectedLayer": 5,
+            "viewCenter": {
+                "x": 336,
+                "y": 345.66666666666663
+            }
+        },
+        "plaza_5.tmx": {
+            "scale": 1.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 125.99999999999999,
+                "y": 85.66666666666664
+            }
+        },
+        "tree.tsx": {
+            "scaleInDock": 1
+        }
+    },
+    "last.imagePath": "C:/Users/code1/OneDrive/바탕 화면/Game/interior",
+    "map.height": 13,
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 13,
+    "openFiles": [
+    ],
+    "project": "Home.tiled-project",
+    "property.type": "string",
+    "recentFiles": [
+        "plaza4.tmx",
+        "plaza5.tmx",
+        "plaza3.tmx",
+        "deco_col.tsx",
+        "plaza2.tmx",
+        "plaza1.tmx",
+        "Home.tmx",
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/temple_interior.tmx",
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/shrine_interior.tmx",
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/restaurant_interior.tmx",
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/police_interior.tmx",
+        "C:/Users/code1/OneDrive/바탕 화면/Game/interior/hospital_interior.tmx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}

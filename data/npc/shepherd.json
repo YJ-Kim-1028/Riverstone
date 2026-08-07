@@ -1,0 +1,98 @@
+{
+    "id": "shepherd",
+    "name": "셰퍼드",
+    "name_en": "Shepherd",
+    "gender": "남성",
+    "age": "20대",
+    "job": "목장 관리 (벨제의 목장)",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "다정하다.",
+        "사람을 잘 챙긴다.",
+        "사랑 표현이 풍부하다.",
+        "죄책감을 회피하는 경향이 있다.",
+        "자기합리화에 능하다.",
+        "자신보다 동물을 더 사랑하는 벨제 때문에 외로움을 느낀다."
+    ],
+    "preferred_food": ["오징어"],
+    "disliked_food": ["옥수수"],
+    "special_notes": [
+        "마을에서 대표적인 사랑꾼으로 알려져 있으나, 실제로는 모카와 불륜 관계이다.",
+        "절을 자주 방문하며, 기도로 자신의 죄가 사해진다고 믿는다.",
+        "가난 때문에 벨제와 상의 없이 소 '맑음이'를 팔아버린 과거가 있다."
+    ],
+    "memento_item": {
+        "name": "반지",
+        "description": "벨제와 연인이던 시절 함께 맞춘 반지. 안쪽에는 희미하게 '언제까지나 함께'라는 글자가 새겨져 있다.",
+        "lore_lines": [
+            "참 이상하지.",
+            "이 때는 뭐든 영원할 거 같았는데."
+        ]
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/shep_port.png",
+        "happy": "res://assets/npc/portrait/shep_happy.png",
+        "sad": "res://assets/npc/portrait/shep_sad.png",
+        "angry": "res://assets/npc/portrait/shep_angry.png"
+    },
+    "sprite": "res://assets/npc/sprite/shepSprite.png",
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "pasture_looking"},
+                {"time": "12:00", "state": "cafe_looking"},
+                {"time": "16:00", "state": "plaza3_standing"},
+                {"time": "18:00", "state": "pasture_looking"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "pasture_looking"},
+                {"time": "12:00", "state": "cafe_sitting"},
+                {"time": "16:00", "state": "fish_standing"},
+                {"time": "21:00", "state": "pasture_looking"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "pasture_looking"},
+                {"time": "12:00", "state": "pasture_working"},
+                {"time": "18:00", "state": "book_standing"},
+                {"time": "21:00", "state": "pasture_looking"}
+            ]
+        }
+    },
+    "affection_events": [
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "벨제와 함께 끼던 반지를 건네준다.",
+            "lines": [
+                "너에게 소중한 내 물건을 건네주고 싶어.",
+                "벨제는 이 반지에 의미가 있다고 생각할까?"
+            ]
+        }
+    ],
+    "story_dialogue": {},
+    "dialogue": {
+        "daily": {
+            "mon_wed_thu": {"low": [], "mid": [], "high": []},
+            "tue_fri": {"low": [], "mid": [], "high": []},
+            "weekend": {"low": [], "mid": [], "high": []}
+        },
+        "rain_conversation": [],
+        "horror_conversation": []
+    },
+    "emails": {
+        "greeting": [],
+        "event_invite": [],
+        "gift_thanks": [],
+        "story_progress": {},
+        "special_day": {}
+    }
+}

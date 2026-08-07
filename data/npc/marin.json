@@ -1,0 +1,104 @@
+{
+    "id": "marin",
+    "name": "마린",
+    "name_en": "Marin",
+    "gender": "남성",
+    "age": "10대 후반",
+    "job": "없음",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "씩씩하다.",
+        "활동적이다.",
+        "운동을 좋아한다.",
+        "단순하다."
+    ],
+    "preferred_food": ["고등어"],
+    "disliked_food": ["상추"],
+    "special_notes": [
+        "로시의 아들. 축구선수의 꿈을 접고 아버지의 가업(어업)을 잇기로 했다.",
+        "세이지 누나가 예뻐서 신사를 자주 찾지만, 실은 아버지의 안전을 빌기 위해서다.",
+        "아버지와 함께 있을 수 있어 비 오는 날을 좋아한다.",
+        "벨제를 어릴 적부터 좋아했지만 벨제에게는 셰퍼드가 있어 마음을 접었다."
+    ],
+    "memento_item": {
+        "name": "축구공",
+        "description": "어릴 적부터 사용하던 낡은 축구공. 여러 번 꿰맨 자국이 있으며, 군데군데 색이 바래 있다.",
+        "lore_lines": []
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/marin_port.png",
+        "happy": "res://assets/npc/portrait/marin_happy.png",
+        "sad": "res://assets/npc/portrait/marin_sad.png",
+        "angry": "res://assets/npc/portrait/marin_port.png"
+    },
+    "sprite": "res://assets/npc/sprite/marinSprite.png",
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "fish_working"},
+                {"time": "18:00", "state": "plaza5_standing"},
+                {"time": "21:00", "state": "fish_working"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "fish_working"},
+                {"time": "18:00", "state": "plaza5_standing"},
+                {"time": "21:00", "state": "fish_working"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "cafe_standing"},
+                {"time": "12:00", "state": "general_looking"},
+                {"time": "18:00", "state": "shrine_standing"},
+                {"time": "21:00", "state": "fish_working"}
+            ]
+        }
+    },
+    "affection_events": [
+        {
+            "threshold": 80,
+            "type": "dialogue",
+            "description": "아버지에 대한 불안을 고백한다.",
+            "lines": [
+                "사실 있지.",
+                "아버지가 바다에 나갈 때마다 무서워.",
+                "언젠가는... 못 돌아올 수도 있잖아."
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "낡은 축구공을 건네준다.",
+            "lines": [
+                "축구선수가 되는 게 꿈이었어.",
+                "하지만 내가 아니면 누가 아버지의 가업을 이어 받겠어?",
+                "그렇게 축구를 잘하지도 못했으니깐... 이건 이제 추억으로 남겨둬야겠지.",
+                "너도 나에게 좋은 추억이니, 내 추억을 선물하고 싶어."
+            ]
+        }
+    ],
+    "story_dialogue": {},
+    "dialogue": {
+        "daily": {
+            "mon_wed_thu": {"low": [], "mid": [], "high": []},
+            "tue_fri": {"low": [], "mid": [], "high": []},
+            "weekend": {"low": [], "mid": [], "high": []}
+        },
+        "rain_conversation": [],
+        "horror_conversation": []
+    },
+    "emails": {
+        "greeting": [],
+        "event_invite": [],
+        "gift_thanks": [],
+        "story_progress": {},
+        "special_day": {}
+    }
+}

@@ -1,0 +1,642 @@
+{
+    "potato": {
+        "id": "potato",
+        "name": "감자",
+        "category": "material",
+        "subtype": "produce",
+        "description": "밭에서 수확한 감자. 요리 재료로 쓴다.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 0
+    },
+    "corn": {
+        "id": "corn",
+        "name": "옥수수",
+        "category": "material",
+        "subtype": "produce",
+        "description": "밭에서 수확한 옥수수. 요리 재료로 쓴다.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 1
+    },
+    "lettuce": {
+        "id": "lettuce",
+        "name": "상추",
+        "category": "material",
+        "subtype": "produce",
+        "description": "밭에서 수확한 상추. 요리 재료로 쓴다.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 2
+    },
+    "potato_seed": {
+        "id": "potato_seed",
+        "name": "감자 씨앗",
+        "category": "material",
+        "subtype": "seed",
+        "slot": "hand",
+        "description": "밭에 심으면 감자를 수확할 수 있다.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 10
+    },
+    "corn_seed": {
+        "id": "corn_seed",
+        "name": "옥수수 씨앗",
+        "category": "material",
+        "subtype": "seed",
+        "slot": "hand",
+        "description": "밭에 심으면 옥수수를 수확할 수 있다.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 11
+    },
+    "lettuce_seed": {
+        "id": "lettuce_seed",
+        "name": "상추 씨앗",
+        "category": "material",
+        "subtype": "seed",
+        "slot": "hand",
+        "description": "밭에 심으면 상추를 수확할 수 있다.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 12
+    },
+    "pork": {
+        "id": "pork",
+        "name": "돼지고기",
+        "category": "material",
+        "subtype": "meat",
+        "description": "목장에서 얻은 돼지고기. 요리 재료로 쓴다.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 3
+    },
+    "beef": {
+        "id": "beef",
+        "name": "소고기",
+        "category": "material",
+        "subtype": "meat",
+        "description": "목장에서 얻은 소고기. 요리 재료로 쓴다.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 4
+    },
+    "milk": {
+        "id": "milk",
+        "name": "우유",
+        "category": "material",
+        "subtype": "dairy",
+        "description": "목장에서 얻은 우유. 요리 재료로 쓴다.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 5
+    },
+    "salmon": {
+        "id": "salmon",
+        "name": "연어",
+        "category": "material",
+        "subtype": "fish",
+        "description": "낚시로 잡은 연어. 요리 재료로 쓴다.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 6
+    },
+    "mackerel": {
+        "id": "mackerel",
+        "name": "고등어",
+        "category": "material",
+        "subtype": "fish",
+        "description": "낚시로 잡은 고등어. 요리 재료로 쓴다.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 7
+    },
+    "squid": {
+        "id": "squid",
+        "name": "오징어",
+        "category": "material",
+        "subtype": "fish",
+        "description": "낚시로 잡은 오징어. 요리 재료로 쓴다.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 8
+    },
+    "berry": {
+        "id": "berry",
+        "name": "베리",
+        "category": "material",
+        "subtype": "produce",
+        "description": "채집한 베리. 요리 재료로 쓴다.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 9
+    },
+    "fishing_rod": {
+        "id": "fishing_rod",
+        "name": "낚싯대",
+        "category": "tool",
+        "slot": "hand",
+        "subtype": "",
+        "description": "낚시할 때 사용하는 도구.",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 3
+    },
+    "watering_can": {
+        "id": "watering_can",
+        "name": "물뿌리개",
+        "category": "tool",
+        "slot": "hand",
+        "subtype": "",
+        "description": "작물에 물을 줄 때 사용하는 도구.",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 0
+    },
+    "hoe": {
+        "id": "hoe",
+        "name": "괭이",
+        "category": "tool",
+        "slot": "hand",
+        "subtype": "",
+        "description": "밭을 갈아 경작지를 만들 때 사용하는 도구.",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 12
+    },
+    "bucket": {
+        "id": "bucket",
+        "name": "양동이",
+        "category": "tool",
+        "subtype": "",
+        "slot": "hand",
+        "description": "소의 젖을 짜 우유를 얻을 수 있다.",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 5
+    },
+    "chair": {
+        "id": "chair",
+        "name": "의자",
+        "category": "furniture",
+        "subtype": "",
+        "description": "집에 배치할 수 있는 가구.",
+        "icon": ""
+    },
+    "bookshelf": {
+        "id": "bookshelf",
+        "name": "책장",
+        "category": "furniture",
+        "subtype": "",
+        "description": "집에 배치할 수 있는 가구.",
+        "icon": ""
+    },
+    "flowerpot": {
+        "id": "flowerpot",
+        "name": "화분",
+        "category": "furniture",
+        "subtype": "",
+        "description": "집에 배치할 수 있는 가구.",
+        "icon": ""
+    },
+    "rat_poison": {
+        "id": "rat_poison",
+        "name": "쥐약",
+        "category": "rat_poison",
+        "subtype": "",
+        "description": "치명적인 독이 들어있다.",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 1
+    },
+    "recipe_grilled_fish": {
+        "id": "recipe_grilled_fish",
+        "name": "레시피: 생선 구이",
+        "category": "recipe",
+        "subtype": "",
+        "description": "우클릭하여 배우면 생선 구이를 요리할 수 있게 된다. 획득한 레시피는 도감에서 확인할 수 있다.",
+        "icon": ""
+    },
+    "recipe_salmon_salad": {
+        "id": "recipe_salmon_salad",
+        "name": "레시피: 연어 샐러드",
+        "category": "recipe",
+        "subtype": "",
+        "description": "우클릭하여 배우면 연어 샐러드를 요리할 수 있게 된다. 획득한 레시피는 도감에서 확인할 수 있다.",
+        "icon": ""
+    },
+    "recipe_grilled_squid": {
+        "id": "recipe_grilled_squid",
+        "name": "레시피: 오징어구이",
+        "category": "recipe",
+        "subtype": "",
+        "description": "우클릭하여 배우면 오징어구이를 요리할 수 있게 된다. 획득한 레시피는 도감에서 확인할 수 있다.",
+        "icon": ""
+    },
+    "recipe_fish_and_chips": {
+        "id": "recipe_fish_and_chips",
+        "name": "레시피: 피쉬 앤 칩스",
+        "category": "recipe",
+        "subtype": "",
+        "description": "우클릭하여 배우면 피쉬 앤 칩스를 요리할 수 있게 된다. 획득한 레시피는 도감에서 확인할 수 있다.",
+        "icon": ""
+    },
+    "recipe_grilled_vegetables": {
+        "id": "recipe_grilled_vegetables",
+        "name": "레시피: 구운 채소",
+        "category": "recipe",
+        "subtype": "",
+        "description": "우클릭하여 배우면 구운 채소를 요리할 수 있게 된다. 획득한 레시피는 도감에서 확인할 수 있다.",
+        "icon": ""
+    },
+    "recipe_potato_salad": {
+        "id": "recipe_potato_salad",
+        "name": "레시피: 감자 샐러드",
+        "category": "recipe",
+        "subtype": "",
+        "description": "우클릭하여 배우면 감자 샐러드를 요리할 수 있게 된다. 획득한 레시피는 도감에서 확인할 수 있다.",
+        "icon": ""
+    },
+    "recipe_chop_steak": {
+        "id": "recipe_chop_steak",
+        "name": "레시피: 찹 스테이크",
+        "category": "recipe",
+        "subtype": "",
+        "description": "우클릭하여 배우면 찹 스테이크를 요리할 수 있게 된다. 획득한 레시피는 도감에서 확인할 수 있다.",
+        "icon": ""
+    },
+    "recipe_barbecue": {
+        "id": "recipe_barbecue",
+        "name": "레시피: 바베큐",
+        "category": "recipe",
+        "subtype": "",
+        "description": "우클릭하여 배우면 바베큐를 요리할 수 있게 된다. 획득한 레시피는 도감에서 확인할 수 있다.",
+        "icon": ""
+    },
+    "recipe_grilled_pork_belly": {
+        "id": "recipe_grilled_pork_belly",
+        "name": "레시피: 삼겹살 구이",
+        "category": "recipe",
+        "subtype": "",
+        "description": "우클릭하여 배우면 삼겹살 구이를 요리할 수 있게 된다. 획득한 레시피는 도감에서 확인할 수 있다.",
+        "icon": ""
+    },
+    "recipe_seafood_set": {
+        "id": "recipe_seafood_set",
+        "name": "레시피: 바다 정식",
+        "category": "recipe",
+        "subtype": "",
+        "description": "우클릭하여 배우면 바다 정식을 요리할 수 있게 된다.",
+        "icon": ""
+    },
+    "recipe_meat_salad": {
+        "id": "recipe_meat_salad",
+        "name": "레시피: 고기 샐러드",
+        "category": "recipe",
+        "subtype": "",
+        "description": "우클릭하여 배우면 고기 샐러드를 요리할 수 있게 된다. 획득한 레시피는 도감에서 확인할 수 있다.",
+        "icon": ""
+    },
+    "recipe_yogurt_smoothie": {
+        "id": "recipe_yogurt_smoothie",
+        "name": "레시피: 요거트 스무디",
+        "category": "recipe",
+        "subtype": "",
+        "description": "우클릭하여 배우면 요거트 스무디를 요리할 수 있게 된다. 획득한 레시피는 도감에서 확인할 수 있다.",
+        "icon": ""
+    },
+    "recipe_strawberry_smoothie": {
+        "id": "recipe_strawberry_smoothie",
+        "name": "레시피: 딸기 스무디",
+        "category": "recipe",
+        "subtype": "",
+        "description": "우클릭하여 배우면 딸기 스무디를 요리할 수 있게 된다. 획득한 레시피는 도감에서 확인할 수 있다.",
+        "icon": ""
+    },
+    "teddy_bear": {
+        "id": "teddy_bear",
+        "name": "곰인형",
+        "category": "gift",
+        "slot": "hand",
+        "subtype": "",
+        "description": "포근한 곰인형.",
+        "icon": "res://assets/icon/Gift.png",
+        "icon_index": 5,
+        "gift_affection": 10
+    },
+    "wildflower_bouquet": {
+        "id": "wildflower_bouquet",
+        "name": "들꽃다발",
+        "category": "gift",
+        "slot": "hand",
+        "subtype": "",
+        "description": "들에서 꺾은 소박한 꽃다발.",
+        "icon": "res://assets/icon/Gift.png",
+        "icon_index": 4,
+        "gift_affection": 2
+    },
+    "rose_bouquet": {
+        "id": "rose_bouquet",
+        "name": "장미 꽃다발",
+        "category": "gift",
+        "slot": "hand",
+        "subtype": "",
+        "description": "화려한 장미 꽃다발.",
+        "icon": "res://assets/icon/Gift.png",
+        "icon_index": 3,
+        "gift_affection": 5
+    },
+    "perfume_blue_de_ocean": {
+        "id": "perfume_blue_de_ocean",
+        "name": "블루 드 오션",
+        "category": "gift",
+        "slot": "hand",
+        "subtype": "perfume",
+        "description": "바다향이 나는 향수. 주변에 파란 꽃향기를 풍긴다.",
+        "icon": "res://assets/icon/Gift.png",
+        "icon_index": 2,
+        "gift_affection": 10,
+        "scent_color": "blue"
+    },
+    "perfume_mr_lilac": {
+        "id": "perfume_mr_lilac",
+        "name": "미스터 라일락",
+        "category": "gift",
+        "slot": "hand",
+        "subtype": "perfume",
+        "description": "라일락 향이 나는 향수. 주변에 보라 꽃향기를 풍긴다.",
+        "icon": "res://assets/icon/Gift.png",
+        "icon_index": 0,
+        "gift_affection": 10,
+        "scent_color": "purple"
+    },
+    "perfume_pale_light": {
+        "id": "perfume_pale_light",
+        "name": "페일 라이트",
+        "category": "gift",
+        "slot": "hand",
+        "subtype": "perfume",
+        "description": "은은한 향의 향수. 주변에 하얀 꽃향기를 풍긴다.",
+        "icon": "res://assets/icon/Gift.png",
+        "icon_index": 1,
+        "gift_affection": 10,
+        "scent_color": "white"
+    },
+    "animal_feed": {
+        "id": "animal_feed",
+        "name": "여물",
+        "category": "material",
+        "subtype": "",
+        "slot": "hand",
+        "description": "소와 돼지의 먹이이다.",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 11
+    },
+    "small_knife": {
+        "id": "small_knife",
+        "name": "작은 칼",
+        "category": "tool",
+        "subtype": "",
+        "slot": "hand",
+        "description": "소나 돼지를 도살해 고기를 얻을 수 있다.",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 2
+    },
+    "bait": {
+        "id": "bait",
+        "name": "미끼",
+        "category": "material",
+        "subtype": "",
+        "description": "오징어를 낚을 확률이 증가한다.",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 10
+    },
+    "americano": {
+        "id": "americano",
+        "name": "아메리카노",
+        "category": "consumable",
+        "subtype": "",
+        "description": "우클릭으로 사용 시 잠시 플레이어의 이속을 증가시킨다.",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 9
+    },
+    "energy_tonic": {
+        "id": "energy_tonic",
+        "name": "자양 강장제",
+        "category": "consumable",
+        "subtype": "",
+        "description": "먹으면 힘이 솟아요! (우클릭으로 사용시 디버프 해제)",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 8
+    },
+    "recipe_random": {
+        "id": "recipe_random",
+        "name": "만능 요리 레시피",
+        "category": "recipe",
+        "subtype": "",
+        "description": "우클릭으로 사용 시 랜덤한 요리의 레시피를 획득한다. 획득한 레시피는 도감에서 확인할 수 있다.",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 4,
+        "stack_limit": 2
+    },
+    "book_beyond_the_door": {
+        "id": "book_beyond_the_door",
+        "name": "문 너머에는",
+        "category": "book",
+        "subtype": "",
+        "description": "작가: 어셔",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 6
+    },
+    "book_perfect_alibi": {
+        "id": "book_perfect_alibi",
+        "name": "완벽한 알리바이",
+        "category": "book",
+        "subtype": "",
+        "description": "작가: 어셔",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 6
+    },
+    "book_life_as_a_cat": {
+        "id": "book_life_as_a_cat",
+        "name": "고양이로 사는 법",
+        "category": "book",
+        "subtype": "",
+        "description": "작가: 어셔",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 6
+    },
+    "book_culprit_is_here": {
+        "id": "book_culprit_is_here",
+        "name": "범인은 이 안에 있어",
+        "category": "book",
+        "subtype": "",
+        "description": "작가: 어셔",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 6
+    },
+    "book_love_in_three_seconds": {
+        "id": "book_love_in_three_seconds",
+        "name": "사랑에 빠지는 건 오직 3초",
+        "category": "book",
+        "subtype": "",
+        "description": "작가: 어셔",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 6
+    },
+    "book_resolve_before_death": {
+        "id": "book_resolve_before_death",
+        "name": "죽음 앞에서의 결심",
+        "category": "book",
+        "subtype": "",
+        "description": "작가: 어셔",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 6
+    },
+    "book_last_summer": {
+        "id": "book_last_summer",
+        "name": "나는 지난 여름에 네가 한 짓을 알고 있다",
+        "category": "book",
+        "subtype": "",
+        "description": "작가: 어셔",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 6
+    },
+    "book_detectives_last_trace": {
+        "id": "book_detectives_last_trace",
+        "name": "탐정의 마지막 발자취",
+        "category": "book",
+        "subtype": "",
+        "description": "작가: 어셔",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 6
+    },
+    "book_unsent_letter": {
+        "id": "book_unsent_letter",
+        "name": "부치지 못한 편지",
+        "category": "book",
+        "subtype": "",
+        "description": "작가: 어셔",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 6
+    },
+    "book_girl_in_the_alley": {
+        "id": "book_girl_in_the_alley",
+        "name": "항상 그 골목에 서있던 그녀는",
+        "category": "book",
+        "subtype": "",
+        "description": "작가: 어셔",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 6
+    },
+    "storage_box": {
+        "id": "storage_box",
+        "name": "보관함",
+        "category": "material",
+        "subtype": "",
+        "slot": "hand",
+        "description": "인벤토리 아이템을 담을 수 있는 상자다.",
+        "icon": "res://assets/img/storage/storage_box_closed.png",
+        "icon_index": 0,
+        "stack_limit": 1
+    },
+    "test_hat": {
+        "id": "test_hat",
+        "name": "테스트 모자",
+        "category": "equipment",
+        "slot": "hat",
+        "description": "장비 시스템 테스트용 임시 아이템 - 나중에 실제 아이템 생기면 삭제.",
+        "icon_color": "#c0654a"
+    },
+    "test_shoes": {
+        "id": "test_shoes",
+        "name": "테스트 신발",
+        "category": "equipment",
+        "slot": "shoes",
+        "description": "장비 시스템 테스트용 임시 아이템 - 나중에 실제 아이템 생기면 삭제.",
+        "icon_color": "#4a6fc0"
+    },
+    "cooked_corn": {
+        "id": "cooked_corn",
+        "name": "찐 옥수수",
+        "category": "cooked_ingredient",
+        "subtype": "",
+        "description": "냄비에 쪄낸 옥수수.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 1,
+        "icon_row": 3
+    },
+    "cooked_potato": {
+        "id": "cooked_potato",
+        "name": "찐 감자",
+        "category": "cooked_ingredient",
+        "subtype": "",
+        "description": "냄비에 쪄낸 감자.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 0,
+        "icon_row": 3
+    },
+    "cooked_pork": {
+        "id": "cooked_pork",
+        "name": "구운 돼지고기",
+        "category": "cooked_ingredient",
+        "subtype": "",
+        "description": "프라이팬에 구운 돼지고기.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 3,
+        "icon_row": 3
+    },
+    "cooked_beef": {
+        "id": "cooked_beef",
+        "name": "구운 소고기",
+        "category": "cooked_ingredient",
+        "subtype": "",
+        "description": "프라이팬에 구운 소고기.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 4,
+        "icon_row": 3
+    },
+    "cooked_salmon": {
+        "id": "cooked_salmon",
+        "name": "구운 연어",
+        "category": "cooked_ingredient",
+        "subtype": "",
+        "description": "프라이팬에 구운 연어.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 6,
+        "icon_row": 3
+    },
+    "cooked_mackerel": {
+        "id": "cooked_mackerel",
+        "name": "구운 고등어",
+        "category": "cooked_ingredient",
+        "subtype": "",
+        "description": "프라이팬에 구운 고등어.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 7,
+        "icon_row": 3
+    },
+    "cooked_squid": {
+        "id": "cooked_squid",
+        "name": "구운 오징어",
+        "category": "cooked_ingredient",
+        "subtype": "",
+        "description": "프라이팬에 구운 오징어.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 8,
+        "icon_row": 3
+    },
+    "salad_greens": {
+        "id": "salad_greens",
+        "name": "샐러드 야채",
+        "category": "cooked_ingredient",
+        "subtype": "",
+        "description": "도마에서 손질한 상추.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 2,
+        "icon_row": 3
+    },
+    "mashed_berry": {
+        "id": "mashed_berry",
+        "name": "갈린 베리",
+        "category": "cooked_ingredient",
+        "subtype": "",
+        "description": "믹서기에 간 베리.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 9,
+        "icon_row": 3
+    },
+    "smoothie": {
+        "id": "smoothie",
+        "name": "스무디",
+        "category": "cooked_ingredient",
+        "subtype": "",
+        "description": "믹서기에 간 우유.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 5,
+        "icon_row": 3
+    }
+}

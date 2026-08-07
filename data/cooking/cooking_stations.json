@@ -1,0 +1,36 @@
+{
+    "cooking_area1": {
+        "tool_name": "냄비",
+        "duration_seconds": 15,
+        "ingredients": {
+            "corn": "cooked_corn",
+            "potato": "cooked_potato"
+        }
+    },
+    "cooking_area2": {
+        "tool_name": "프라이팬",
+        "duration_seconds": 15,
+        "ingredients": {
+            "pork": "cooked_pork",
+            "beef": "cooked_beef",
+            "salmon": "cooked_salmon",
+            "mackerel": "cooked_mackerel",
+            "squid": "cooked_squid"
+        }
+    },
+    "cooking_area3": {
+        "tool_name": "도마",
+        "duration_seconds": 7,
+        "ingredients": {
+            "lettuce": "salad_greens"
+        }
+    },
+    "cooking_area4": {
+        "tool_name": "믹서기",
+        "duration_seconds": 7,
+        "ingredients": {
+            "berry": "mashed_berry",
+            "milk": "smoothie"
+        }
+    }
+}

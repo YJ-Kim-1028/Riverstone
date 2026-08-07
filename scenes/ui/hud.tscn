@@ -1,0 +1,76 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" uid="uid://7io3sxkr6wid" path="res://scripts/ui/hud.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://c7uebg4qpl6ii" path="res://assets/ui/icon_clock.png" id="2_clock"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_weather_sunny.png" id="3_sunny"]
+[ext_resource type="Texture2D" uid="uid://bdrk6aavhgtwc" path="res://assets/ui/icon_coin.png" id="4_coin"]
+
+[node name="HUD" type="Control" unique_id=1898654674]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 160.0
+offset_bottom = 60.0
+mouse_filter = 2
+script = ExtResource("1_script")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 2
+
+[node name="TimeGroup" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="TextureRect2" type="TextureRect" parent="VBox/TimeGroup" unique_id=2139620483]
+custom_minimum_size = Vector2(8, 8)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("2_clock")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TimeLabel" type="Label" parent="VBox/TimeGroup" unique_id=1627654388]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 7
+text = "1일차 (월) 09:00"
+
+[node name="WeatherIcon" type="TextureRect" parent="VBox" unique_id=1094296287]
+custom_minimum_size = Vector2(8, 8)
+layout_mode = 2
+size_flags_horizontal = 0
+texture = ExtResource("3_sunny")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BuffIcon" type="TextureRect" parent="VBox"]
+visible = false
+custom_minimum_size = Vector2(8, 8)
+layout_mode = 2
+size_flags_horizontal = 0
+mouse_filter = 0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="GoldGroup" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="TextureRect" type="TextureRect" parent="VBox/GoldGroup" unique_id=344208504]
+custom_minimum_size = Vector2(8, 8)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("4_coin")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="GoldLabel" type="Label" parent="VBox/GoldGroup" unique_id=1126981114]
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 7
+text = "0"

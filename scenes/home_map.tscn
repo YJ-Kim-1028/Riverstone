@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/home_map.gd" id="1_home_map"]
+
+[node name="HomeMap" type="Node2D"]
+texture_filter = 1
+y_sort_enabled = true
+script = ExtResource("1_home_map")
+

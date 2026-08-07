@@ -1,0 +1,102 @@
+{
+    "id": "belje",
+    "name": "벨제",
+    "name_en": "Belze",
+    "gender": "여성",
+    "age": "20대",
+    "job": "목장 운영",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "애정결핍이 있다.",
+        "정이 많다.",
+        "사람을 쉽게 믿지 않는다.",
+        "동물을 매우 아낀다.",
+        "외로움을 잘 탄다."
+    ],
+    "preferred_food": ["감자"],
+    "disliked_food": ["오징어"],
+    "special_notes": [
+        "목장 운영 NPC로 축산 관련 아이템(소, 돼지, 여물)을 판매한다.",
+        "어릴 적 천식을 앓았으며, 이샤가 치료해줬다고 믿고 있다.",
+        "셰퍼드가 상의 없이 소 '맑음이'를 팔아버린 뒤로 관계가 예전 같지 않다.",
+        "어셔가 집 근처에 심는 꽃나무 때문에 꽃가루 알레르기로 고생한다."
+    ],
+    "memento_item": {
+        "name": "소 모양 털인형",
+        "description": "벨제가 처음 목장을 시작했을 때 키웠던 소 '맑음이'를 본떠 만든 작은 인형.",
+        "lore_lines": [
+            "이 애 이름은 '맑음이'였어.",
+            "내가 처음으로 가족이라고 생각했던 아이였지.",
+            "소의 눈을 가까이서 본 적이 있어? 정말 맑고 깨끗해.",
+            "맑음이는 항상 그런 아이였어. 나에게 솔직하고 따뜻하게 대해줬지."
+        ]
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/belje_port.png",
+        "happy": "res://assets/npc/portrait/belje_happy.png",
+        "sad": "res://assets/npc/portrait/belje_sad.png",
+        "angry": "res://assets/npc/portrait/belje_angry.png"
+    },
+    "sprite": "res://assets/npc/sprite/beljeSprite.png",
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "pasture_working"},
+                {"time": "16:00", "state": "hospital_lying"},
+                {"time": "18:00", "state": "plaza4_pond_sitting"},
+                {"time": "22:00", "state": "pasture_working"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "pasture_working"},
+                {"time": "12:00", "state": "cafe_looking"},
+                {"time": "16:00", "state": "furniture_sitting"},
+                {"time": "20:00", "state": "pasture_working"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "pasture_working"},
+                {"time": "12:00", "state": "plaza4_pond_sitting"},
+                {"time": "14:00", "state": "general_looking"},
+                {"time": "18:00", "state": "pasture_working"}
+            ]
+        }
+    },
+    "affection_events": [
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "소 인형을 건네준다.",
+            "lines": [
+                "이 인형... 네가 가져.",
+                "이제는 맑음이를 생각하면 슬프기보단... 보고 싶거든.",
+                "그리고 있잖아.",
+                "난 네가 꽤 좋은 사람이 된 것 같아."
+            ]
+        }
+    ],
+    "story_dialogue": {},
+    "dialogue": {
+        "daily": {
+            "mon_wed_thu": {"low": [], "mid": [], "high": []},
+            "tue_fri": {"low": [], "mid": [], "high": []},
+            "weekend": {"low": [], "mid": [], "high": []}
+        },
+        "rain_conversation": [],
+        "horror_conversation": []
+    },
+    "emails": {
+        "greeting": [],
+        "event_invite": [],
+        "gift_thanks": [],
+        "story_progress": {},
+        "special_day": {}
+    }
+}

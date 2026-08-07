@@ -1,0 +1,65 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/language_settings_screen.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/frame_9slice.png" id="2_frame"]
+
+[node name="LanguageSettingsScreen" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_script")
+
+[node name="Dim" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.7)
+
+[node name="Panel" type="NinePatchRect" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -60.0
+offset_top = -30.0
+offset_right = 60.0
+offset_bottom = 30.0
+texture = ExtResource("2_frame")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TitleLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+horizontal_alignment = 1
+text = "언어 설정"
+
+[node name="MessageLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+autowrap_mode = 3
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 6
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+text = "준비 중입니다."
+
+[node name="BackButton" type="Button" parent="Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 7
+text = "뒤로"

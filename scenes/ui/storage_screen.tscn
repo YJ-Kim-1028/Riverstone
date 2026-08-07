@@ -1,0 +1,161 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/frame_inventory_9slice.png" id="1_frame"]
+[ext_resource type="Script" path="res://scripts/ui/storage_screen.gd" id="2_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_close.png" id="3_close"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_sort.png" id="4_sort"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_sort_hover.png" id="5_sort_hover"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_retrieve.png" id="6_retrieve"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_retrieve_hover.png" id="7_retrieve_hover"]
+
+[node name="StorageScreen" type="Control"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -72.0
+offset_right = 120.0
+offset_bottom = 72.0
+clip_contents = true
+script = ExtResource("2_script")
+
+[node name="Background" type="NinePatchRect" parent="."]
+texture_filter = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("1_frame")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="CloseButton" type="TextureButton" parent="Background"]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -14.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = 14.0
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("3_close")
+
+[node name="Margin" type="MarginContainer" parent="Background"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBox" type="VBoxContainer" parent="Background/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TitleLabel" type="Label" parent="Background/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 9
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+horizontal_alignment = 1
+text = "보관함"
+
+[node name="HBox" type="HBoxContainer" parent="Background/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="BagPanel" type="VBoxContainer" parent="Background/Margin/VBox/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="BagLabel" type="Label" parent="Background/Margin/VBox/HBox/BagPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 7
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+text = "인벤토리"
+
+[node name="BagScroll" type="ScrollContainer" parent="Background/Margin/VBox/HBox/BagPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="BagGridMargin" type="MarginContainer" parent="Background/Margin/VBox/HBox/BagPanel/BagScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_right = 6
+
+[node name="BagGrid" type="GridContainer" parent="Background/Margin/VBox/HBox/BagPanel/BagScroll/BagGridMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 3
+theme_override_constants/v_separation = 3
+columns = 4
+
+[node name="BoxPanel" type="VBoxContainer" parent="Background/Margin/VBox/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="BoxLabelRow" type="HBoxContainer" parent="Background/Margin/VBox/HBox/BoxPanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="BoxLabel" type="Label" parent="Background/Margin/VBox/HBox/BoxPanel/BoxLabelRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 7
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+text = "상자"
+
+[node name="SortButton" type="TextureButton" parent="Background/Margin/VBox/HBox/BoxPanel/BoxLabelRow"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("4_sort")
+texture_hover = ExtResource("5_sort_hover")
+
+[node name="BoxScroll" type="ScrollContainer" parent="Background/Margin/VBox/HBox/BoxPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="BoxGridMargin" type="MarginContainer" parent="Background/Margin/VBox/HBox/BoxPanel/BoxScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_right = 6
+
+[node name="BoxGrid" type="GridContainer" parent="Background/Margin/VBox/HBox/BoxPanel/BoxScroll/BoxGridMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 3
+theme_override_constants/v_separation = 3
+columns = 4
+
+[node name="BottomRow" type="HBoxContainer" parent="Background/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 6
+
+[node name="MessageLabel" type="Label" parent="Background/Margin/VBox/BottomRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 6
+theme_override_colors/font_color = Color(0.7, 0.15, 0.15, 1)
+autowrap_mode = 2
+
+[node name="PickupButton" type="TextureButton" parent="Background/Margin/VBox/BottomRow"]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+size_flags_vertical = 4
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("6_retrieve")
+texture_hover = ExtResource("7_retrieve_hover")

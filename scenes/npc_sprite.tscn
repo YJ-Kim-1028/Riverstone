@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/npc/npc_sprite.gd" id="1_npc_sprite"]
+
+[node name="NPCSprite" type="Node2D"]
+z_index = 0
+script = ExtResource("1_npc_sprite")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
