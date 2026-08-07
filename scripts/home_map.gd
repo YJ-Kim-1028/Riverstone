@@ -162,6 +162,16 @@ const TILE_SET_RESOURCES: Dictionary = {
 	"shrine_interior": preload("res://assets/tilesets/shrine_interior_tileset.tres"),
 	"temple_interior": preload("res://assets/tilesets/temple_interior_tileset.tres"),
 }
+## load_map()의 render 인자 그대로 - false면 텍스처 로딩/타일 그리기(Sprite2D든
+## TileMapLayer든)를 전부 건너뛰고 충돌(_blocked_cells)/경로탐색(_astar)에
+## 필요한 데이터만 만든다. compute_path_length()/compute_point_along_path()가
+## 화면에 안 보이는 맵의 "거리"만 재려고 임시 WorldMap을 만들 때 쓴다 - 예전엔
+## 이 계산 하나 하려고 그 맵 전체를 화면에 보이는 것과 똑같이 렌더링까지 했었는데
+## (NPC 스케줄 엔진이 여러 맵에 대해 한꺼번에 이걸 부르면 그때마다 텍스처
+## 로딩+타일 생성이 통째로 일어나 눈에 띄는 정지가 생겼다 - 사용자 리포트,
+## 2026-08-08), 정작 find_path()는 _blocked_cells/_astar만 보고 그림은 전혀
+## 안 봐서 렌더링이 애초에 불필요했다.
+var _render_enabled := true
 ## 이번에 load_map()한 맵에 대응하는 TileSet - 없으면(아직 전환 안 된 맵) null이고
 ## _create_tile()이 예전 Sprite2D 방식을 그대로 쓴다.
 var _active_tile_set: TileSet = null
@@ -186,11 +196,12 @@ func _ready() -> void:
 	load_map(map_path)
 
 
-func load_map(next_map_path: String) -> void:
+func load_map(next_map_path: String, render: bool = true) -> void:
 	if not FileAccess.file_exists(next_map_path):
 		push_error("Map file could not be found: %s" % next_map_path)
 		return
 	map_path = next_map_path
+	_render_enabled = render
 	_clear_tiles()
 	_tilesets.clear()
 	_spawns.clear()
@@ -247,8 +258,8 @@ func load_map(next_map_path: String) -> void:
 	# "YSortAnchor" 오브젝트 레이어(기획자가 Tiled에서 세로로 2칸 이상 이어진
 	# 그림마다 직접 그려주는 사각형)를 전체 레이어를 다 읽은 뒤 한꺼번에
 	# 계산한다(레이어 하나씩 바로 만들면 아직 안 읽은 다른 레이어 데이터를
-	# 볼 수 없다).
-	_anchor_layer_bottom_row = _compute_anchor_bottom_rows()
+	# 볼 수 없다). Y-sort 렌더링에만 쓰이므로 render=false면 건너뛴다.
+	_anchor_layer_bottom_row = _compute_anchor_bottom_rows() if _render_enabled else {}
 	# 같은 칸(또는 같은 행)에 서로 다른 레이어의 타일이 겹쳐 있으면(예: 장식품
 	# 레이어와 그 밑 가구 레이어가 같은 행에 있는 경우) Y-sort 기준값이
 	# 완전히 같아져서 어느 게 앞으로 그려질지 정해져 있지 않게 된다 - 맵
@@ -261,7 +272,10 @@ func load_map(next_map_path: String) -> void:
 		if not _layer_visibility.get(stored_layer_name, true):
 			continue
 		_create_layer_tiles(stored_layer_name, layer_order[stored_layer_name])
-	_compute_light_source_positions()
+	# _blocked_cells는 위 루프(_create_tile)에서 render 여부와 무관하게 항상
+	# 채워진다 - 조명 위치만 순수 렌더링용이라 여기서 건너뛴다.
+	if _render_enabled:
+		_compute_light_source_positions()
 	_rebuild_pathfinding_grid()
 
 
@@ -632,16 +646,33 @@ static func find_map_route(from_map_id: String, to_map_id: String) -> Array[Stri
 	return []
 
 
-## 화면에 안 보이는 맵을 NPC가 지나가는 데 걸리는 실제 거리를 구하기 위해, 그
-## 맵을 씬 트리에 붙이지 않고 임시로 한 번 로드해서 find_path()를 돌린다 -
-## 렌더링/실제 게임 로직에는 전혀 관여하지 않고 오직 경로 길이 측정용이라
-## add_child가 필요 없다(이번 세션 내내 진단 스크립트들에서 검증된 방식과 동일).
-## 경로를 못 찾으면 0.0을 반환하고, 호출한 쪽이 "즉시 도착"으로 처리해야 한다.
-static func compute_path_length(map_path: String, from_position: Vector2, to_position: Vector2) -> float:
+## compute_path_length()/compute_point_along_path() 전용 캐시 - map_path마다
+## render=false 임시 WorldMap을 한 번만 만들어서 계속 재사용한다. NPC 스케줄
+## 엔진이 같은 틱에 같은 맵을 여러 번(예: 여러 NPC가 plaza1을 지나감) 물어보는
+## 경우가 흔해서, 매번 새로 만들면 그만큼 XML을 다시 파싱하게 된다(사용자
+## 리포트로 발견된 첫 분 틱 정지, 2026-08-08 - render=false로 텍스처 로딩은
+## 없앴지만 중복 파싱 자체는 남아있었다). 텍스처를 안 들고 있어서 세션 내내
+## 들고 있어도 메모리 부담이 작다.
+static var _lightweight_map_cache: Dictionary = {}
+
+
+static func _get_lightweight_map(map_path: String) -> WorldMap:
+	if _lightweight_map_cache.has(map_path):
+		return _lightweight_map_cache[map_path]
 	var temp_map := new()
-	temp_map.load_map(map_path)
+	temp_map.load_map(map_path, false)
+	_lightweight_map_cache[map_path] = temp_map
+	return temp_map
+
+
+## 화면에 안 보이는 맵을 NPC가 지나가는 데 걸리는 실제 거리를 구하기 위해, 그
+## 맵을 씬 트리에 붙이지 않고 render=false로 로드해서(_get_lightweight_map -
+## 맵당 한 번만) find_path()를 돌린다 - 렌더링/실제 게임 로직에는 전혀
+## 관여하지 않고 오직 경로 길이 측정용이라 add_child가 필요 없다. 경로를 못
+## 찾으면 0.0을 반환하고, 호출한 쪽이 "즉시 도착"으로 처리해야 한다.
+static func compute_path_length(map_path: String, from_position: Vector2, to_position: Vector2) -> float:
+	var temp_map := _get_lightweight_map(map_path)
 	var path := temp_map.find_path(from_position, to_position)
-	temp_map.free()
 	if path.size() < 2:
 		return 0.0
 	var length := 0.0
@@ -681,10 +712,8 @@ static func advance_along_path(path: PackedVector2Array, traveled_distance: floa
 ## 위치"를 계산할 때 쓴다(예: 이동 도중 스케줄이 또 바뀌어 재경로해야 하는
 ## 경우). 경로를 못 찾으면 from_position을 그대로 반환한다.
 static func compute_point_along_path(map_path: String, from_position: Vector2, to_position: Vector2, traveled_distance: float) -> Vector2:
-	var temp_map := new()
-	temp_map.load_map(map_path)
+	var temp_map := _get_lightweight_map(map_path)
 	var path := temp_map.find_path(from_position, to_position)
-	temp_map.free()
 	if path.is_empty():
 		return from_position
 	return advance_along_path(path, traveled_distance)["position"]
@@ -759,15 +788,22 @@ func _add_tileset(parser: XMLParser) -> void:
 			# Must read "columns" before _find_tileset_image() advances this
 			# same parser past the <tileset> element looking for <image>.
 			var columns := tileset_parser.get_named_attribute_value_safe("columns").to_int()
+			# _find_tileset_image()가 파서를 <image> 다음(<tile> 블록들 앞)까지
+			# 옮겨줘야 _read_blocked_tile_ids()가 이어서 읽을 수 있다 - render가
+			# false여도 이 호출 자체(경로 문자열만 얻고 실제 로딩은 안 함)는
+			# 그대로 해야 한다.
 			var image_path := _find_tileset_image(tileset_parser, tileset_path)
-			var texture := load(image_path) as Texture2D
-			if texture != null:
-				_tilesets.append({
-					"first_gid": parser.get_named_attribute_value_safe("firstgid").to_int(),
-					"columns": columns,
-					"texture": texture,
-					"blocked_local_ids": _read_blocked_tile_ids(tileset_parser),
-				})
+			var texture: Texture2D = null
+			if _render_enabled:
+				texture = load(image_path) as Texture2D
+				if texture == null:
+					return
+			_tilesets.append({
+				"first_gid": parser.get_named_attribute_value_safe("firstgid").to_int(),
+				"columns": columns,
+				"texture": texture,
+				"blocked_local_ids": _read_blocked_tile_ids(tileset_parser),
+			})
 			return
 
 
@@ -1180,18 +1216,21 @@ func _create_tile(gid: int, index: int, layer_name: String, layer_priority: int)
 	if tileset.is_empty():
 		return
 	var local_tile_id := gid - int(tileset["first_gid"])
-	var columns := int(tileset["columns"])
 	var map_columns := int(_map_size.x / TILE_SIZE)
 	var cell := Vector2i(index % map_columns, index / map_columns)
-	var cell_center := Vector2(cell) * TILE_SIZE + Vector2.ONE * TILE_SIZE * 0.5
 
-	var source_id := -1
-	if _active_tile_set != null:
-		source_id = _resolve_source_id(_active_tile_set, tileset["texture"])
-	if source_id != -1:
-		_place_tilemap_cell(source_id, local_tile_id, columns, cell, cell_center, layer_name)
-	else:
-		_place_sprite_tile(tileset, local_tile_id, columns, cell, cell_center, layer_name, layer_priority)
+	# render=false(compute_path_length() 등이 만드는, 화면에 안 붙는 임시 맵)면
+	# 텍스처/노드를 하나도 안 만들고 바로 아래 충돌 판정만 계산한다.
+	if _render_enabled:
+		var columns := int(tileset["columns"])
+		var cell_center := Vector2(cell) * TILE_SIZE + Vector2.ONE * TILE_SIZE * 0.5
+		var source_id := -1
+		if _active_tile_set != null:
+			source_id = _resolve_source_id(_active_tile_set, tileset["texture"])
+		if source_id != -1:
+			_place_tilemap_cell(source_id, local_tile_id, columns, cell, cell_center, layer_name)
+		else:
+			_place_sprite_tile(tileset, local_tile_id, columns, cell, cell_center, layer_name, layer_priority)
 
 	var blocked_local_ids: Dictionary = tileset.get("blocked_local_ids", {})
 	if blocked_local_ids.has(local_tile_id):
