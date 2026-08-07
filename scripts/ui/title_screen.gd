@@ -20,6 +20,13 @@ const BUTTON_TEXT_COLOR := Color(0.25, 0.15, 0.08)
 const DISABLED_TINT := Color(0.55, 0.55, 0.55)
 const MODE_NEW_GAME := "new_game"
 const MODE_CONTINUE := "continue"
+## main.tscn 진입 시 씬 트리 전체(Player/UI 화면들 등)를 새로 만드는 동안
+## 체감되는 정지를 화면 뒤로 가리기 위한 페이드 - main.gd의 FADE_DURATION(0.2,
+## 이미 로드된 맵끼리 이동할 때용)보다 길게 잡는다. main.tscn의 TransitionLayer/
+## Fade는 이제 기본값이 불투명(검은 화면)이라, 여기서 검게 만들어둔 채로
+## change_scene_to_file()을 부르면 무거운 인스턴싱이 끝나고 main.gd의
+## _ready() -> _load_map()이 끝난 뒤에야(_fade_in()) 화면이 다시 밝아진다.
+const BOOT_FADE_DURATION := 1.0
 
 @onready var _start_button: Button = $ButtonColumn/StartButton
 @onready var _continue_button: Button = $ButtonColumn/ContinueButton
@@ -28,6 +35,7 @@ const MODE_CONTINUE := "continue"
 @onready var _slot_picker: Control = $SlotPickerScreen
 @onready var _character_creation: Control = $CharacterCreationScreen
 @onready var _language_screen: Control = $LanguageSettingsScreen
+@onready var _fade: ColorRect = $TransitionLayer/Fade
 
 
 func _ready() -> void:
@@ -68,6 +76,10 @@ func _on_character_confirmed() -> void:
 
 
 func _go_to_main() -> void:
+	if _fade != null:
+		var tween := create_tween()
+		tween.tween_property(_fade, "color:a", 1.0, BOOT_FADE_DURATION)
+		await tween.finished
 	get_tree().change_scene_to_file("res://scenes/main.tscn")
 
 

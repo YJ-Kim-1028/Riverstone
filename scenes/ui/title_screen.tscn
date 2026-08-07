@@ -70,3 +70,13 @@ text = "종료"
 [node name="CharacterCreationScreen" parent="." instance=ExtResource("5_character_creation")]
 
 [node name="LanguageSettingsScreen" parent="." instance=ExtResource("6_language_settings")]
+
+[node name="TransitionLayer" type="CanvasLayer" parent="."]
+layer = 3
+
+[node name="Fade" type="ColorRect" parent="TransitionLayer"]
+mouse_filter = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0)

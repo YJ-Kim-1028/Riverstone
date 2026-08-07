@@ -85,6 +85,11 @@ const RESTAURANT_SIGN_CLOSE_TEXTURE := preload("res://assets/ui/sign_close.png")
 @onready var book_screen: Control = get_node_or_null("UI/BookScreen") as Control
 @onready var storage_screen: Control = get_node_or_null("UI/StorageScreen") as Control
 @onready var _restaurant_sign: Sprite2D = get_node_or_null("HomeMap/RestaurantSign") as Sprite2D
+## main.tscn 안에서 이 노드의 기본 color는 불투명 검정이다(title_screen.gd가
+## main.tscn으로 넘어가기 직전에 자기 화면을 먼저 검게 페이드하고 넘어오므로,
+## 무거운 씬 인스턴싱이 끝난 첫 프레임에 게임 화면이 잠깐 안 가려진 채
+## 보이는 걸 막기 위함) - _ready()의 _load_map()이 끝에서 _fade_in()으로
+## 걷어내야 비로소 화면이 보인다.
 @onready var _fade: ColorRect = get_node_or_null("TransitionLayer/Fade") as ColorRect
 @onready var _day_label: Label = get_node_or_null("TransitionLayer/DayLabel") as Label
 @onready var _ui_dim: ColorRect = get_node_or_null("UI/Dim") as ColorRect
