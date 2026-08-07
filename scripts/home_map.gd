@@ -94,6 +94,17 @@ const MAP_PATHS := {
 	"temple_interior": "res://assets/interior/temple_interior.tmx",
 }
 
+## MAP_PATHS를 거꾸로 뒤져서 이 경로의 map_id를 찾는다 - TILE_SET_RESOURCES가
+## map_id 기준이라 필요하다. 등록 안 된 경로(예외적으로 커스텀 경로를 직접
+## 지정한 경우)면 빈 문자열 - TILE_SET_RESOURCES.get("")이 항상 null이라
+## 안전하게 기존 Sprite2D 방식으로 대체된다.
+static func _map_id_for_path(path: String) -> String:
+	for map_id in MAP_PATHS:
+		if String(MAP_PATHS[map_id]) == path:
+			return map_id
+	return ""
+
+
 @export_file("*.tmx") var map_path := DEFAULT_MAP_PATH
 
 var _map_size := Vector2i.ZERO
@@ -123,6 +134,32 @@ var _anchor_layer_bottom_row: Dictionary = {}
 ## 다시 만든다(맵마다 막힌 칸이 다르므로). find_path() 참고.
 var _astar := AStarGrid2D.new()
 
+## 성능 점검(개별 Sprite2D 타일 구조 스케일 한계, plan/day6.md) 대응 - 파일럿으로
+## 홈맵만 우선 내장 TileMapLayer로 그린다. map_id(MAP_PATHS 키) -> 그 맵 전용으로
+## 미리 스크립트로 생성해둔 TileSet 리소스. 다른 맵도 나중에 전환하면 여기
+## 항목만 추가하면 된다 - 목록에 없는 맵은 계속 기존 Sprite2D 방식으로 그려진다.
+const TILE_SET_RESOURCES: Dictionary = {
+	"Home": preload("res://assets/tilesets/home_tileset.tres"),
+}
+## 이번에 load_map()한 맵에 대응하는 TileSet - 없으면(아직 전환 안 된 맵) null이고
+## _create_tile()이 예전 Sprite2D 방식을 그대로 쓴다.
+var _active_tile_set: TileSet = null
+## layer_name -> 이번 로드에서 만든 TileMapLayer 노드 (TileMapLayer 렌더링
+## 경로 전용, Sprite2D 경로의 _door_tiles/그룹 태그와는 별개 자료구조).
+var _tile_map_layers: Dictionary = {}
+## "Door" 레이어를 TileMapLayer로 그린 경우 set_door_open()이 칸을 지우고/
+## 되살리는 데 필요한 정보 - cell(Vector2i) -> {source_id, atlas_coords, alt_id}.
+var _tilemap_door_cells: Dictionary = {}
+var _tilemap_door_layer: TileMapLayer = null
+## TILE_SET_RESOURCES는 preload라 WorldMap 인스턴스마다 새로 만들어지지 않고
+## 전부 같은 리소스를 공유한다 - 텍스처->source_id, (좌표+y_sort_origin)->대체
+## 타일 id 캐시도 인스턴스가 아니라 리소스 자체에 속한 정보라 static으로 공유
+## 해야 한다. 인스턴스별로 따로 캐싱하면 compute_path_length() 등이 만드는
+## 임시 WorldMap마다 같은 오프셋의 대체 타일을 매번 새로 만들어서 공유
+## 리소스에 계속 쌓이는 누수가 생긴다.
+static var _tile_source_id_cache: Dictionary = {}
+static var _tile_alt_id_cache: Dictionary = {}
+
 
 func _ready() -> void:
 	load_map(map_path)
@@ -145,6 +182,10 @@ func load_map(next_map_path: String) -> void:
 	_layer_visibility.clear()
 	_light_source_positions.clear()
 	_anchor_layer_bottom_row.clear()
+	_tile_map_layers.clear()
+	_tilemap_door_cells.clear()
+	_tilemap_door_layer = null
+	_active_tile_set = TILE_SET_RESOURCES.get(_map_id_for_path(next_map_path))
 
 	var parser := XMLParser.new()
 	if parser.open(map_path) != OK:
@@ -386,6 +427,12 @@ func set_door_open(door_interactable: Dictionary, open: bool) -> void:
 		var tile: Sprite2D = _door_tiles.get(cell)
 		if tile != null:
 			tile.visible = not open
+		if _tilemap_door_layer != null and _tilemap_door_cells.has(cell):
+			if open:
+				_tilemap_door_layer.erase_cell(cell)
+			else:
+				var door_cell: Dictionary = _tilemap_door_cells[cell]
+				_tilemap_door_layer.set_cell(cell, door_cell["source_id"], door_cell["atlas_coords"], door_cell["alt_id"])
 		if open:
 			_blocked_cells.erase(cell)
 		else:
@@ -1103,21 +1150,42 @@ func _ring_offsets(radius: int) -> Array[Vector2i]:
 	return offsets
 
 
+## GID 하나를 실제로 화면에 배치한다. _active_tile_set이 있는 맵(TILE_SET_RESOURCES에
+## 등록된 맵, 현재는 Home뿐)이면 TileMapLayer로, 없으면(아직 전환 안 된 나머지
+## 19개 맵) 예전 Sprite2D 방식으로 그린다 - 어느 쪽이든 _blocked_cells를 채우는
+## 규칙은 동일해서 여기서 한 번만 처리한다.
 func _create_tile(gid: int, index: int, layer_name: String, layer_priority: int) -> void:
 	var tileset := _get_tileset(gid)
 	if tileset.is_empty():
 		return
 	var local_tile_id := gid - int(tileset["first_gid"])
 	var columns := int(tileset["columns"])
+	var map_columns := int(_map_size.x / TILE_SIZE)
+	var cell := Vector2i(index % map_columns, index / map_columns)
+	var cell_center := Vector2(cell) * TILE_SIZE + Vector2.ONE * TILE_SIZE * 0.5
+
+	var source_id := -1
+	if _active_tile_set != null:
+		source_id = _resolve_source_id(_active_tile_set, tileset["texture"])
+	if source_id != -1:
+		_place_tilemap_cell(source_id, local_tile_id, columns, cell, cell_center, layer_name)
+	else:
+		_place_sprite_tile(tileset, local_tile_id, columns, cell, cell_center, layer_name, layer_priority)
+
+	var blocked_local_ids: Dictionary = tileset.get("blocked_local_ids", {})
+	if blocked_local_ids.has(local_tile_id):
+		_blocked_cells[cell] = true
+
+
+## 예전 방식 - 타일 하나당 Sprite2D 하나(성능 문제의 원인, plan/day6.md).
+## TILE_SET_RESOURCES에 아직 등록 안 된 맵은 전부 이 경로를 그대로 쓴다.
+func _place_sprite_tile(tileset: Dictionary, local_tile_id: int, columns: int, cell: Vector2i, cell_center: Vector2, layer_name: String, layer_priority: int) -> void:
 	var atlas := AtlasTexture.new()
 	atlas.atlas = tileset["texture"]
 	atlas.region = Rect2((local_tile_id % columns) * TILE_SIZE, (local_tile_id / columns) * TILE_SIZE, TILE_SIZE, TILE_SIZE)
 	var tile := Sprite2D.new()
 	tile.texture = atlas
 	tile.add_to_group(&"_map_tile")
-	var map_columns := int(_map_size.x / TILE_SIZE)
-	var cell := Vector2i(index % map_columns, index / map_columns)
-	var cell_center := Vector2(cell) * TILE_SIZE + Vector2.ONE * TILE_SIZE * 0.5
 	if FLAT_LAYERS.has(layer_name):
 		tile.position = cell_center
 		tile.z_index = FLAT_Z_INDEX
@@ -1146,9 +1214,95 @@ func _create_tile(gid: int, index: int, layer_name: String, layer_priority: int)
 	add_child(tile)
 	if layer_name == "Door":
 		_door_tiles[cell] = tile
-	var blocked_local_ids: Dictionary = tileset.get("blocked_local_ids", {})
-	if blocked_local_ids.has(local_tile_id):
-		_blocked_cells[cell] = true
+
+
+## 새 방식 - TileMapLayer.set_cell()로 배칭되어 그려진다. 레이어 하나당
+## TileMapLayer 노드 하나(_get_or_create_tile_map_layer)를 쓰는 건 Sprite2D
+## 시절과 동일하게 "이 레이어에 이 칸이 있는가"를 레이어별로 따로 조회할 수
+## 있어야 하기 때문 - is_water_cell 등은 여전히 _layer_gids만 보므로 이 구조
+## 자체와는 무관하게 그대로 동작한다.
+##
+## Y-sort 그룹은 TileMapLayer.y_sort_enabled로 칸 단위 비교를 켜고,
+## TileData.y_sort_origin(정수, 픽셀)에 sort_y - cell_center.y를 넣어 옛
+## Sprite2D의 "position은 정렬 기준, offset은 실제 그림 위치" 트릭을 그대로
+## 재현한다. LAYER_PRIORITY_EPSILON(0.01)은 정수 y_sort_origin에 반올림하면
+## 사라지므로 여기서는 적용하지 않는다 - 대신 TileMapLayer 노드를 Tiled 레이어
+## 순서 그대로 자식으로 추가해서(같은 순서로 _create_layer_tiles가 호출됨)
+## Godot의 동점 처리(같은 정렬값이면 나중에 추가된 자식이 위)가 "나중에
+## 나오는 레이어가 이긴다"는 원래 규칙과 같은 결과를 내도록 한다. 동점 상황
+## (예: 장식품+그 밑 가구가 같은 행)은 시각 확인이 필요한 항목으로 남겨둔다.
+func _place_tilemap_cell(source_id: int, local_tile_id: int, columns: int, cell: Vector2i, cell_center: Vector2, layer_name: String) -> void:
+	var atlas_coords := Vector2i(local_tile_id % columns, local_tile_id / columns)
+	var layer := _get_or_create_tile_map_layer(layer_name)
+	var alt_id := 0
+	if not FLAT_LAYERS.has(layer_name) and not ALWAYS_FRONT_LAYERS.has(layer_name):
+		var source := _active_tile_set.get_source(source_id) as TileSetAtlasSource
+		var anchor_key := "%s:%d:%d" % [layer_name, cell.x, cell.y]
+		var sort_row: int = _anchor_layer_bottom_row.get(anchor_key, cell.y)
+		var sort_y := float(sort_row) * TILE_SIZE + TILE_SIZE - SORT_SAFE_MARGIN
+		var y_sort_origin := int(round(sort_y - cell_center.y))
+		alt_id = _resolve_alt_tile(_active_tile_set, source, source_id, atlas_coords, y_sort_origin)
+	layer.set_cell(cell, source_id, atlas_coords, alt_id)
+	if layer_name == "Door":
+		_tilemap_door_cells[cell] = {"source_id": source_id, "atlas_coords": atlas_coords, "alt_id": alt_id}
+		_tilemap_door_layer = layer
+
+
+## layer_name(Tiled 레이어 이름)에 대응하는 TileMapLayer 노드를 이번 로드에서
+## 처음 필요할 때 하나 만들어서 캐싱한다. 생성 순서가 곧 _layer_gids를 훑는
+## 순서(=Tiled 레이어 선언 순서)와 같아서, 형제 노드 순서로 Y-sort 동점 처리가
+## "나중 레이어가 이긴다" 규칙과 맞아떨어진다(_place_tilemap_cell 주석 참고).
+func _get_or_create_tile_map_layer(layer_name: String) -> TileMapLayer:
+	if _tile_map_layers.has(layer_name):
+		return _tile_map_layers[layer_name]
+	var layer := TileMapLayer.new()
+	layer.name = "TileLayer_%s" % layer_name
+	layer.tile_set = _active_tile_set
+	layer.add_to_group(&"_map_tile_layer")
+	if FLAT_LAYERS.has(layer_name):
+		layer.z_index = FLAT_Z_INDEX
+	elif ALWAYS_FRONT_LAYERS.has(layer_name):
+		layer.z_index = ALWAYS_FRONT_Z_INDEX
+	else:
+		layer.z_index = Y_SORT_Z_INDEX
+		layer.y_sort_enabled = true
+	add_child(layer)
+	_tile_map_layers[layer_name] = layer
+	return layer
+
+
+## tile_set 안에서 texture를 쓰는 TileSetAtlasSource의 source_id를 찾는다.
+## TILE_SET_RESOURCES가 preload라 이 tile_set은 모든 WorldMap 인스턴스가
+## 공유하므로 결과를 인스턴스가 아니라 static Dictionary에 캐싱한다.
+static func _resolve_source_id(tile_set: TileSet, texture: Texture2D) -> int:
+	var cache_key := "%d:%d" % [tile_set.get_instance_id(), texture.get_instance_id()]
+	if _tile_source_id_cache.has(cache_key):
+		return _tile_source_id_cache[cache_key]
+	for i in tile_set.get_source_count():
+		var source_id := tile_set.get_source_id(i)
+		var source := tile_set.get_source(source_id) as TileSetAtlasSource
+		if source != null and source.texture == texture:
+			_tile_source_id_cache[cache_key] = source_id
+			return source_id
+	return -1
+
+
+## y_sort_origin이 필요한 (source_id, atlas_coords) 조합마다 대체 타일을 하나
+## 만들어서 재사용한다(같은 오프셋이 여러 칸에서 반복되는 경우가 흔함). 0이면
+## 원본 타일(alt_id 0)의 기본 y_sort_origin(0)과 같으므로 새로 안 만든다.
+## static 캐시인 이유는 _resolve_source_id와 동일 - 공유 리소스에 중복 생성을
+## 막기 위함.
+static func _resolve_alt_tile(tile_set: TileSet, source: TileSetAtlasSource, source_id: int, atlas_coords: Vector2i, y_sort_origin: int) -> int:
+	if y_sort_origin == 0:
+		return 0
+	var cache_key := "%d:%d:%d:%d:%d" % [tile_set.get_instance_id(), source_id, atlas_coords.x, atlas_coords.y, y_sort_origin]
+	if _tile_alt_id_cache.has(cache_key):
+		return _tile_alt_id_cache[cache_key]
+	var alt_id := source.create_alternative_tile(atlas_coords)
+	var tile_data := source.get_tile_data(atlas_coords, alt_id)
+	tile_data.y_sort_origin = y_sort_origin
+	_tile_alt_id_cache[cache_key] = alt_id
+	return alt_id
 
 
 func _get_tileset(gid: int) -> Dictionary:
@@ -1167,5 +1321,5 @@ func _get_tileset(gid: int) -> Dictionary:
 ## 임시 WorldMap 인스턴스에서도(get_tree()가 null이라) 문제없이 동작해야 한다.
 func _clear_tiles() -> void:
 	for tile in get_children():
-		if tile.is_in_group(&"_map_tile"):
+		if tile.is_in_group(&"_map_tile") or tile.is_in_group(&"_map_tile_layer"):
 			tile.free()
