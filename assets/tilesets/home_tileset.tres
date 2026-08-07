@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" path="res://assets/map/building.png" id="3_cqfgj"]
 [ext_resource type="Texture2D" path="res://assets/map/deco_col.png" id="4_tgpwj"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_xv6io"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_q6oin"]
 texture = ExtResource("1_q6oin")
 0:0/0 = 0
 1:0/0 = 0
@@ -338,7 +338,7 @@ texture = ExtResource("1_q6oin")
 14:15/0 = 0
 15:15/0 = 0
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3dawi"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_xx3gc"]
 texture = ExtResource("2_xx3gc")
 0:0/0 = 0
 1:0/0 = 0
@@ -602,7 +602,7 @@ texture = ExtResource("2_xx3gc")
 14:15/0 = 0
 15:15/0 = 0
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_572un"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cqfgj"]
 texture = ExtResource("3_cqfgj")
 0:0/0 = 0
 1:0/0 = 0
@@ -1839,7 +1839,7 @@ texture = ExtResource("3_cqfgj")
 30:31/0 = 0
 31:31/0 = 0
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_hwtp8"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tgpwj"]
 texture = ExtResource("4_tgpwj")
 0:0/0 = 0
 1:0/0 = 0
@@ -2116,7 +2116,7 @@ texture = ExtResource("4_tgpwj")
 [resource]
 custom_data_layer_0/name = "collision"
 custom_data_layer_0/type = 1
-sources/0 = SubResource("TileSetAtlasSource_xv6io")
-sources/1 = SubResource("TileSetAtlasSource_3dawi")
-sources/2 = SubResource("TileSetAtlasSource_572un")
-sources/3 = SubResource("TileSetAtlasSource_hwtp8")
+sources/0 = SubResource("TileSetAtlasSource_q6oin")
+sources/1 = SubResource("TileSetAtlasSource_xx3gc")
+sources/2 = SubResource("TileSetAtlasSource_cqfgj")
+sources/3 = SubResource("TileSetAtlasSource_tgpwj")

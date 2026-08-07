@@ -134,12 +134,33 @@ var _anchor_layer_bottom_row: Dictionary = {}
 ## 다시 만든다(맵마다 막힌 칸이 다르므로). find_path() 참고.
 var _astar := AStarGrid2D.new()
 
-## 성능 점검(개별 Sprite2D 타일 구조 스케일 한계, plan/day6.md) 대응 - 파일럿으로
-## 홈맵만 우선 내장 TileMapLayer로 그린다. map_id(MAP_PATHS 키) -> 그 맵 전용으로
-## 미리 스크립트로 생성해둔 TileSet 리소스. 다른 맵도 나중에 전환하면 여기
-## 항목만 추가하면 된다 - 목록에 없는 맵은 계속 기존 Sprite2D 방식으로 그려진다.
+## 성능 점검(개별 Sprite2D 타일 구조 스케일 한계, plan/day6.md) 대응 - 전체 20개
+## 맵을 내장 TileMapLayer로 그린다. map_id(MAP_PATHS 키) -> 그 맵 전용으로 미리
+## 스크립트로 생성해둔 TileSet 리소스(assets/tilesets/<map_id>_tileset.tres,
+## Home만 예외적으로 파일럿 때 이름을 그대로 둬서 home_tileset.tres). 새 맵이
+## 추가되면 여기 항목만 추가하면 된다 - 목록에 없는 맵은 안전하게 예전
+## Sprite2D 방식으로 자동 대체된다(_create_tile 참고).
 const TILE_SET_RESOURCES: Dictionary = {
 	"Home": preload("res://assets/tilesets/home_tileset.tres"),
+	"plaza1": preload("res://assets/tilesets/plaza1_tileset.tres"),
+	"plaza2": preload("res://assets/tilesets/plaza2_tileset.tres"),
+	"plaza3": preload("res://assets/tilesets/plaza3_tileset.tres"),
+	"plaza4": preload("res://assets/tilesets/plaza4_tileset.tres"),
+	"plaza5": preload("res://assets/tilesets/plaza5_tileset.tres"),
+	"book_interior": preload("res://assets/tilesets/book_interior_tileset.tres"),
+	"cafe_interior": preload("res://assets/tilesets/cafe_interior_tileset.tres"),
+	"cowshed_interior": preload("res://assets/tilesets/cowshed_interior_tileset.tres"),
+	"farm_interior": preload("res://assets/tilesets/farm_interior_tileset.tres"),
+	"fish_interior": preload("res://assets/tilesets/fish_interior_tileset.tres"),
+	"furniture_interior": preload("res://assets/tilesets/furniture_interior_tileset.tres"),
+	"general_interior": preload("res://assets/tilesets/general_interior_tileset.tres"),
+	"home_interior": preload("res://assets/tilesets/home_interior_tileset.tres"),
+	"hospital_interior": preload("res://assets/tilesets/hospital_interior_tileset.tres"),
+	"pasture_interior": preload("res://assets/tilesets/pasture_interior_tileset.tres"),
+	"police_interior": preload("res://assets/tilesets/police_interior_tileset.tres"),
+	"restaurant_interior": preload("res://assets/tilesets/restaurant_interior_tileset.tres"),
+	"shrine_interior": preload("res://assets/tilesets/shrine_interior_tileset.tres"),
+	"temple_interior": preload("res://assets/tilesets/temple_interior_tileset.tres"),
 }
 ## 이번에 load_map()한 맵에 대응하는 TileSet - 없으면(아직 전환 안 된 맵) null이고
 ## _create_tile()이 예전 Sprite2D 방식을 그대로 쓴다.
