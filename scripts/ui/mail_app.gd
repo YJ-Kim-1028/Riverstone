@@ -157,6 +157,10 @@ func _update_portrait(npc_id: String) -> void:
 	var portraits: Dictionary = NPCManager.get_definition(npc_id).get("portraits", {})
 	var path := String(portraits.get("default", ""))
 	_portrait_box.texture = load(path) if not path.is_empty() else null
+	# horror_events.md "NPC 사망 - 초상화 회색 처리" - 죽은 뒤에 온 사칭 메일뿐
+	# 아니라, 살아있을 때 받았던 옛 메일을 다시 봐도 회색으로 보인다(의도적 -
+	# "이제는 없는 사람"이라는 사실 자체가 기준이라 메일이 언제 온 건지는 안 따짐).
+	_portrait_box.material = null if NPCManager.is_alive(npc_id) else NPCManager.get_dead_portrait_material()
 
 
 func _set_active(control: Control, active: bool) -> void:

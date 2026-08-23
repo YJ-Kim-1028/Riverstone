@@ -145,7 +145,11 @@ func _build_row(entry: Dictionary, is_sent: bool) -> Control:
 	row.add_child(text_column)
 
 	var title_label := Label.new()
-	title_label.text = String(entry.get("title", ""))
+	# {player_name} 자리표시자 - mail_detail_panel.gd/dialogue_screen.gd와 동일한
+	# 규칙(README 참고). 지금까지는 본문(lines)에서만 치환됐는데, 스토커 후반
+	# 이메일 제목("조심해, {player_name}")처럼 제목에도 쓰이는 경우가 생겨서
+	# 목록에서도 치환하도록 맞춤 - 안 하면 목록에 자리표시자 글자가 그대로 보임.
+	title_label.text = String(entry.get("title", "")).replace("{player_name}", GameManager.player_name)
 	title_label.add_theme_font_size_override("font_size", ROW_FONT_SIZE)
 	title_label.add_theme_color_override("font_color", Color.BLACK)
 	text_column.add_child(title_label)

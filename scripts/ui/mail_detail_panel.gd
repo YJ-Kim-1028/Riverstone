@@ -10,10 +10,12 @@ extends Control
 
 
 func show_email(entry: Dictionary, is_sent: bool) -> void:
-	_title_label.text = String(entry.get("title", ""))
+	# {player_name} 자리표시자 - mail_list_panel.gd와 동일하게 제목도 치환.
+	_title_label.text = String(entry.get("title", "")).replace("{player_name}", GameManager.player_name)
 	var npc_id := String(entry.get("npc_id", ""))
 	var npc_name := String(NPCManager.get_definition(npc_id).get("name", npc_id))
 	_person_label.text = ("수신인 : %s" if is_sent else "보낸 사람 : %s") % npc_name
 	var lines: Array = entry.get("lines", [])
-	_content_label.text = "\n".join(lines)
+	# {player_name} 자리표시자 - dialogue_screen.gd와 동일한 규칙(README 참고).
+	_content_label.text = "\n".join(lines).replace("{player_name}", GameManager.player_name)
 	_date_label.text = String(entry.get("date", ""))
