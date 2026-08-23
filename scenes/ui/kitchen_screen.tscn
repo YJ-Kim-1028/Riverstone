@@ -60,7 +60,7 @@ theme_override_constants/separation = 6
 
 [node name="ToolLabel" type="Label" parent="Background/Margin/VBox/StatusRow"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 5
 theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
 
 [node name="ToolVessel" type="Control" parent="Background/Margin/VBox/StatusRow"]
@@ -100,7 +100,7 @@ stretch_mode = 5
 custom_minimum_size = Vector2(40, 16)
 layout_mode = 2
 size_flags_vertical = 4
-theme_override_font_sizes/font_size = 6
+theme_override_font_sizes/font_size = 5
 text = "조리 시작"
 
 [node name="GridScroll" type="ScrollContainer" parent="Background/Margin/VBox"]

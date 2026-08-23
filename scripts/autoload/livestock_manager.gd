@@ -203,11 +203,8 @@ func perform_milk(stall_index: int) -> String:
 ## main.gd가 작은 칼로 상호작용할 때 호출한다 - 도살 액션이 아니면 빈
 ## Dictionary(아무 반응도 안 함). 아기(아직 성체가 아님)면 즉시 거부 문구를
 ## {"denied": true, "message": ...}로 돌려주고(확인 팝업 없이 바로 안내만),
-## 성체면 {"denied": false, "message": ..., "needs_confirm": bool}을
-## 돌려준다 - main.gd는 denied=false일 때만 실제로 확인 팝업을 여는데,
-## needs_confirm이 false면 팝업 없이 바로 도살한다. 젖을 생산하는 동물(소)만
-## 도살로 그 수입원이 사라지니 확인이 필요하고, 돼지처럼 애초에 우유가 없는
-## 동물은 굳이 안 물어봐도 된다(사용자 지시).
+## 성체면 {"denied": false, "message": ...}를 돌려준다 - main.gd는 denied=false일
+## 때 확인 팝업 없이 바로 도살한다(모든 동물 공통, 사용자 지시).
 func get_slaughter_request(stall_index: int) -> Dictionary:
 	if get_equipped_action(stall_index) != "slaughter":
 		return {}
@@ -216,11 +213,9 @@ func get_slaughter_request(stall_index: int) -> Dictionary:
 	if not is_adult(stall_index):
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
 		return {"denied": true, "message": "이런 짓을 하기엔 너무 어리다."}
-	var needs_confirm := not String(definition.get("milk_item_id", "")).is_empty()
 	return {
 		"denied": false,
 		"message": "%s를 정말 도살하시겠습니까? 되돌릴 수 없습니다." % animal_name,
-		"needs_confirm": needs_confirm,
 	}
 
 

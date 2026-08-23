@@ -98,7 +98,11 @@ func _show_result(result: Dictionary) -> void:
 	_result_label.text = "획득!"
 
 
+## cancel_fishing()이 fishing_ended를 쏘므로(2026-08-12부터), 그 신호가
+## 도착하는 시점에 이미 visible=false여야 _on_fishing_ended의 "닫혀있으면
+## 무시" 가드에 걸려 결과 팝업(실패 문구)이 잠깐 뜨는 걸 막을 수 있다 - 순서를
+## 바꾸면 안 됨.
 func _force_cancel() -> void:
-	FishingManager.cancel_fishing()
-	_fish.stop_cycle()
 	visible = false
+	_fish.stop_cycle()
+	FishingManager.cancel_fishing()

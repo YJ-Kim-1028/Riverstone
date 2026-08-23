@@ -42,7 +42,7 @@ theme_override_constants/separation = 8
 
 [node name="TitleLabel" type="Label" parent="Panel/Margin/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 8
+theme_override_font_sizes/font_size = 7
 theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
 horizontal_alignment = 1
 text = "언어 설정"
@@ -53,7 +53,7 @@ size_flags_vertical = 3
 autowrap_mode = 3
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 6
+theme_override_font_sizes/font_size = 5
 theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
 text = "준비 중입니다."
 
@@ -61,5 +61,5 @@ text = "준비 중입니다."
 custom_minimum_size = Vector2(0, 16)
 layout_mode = 2
 size_flags_vertical = 0
-theme_override_font_sizes/font_size = 7
+theme_override_font_sizes/font_size = 5
 text = "뒤로"

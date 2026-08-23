@@ -44,25 +44,25 @@ theme_override_constants/separation = 5
 [node name="StartButton" type="Button" parent="ButtonColumn"]
 custom_minimum_size = Vector2(70, 16)
 layout_mode = 2
-theme_override_font_sizes/font_size = 7
+theme_override_font_sizes/font_size = 5
 text = "시작하기"
 
 [node name="ContinueButton" type="Button" parent="ButtonColumn"]
 custom_minimum_size = Vector2(70, 16)
 layout_mode = 2
-theme_override_font_sizes/font_size = 7
+theme_override_font_sizes/font_size = 5
 text = "이어하기"
 
 [node name="LanguageButton" type="Button" parent="ButtonColumn"]
 custom_minimum_size = Vector2(70, 16)
 layout_mode = 2
-theme_override_font_sizes/font_size = 7
+theme_override_font_sizes/font_size = 5
 text = "언어"
 
 [node name="QuitButton" type="Button" parent="ButtonColumn"]
 custom_minimum_size = Vector2(70, 16)
 layout_mode = 2
-theme_override_font_sizes/font_size = 7
+theme_override_font_sizes/font_size = 5
 text = "종료"
 
 [node name="SlotPickerScreen" parent="." instance=ExtResource("4_slot_picker")]

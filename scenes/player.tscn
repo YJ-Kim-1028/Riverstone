@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/player/player.gd" id="1_player"]
+[ext_resource type="Script" path="res://scripts/player/player_tool_overlay.gd" id="2_tool_overlay"]
 
 [node name="Player" type="Node2D"]
 texture_filter = 1
@@ -8,6 +9,12 @@ z_index = 0
 script = ExtResource("1_player")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+
+[node name="ToolOverlay" type="Node2D" parent="."]
+script = ExtResource("2_tool_overlay")
+
+[node name="IconSprite" type="Sprite2D" parent="ToolOverlay"]
+texture_filter = 1
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(0, -8)

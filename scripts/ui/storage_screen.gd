@@ -6,9 +6,11 @@ extends Control
 ## 순서) shop_screen.gd가 문서화한 "ancestor.visible이 한 번이라도 false였던
 ## 컨트롤은 폰트/모듈레이트가 깨지는" 버그를 피할 수 있다.
 ## 왼쪽 = 플레이어 인벤토리, 오른쪽 = 상자 내용물. 둘 다 inventory_slot.tscn을
-## 재사용하고, 드래그로 서로 아이템을 옮긴다(inventory_slot.gd의
-## accepts_drops/source_tag 확장 참고). 드래그는 항상 그 슬롯의 전체 스택을
-## 옮긴다(부분 이동/분할 없음 - 이 프로젝트의 다른 드래그 상호작용과 동일).
+## 재사용하고, 드래그 또는 클릭으로 서로 아이템을 옮긴다(inventory_slot.gd의
+## accepts_drops/source_tag 확장 참고). 클릭 한 번으로도 반대쪽으로 즉시
+## 옮겨지게 했다(사용자 지시 - 매번 드래그하기 귀찮음). 어느 방식이든 항상
+## 그 슬롯의 전체 스택을 옮긴다(부분 이동/분할 없음 - 이 프로젝트의 다른
+## 드래그 상호작용과 동일).
 
 const SlotScene := preload("res://scenes/ui/inventory_slot.tscn")
 const SCROLLBAR_WIDTH := 4
@@ -112,6 +114,7 @@ func _rebuild_grid(grid: GridContainer, slots: Array, source_tag: String) -> voi
 		slot_instance.source_tag = source_tag
 		slot_instance.accepts_drops = true
 		slot_instance.connect("slot_drop_received", _on_slot_drop_received)
+		slot_instance.connect("slot_pressed", _on_slot_pressed.bind(source_tag))
 
 
 func _on_slot_drop_received(target_source: String, _target_index: int, data: Dictionary) -> void:
@@ -122,6 +125,26 @@ func _on_slot_drop_received(target_source: String, _target_index: int, data: Dic
 	var count := int(data.get("count", 0))
 	if item_id.is_empty() or count <= 0:
 		return
+	_move_item(from_source, target_source, item_id, count)
+
+
+## 슬롯을 클릭하면(드래그 대신) 그 슬롯의 전체 스택을 즉시 반대쪽으로 옮긴다
+## (사용자 지시 - 매번 드래그하는 게 귀찮다는 피드백). 드롭과 마찬가지로
+## 어느 쪽 슬롯을 눌렀는지만 알면 반대쪽이 자동으로 정해진다(가방 슬롯 클릭
+## -> 상자로, 상자 슬롯 클릭 -> 가방으로).
+func _on_slot_pressed(index: int, source_tag: String) -> void:
+	var slots := InventoryManager.get_slots() if source_tag == BAG_SOURCE else StorageBoxManager.get_box_slots(_map_id, _cell)
+	if index < 0 or index >= slots.size() or slots[index] == null:
+		return
+	var item_id := String(slots[index].get("item_id", ""))
+	var count := int(slots[index].get("count", 0))
+	if item_id.is_empty() or count <= 0:
+		return
+	var target_source := BOX_SOURCE if source_tag == BAG_SOURCE else BAG_SOURCE
+	_move_item(source_tag, target_source, item_id, count)
+
+
+func _move_item(from_source: String, target_source: String, item_id: String, count: int) -> void:
 	if from_source == BAG_SOURCE and target_source == BOX_SOURCE:
 		if not StorageBoxManager.can_add_item_to_box(_map_id, _cell, item_id, count):
 			_show_message("상자에 넣을 공간이 없다.")

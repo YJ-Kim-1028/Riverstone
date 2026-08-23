@@ -70,8 +70,15 @@ func start_fishing() -> bool:
 	return true
 
 
+## 입질 대기 중 E로 취소하든, 미니게임 중 ESC로 취소하든(fishing_screen.gd)
+## 이 한 곳을 거친다 - fishing_ended를 똑같이 쏴줘야 그 신호에 기대는 쪽(예:
+## player.tool_overlay, main.gd의 _on_fishing_ended)이 취소도 "낚시 끝남"으로
+## 알아챈다. 예전엔 이 신호를 안 쏴서, 미니게임 중 ESC로 닫으면 낚시대 사용
+## 포즈가 안 풀린 채로 계속 걸어다니는 버그가 있었다(2026-08-12 리포트).
 func cancel_fishing() -> void:
 	_phase = Phase.IDLE
+	_current_species = ""
+	fishing_ended.emit({"success": false, "item_id": "", "cancelled": true})
 
 
 func is_waiting_for_bite() -> bool:

@@ -72,6 +72,7 @@ func _on_slot_confirmed(slot: int, mode: String) -> void:
 
 
 func _on_character_confirmed() -> void:
+	EmailManager.send_arrival_emails()
 	_go_to_main()
 
 

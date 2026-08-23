@@ -6,8 +6,7 @@ class_name EquipmentSlot
 ## 인벤토리 슬롯(inventory_slot.gd)을 이 위로 드래그하면 착용된다. 빼는 것도
 ## 같은 방식(드래그해서 밖으로 꺼내면 해제)으로 통일했다(사용자 지시 - "넣는
 ## 건 드래그, 빼는 건 클릭"이라 통일성이 없다는 피드백). 클릭으로 해제하는
-## 기존 방식도 그대로 남겨둔다(굳이 없앨 이유가 없어서 - 짧게 클릭하면 그대로
-## 착용 해제, 길게 끌어서 놓으면 그 자리에서 해제).
+## 옛 방식은 드래그 방식과 상충돼서 완전히 제거함(사용자 지시).
 
 ## 맞지 않는 장비(예: 신발 칸에 모자)를 놓으려고 하면 쏜다 - _can_drop_data가
 ## false를 반환하는 것만으로는 화면에 아무 안내도 안 뜨므로, 별도로 감지해서
@@ -34,7 +33,6 @@ var _dragging_self := false
 
 func _ready() -> void:
 	_empty_texture = texture_normal
-	pressed.connect(_on_pressed)
 	EquipmentManager.equipment_changed.connect(refresh)
 	refresh()
 
@@ -44,10 +42,6 @@ func refresh() -> void:
 	_icon.texture = InventoryManager.get_item_icon_texture(item_id) if not item_id.is_empty() else null
 	var count := EquipmentManager.get_equipped_count(slot_name)
 	_count_label.text = str(count) if count > 1 else ""
-
-
-func _on_pressed() -> void:
-	EquipmentManager.unequip(slot_name)
 
 
 func _can_drop_data(_at_position: Vector2, data) -> bool:

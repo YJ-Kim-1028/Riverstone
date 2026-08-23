@@ -97,4 +97,4 @@ func _update_weather_icon() -> void:
 
 
 func _update_gold_label() -> void:
-	_gold_label.text = "%d" % EconomyManager.gold
+	_gold_label.text = EconomyManager.format_gold(EconomyManager.gold)

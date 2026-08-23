@@ -57,21 +57,30 @@ func _ready() -> void:
 
 ## main.gd가 프롬프트 문구/실제 처리 양쪽에서 같은 판정을 쓴다
 ## (LivestockManager.get_equipped_action()과 동일한 역할).
-## "till"/"water"/"plant"/"harvest"/"" 중 하나. 다 자란 칸은 손에 뭘 들었든
-## 항상 수확이 최우선이다(사용자 지시 - 물뿌리개를 든 채 다 자란 작물과
-## 상호작용했더니 수확 대신 물이 나가버렸다는 피드백. 이미 다 자란 작물에
-## 물을 더 주는 건 어차피 의미가 없으므로 물주기보다 수확이 항상 이긴다).
+## "till"/"water"/"needs_till"/"plant"/"harvest"/"" 중 하나. 다 자란 칸은 손에
+## 뭘 들었든 항상 수확이 최우선이다(사용자 지시 - 물뿌리개를 든 채 다 자란
+## 작물과 상호작용했더니 수확 대신 물이 나가버렸다는 피드백. 이미 다 자란
+## 작물에 물을 더 주는 건 어차피 의미가 없으므로 물주기보다 수확이 항상
+## 이긴다). "needs_till"은 물뿌리개를 든 채 아직 갈지 않은 밭에 물을 주려 할
+## 때만 나온다 - main.gd가 이걸 보고 "먼저 밭을 갈아야 한다." 안내를 띄운다
+## (2026-08-12 사용자 지시). 이미 오늘 물을 준 칸도 "water"를 그대로 돌려준다
+## - 다시 줘도 막지 않되(사용자 지시), 실제 급수 횟수 중복 반영은
+## perform_water()에서 따로 막는다(하루 1번 성장 판정은 유지).
 func get_available_action(world_position: Vector2) -> String:
 	if _world_map == null or not _world_map.is_farmable_cell(world_position):
 		return ""
 	var cell := _world_to_cell(world_position)
 	var equipped := EquipmentManager.get_equipped(EquipmentManager.HAND_SLOT)
 	if not _plots.has(cell):
-		return "till" if equipped == "hoe" else ""
+		if equipped == "hoe":
+			return "till"
+		if equipped == "watering_can":
+			return "needs_till"
+		return ""
 	var plot: Dictionary = _plots[cell]
 	if _is_grown(plot):
 		return "harvest"
-	if equipped == "watering_can" and not bool(plot.get("watered_today", false)):
+	if equipped == "watering_can":
 		return "water"
 	if _seed_to_crop.has(equipped) and String(plot.get("crop_type", "")).is_empty():
 		return "plant"
@@ -99,13 +108,17 @@ func perform_till(world_position: Vector2) -> String:
 	return ""
 
 
+## 오늘 이미 물을 준 칸이어도 다시 물을 줄 수 있다(사용자 지시, 2026-08-12) -
+## 다만 성장에 반영되는 건 하루 첫 급수뿐이라, watered_count는 그 경우에만
+## 올린다(급수 무제한 반복으로 하루 만에 다 자라는 걸 막기 위한 기존 규칙 유지).
 func perform_water(world_position: Vector2) -> String:
 	if get_available_action(world_position) != "water":
 		return ""
 	var cell := _world_to_cell(world_position)
 	var plot: Dictionary = _plots[cell]
+	var first_watering_today := not bool(plot.get("watered_today", false))
 	plot["watered_today"] = true
-	if not String(plot.get("crop_type", "")).is_empty():
+	if first_watering_today and not String(plot.get("crop_type", "")).is_empty():
 		plot["watered_count"] = int(plot.get("watered_count", 0)) + 1
 	_update_plot_sprites(cell)
 	AudioManager.play_sfx(AudioManager.SFX_WATERING_CAN)

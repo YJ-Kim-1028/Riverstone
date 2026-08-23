@@ -47,7 +47,7 @@ autowrap_mode = 3
 horizontal_alignment = 1
 vertical_alignment = 1
 theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
-theme_override_font_sizes/font_size = 7
+theme_override_font_sizes/font_size = 6
 text = "잠에 드시겠습니까?"
 
 [node name="ButtonRow" type="HBoxContainer" parent="Panel/Margin/VBox"]
@@ -58,11 +58,11 @@ theme_override_constants/separation = 16
 [node name="YesButton" type="Button" parent="Panel/Margin/VBox/ButtonRow"]
 custom_minimum_size = Vector2(32, 16)
 layout_mode = 2
-theme_override_font_sizes/font_size = 7
+theme_override_font_sizes/font_size = 6
 text = "예"
 
 [node name="NoButton" type="Button" parent="Panel/Margin/VBox/ButtonRow"]
 custom_minimum_size = Vector2(32, 16)
 layout_mode = 2
-theme_override_font_sizes/font_size = 7
+theme_override_font_sizes/font_size = 6
 text = "아니오"

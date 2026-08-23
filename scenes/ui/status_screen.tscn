@@ -12,6 +12,9 @@
 [ext_resource type="Texture2D" path="res://assets/ui/icon_equipment_hover.png" id="9_equipment_hover"]
 [ext_resource type="Texture2D" path="res://assets/ui/icon_affection_hover.png" id="10_affection_hover"]
 [ext_resource type="Texture2D" path="res://assets/ui/icon_settings_hover.png" id="11_settings_hover"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_end.png" id="13_end_icon"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_end_hover.png" id="14_end_hover"]
+[ext_resource type="PackedScene" path="res://scenes/ui/quit_confirm_popup.tscn" id="15_quit_popup"]
 
 [node name="StatusScreen" type="Control"]
 anchor_left = 0.5
@@ -78,12 +81,12 @@ layout_mode = 1
 layout_mode = 1
 
 [node name="TabButtons" type="VBoxContainer" parent="Background/Margin/HBox"]
-custom_minimum_size = Vector2(40, 0)
+custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 3
 
 [node name="EquipmentTabButton" type="TextureButton" parent="Background/Margin/HBox/TabButtons"]
-custom_minimum_size = Vector2(28, 28)
+custom_minimum_size = Vector2(20, 20)
 layout_mode = 2
 ignore_texture_size = true
 stretch_mode = 5
@@ -91,7 +94,7 @@ texture_normal = ExtResource("6_equipment_icon")
 texture_hover = ExtResource("9_equipment_hover")
 
 [node name="AffectionTabButton" type="TextureButton" parent="Background/Margin/HBox/TabButtons"]
-custom_minimum_size = Vector2(28, 28)
+custom_minimum_size = Vector2(20, 20)
 layout_mode = 2
 ignore_texture_size = true
 stretch_mode = 5
@@ -99,9 +102,19 @@ texture_normal = ExtResource("7_affection_icon")
 texture_hover = ExtResource("10_affection_hover")
 
 [node name="SettingsTabButton" type="TextureButton" parent="Background/Margin/HBox/TabButtons"]
-custom_minimum_size = Vector2(28, 28)
+custom_minimum_size = Vector2(20, 20)
 layout_mode = 2
 ignore_texture_size = true
 stretch_mode = 5
 texture_normal = ExtResource("8_settings_icon")
 texture_hover = ExtResource("11_settings_hover")
+
+[node name="EndTabButton" type="TextureButton" parent="Background/Margin/HBox/TabButtons"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("13_end_icon")
+texture_hover = ExtResource("14_end_hover")
+
+[node name="QuitConfirmPopup" parent="." instance=ExtResource("15_quit_popup")]
