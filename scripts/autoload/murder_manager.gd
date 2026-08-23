@@ -154,6 +154,16 @@ func get_case_count() -> int:
 	return _cases.size()
 
 
+## 사칭 이메일 등 "이 NPC가 몇 번째로 죽었는지"가 필요한 곳에서 쓴다 -
+## _cases에 기록된 순서(스토커 살인 + 플레이어 독살 전부 포함) 기준
+## 1부터 시작, 못 찾으면 0(horror_event_manager.gd 참고).
+func get_case_number_for_victim(npc_id: String) -> int:
+	for i in _cases.size():
+		if String(_cases[i].get("victim_id", "")) == npc_id:
+			return i + 1
+	return 0
+
+
 func get_case_info(case_number: int) -> Dictionary:
 	if case_number < 1 or case_number > _cases.size():
 		return {}
