@@ -175,11 +175,11 @@ func consume_alibi_line(npc_id: String) -> String:
 	if npc_id == NPCManager.get_stalker_id():
 		var lie := _stalker_alibi_lie()
 		if not lie.is_empty():
-			return "그날 오후 6시엔 %s에 있었어." % lie
+			return "난 그 날 오후 6시엔 %s에 있었어." % lie
 	var alibis: Dictionary = _cases[_cases.size() - 1].get("alibis", {})
 	if not alibis.has(npc_id):
 		return "그날 밤 어디 있었는지는... 나도 잘 기억이 안 나."
-	return "그날 오후 6시엔 %s에 있었어." % _describe_location(String(alibis[npc_id]))
+	return "난 그 날 오후 6시엔 %s에 있었어." % _describe_location(String(alibis[npc_id]))
 
 
 ## 스토커(어셔)의 거짓 알리바이(사용자 지시, 2026-08-17) - 실제 스케줄과 무관하게

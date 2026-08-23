@@ -74,12 +74,23 @@ var _definitions: Dictionary = {}
 var _affection: Dictionary = {}
 var _alive: Dictionary = {}
 var _completed_events: Dictionary = {}
-## npc_id -> {"threshold": int, "is_memento": bool} - 호감도 임계값을 넘긴
-## affection_event를 아직 실제로 보여주지 않은 상태. consume_pending_milestone()
-## 참고 - 2026-08-16 사용자 리포트: 예전엔 임계값 넘는 순간 대사 없이 바로
-## 추억의 물건이 가방에 들어갔음(대사를 실제로 본 뒤에 받아야 함).
+## npc_id -> [int, ...] - completed_events와 달리 "실제로 화면에 뜬" 임계값만
+## 기록한다(has_shown_event() 참고). affection_events의 "requires" 필드로 다른
+## NPC의 이벤트를 선행 조건으로 걸 때 이걸로 판정한다 - completed_events는
+## 대사를 보여주기도 전에 대기열에 등록되는 순간 채워져서 이 용도로는 못 씀.
+var _shown_events: Dictionary = {}
+## npc_id -> [{"threshold": int, "is_memento": bool}, ...] - 호감도 임계값을
+## 넘긴 affection_event 중 아직 실제로 보여주지 않은 것들의 대기열(FIFO).
+## consume_pending_milestone() 참고 - 2026-08-16 사용자 리포트: 예전엔 임계값
+## 넘는 순간 대사 없이 바로 추억의 물건이 가방에 들어갔음(대사를 실제로 본
+## 뒤에 받아야 함). 2026-08-23: 큰 폭의 호감도 상승 한 번으로 임계값 두 개를
+## 동시에 넘기면(예: 100 추억의 물건 + 105 불안 신호) 단일 Dictionary로는
+## 나중 것이 먼저 것을 덮어써서 하나가 통째로 씹혔음 - 배열 대기열로 바꿔서
+## 넘은 순서 그대로 하나씩 소비되게 함.
 var _pending_milestone: Dictionary = {}
 var _murder_candidate_flagged: Dictionary = {}
+## npc_id -> bool - PARTNER_DEATH_PAIRS 참고, get_daily_dialogue()가 채운다.
+var _partner_death_reaction_shown: Dictionary = {}
 var _dead_npc_ids: Array[String] = []
 var _death_days: Dictionary = {}
 var _last_daily_dialogue_index: Dictionary = {}
@@ -87,6 +98,13 @@ var _talked_today: Dictionary = {}
 var _spawn_index: Dictionary = {}
 var _pending_scent: Dictionary = {}
 var _active_scent: Dictionary = {}
+## 2026-08-23 사용자 지시: 플레이어가 선물 안 해도 모카/플로라는 가끔 자기가
+## 알아서 향수를 뿌린 채로 나온다 - 두 사람만 해당, 매일 밤 자정에 확률
+## 판정(_on_day_changed 참고). 이미 그날 선물로 향을 받았으면(=_active_scent에
+## 이미 값이 있으면) 건드리지 않는다.
+const SELF_SCENT_NPC_IDS := ["mocha", "flora"]
+const SELF_SCENT_CHANCE := 0.05
+const SELF_SCENT_COLORS := ["blue", "purple", "white"]
 ## npc_id -> {"map_id": String, "position": Vector2} - 실제로 걸어서 정확히
 ## 그 좌표에 도착해 확정된(걷는 중이 아닌) 위치. get_npc_world_position()은
 ## 스케줄이 가리키는 위치를 즉시 반환하지만, 다구간 이동은 물론 같은 맵 안
@@ -105,6 +123,7 @@ func _ready() -> void:
 		_affection[npc_id] = 0
 		_alive[npc_id] = true
 		_completed_events[npc_id] = []
+		_shown_events[npc_id] = []
 		_murder_candidate_flagged[npc_id] = false
 	TimeManager.day_changed.connect(_on_day_changed)
 
@@ -342,6 +361,11 @@ func get_affection_tier(npc_id: String) -> String:
 ## entry twice in a row when the pool has more than one option.
 const SAGE_NPC_ID := "sage"
 const POLI_NPC_ID := "poli"
+## 셰퍼드/모카 불륜 관계 - get_daily_dialogue()의 partner_death_reaction 참고.
+const PARTNER_DEATH_PAIRS := {
+	"shepherd": "mocha",
+	"mocha": "shepherd",
+}
 
 ## 상점이 없는 스토리 NPC(폴리/세이지/라마)의 "자기 공간"(사용자 리포트,
 ## 2026-08-17: "폴리 세이지도 자기 경찰서랑 신사 있는데?") - ShopManager엔
@@ -373,8 +397,9 @@ func get_daily_dialogue(npc_id: String) -> Array:
 	## NPC(STORY_NPC_HOME_MAP) 둘 다 커버. 그래도 못 찾으면(향후 추가 NPC
 	## 누락 등) 위치 조건 자체를 안 걸고 예전처럼 바로 터진다 - 영원히 못
 	## 받는 상태를 막기 위한 안전장치.
-	if _pending_milestone.has(npc_id):
-		var pending: Dictionary = _pending_milestone[npc_id]
+	var pending_queue: Array = _pending_milestone.get(npc_id, [])
+	if not pending_queue.is_empty():
+		var pending: Dictionary = pending_queue[0]
 		var threshold := int(pending.get("threshold", -1))
 		var is_memento := bool(pending.get("is_memento", false))
 		var owned_space_map := get_owned_space_map_id(npc_id)
@@ -432,12 +457,15 @@ func get_daily_dialogue(npc_id: String) -> Array:
 		EmailManager.clear_pending_mail_reaction(npc_id)
 	var picked: Array = pool[index]
 	## murder_system.md 경찰 조사 - 살인 후 5일 이내 이 NPC와 처음 나누는
-	## 대화라면, 오늘의 잡담 앞에 알리바이 한 줄을 강제로 끼워 넣는다
-	## (MurderManager.consume_alibi_line() 참고, 한 번 나오면 다시 안 나옴).
-	## 목격 진술(consume_witness_line())도 선택 없이 곧바로 이어서 보여준다 -
-	## 플레이어가 놓칠 수 있는 선택지로 만들지 않는다(사용자 지시, 2026-08-17:
-	## "무조건 보게 만들거라"). 스토커의 거짓 알리바이가 나온 경우에만
-	## corroboration_line(가짜 뒷받침 근거)이 알리바이 바로 다음에 붙는다.
+	## 대화는 그 자체로 애도+알리바이 대화여야 한다(사용자 지시, 2026-08-23 -
+	## "살인 일어난 후 바로 다음 대화는 알리바이와 애도여야 할 거 같아").
+	## 그래서 오늘의 평소 잡담(picked)은 아예 안 섞고 이 대화를 통째로
+	## 대체한다. 순서: (있으면) 애도 대사(story_dialogue.murder_grief) →
+	## 알리바이 한 줄(MurderManager.consume_alibi_line(), 한 번 나오면 다시 안
+	## 나옴) → (스토커의 거짓 알리바이인 경우만) corroboration_line → 목격
+	## 진술(consume_witness_line()). 목격 진술/뒷받침도 선택 없이 곧바로 이어서
+	## 보여준다 - 플레이어가 놓칠 수 있는 선택지로 만들지 않는다(사용자 지시,
+	## 2026-08-17: "무조건 보게 만들거라").
 	var alibi_line := MurderManager.consume_alibi_line(npc_id)
 	if not alibi_line.is_empty():
 		## 폴리는 이 "살인 후 첫 재회" 순간, 첫 번째 살인에 한해 일반 알리바이
@@ -449,15 +477,31 @@ func get_daily_dialogue(npc_id: String) -> Array:
 		if npc_id == POLI_NPC_ID and MurderManager.get_murder_count() == 1:
 			var confession: Array = get_definition(npc_id).get("story_dialogue", {}).get("first_murder_occurred", {}).get("lines", [])
 			if not confession.is_empty():
-				return confession.duplicate() + picked
-		var lines: Array = [alibi_line]
+				return confession.duplicate()
+		var lines: Array = []
+		var grief_lines: Array = get_definition(npc_id).get("story_dialogue", {}).get("murder_grief", [])
+		if not grief_lines.is_empty():
+			lines.append_array(grief_lines.duplicate())
+		lines.append(alibi_line)
 		var corroboration_line := MurderManager.consume_stalker_corroboration_line(npc_id)
 		if not corroboration_line.is_empty():
 			lines.append(corroboration_line)
 		var witness_line := MurderManager.consume_witness_line(npc_id)
 		if not witness_line.is_empty():
 			lines.append(witness_line)
-		return lines + picked
+		return lines
+	## 셰퍼드/모카는 서로 불륜 상대다(shepherd.json/mocha.json special_notes) -
+	## 둘 중 한쪽이 살해당하면, 남은 쪽에게는 위 애도+알리바이 대화 다음번
+	## 재회 때 한정으로 한 번 더 특별한 반응을 보여준다(사용자 지시,
+	## 2026-08-23). PARTNER_DEATH_PAIRS에 없는 NPC나 상대가 죽지 않았으면
+	## 그냥 무시하고 평소 잡담으로 넘어간다.
+	if PARTNER_DEATH_PAIRS.has(npc_id):
+		var partner_id: String = PARTNER_DEATH_PAIRS[npc_id]
+		if not is_alive(partner_id) and not bool(_partner_death_reaction_shown.get(npc_id, false)):
+			var reaction: Array = get_definition(npc_id).get("story_dialogue", {}).get("partner_death_reaction", [])
+			if not reaction.is_empty():
+				_partner_death_reaction_shown[npc_id] = true
+				return reaction.duplicate()
 	return picked
 
 
@@ -750,11 +794,13 @@ func get_save_data() -> Dictionary:
 			"completed_events": (_completed_events.get(npc_id, []) as Array).duplicate(),
 			"memento_received": has_completed_event(npc_id, MEMENTO_AFFECTION),
 			"murder_candidate_flagged": bool(_murder_candidate_flagged.get(npc_id, false)),
+			"partner_death_reaction_shown": bool(_partner_death_reaction_shown.get(npc_id, false)),
 			"talked_today": has_talked_today(npc_id),
 			"current_position": _serialize_position(npc_id),
 			"death_day": get_death_day(npc_id),
 			"scent_color": get_scent_color(npc_id),
-			"pending_milestone": (_pending_milestone.get(npc_id, {}) as Dictionary).duplicate(),
+			"pending_milestone": (_pending_milestone.get(npc_id, []) as Array).duplicate(true),
+			"shown_events": (_shown_events.get(npc_id, []) as Array).duplicate(),
 		}
 	return {
 		"npc_states": npc_states,
@@ -772,7 +818,14 @@ func load_save_data(data: Dictionary) -> void:
 		for threshold in (state.get("completed_events", []) as Array):
 			completed.append(int(threshold))
 		_completed_events[npc_id] = completed
+		## 이 필드가 없던 세이브(2026-08-23 이전)는 빈 배열로 취급 - requires
+		## 게이팅이 걸린 이벤트가 있으면 다시 조건을 만족할 때 자연스럽게 뜬다.
+		var shown: Array = []
+		for threshold in (state.get("shown_events", []) as Array):
+			shown.append(int(threshold))
+		_shown_events[npc_id] = shown
 		_murder_candidate_flagged[npc_id] = bool(state.get("murder_candidate_flagged", false))
+		_partner_death_reaction_shown[npc_id] = bool(state.get("partner_death_reaction_shown", false))
 		_talked_today[npc_id] = bool(state.get("talked_today", false))
 		var death_day := int(state.get("death_day", -1))
 		if death_day >= 0:
@@ -780,9 +833,17 @@ func load_save_data(data: Dictionary) -> void:
 		var scent_color := String(state.get("scent_color", ""))
 		if not scent_color.is_empty():
 			_active_scent[npc_id] = scent_color
-		var pending: Dictionary = state.get("pending_milestone", {})
-		if not pending.is_empty():
-			_pending_milestone[npc_id] = pending.duplicate()
+		## 큐 도입 전 세이브(2026-08-23 이전)는 이 필드가 단일 Dictionary였음 -
+		## 예전 세이브를 불러와도 죽지 않게 배열로 감싸서 받아들인다.
+		var pending_raw: Variant = state.get("pending_milestone", [])
+		var pending_queue: Array = []
+		if pending_raw is Array:
+			for entry in pending_raw:
+				pending_queue.append((entry as Dictionary).duplicate())
+		elif pending_raw is Dictionary and not (pending_raw as Dictionary).is_empty():
+			pending_queue.append((pending_raw as Dictionary).duplicate())
+		if not pending_queue.is_empty():
+			_pending_milestone[npc_id] = pending_queue
 	_dead_npc_ids.clear()
 	for npc_id in data.get("dead_npc_ids", []):
 		_dead_npc_ids.append(String(npc_id))
@@ -826,29 +887,64 @@ func _affection_tier_rank(tier: String) -> int:
 ## 실제 신호(affection_event_triggered/memento_received)와 추억의 물건 지급은
 ## 아직 안 한다 - NPCManager.consume_pending_milestone()이 그 대사가 실제로
 ## 화면에 뜰 때(get_daily_dialogue()가 골라 보여줄 때) 대신 내보낸다.
+## 2026-08-23: 이벤트가 다른 NPC의 이벤트를 먼저 봐야 열리는 경우("requires":
+## {"npc_id": ..., "threshold": ...})를 지원한다 - 선행 조건이 아직 실제로
+## 화면에 뜨지 않았으면(has_shown_event) completed 처리를 미루고 다음 기회에
+## 다시 검사한다(예: 이 NPC 호감도가 먼저 임계값을 넘고 선행 대사는 나중에
+## 보는 순서라도 놓치지 않게, consume_pending_milestone()이 _recheck_gated_events()
+## 로 다른 NPC들을 재검사해준다).
 func _check_affection_events(npc_id: String, affection: int) -> void:
 	var completed: Array = _completed_events.get(npc_id, [])
 	for event in get_definition(npc_id).get("affection_events", []):
 		var threshold := int(event.get("threshold", -1))
-		if affection >= threshold and not completed.has(threshold):
-			completed.append(threshold)
-			_completed_events[npc_id] = completed
-			_pending_milestone[npc_id] = {"threshold": threshold, "is_memento": String(event.get("type", "")) == "memento"}
+		if affection < threshold or completed.has(threshold):
+			continue
+		var requires: Dictionary = event.get("requires", {})
+		if not requires.is_empty():
+			var required_npc_id := String(requires.get("npc_id", ""))
+			var required_threshold := int(requires.get("threshold", -1))
+			if not has_shown_event(required_npc_id, required_threshold):
+				continue
+		completed.append(threshold)
+		_completed_events[npc_id] = completed
+		var queue: Array = _pending_milestone.get(npc_id, [])
+		queue.append({"threshold": threshold, "is_memento": String(event.get("type", "")) == "memento"})
+		_pending_milestone[npc_id] = queue
+
+
+func has_shown_event(npc_id: String, threshold: int) -> bool:
+	return (_shown_events.get(npc_id, []) as Array).has(threshold)
 
 
 ## get_daily_dialogue()가 대기 중인 마일스톤 대사를 실제로 보여주기로 결정한
 ## 순간 호출한다 - 그때서야 신호를 내보내고(추억의 물건이면 지급도 그때).
 func consume_pending_milestone(npc_id: String) -> void:
-	if not _pending_milestone.has(npc_id):
+	var queue: Array = _pending_milestone.get(npc_id, [])
+	if queue.is_empty():
 		return
-	var pending: Dictionary = _pending_milestone[npc_id]
-	_pending_milestone.erase(npc_id)
+	var pending: Dictionary = queue.pop_front()
+	if queue.is_empty():
+		_pending_milestone.erase(npc_id)
+	else:
+		_pending_milestone[npc_id] = queue
 	var threshold := int(pending.get("threshold", -1))
+	var shown: Array = _shown_events.get(npc_id, [])
+	shown.append(threshold)
+	_shown_events[npc_id] = shown
 	affection_event_triggered.emit(npc_id, threshold)
 	if bool(pending.get("is_memento", false)):
 		memento_received.emit(npc_id)
 		# 웃음: 추억의 물건 건넬 때.
 		request_emote(npc_id, EMOTE_SMILE)
+	_recheck_gated_events()
+
+
+## requires로 다른 NPC의 이벤트를 기다리던 항목들을 다시 검사한다 - 방금 막
+## 화면에 뜬 이벤트가 다른 누군가의 선행 조건이었을 수 있으니, 그쪽 호감도가
+## 이미 오래 전에 임계값을 넘어서 대기만 하고 있던 경우를 놓치지 않게 한다.
+func _recheck_gated_events() -> void:
+	for other_id in _definitions:
+		_check_affection_events(other_id, get_affection(other_id))
 
 
 ## 호감도 임계값이 아니라 특정 dialogue.daily 대사 줄이 실제로 화면에 나왔을 때
@@ -864,6 +960,11 @@ func _on_day_changed(_day: int, _weekday: String) -> void:
 	_talked_today.clear()
 	_active_scent = _pending_scent.duplicate()
 	_pending_scent.clear()
+	for npc_id in SELF_SCENT_NPC_IDS:
+		if _active_scent.has(npc_id) or not is_alive(npc_id):
+			continue
+		if randf() < SELF_SCENT_CHANCE:
+			_active_scent[npc_id] = SELF_SCENT_COLORS[randi() % SELF_SCENT_COLORS.size()]
 
 
 func _serialize_position(npc_id: String) -> Dictionary:

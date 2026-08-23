@@ -79,9 +79,25 @@
                 "너만 괜찮다면 나중에 우리 이거로 연극해보지 않을래?",
                 "하하... 농담이야. 표정 풀어."
             ]
+        },
+        {
+            "threshold": 105,
+            "type": "dialogue",
+            "description": "창밖 시선을 느끼지만 농담으로 넘긴다.",
+            "lines": [
+                "요즘 늦은 새벽마다 수풀 소리가 자꾸 들려.",
+                "바람이 세게 부는 거겠지? 설마...",
+                {"text": "글 쓰는 거에 너무 몰입해서 상상력이 넘치나 봐. 하하, 무시 해도 돼.", "emotion": "happy"}
+            ]
         }
     ],
-    "story_dialogue": {},
+    "story_dialogue": {
+        "murder_grief": [
+            {"text": "마을에 이런 일이 생기다니, 믿기지가 않아.", "emotion": "sad"},
+            {"text": "다들 무섭다고 하는데... 나도 그래. 당연히 그렇지.", "emotion": "sad"},
+            {"text": "얼른 잡혔으면 좋겠다.", "emotion": "sad"}
+        ]
+    },
     "dialogue": {
         "daily": {
             "월": {

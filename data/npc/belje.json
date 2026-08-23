@@ -71,6 +71,16 @@
     },
     "affection_events": [
         {
+            "threshold": 80,
+            "type": "dialogue",
+            "description": "셰퍼드에 대한 의심을 잠깐 내비쳤다가 거둔다.",
+            "lines": [
+                "셰퍼드가 요즘 너무 다정해. 이상할 정도로.",
+                "사람이 갑자기 잘해주면, 뭔가 숨기고 있다는 뜻이잖아.",
+                "내가 사람을 별로 안 좋아해서, 너무 부정적으로 생각하나...?"
+            ]
+        },
+        {
             "threshold": 100,
             "type": "memento",
             "description": "소 인형을 건네준다.",
@@ -80,9 +90,25 @@
                 "그리고 있잖아.",
                 {"text": "난 네가 꽤 좋은 사람이 된 것 같아.", "emotion": "happy"}
             ]
+        },
+        {
+            "threshold": 105,
+            "type": "dialogue",
+            "description": "밤마다 소들이 이상하게 구는 걸 의아해한다.",
+            "lines": [
+                "요즘 새벽이 되면 축사에서 인기척이 느껴져. 처음엔 좀 무서웠는데 설마 사람은 아니겠지.",
+                "누가 올 사람이 없는데. 그치?",
+                "곡식 냄새를 맡고 들짐승들이 오나 봐."
+            ]
         }
     ],
-    "story_dialogue": {},
+    "story_dialogue": {
+        "murder_grief": [
+            {"text": "이런 일이 생기니까 다시 한번 느껴. 사람 속은 절대 알 수 없다는 거.", "emotion": "sad"},
+            {"text": "그래서 더 무서워. 누굴 믿어야 할지 모르겠어서.", "emotion": "sad"},
+            {"text": "...그래도, 너는 믿어. 그것만은 확실해.", "emotion": "sad"}
+        ]
+    },
     "dialogue": {
         "daily": {
             "월": {

@@ -86,6 +86,11 @@
         "player_poisoned_innocent_npc": [
             "너 해서는 안될 일을 했구나.",
             "네 곁에 아주 분노한 영혼이 하나 있어."
+        ],
+        "murder_grief": [
+            {"text": "...아직도 그 기운이 남아있어.", "emotion": "sad"},
+            {"text": "말로 설명하긴 어려운데.", "emotion": "sad"},
+            {"text": "조심해.", "emotion": "sad"}
         ]
     },
     "dialogue": {
