@@ -39,11 +39,13 @@ var cheek_color := "f4a6b3"
 var hair_color_1 := "d8d8d8"
 var hair_color_2 := "9a9a9a"
 var hair_color_3 := "565656"
-## 옷 시트에 표식으로 그려둔 색1/색2(#9A9A9A/#565656)를 사용자가 어떤
-## 색으로 바꿨는지 - "상의"/"하의"라는 UI 이름표가 붙어있지만 실제로는
-## 그림 속 부위가 아니라 이 마커 2개에 대응한다(사용자 확정).
-var outfit_color_1 := "9a9a9a"
-var outfit_color_2 := "565656"
+## 옷 시트에 표식으로 그려둔 색1/색2/색3(#D6D6D6/#A8A8A8/#727272, 2026-08-09
+## player_outfit.png 재작업으로 2색→3색)을 사용자가 어떤 색으로 바꿨는지 -
+## "상의"/"하의"/"포인트"라는 UI 이름표가 붙어있지만 실제로는 그림 속 부위가
+## 아니라 이 마커 3개에 대응한다(사용자 확정).
+var outfit_color_1 := "d6d6d6"
+var outfit_color_2 := "a8a8a8"
+var outfit_color_3 := "727272"
 ## 신발 시트(player_shoes.png)에 그려둔 마커(#9A9A9A) 색.
 var shoe_color := "9a9a9a"
 ## 장신구 시트(player_accessory.png)에 그려둔 마커(#9A9A9A) 색.
@@ -79,16 +81,12 @@ func start_play_timer() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F11:
 		_toggle_fullscreen()
-	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F8:
-		_debug_give_test_equipment()
 	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F9:
 		_debug_give_test_ingredients()
-	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F10:
-		_debug_open_restaurant_with_guests()
-	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F12:
-		_debug_give_test_emails()
 	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F7:
 		_debug_give_test_storage_boxes()
+	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F4:
+		_debug_queue_murder_candidates()
 
 
 func _toggle_fullscreen() -> void:
@@ -97,15 +95,6 @@ func _toggle_fullscreen() -> void:
 		window.mode = Window.MODE_WINDOWED
 	else:
 		window.mode = Window.MODE_FULLSCREEN
-
-
-## Debug-only (F8, editor/debug builds only): gives the fishing_rod so the
-## 상태창 장비 탭 "손" 슬롯 drag-to-equip flow와 낚시 시스템을 바로 테스트할
-## 수 있다. 원래는 test_hat/test_shoes를 줬음(여전히 data/items/items.json에
-## 있는 placeholder 아이템 - 모자/신발 슬롯 테스트가 다시 필요하면 그때
-## add_item으로 넣으면 됨).
-func _debug_give_test_equipment() -> void:
-	InventoryManager.add_item("fishing_rod", 1)
 
 
 ## Debug-only (F9, editor/debug builds only): fills the inventory with a
@@ -119,33 +108,24 @@ func _debug_give_test_ingredients() -> void:
 	InventoryManager.add_item("rat_poison", 1)
 
 
-## Debug-only (F10, editor/debug builds only): force-opens the restaurant and
-## seats an NPC at every cooking station, since cook_and_serve() refuses to
-## work at a station with nobody sitting there - without this, testing the
-## cooking screen requires waiting for a real customer to be seated.
-func _debug_open_restaurant_with_guests() -> void:
-	RestaurantManager.is_open = true
-	var npc_ids := NPCManager.get_all_ids()
-	for i in RestaurantManager.STATION_COUNT:
-		if i < npc_ids.size():
-			RestaurantManager._seat_npc(i, npc_ids[i])
-
-
-## Debug-only (F12, editor/debug builds only): drops 5 test emails straight
-## into the inbox so the mail app's 수신함 list can be tested without waiting
-## on the (still-placeholder) daily auto-send logic to actually fire one.
-func _debug_give_test_emails() -> void:
-	var npc_ids := NPCManager.get_all_ids()
-	for i in range(min(5, npc_ids.size())):
-		var npc_id: String = npc_ids[i]
-		EmailManager._add_mail(npc_id, "greeting", "테스트 메일 %d" % (i + 1), ["테스트용 내용입니다."])
-
-
 ## Debug-only (F7, editor/debug builds only): 상점 구매 없이 바로 설치 흐름을
 ## 테스트할 수 있게 보관함 3개를 인벤토리에 지급한다(F8의 낚싯대 지급과 동일한
 ## 목적).
 func _debug_give_test_storage_boxes() -> void:
 	InventoryManager.add_item("storage_box", 3)
+
+
+## Debug-only (F4, editor/debug builds only): murder_system.md 테스트용 -
+## 스토리 NPC/스토커를 제외한 살아있는 NPC 전원의 호감도를 120(MURDER_CANDIDATE_AFFECTION)
+## 으로 끌어올려 살해 대상 대기열에 한 번에 등록한다. 그 이후 조건(비/오후10시/
+## 플레이어·스토커·피해자 맵 분리)은 정상 플레이와 동일하게 자연 발생을
+## 기다려야 한다 - 비는 대기 중인 대상이 있으면 3일 이내 강제로 오게 되어
+## 있어서(WeatherManager.set_murder_pending) 오래 걸리진 않는다.
+func _debug_queue_murder_candidates() -> void:
+	for npc_id in NPCManager.get_all_ids():
+		if not NPCManager.is_alive(npc_id) or NPCManager.is_story_npc(npc_id) or NPCManager.is_stalker(npc_id):
+			continue
+		NPCManager.debug_set_affection(npc_id, NPCManager.MURDER_CANDIDATE_AFFECTION)
 
 
 func set_current_map(map_id: String) -> void:
@@ -170,6 +150,7 @@ func get_save_data() -> Dictionary:
 		"cheek_color": cheek_color,
 		"outfit_color_1": outfit_color_1,
 		"outfit_color_2": outfit_color_2,
+		"outfit_color_3": outfit_color_3,
 		"shoe_color": shoe_color,
 		"accessory_color": accessory_color,
 		"outfit_id": outfit_id,
@@ -190,8 +171,9 @@ func load_save_data(data: Dictionary) -> void:
 	skin_color = String(data.get("skin_color", "f8e7da"))
 	eye_color = String(data.get("eye_color", "38b57a"))
 	cheek_color = String(data.get("cheek_color", "f4a6b3"))
-	outfit_color_1 = String(data.get("outfit_color_1", "9a9a9a"))
-	outfit_color_2 = String(data.get("outfit_color_2", "565656"))
+	outfit_color_1 = String(data.get("outfit_color_1", "d6d6d6"))
+	outfit_color_2 = String(data.get("outfit_color_2", "a8a8a8"))
+	outfit_color_3 = String(data.get("outfit_color_3", "727272"))
 	shoe_color = String(data.get("shoe_color", "9a9a9a"))
 	accessory_color = String(data.get("accessory_color", "9a9a9a"))
 	outfit_id = String(data.get("outfit_id", ""))

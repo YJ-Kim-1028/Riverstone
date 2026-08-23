@@ -14,7 +14,6 @@ const FEET_MARGIN := 8.0
 const PREVIEW_SCALE := 1.8
 
 var _body_texture: Texture2D = null
-var _shoe_texture: Texture2D = null
 var _outfit_texture: Texture2D = null
 var _hair_texture: Texture2D = null
 var _accessory_texture: Texture2D = null
@@ -22,10 +21,10 @@ var _accessory_texture: Texture2D = null
 
 ## 각 텍스처는 이미 프레임 하나(16x32, region (0,0,16,32) = 정면 정지)로
 ## 잘라진 AtlasTexture를 넘겨받는다 - 자르는 건 호출부(character_creation_screen.gd)
-## 책임이다.
-func set_layers(body: Texture2D, shoe: Texture2D, outfit: Texture2D, hair: Texture2D, accessory: Texture2D) -> void:
+## 책임이다. 신발은 더 이상 별도 레이어가 아니다 - outfit 그림에 이미 신발이
+## 그려져 있어서(사용자 지시, 2026-08-10) 따로 합성하면 덮어씌워짐.
+func set_layers(body: Texture2D, outfit: Texture2D, hair: Texture2D, accessory: Texture2D) -> void:
 	_body_texture = body
-	_shoe_texture = shoe
 	_outfit_texture = outfit
 	_hair_texture = hair
 	_accessory_texture = accessory
@@ -37,8 +36,8 @@ func _draw() -> void:
 	var feet := Vector2(size.x / 2.0, size.y - FEET_MARGIN)
 	var dest := Rect2(feet + Vector2(-draw_size.x / 2.0, -draw_size.y), draw_size)
 	var region := Rect2(0, 0, FRAME_WIDTH, FRAME_HEIGHT)
-	# 순서 중요: 몸(맨살) -> 신발(발) -> 옷(다리까지 덮음) -> 머리 -> 장신구,
+	# 순서 중요: 몸(맨살) -> 옷(신발까지 포함해서 다리를 덮음) -> 머리 -> 장신구,
 	# 나중에 그릴수록 위에 겹쳐 보인다.
-	for texture in [_body_texture, _shoe_texture, _outfit_texture, _hair_texture, _accessory_texture]:
+	for texture in [_body_texture, _outfit_texture, _hair_texture, _accessory_texture]:
 		if texture != null:
 			draw_texture_rect_region(texture, dest, region)
