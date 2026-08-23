@@ -202,6 +202,14 @@ func get_todays_visitor_ids() -> Array:
 	return _todays_visitors.duplicate()
 
 
+## email_manager.gd의 event_invite 메일 전용 - "오늘 방문한 사람 전원"이 아니라
+## 플레이어가 실제로 invite_npc()로 초대한 그 한 명만 반환한다(빈 문자열 =
+## 오늘 초대한 사람 없음). get_todays_visitor_ids()와 혼동하지 말 것 - 그건
+## 무작위로 뽑힌 일반 손님까지 다 포함한다.
+func get_todays_invited_npc_id() -> String:
+	return _todays_invited_npc_id
+
+
 ## 로시처럼 오늘 스케줄상 안 보이는 NPC라도, 플레이어가 직접 초대하면 예외적
 ## 으로 온다(사용자 확정) - _generate_daily_visitors()의 무작위 후보 필터링과
 ## 달리 초대는 "안 오는데 왜 안 오지?" 하고 플레이어가 헷갈리면 안 되는

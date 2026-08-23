@@ -220,7 +220,7 @@ func _generate_daily_emails() -> void:
 		_maybe_send_story_progress(npc_id)
 		if gifted_yesterday.has(npc_id):
 			_maybe_send_category(npc_id, "gift_thanks", 1.0)
-		elif RestaurantManager.get_todays_visitor_ids().has(npc_id):
+		elif npc_id == RestaurantManager.get_todays_invited_npc_id():
 			_maybe_send_category(npc_id, "event_invite", EVENT_INVITE_CHANCE_PER_DAY, favorite_food_served_yesterday.has(npc_id))
 		elif NPCManager.get_affection(npc_id) >= GREETING_AFFECTION_THRESHOLD and _is_greeting_off_cooldown(npc_id):
 			greeting_candidates.append(npc_id)
