@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="16" height="17" tilewidth="16" tileheight="16" infinite="0" nextlayerid="12" nextobjectid="25">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="16" height="17" tilewidth="16" tileheight="16" infinite="0" nextlayerid="12" nextobjectid="27">
  <tileset firstgid="1" source="gg.tsx"/>
  <tileset firstgid="257" source="buildings.tsx"/>
  <tileset firstgid="1281" source="deco_col.tsx"/>
@@ -191,6 +191,7 @@
   <object id="4" name="plaza5_enterance_plaza4" x="224" y="216"/>
   <object id="5" name="plaza5_standing" x="55" y="215.5"/>
   <object id="6" name="shrine_standing_next" x="183.5" y="86.5"/>
+  <object id="26" name="shadow_figure_plaza5" x="240" y="32"/>
  </objectgroup>
  <objectgroup id="11" name="YSortAnchor" visible="0" locked="1">
   <object id="7" name="light1" x="64" y="64" width="16" height="64">
