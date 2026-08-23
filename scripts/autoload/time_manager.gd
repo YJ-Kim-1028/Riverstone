@@ -20,7 +20,7 @@ const DAY_START_HOUR := 9
 const DAY_END_HOUR := 24
 const RESTAURANT_OPEN_HOUR := 10
 const RESTAURANT_CLOSE_HOUR := 16
-const NIGHT_EVENT_HOUR := 22
+const NIGHT_EVENT_HOUR := 21
 const SECONDS_PER_GAME_MINUTE := 1.0
 const WEEKDAY_NAMES: Array[String] = ["월", "화", "수", "목", "금", "토", "일"]
 

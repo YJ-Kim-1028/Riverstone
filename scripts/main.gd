@@ -105,8 +105,22 @@ const RESTAURANT_SIGN_CLOSE_TEXTURE := preload("res://assets/ui/sign_close.png")
 ## 위에 겹쳐 놓은 오버레이. RestaurantSign과 같은 방식으로 world_map 하위에
 ## 미리 배치해두고, 살인 발생 후 첫 입장 때만 색을 빨갛게 튀겼다 되돌린다.
 @onready var _restaurant_frame_blood: ColorRect = get_node_or_null("HomeMap/RestaurantFrameBlood") as ColorRect
-const RESTAURANT_FRAME_CELL := Vector2i(15, 2)
-const RESTAURANT_FRAME_BLOOD_COLOR := Color(0.6, 0.0, 0.0, 0.85)
+## _load_map()이 맵을 나갈 때 이 트윈을 강제로 죽이고 오버레이를 숨긴다
+## (사용자 리포트, 2026-08-24: "레스토랑에서 나갔는데도 핏자국이 보여" -
+## 애니메이션이 안 끝난 채로 맵을 나가면 다음 맵까지 계속 남아있었음).
+var _restaurant_frame_blood_tween: Tween = null
+## 2026-08-24: 하드코딩된 셀 좌표(15,2)가 입구에서 안 보이는 맵 반대쪽
+## 구석이었다는 사용자 리포트로, restaurant_interior_new.tmx의 "EffectArea"
+## 오브젝트 레이어(WorldMap.get_effect_area() 참고)에 이 이름으로 찍은
+## 영역을 쓰는 걸로 바꿨다(사용자 배치 예정) - 액자 실제 그림 크기만큼
+## 영역을 잡아서 오버레이가 액자 전체를 덮게 한다. 못 찾으면(아직 안
+## 찍었으면) 조용히 스킵한다(다른 사용자 제공 좌표들과 동일 패턴).
+const RESTAURANT_FRAME_AREA := "restaurant_frame_blood"
+## 2026-08-24: 절차적 얼룩 모양 셰이더를 시도했다가 "PPT 클립아트 같다"는
+## 피드백으로 폐기 - 대신 곱하기(Multiply) 블렌드로 실제 액자 그림 위에
+## 빨간 틴트만 씌운다(그림 자체가 빨갛게 변한 것처럼 보임, 새 그림 불필요).
+## 흰색(곱해도 원본 그대로)에서 이 색으로 갔다가 다시 흰색으로 돌아온다.
+const RESTAURANT_FRAME_BLOOD_TINT := Color(0.9, 0.1, 0.1, 1.0)
 const RESTAURANT_FRAME_BLOOD_IN_SECONDS := 0.15
 const RESTAURANT_FRAME_BLOOD_HOLD_SECONDS := 3.0
 const RESTAURANT_FRAME_BLOOD_OUT_SECONDS := 0.4
@@ -224,6 +238,8 @@ func _ready() -> void:
 	WallDecorManager.wall_decor_changed.connect(_on_decor_changed)
 	ShopManager.furniture_hammer_granted.connect(_on_furniture_hammer_granted)
 	FishingManager.fishing_ended.connect(_on_fishing_ended)
+	AudioManager.knock_sequence_finished.connect(_on_knock_sequence_finished)
+	TimeManager.day_changed.connect(_on_day_changed_clear_knock_check)
 	MurderManager.murder_occurred.connect(_on_murder_occurred)
 	_build_box_preview()
 	_build_furniture_preview()
@@ -322,6 +338,63 @@ const MURDER_DISCOVERY_AFTERMATH_DELAY_SECONDS := 2.5
 const SECOND_MURDER_SACK_SPAWN := "second_murder_sack_home"
 const SECOND_MURDER_DISCOVERY_TRIGGER := "second_murder_discovery"
 const SECOND_MURDER_POLI_OFFSET := Vector2(10, 4)
+## 자루를 확인한 직후 플레이어 혼잣말(사용자 작성, 2026-08-24) - NPC 대사가
+## 아니라 dialogue_screen.open_special("", ...)로 이름/초상화 없이 띄운다.
+const SECOND_MURDER_PLAYER_MONOLOGUE: Array[String] = [
+	"...뭐지?",
+	"이 자루, 왜 우리 집 앞에 있는 거지?",
+	"안에... 뭔가 들어있다.",
+	"설마...",
+	"일단... 신고부터 해야겠다.",
+]
+
+## 물귀신 가짜 입질(FishingManager.is_ghost_bite()) 직후 플레이어 혼잣말
+## (사용자 작성, 2026-08-24) - 씨름하는 듯한 반복 효과음이 뚝 끊긴 다음
+## 호러 사운드로 놀래킨 뒤 이 대사로 마무리한다.
+const GHOST_BITE_MONOLOGUE: Array[String] = [
+	"무언가가 낚시대를 거세게 잡아당겼다.",
+	"그러나 낚시대엔 아무것도 없다.",
+]
+
+## 노크 소리가 끝난 직후 플레이어 혼잣말(사용자 작성, 2026-08-24).
+const KNOCK_PLAYER_MONOLOGUE: Array[String] = [
+	"방금 무슨 소리지?",
+	"나가서 확인해볼까...?",
+]
+## 노크 이후 실제로 문을 열고 나가봤을 때(home_interior -> Home) 아무도
+## 없었다는 혼잣말(초안, 사용자 지시 2026-08-24 - "나가면 아무것도 없는거로").
+## 문구는 아직 확정 아님, 수정 환영.
+const KNOCK_CHECK_RESULT_MONOLOGUE: Array[String] = [
+	"...아무도 없다.",
+	"그냥 기분 탓이었나.",
+]
+
+## 정체를 밝히지 않는 그림자 인영(사용자 지시, 2026-08-24) - 스토커인지
+## 아닌지 확정하지 않는다. 1차 살인 이후, 스토커가 아직 살아있는 동안만
+## (스토커가 죽으면 이 이벤트도 저절로 끝남 - 사용자 지시) 지정된 맵에
+## 들어갈 때마다 낮은 확률로 스폰 지점에 조용히 서 있다가, 플레이어가
+## SHADOW_FIGURE_VANISH_DISTANCE 안으로 다가가면 그 자리에서 사라진다.
+## 처음엔 기존 NPCSprite를 검게 물들여 재사용했으나, 체형/머리 모양으로
+## 성별이 드러날 수 있다는 지적(사용자 리포트, 2026-08-24)으로 전용 그림
+## 한 장으로 바꿨다 - 가만히 서 있기만 하므로 정면 그림 한 장이면 충분(사용자
+## 확정). 파일 없으면 조용히 아무 일도 안 한다(다른 사용자 제공 에셋과 동일한
+## 관례). 스폰 지점은 사용자가 직접 각 맵의 Tiled Spawn 레이어에 찍어뒀다.
+const SHADOW_FIGURE_TEXTURE_PATH := "res://assets/img/shadow_figure.png"
+const SHADOW_FIGURE_SPAWN_NAMES := {
+	"Home": "shadow_figure_home",
+	"plaza1": "shadow_figure_plaza1",
+	"plaza4": "shadow_figure_plaza4",
+	"plaza5": "shadow_figure_plaza5",
+}
+const SHADOW_FIGURE_APPEAR_CHANCE := 0.2
+const SHADOW_FIGURE_VANISH_DISTANCE := 64.0
+
+var _shadow_figure_node: Sprite2D = null
+
+## 노크 이후 아직 문을 열고 나가보지 않은 상태 - main.gd._load_map()이
+## home_interior에서 Home으로 나갈 때 이 플래그를 보고 "아무도 없다" 반응을
+## 한 번 보여준 뒤 끈다.
+var _knock_check_pending := false
 
 ## MurderManager.murder_occurred - 살인 발생 시각(오후 10시)에 플레이어가 뭘
 ## 하고 있었든 강제로 끊고 들어가는 발견 씬(사용자 지시): 비명 → 지금 있는
@@ -361,6 +434,7 @@ func _on_murder_occurred(_victim_id: String, murder_number: int) -> void:
 	if poli_spawn != Vector2.INF:
 		scene_props = _spawn_murder_discovery_poli_decoy(poli_spawn)
 		await player.walk_to(poli_spawn)
+		AudioManager.play_sfx(AudioManager.SFX_MURDER_1)
 		if not scene_props.is_empty():
 			scene_props[0].call("show_emote", NPCManager.EMOTE_DEJECTED, MURDER_DISCOVERY_REACTION_DELAY_SECONDS)
 		await get_tree().create_timer(MURDER_DISCOVERY_REACTION_DELAY_SECONDS).timeout
@@ -383,32 +457,54 @@ func _on_murder_occurred(_victim_id: String, murder_number: int) -> void:
 ## 호출한다. 자루만 먼저 보여주고(플레이어가 직접 발견하는 순간) 잠깐 뒤에
 ## 암전 → 폴리가 도착한 걸로 처리(분신 배치) → 암전 해제 → 강제 대화 →
 ## 마무리, 순서는 1차 발견 씬과 동일하되 뛰어가는 구간이 없다.
-func _run_second_murder_discovery_scene() -> void:
-	_murder_scene_active = true
-	MurderManager.consume_second_murder_discovery_pending()
-	_close_all_screens()
-	AudioManager.play_sfx(AudioManager.SFX_SCREAM)
-	## 사용자 지시(2026-08-23): 시체가 있는 동안은 1차 발견 씬 때처럼 마을에
-	## 아무도 지나다니지 않는 게 맞다 - 자루가 보이기 전부터(씬 시작 즉시)
-	## 미리 전원 숨겨둔다.
-	_set_all_npc_sprites_hidden(true)
+##
+## 2단계로 나뉜다(사용자 지시, 2026-08-24 - "E 키로 상호작용해서 먼저
+## 확인하고 나왔으면 좋겠다"): 1단계(_spawn_second_murder_sack, _process()가
+## Home 입장을 감지해서 호출)는 자루만 조용히 세워두고 플레이어 조작은 그대로
+## 풀어둔다. 2단계(_continue_second_murder_discovery, _on_interact_pressed()가
+## 자루 옆에서 E를 감지하면 호출)에서만 실제로 암전/폴리 도착/강제 대화가
+## 진행된다. 시체가 있는 동안은 1차 발견 씬 때처럼 마을에 아무도 지나다니지
+## 않는 게 맞다는 지적이 있어서, NPC 숨김은 1단계(자루가 보이는 시점)부터
+## 걸어둔다.
+const SECOND_MURDER_SACK_INTERACT_RADIUS := 16.0
+var _second_murder_sack_awaiting_interaction := false
+var _second_murder_sack_node: Sprite2D = null
+var _second_murder_sack_position := Vector2.ZERO
+
+
+func _spawn_second_murder_sack() -> void:
 	var sack_spawn: Vector2 = world_map.get_spawn_position(SECOND_MURDER_SACK_SPAWN)
+	if sack_spawn == Vector2.INF or not ResourceLoader.exists(POLI_SACK_TEXTURE_PATH):
+		return
+	_set_all_npc_sprites_hidden(true)
+	var sack := Sprite2D.new()
+	sack.texture = load(POLI_SACK_TEXTURE_PATH)
+	sack.position = sack_spawn
+	world_map.add_child(sack)
+	_second_murder_sack_node = sack
+	_second_murder_sack_position = sack_spawn
+	_second_murder_sack_awaiting_interaction = true
+
+
+func _continue_second_murder_discovery() -> void:
+	_second_murder_sack_awaiting_interaction = false
+	_murder_scene_active = true
+	_close_all_screens()
+	AudioManager.play_sfx(AudioManager.SFX_FIND_BODY_2)
 	var scene_props: Array[Node2D] = []
-	if sack_spawn != Vector2.INF and ResourceLoader.exists(POLI_SACK_TEXTURE_PATH):
-		var sack := Sprite2D.new()
-		sack.texture = load(POLI_SACK_TEXTURE_PATH)
-		sack.position = sack_spawn
-		world_map.add_child(sack)
-		scene_props.append(sack)
+	if _second_murder_sack_node != null:
+		scene_props.append(_second_murder_sack_node)
+	if dialogue_screen != null:
+		dialogue_screen.open_special("", SECOND_MURDER_PLAYER_MONOLOGUE.duplicate())
+		await dialogue_screen.closed
 	await get_tree().create_timer(MURDER_DISCOVERY_REACTION_DELAY_SECONDS).timeout
 	await _fade_out()
-	if sack_spawn != Vector2.INF:
-		var poli_decoy := POLI_DECOY_SCENE.instantiate() as Node2D
-		world_map.add_child(poli_decoy)
-		poli_decoy.call("set_npc_id", MURDER_DISCOVERY_NPC_ID)
-		poli_decoy.call("snap_to", sack_spawn + SECOND_MURDER_POLI_OFFSET)
-		poli_decoy.call("face_down")
-		scene_props.append(poli_decoy)
+	var poli_decoy := POLI_DECOY_SCENE.instantiate() as Node2D
+	world_map.add_child(poli_decoy)
+	poli_decoy.call("set_npc_id", MURDER_DISCOVERY_NPC_ID)
+	poli_decoy.call("snap_to", _second_murder_sack_position + SECOND_MURDER_POLI_OFFSET)
+	poli_decoy.call("face_down")
+	scene_props.append(poli_decoy)
 	await _fade_in()
 	if dialogue_screen != null:
 		var trigger: Dictionary = NPCManager.get_definition(MURDER_DISCOVERY_NPC_ID).get("story_dialogue", {}).get(SECOND_MURDER_DISCOVERY_TRIGGER, {})
@@ -419,8 +515,10 @@ func _run_second_murder_discovery_scene() -> void:
 	await get_tree().create_timer(MURDER_DISCOVERY_AFTERMATH_DELAY_SECONDS).timeout
 	await _fade_out()
 	_cleanup_murder_discovery_scene_props(scene_props)
+	_second_murder_sack_node = null
 	_set_all_npc_sprites_hidden(false)
 	_murder_scene_active = false
+	MurderManager.consume_second_murder_discovery_pending()
 	await _fade_in()
 
 
@@ -476,8 +574,26 @@ func _close_all_screens() -> void:
 ## 낚시 사용 포즈(_on_interact_pressed의 FishingManager.start_fishing() 지점에서
 ## 켰음)를 입질 대기든 미니게임이든 낚싯줄이 완전히 걷힌 시점에 끈다 - 성공/실패/
 ## 취소(cancel_fishing()도 이 신호를 쏨, 2026-08-12) 전부 이 한 곳으로 모인다.
-func _on_fishing_ended(_result: Dictionary) -> void:
+func _on_fishing_ended(result: Dictionary) -> void:
 	player.tool_overlay.stop()
+	if bool(result.get("ghost", false)):
+		AudioManager.play_sfx(AudioManager.SFX_FIND_BODY_2)
+		if dialogue_screen != null:
+			dialogue_screen.open_special("", GHOST_BITE_MONOLOGUE.duplicate())
+
+
+func _on_knock_sequence_finished() -> void:
+	_knock_check_pending = true
+	if dialogue_screen != null:
+		dialogue_screen.open_special("", KNOCK_PLAYER_MONOLOGUE.duplicate())
+
+
+## 그 밤 안에 나가서 확인하지 않으면(잠들었든, 기절해서 병원에 실려갔든)
+## 하루가 지나 뜬금없이 반응이 뜨는 게 어색하다는 지적(사용자 리포트,
+## 2026-08-24)으로, 날짜가 바뀌면 그 밤의 "확인 대기" 자체를 없던 일로
+## 한다.
+func _on_day_changed_clear_knock_check(_day: int, _weekday: String) -> void:
+	_knock_check_pending = false
 
 
 ## UI 창이 하나라도 열려있는 동안의 마우스 클릭에 공통 클릭 효과음을 준다
@@ -543,34 +659,57 @@ func _update_restaurant_sign() -> void:
 
 
 ## RestaurantSign과 달리 이 오버레이는 벽에 평평하게 붙은 장식이라(플레이어
-## 앞뒤로 가려질 일이 없음) Y-sort 앵커 없이 타일 좌표를 그대로 픽셀로
-## 변환한다 - get_tile_sort_y()는 YSortAnchor가 정의된 칸에만 의미가 있다.
-## HorrorEventManager.consume_restaurant_frame_blood_trigger()가 참(=이번
-## 살인 건수에 대해 아직 안 보여줬음)일 때만 색을 튀긴다.
+## 앞뒤로 가려질 일이 없음) Y-sort 앵커가 필요 없다 - RESTAURANT_FRAME_SPAWN
+## 지점을 그대로 위치로 쓴다. HorrorEventManager.consume_restaurant_frame_blood_trigger()가
+## 참(=이번 살인 건수에 대해 아직 안 보여줬음)일 때만 색을 튀긴다.
 func _maybe_play_restaurant_frame_blood_effect() -> void:
 	if _restaurant_frame_blood == null or world_map == null:
 		return
+	## 영역을 아직 안 찍었으면 트리거 자체를 소비하지 않고 그대로 남겨둔다 -
+	## 나중에 찍고 나서도 다음 살인/리셋(F12) 때 정상 작동하게.
+	var frame_area: Rect2 = world_map.get_effect_area(RESTAURANT_FRAME_AREA)
+	if frame_area.position == Vector2.INF:
+		return
 	if not HorrorEventManager.consume_restaurant_frame_blood_trigger():
 		return
-	_restaurant_frame_blood.position = Vector2(RESTAURANT_FRAME_CELL) * 16.0
+	_restaurant_frame_blood.position = frame_area.position
+	_restaurant_frame_blood.size = frame_area.size
+	## 곱하기 블렌드로 실제 그림 위에 틴트만 씌운다(RESTAURANT_FRAME_BLOOD_TINT
+	## 참고) - color가 흰색(1,1,1,1)일 땐 곱해도 원본 그대로라 평소엔 안 보이고
+	## 없다.
+	if _restaurant_frame_blood.material == null:
+		var material := CanvasItemMaterial.new()
+		material.blend_mode = CanvasItemMaterial.BLEND_MODE_MUL
+		_restaurant_frame_blood.material = material
 	_restaurant_frame_blood.visible = true
-	_restaurant_frame_blood.color.a = 0.0
-	AudioManager.play_sfx(AudioManager.SFX_BLOOD)
-	var tween := create_tween()
-	tween.tween_property(_restaurant_frame_blood, "color", RESTAURANT_FRAME_BLOOD_COLOR, RESTAURANT_FRAME_BLOOD_IN_SECONDS)
-	tween.tween_interval(RESTAURANT_FRAME_BLOOD_HOLD_SECONDS)
-	tween.tween_property(_restaurant_frame_blood, "color:a", 0.0, RESTAURANT_FRAME_BLOOD_OUT_SECONDS)
-	tween.tween_callback(func() -> void: _restaurant_frame_blood.visible = false)
+	_restaurant_frame_blood.color = Color.WHITE
+	## 사용자 지시(2026-08-24): 새 소리 구하는 대신 find_body_2를 재사용.
+	AudioManager.play_sfx(AudioManager.SFX_FIND_BODY_2)
+	if _restaurant_frame_blood_tween != null and _restaurant_frame_blood_tween.is_valid():
+		_restaurant_frame_blood_tween.kill()
+	_restaurant_frame_blood_tween = create_tween()
+	_restaurant_frame_blood_tween.tween_property(_restaurant_frame_blood, "color", RESTAURANT_FRAME_BLOOD_TINT, RESTAURANT_FRAME_BLOOD_IN_SECONDS)
+	_restaurant_frame_blood_tween.tween_interval(RESTAURANT_FRAME_BLOOD_HOLD_SECONDS)
+	_restaurant_frame_blood_tween.tween_property(_restaurant_frame_blood, "color", Color.WHITE, RESTAURANT_FRAME_BLOOD_OUT_SECONDS)
+	_restaurant_frame_blood_tween.tween_callback(func() -> void: _restaurant_frame_blood.visible = false)
 
 
 func _process(delta: float) -> void:
 	_update_ui_blocking()
 	if world_map == null or player == null:
 		return
-	if not _murder_scene_active and not _is_transitioning and GameManager.current_map_id == "Home" \
-			and MurderManager.is_second_murder_discovery_pending():
-		_run_second_murder_discovery_scene()
-		return
+	if not _murder_scene_active and not _is_transitioning:
+		if GameManager.current_map_id == "Home" and MurderManager.is_second_murder_discovery_pending() \
+				and not _second_murder_sack_awaiting_interaction and _second_murder_sack_node == null:
+			_spawn_second_murder_sack()
+		elif _second_murder_sack_awaiting_interaction and GameManager.current_map_id != "Home":
+			# 집을 나가면 world_map이 다른 맵으로 다시 로드되면서 자루 노드는
+			# 이미 사라진 상태 - 다음에 Home에 돌아오면 새로 스폰되게 리셋.
+			_second_murder_sack_awaiting_interaction = false
+			_second_murder_sack_node = null
+		if _shadow_figure_node != null and player.position.distance_to(_shadow_figure_node.position) <= SHADOW_FIGURE_VANISH_DISTANCE:
+			_shadow_figure_node.queue_free()
+			_shadow_figure_node = null
 	if _message_timer > 0.0:
 		_message_timer = max(_message_timer - delta, 0.0)
 	var interactable := world_map.get_interactable_at(player.position)
@@ -582,6 +721,11 @@ func _process(delta: float) -> void:
 	_update_floor_decor_preview()
 	_update_wall_decor_preview()
 	_update_farm_tile_highlight()
+	if _second_murder_sack_awaiting_interaction and _second_murder_sack_node != null \
+			and player.position.distance_to(_second_murder_sack_position) <= SECOND_MURDER_SACK_INTERACT_RADIUS:
+		if _message_timer <= 0.0:
+			player.show_interaction_prompt("E 확인")
+		return
 	if _is_npc_talk_priority(interactable):
 		var talk_npc_id := String(_nearest_talkable_npc(player.position).get("npc_id", ""))
 		_handle_npc_encounter(talk_npc_id)
@@ -701,7 +845,7 @@ func _process(delta: float) -> void:
 			if _message_timer <= 0.0:
 				player.show_interaction_prompt("E 낚시 취소")
 			return
-		if FishingManager.can_start_fishing() and world_map.is_water_cell(player.get_facing_tile_position()) and not InventoryManager.is_full():
+		if FishingManager.can_start_fishing() and _is_facing_water() and not InventoryManager.is_full():
 			if _message_timer <= 0.0:
 				player.show_interaction_prompt("E 낚시하기")
 			return
@@ -846,7 +990,9 @@ func _update_ui_blocking() -> void:
 	# 막는다 - 그래야 웜프 타일을 밟거나 맵을 벗어나는 상황 자체가 물리적으로
 	# 발생하지 않아서, 낚시 도중 맵이 바뀌는 경우를 따로 취소 처리할 필요가 없다.
 	if player != null:
-		player.set_movement_enabled(not any_open and not FishingManager.is_active())
+		# 노크 소리가 나는 동안 문 앞으로 뛰쳐나가 확인할 수 없게 이동도 같이
+		# 잠근다(사용자 지시, 2026-08-24).
+		player.set_movement_enabled(not any_open and not FishingManager.is_active() and not AudioManager.is_knock_playing())
 	if _ui_dim != null:
 		_ui_dim.color.a = UI_DIM_ALPHA if any_open else 0.0
 	if _should_pause_time():
@@ -1092,6 +1238,29 @@ func _is_building_transition(warp: Dictionary) -> bool:
 	return GameManager.current_map_id.ends_with("_interior") or target_map.ends_with("_interior")
 
 
+## 낚시 캐스팅 판정 - 바로 앞 한 칸이 물(바다/연못)이면 그걸로 끝. 아니면
+## 그 칸의 대각선 이웃 두 곳, 또는 정면으로 한 칸 더(총 두 칸)가 "바다"인
+## 경우만 추가로 허용한다(사용자 리포트, 2026-08-24: plaza3 해안선이 계단식
+## 대각선이라 대각선만 보면 놓치는 케이스가 있고, 정면 2칸만 보면 너무 멀게
+## 느껴짐 - 대각선 + 정면 2칸을 같이 허용해 실제 해안 형태를 더 폭넓게
+## 커버한다. 연못/강까지 다 열어주면 너무 멀리서도 낚시가 되니 "Water"
+## (바다) 레이어일 때만 이 추가 판정을 적용한다).
+func _is_facing_water() -> bool:
+	if world_map.is_water_cell(player.get_facing_tile_position()):
+		return true
+	var forward := Vector2(player.facing_direction) * WorldMap.TILE_SIZE
+	var perpendicular := Vector2(-player.facing_direction.y, player.facing_direction.x) * WorldMap.TILE_SIZE
+	var sea_candidates: Array[Vector2] = [
+		player.position + forward + perpendicular,
+		player.position + forward - perpendicular,
+		player.position + forward * 2,
+	]
+	for candidate in sea_candidates:
+		if world_map.is_sea_cell(candidate):
+			return true
+	return false
+
+
 ## horror_events.md "NPC 사망 - 집 잠금": map_id가 어느 상점의 map_id와
 ## 일치하고, 그 상점이 shop.md 승계 규칙상 이미 "online"(운영 NPC 전원
 ## 사망)으로 전환됐으면 잠긴 것으로 본다 - ShopManager.get_shop_mode()를
@@ -1099,6 +1268,33 @@ func _is_building_transition(warp: Dictionary) -> bool:
 func _is_locked_shop_map(map_id: String) -> bool:
 	var shop_id := ShopManager.get_shop_id_for_map(map_id)
 	return not shop_id.is_empty() and ShopManager.get_shop_mode(shop_id) == "online"
+
+
+## SHADOW_FIGURE_SPAWN_NAMES에 등록된 맵이고, 1차 살인 이후 스토커가 아직
+## 살아있으면(스토커 사망 시 이 이벤트는 저절로 끝남) 낮은 확률로 스폰
+## 지점에 그림자 인영을 세운다. 다른 NPC 캐릭터의 몸/머리 실루엣을 재사용하지
+## 않는 전용 그림(SHADOW_FIGURE_TEXTURE_PATH)만 쓰므로 성별 등 정체가 드러날
+## 여지가 없다. position이 캐릭터 발 위치 기준이 되도록(NPCSprite와 동일한
+## 관례) offset을 그림 높이의 절반만큼 위로 준다.
+func _maybe_spawn_shadow_figure(map_id: String) -> void:
+	if not SHADOW_FIGURE_SPAWN_NAMES.has(map_id):
+		return
+	if not ResourceLoader.exists(SHADOW_FIGURE_TEXTURE_PATH):
+		return
+	if MurderManager.get_murder_count() <= 0 or not NPCManager.is_alive(NPCManager.get_stalker_id()):
+		return
+	if randf() >= SHADOW_FIGURE_APPEAR_CHANCE:
+		return
+	var spawn_position: Vector2 = world_map.get_spawn_position(String(SHADOW_FIGURE_SPAWN_NAMES[map_id]))
+	if spawn_position == Vector2.INF:
+		return
+	var figure := Sprite2D.new()
+	figure.texture = load(SHADOW_FIGURE_TEXTURE_PATH)
+	figure.centered = true
+	figure.offset = Vector2(0, -figure.texture.get_height() / 2.0)
+	figure.position = spawn_position
+	world_map.add_child(figure)
+	_shadow_figure_node = figure
 
 
 ## skip_fade: 호출하는 쪽이 이미 화면을 검게 만들어 둔 상태에서 맵만 갈아
@@ -1114,10 +1310,23 @@ func _load_map(map_id: String, spawn_name: String, skip_fade: bool = false) -> v
 		return
 	_is_transitioning = true
 	_open_doors.clear()
+	## 레스토랑 액자 핏자국이 애니메이션 도중 맵을 나가도 다음 맵까지 안 남게
+	## 강제로 정리한다(사용자 리포트, 2026-08-24).
+	if _restaurant_frame_blood_tween != null and _restaurant_frame_blood_tween.is_valid():
+		_restaurant_frame_blood_tween.kill()
+	if _restaurant_frame_blood != null:
+		_restaurant_frame_blood.visible = false
+	## world_map은 맵이 바뀌어도 파괴되지 않고 재사용되는 노드라서(furniture/
+	## storage_box 스프라이트들이 매번 직접 despawn/respawn하는 이유와 동일),
+	## 그림자 인영도 맵을 나갈 때 직접 지워야 다음 맵까지 안 남는다.
+	if _shadow_figure_node != null:
+		_shadow_figure_node.queue_free()
+		_shadow_figure_node = null
 	# 실내/실외 경계를 넘는지는 GameManager.current_map_id가 아직 이전 맵인
 	# 지금 시점에 미리 재둬야 한다 - 아래 GameManager.set_current_map(map_id)가
 	# 지나가면 "이전 맵"을 더 이상 알 수 없다.
 	var was_indoor := GameManager.current_map_id.ends_with("_interior")
+	var was_home_interior := GameManager.current_map_id == "home_interior"
 	if not skip_fade:
 		await _fade_out()
 	world_map.load_map(map_path)
@@ -1146,8 +1355,13 @@ func _load_map(map_id: String, spawn_name: String, skip_fade: bool = false) -> v
 		WallDecorManager.set_world_map(world_map, map_id)
 		if was_indoor != is_indoor:
 			AudioManager.play_sfx(AudioManager.SFX_DOOR)
+		_maybe_spawn_shadow_figure(map_id)
 	if not skip_fade:
 		await _fade_in()
+	if _knock_check_pending and was_home_interior and map_id == "Home":
+		_knock_check_pending = false
+		if dialogue_screen != null:
+			dialogue_screen.open_special("", KNOCK_CHECK_RESULT_MONOLOGUE.duplicate())
 	_is_transitioning = false
 
 
@@ -1211,6 +1425,10 @@ func _on_interact_pressed() -> void:
 	# 같이 처리하면, NPC가 자기 근무지 바로 옆에 서 있을 때 대화 넘기려고 누른
 	# E가 계산대까지 같이 눌러버리는 문제가 생긴다.
 	if _is_any_modal_open() or _murder_scene_active:
+		return
+	if _second_murder_sack_awaiting_interaction and _second_murder_sack_node != null \
+			and player.position.distance_to(_second_murder_sack_position) <= SECOND_MURDER_SACK_INTERACT_RADIUS:
+		_continue_second_murder_discovery()
 		return
 	var interactable := world_map.get_interactable_at(player.position)
 	if _is_npc_talk_priority(interactable):
@@ -1281,7 +1499,7 @@ func _on_interact_pressed() -> void:
 		# 정리한다(2026-08-12) - 여기서 따로 stop() 안 불러도 됨.
 		FishingManager.cancel_fishing()
 		return
-	if FishingManager.can_start_fishing() and world_map.is_water_cell(player.get_facing_tile_position()) and not InventoryManager.is_full():
+	if FishingManager.can_start_fishing() and _is_facing_water() and not InventoryManager.is_full():
 		if FishingManager.start_fishing():
 			AudioManager.play_sfx(AudioManager.SFX_BUBBLE)
 			player.tool_overlay.start("fishing_rod")

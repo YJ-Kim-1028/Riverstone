@@ -87,6 +87,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		_debug_give_test_storage_boxes()
 	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F4:
 		_debug_queue_murder_candidates()
+	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F12:
+		_debug_reset_restaurant_frame_blood()
+	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F10:
+		HorrorEventManager.debug_trigger_knock_event()
 
 
 func _toggle_fullscreen() -> void:
@@ -126,6 +130,13 @@ func _debug_queue_murder_candidates() -> void:
 		if not NPCManager.is_alive(npc_id) or NPCManager.is_story_npc(npc_id) or NPCManager.is_stalker(npc_id):
 			continue
 		NPCManager.debug_set_affection(npc_id, NPCManager.MURDER_CANDIDATE_AFFECTION)
+
+
+## Debug-only (F12, editor/debug builds only): 레스토랑 액자 이벤트가 이미
+## 소비된 상태여도 다시 볼 수 있게 리셋한다 - 누른 뒤 레스토랑을 나갔다 다시
+## 들어오면 뜬다.
+func _debug_reset_restaurant_frame_blood() -> void:
+	HorrorEventManager.debug_reset_restaurant_frame_blood_trigger()
 
 
 func set_current_map(map_id: String) -> void:

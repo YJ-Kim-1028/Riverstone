@@ -121,9 +121,15 @@ func _stalker_email_unlocked_pool() -> Array:
 ## 어차피 스토커가 그 사람 흉내를 내는 것뿐이라 본인 목소리가 아니어도
 ## 자연스럽고, 13명 전부 따로 쓰지 않아도 된다는 사용자 확정(2026-08-15).
 ## 반환값은 {"title","lines"} - data/npc/*.json 이메일과 같은 모양으로 통일함.
-func get_impersonation_email(npc_id: String) -> Dictionary:
+## 2026-08-24: 두 번째 희생자가 첫 번째와 똑같은 문구를 또 받으면 어색하다는
+## 지적으로, "default_<case_number>"가 있으면 우선 쓰고(murder_grief_<N>과
+## 동일한 폴백 방식) 없으면 그냥 "default"로 대체한다.
+func get_impersonation_email(npc_id: String, case_number: int = 0) -> Dictionary:
 	if _impersonation_emails.has(npc_id):
 		return (_impersonation_emails[npc_id] as Dictionary).duplicate(true)
+	var numbered_key := "default_%d" % case_number
+	if case_number > 0 and _impersonation_emails.has(numbered_key):
+		return (_impersonation_emails[numbered_key] as Dictionary).duplicate(true)
 	return (_impersonation_emails.get("default", {}) as Dictionary).duplicate(true)
 
 
@@ -153,6 +159,22 @@ func load_save_data(data: Dictionary) -> void:
 ## 레스토랑에 처음 들어올 때 딱 한 번만 발동시킨다(살인 1건당 최대 1회, 최대
 ## 2번 살인이니 총 최대 2번). 매번 입장할 때마다 재생되면 일상 플레이를
 ## 방해한다는 사용자 피드백(2026-08-15)으로 "입장마다"에서 이렇게 바꿈.
+## 디버그 전용(game_manager.gd F12) - 이미 소비된 상태여도 레스토랑 재입장
+## 시 다시 뜨게 리셋한다. 실제로 murder_count가 어디까지 갔는지는 안 건드리고
+## "몇 번째까지 보여줬는지"만 0으로 되돌린다.
+func debug_reset_restaurant_frame_blood_trigger() -> void:
+	_restaurant_frame_blood_shown_for_murder_count = 0
+
+
+## 디버그 전용(game_manager.gd F10 - F8은 Godot 에디터 "실행 중지" 단축키와
+## 겹쳐서 F10으로 바꿈) - murder_count/맵/시간/확률 조건을 다 건너뛰고 노크
+## 사운드 시퀀스만 바로 들어본다(사용자 리포트, 2026-08-24: 실제 조건을 다
+## 맞춰서 테스트하기엔 너무 번거로움 - 조건만 알려주는 걸로 바꿨다가 다시
+## 요청함).
+func debug_trigger_knock_event() -> void:
+	knock_event_triggered.emit()
+
+
 func consume_restaurant_frame_blood_trigger() -> bool:
 	var murder_count := MurderManager.get_murder_count()
 	if murder_count <= _restaurant_frame_blood_shown_for_murder_count:
@@ -180,7 +202,7 @@ func _on_day_changed(_day: int, _weekday: String) -> void:
 		if TimeManager.current_day != NPCManager.get_death_day(npc_id) + 1:
 			continue
 		_impersonation_sent[npc_id] = true
-		var email := get_impersonation_email(npc_id)
+		var email := get_impersonation_email(npc_id, MurderManager.get_case_number_for_victim(npc_id))
 		# 사칭 메일은 항상 "죽은 그 본인" 명의니까 {victim_name}은 최근 사망자
 		# 조회 없이 이 npc_id 자신의 이름으로 바로 채운다("나야, {victim_name}"
 		# 처럼 죽은 사람이 자기 이름을 대는 용도).

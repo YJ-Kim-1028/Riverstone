@@ -30,7 +30,15 @@ const CHOICE_TYPE := "choice"
 ## 호감도 임계값이 아니라 "이 대사가 실제로 나왔을 때" 선물이 되어야 한다).
 const GIFT_TYPE := "gift"
 
+## npc_id 없이 여는 혼잣말(open_special("", ...), 예: 물귀신 낚시 이벤트)은
+## 초상화가 없는데 TextureRect 자리만 비어 보여서 어색하다는 지적(사용자
+## 리포트, 2026-08-24) - 초상화를 아예 숨기고, 텍스트 영역을 그 자리까지
+## 왼쪽으로 당겨서 채운다.
+const TEXT_AREA_OFFSET_LEFT_WITH_PORTRAIT := 30.0
+const TEXT_AREA_OFFSET_LEFT_NO_PORTRAIT := 6.0
+
 @onready var _portrait: TextureRect = $Background/Portrait
+@onready var _text_area: Control = $Background/TextArea
 @onready var _name_label: Label = $Background/TextArea/VBox/NameLabel
 @onready var _text_label: Label = $Background/TextArea/VBox/TextLabel
 @onready var _choice_box: VBoxContainer = $Background/TextArea/VBox/ChoiceBox
@@ -42,6 +50,16 @@ var _line_index := 0
 var _pending_choice: Dictionary = {}
 var _choice_index := 0
 var _choice_labels: Array[Label] = []
+
+## 타자기 효과(사용자 지시, 2026-08-23) - 한 글자씩 visible_characters를 늘려가며
+## 보여준다. _typewriter_token은 진행 중인 코루틴을 무효화하는 용도 -
+## _start_typewriter()가 호출될 때마다 증가시켜서, 이전 줄의 루프가 도중에
+## 자기 token이 최신이 아님을 발견하면 스스로 멈춘다(새 줄이 이미 시작됐다는 뜻).
+const TYPEWRITER_CHAR_INTERVAL := 0.03
+## 매 글자마다 소리를 내면 너무 시끄러워서, 이 글자 수마다 한 번만 재생한다.
+const TYPEWRITER_BLIP_SFX_STRIDE := 2
+var _typewriter_token := 0
+var _is_typing := false
 
 
 func _ready() -> void:
@@ -58,7 +76,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if event.keycode == KEY_E:
-		_advance()
+		if _is_typing:
+			_complete_typewriter()
+		else:
+			_advance()
 		get_viewport().set_input_as_handled()
 	elif event.keycode == KEY_ESCAPE:
 		close()
@@ -109,6 +130,8 @@ func close() -> void:
 	# 웃음: 대화 끝나고 헤어질 때(닫는 방식과 무관 - 마지막 줄 넘김/ESC 둘 다).
 	if not _npc_id.is_empty():
 		NPCManager.request_emote(_npc_id, NPCManager.EMOTE_SMILE)
+	_typewriter_token += 1
+	_is_typing = false
 	_set_choice_mode(false)
 	_pending_choice = {}
 	_set_open(false)
@@ -116,6 +139,7 @@ func close() -> void:
 
 
 func _advance() -> void:
+	AudioManager.play_sfx(AudioManager.SFX_DIALOGUE_ADVANCE)
 	_line_index += 1
 	if _line_index >= _lines.size():
 		close()
@@ -144,11 +168,49 @@ func _show_current_line() -> void:
 	# 그대로 부를 때 쓴다({player_mail_content}는 NPCManager.get_daily_dialogue()가
 	# 뽑는 시점에 이미 치환해서 돌려주므로 여기서는 신경 쓸 필요 없음).
 	var victim_name := String(NPCManager.get_definition(NPCManager.get_most_recent_death_npc_id()).get("name", ""))
-	_text_label.text = text.replace("{player_name}", GameManager.player_name).replace("{victim_name}", victim_name)
+	var resolved_text := text.replace("{player_name}", GameManager.player_name).replace("{victim_name}", victim_name)
+	_start_typewriter(resolved_text)
 	_update_portrait(emotion)
 
 
+## 대사 한 줄을 한 글자씩 늘려가며 보여준다(사용자 지시, 2026-08-23). 텍스트
+## 자체는 처음부터 전부 대입해둬야 줄바꿈/크기 계산이 완성본 기준으로 맞고,
+## visible_characters로 실제 노출 글자 수만 제어한다.
+func _start_typewriter(text: String) -> void:
+	_typewriter_token += 1
+	var token := _typewriter_token
+	_text_label.text = text
+	_text_label.visible_characters = 0
+	var length := text.length()
+	if length == 0:
+		_is_typing = false
+		return
+	_is_typing = true
+	for i in length:
+		await get_tree().create_timer(TYPEWRITER_CHAR_INTERVAL).timeout
+		if token != _typewriter_token:
+			return
+		_text_label.visible_characters = i + 1
+		if i % TYPEWRITER_BLIP_SFX_STRIDE == 0:
+			AudioManager.play_sfx(AudioManager.SFX_DIALOGUE_TYPE)
+	_is_typing = false
+
+
+## E로 타이핑 도중 넘기면(사용자 지시) 즉시 전체 텍스트를 다 보여주고 끝낸다 -
+## 다음 E 입력은 그제서야 다음 줄로 넘어간다(한 번에 두 동작이 겹치지 않게).
+func _complete_typewriter() -> void:
+	_typewriter_token += 1
+	_text_label.visible_characters = -1
+	_is_typing = false
+
+
 func _update_portrait(emotion: String) -> void:
+	if _npc_id.is_empty():
+		_portrait.visible = false
+		_text_area.offset_left = TEXT_AREA_OFFSET_LEFT_NO_PORTRAIT
+		return
+	_portrait.visible = true
+	_text_area.offset_left = TEXT_AREA_OFFSET_LEFT_WITH_PORTRAIT
 	var portraits: Dictionary = NPCManager.get_definition(_npc_id).get("portraits", {})
 	var path := String(portraits.get(emotion, portraits.get("default", "")))
 	_portrait.texture = load(path) if not path.is_empty() else null

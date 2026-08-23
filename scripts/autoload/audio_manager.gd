@@ -94,6 +94,22 @@ const INTERIOR_RAIN_SFX_TARGET_VOLUME_DB := -9.1
 const SFX_BELL := "res://assets/audio/sfx/sfx_bell.mp3"
 const SFX_BUBBLE := "res://assets/audio/sfx/sfx_bubble.mp3"
 const SFX_CLICK := "res://assets/audio/sfx/sfx_click.mp3"
+## 대화창 타자기 효과(dialogue_screen.gd) 전용 - 아직 파일 없음(2026-08-23),
+## 사용자가 프리사운드에서 찾아 넣어줄 예정. 그때까지는 play_sfx()가 조용히
+## 스킵한다.
+const SFX_DIALOGUE_TYPE := "res://assets/audio/sfx/sfx_dialogue_type.mp3"
+const SFX_DIALOGUE_ADVANCE := "res://assets/audio/sfx/sfx_dialogue_advance.mp3"
+## 집 업그레이드 구매 전용(사용자 지시, 2026-08-23) - 비싼 구매라 일반
+## SFX_COIN 대신 따로 재생한다. _on_item_purchased() 참고.
+const SFX_HOME := "res://assets/audio/sfx/sfx_home.mp3"
+## 스토커 이메일을 열어볼 때(mail_detail_panel.gd) - 사용자 지시, 2026-08-24.
+const SFX_STALKER_MAIL := "res://assets/audio/sfx/sfx_stalker_mail.mp3"
+## 스토커 메일 외의 일반 메일을 열 때(mail_detail_panel.gd) - 사용자 지시, 2026-08-24.
+const SFX_MAIL_OPEN := "res://assets/audio/sfx/sfx_mail_open.mp3"
+## 살인 발견 씬 전용(main.gd) - 1차는 plaza3에서 폴리를 만나는 순간, 2차는
+## 집 앞 자루를 E로 확인하는 순간.
+const SFX_MURDER_1 := "res://assets/audio/sfx/sfx_murder_1.mp3"
+const SFX_FIND_BODY_2 := "res://assets/audio/sfx/sfx_find_body_2.mp3"
 const SFX_COLLECTION_MOVE := "res://assets/audio/sfx/sfx_collection_move.mp3"
 const SFX_COLLECTION_OPEN := "res://assets/audio/sfx/sfx_collection_open.mp3"
 ## 도감 효과음 2개(open/move)가 너무 작다는 피드백으로 20%(선형) 키움(사용자
@@ -107,13 +123,10 @@ const SFX_UI_TAB := "res://assets/audio/sfx/sfx_ui_tab.mp3"
 ## "_interior" 여부가 다를 때만 재생).
 const SFX_DOOR := "res://assets/audio/sfx/sfx_door.mp3"
 ## horror_events.md "집 이벤트" - HorrorEventManager.knock_event_triggered가
-## 발생하면 재생. 사용자 지시로 3번 반복해서 들려준다(_play_knock_sequence).
-const SFX_KNOCK := "res://assets/audio/sfx/sfx_knock.mp3"
-const KNOCK_REPEAT_COUNT := 3
-## horror_events.md "레스토랑 액자 이벤트" - main.gd가 살인 발생 이후 레스토랑에
-## 입장할 때마다 재생(_maybe_play_restaurant_frame_blood_effect). 파일이
-## 없으면 play_sfx()가 조용히 무시하므로 파일을 안 넣어도 에러는 안 남.
-const SFX_BLOOD := "res://assets/audio/sfx/sfx_blood.mp3"
+## 발생하면 재생(_play_knock_sequence). 원래는 3번 반복이었으나, 위압감 있는
+## 새 소리(sfx_knock2.mp3, 2026-08-24 교체)는 파일 자체가 이미 세 번 두드리는
+## 소리라 한 번만 튼다(사용자 지시).
+const SFX_KNOCK := "res://assets/audio/sfx/sfx_knock2.mp3"
 ## 살인 발생 시각(main.gd의 살인 발견 씬 시작 직전) 재생 - 파일 없으면
 ## play_sfx()가 조용히 무시.
 const SFX_SCREAM := "res://assets/audio/sfx/sfx_scream.mp3"
@@ -540,8 +553,11 @@ func _on_npc_departed(_station_index: int, _npc_id: String, paid_amount: int) ->
 ## 상점 구매(현장/온라인/축산 전부 ShopManager.item_purchased 하나로 합쳐져
 ## 있음)가 성공할 때마다 - 지금까지는 모달 공통 클릭음(main.gd._input())만
 ## 나서 다른 버튼 클릭이랑 구분이 안 됐다는 사용자 피드백으로 추가.
-func _on_item_purchased(_shop_id: String, _item_id: String, _price: int) -> void:
-	play_sfx(SFX_COIN)
+func _on_item_purchased(_shop_id: String, item_id: String, _price: int) -> void:
+	if item_id == ShopManager.HOUSE_UPGRADE_ITEM_ID:
+		play_sfx(SFX_HOME)
+	else:
+		play_sfx(SFX_COIN)
 
 
 func _on_fishing_ended(result: Dictionary) -> void:
@@ -557,20 +573,33 @@ func _on_knock_event_triggered() -> void:
 	_play_knock_sequence()
 
 
-## play_sfx()는 재생될 때마다 새 AudioStreamPlayer를 만들고 끝나면 스스로
-## 지우는 fire-and-forget 방식이라, 겹치지 않게 "N번 반복"을 표현하려면
-## 재생이 끝날 때까지 기다렸다가 다시 트는 전용 플레이어가 하나 필요하다.
+## 소리가 나는 동안 문 앞으로 뛰쳐나가 확인하지 못하게, main.gd가
+## is_knock_playing()으로 이 상태를 보고 이동을 잠근다(사용자 지시,
+## 2026-08-24).
+var _is_knock_playing := false
+
+## 소리가 다 끝난 시점에 main.gd가 플레이어 혼잣말을 띄우는 데 쓴다(사용자
+## 지시, 2026-08-24 - 낚시 물귀신 이벤트와 같은 패턴).
+signal knock_sequence_finished
+
+
+func is_knock_playing() -> bool:
+	return _is_knock_playing
+
+
 func _play_knock_sequence() -> void:
 	if not ResourceLoader.exists(SFX_KNOCK):
 		return
+	_is_knock_playing = true
 	var player := AudioStreamPlayer.new()
 	player.bus = BUS_SFX
 	player.stream = load(SFX_KNOCK)
 	add_child(player)
-	for i in KNOCK_REPEAT_COUNT:
-		player.play()
-		await player.finished
+	player.play()
+	await player.finished
 	player.queue_free()
+	_is_knock_playing = false
+	knock_sequence_finished.emit()
 
 
 ## 추억의 물건과 같은 소리 재사용 - NPC가 플레이어에게 주는 쪽도 "습득"이라는
