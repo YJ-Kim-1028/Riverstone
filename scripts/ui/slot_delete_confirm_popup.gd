@@ -1,6 +1,6 @@
 extends Control
 
-## 새 게임을 이미 데이터가 있는 슬롯에 시작하려 할 때 뜨는 확인창.
+## 이어하기 화면에서 세이브 슬롯을 삭제하기 전 뜨는 확인창.
 ## restaurant_confirm_popup.gd/sleep_confirm_popup.gd와 완전히 동일한 패턴
 ## (button.png 9-슬라이스, modulate.a + mouse_filter로 열고 닫기) - 이
 ## 프로젝트는 확인창마다 이런 작은 전용 스크립트를 각각 두는 관례라 그대로

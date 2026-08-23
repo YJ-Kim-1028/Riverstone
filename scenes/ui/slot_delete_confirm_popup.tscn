@@ -1,9 +1,9 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" path="res://scripts/ui/save_overwrite_confirm_popup.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/ui/slot_delete_confirm_popup.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/ui/frame_9slice.png" id="2_frame"]
 
-[node name="SaveOverwriteConfirmPopup" type="Control"]
+[node name="SlotDeleteConfirmPopup" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1_script")
@@ -47,8 +47,8 @@ autowrap_mode = 3
 horizontal_alignment = 1
 vertical_alignment = 1
 theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
-theme_override_font_sizes/font_size = 7
-text = "이미 저장된 데이터가 있습니다. 덮어쓰시겠습니까?"
+theme_override_font_sizes/font_size = 6
+text = "정말 삭제하시겠습니까?"
 
 [node name="ButtonRow" type="HBoxContainer" parent="Panel/Margin/VBox"]
 layout_mode = 2
@@ -58,11 +58,11 @@ theme_override_constants/separation = 16
 [node name="YesButton" type="Button" parent="Panel/Margin/VBox/ButtonRow"]
 custom_minimum_size = Vector2(32, 16)
 layout_mode = 2
-theme_override_font_sizes/font_size = 7
+theme_override_font_sizes/font_size = 6
 text = "예"
 
 [node name="NoButton" type="Button" parent="Panel/Margin/VBox/ButtonRow"]
 custom_minimum_size = Vector2(32, 16)
 layout_mode = 2
-theme_override_font_sizes/font_size = 7
+theme_override_font_sizes/font_size = 6
 text = "아니오"
