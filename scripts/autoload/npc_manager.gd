@@ -8,6 +8,9 @@ extends Node
 signal affection_changed(npc_id: String, affection: int)
 signal affection_event_triggered(npc_id: String, threshold: int)
 signal memento_received(npc_id: String)
+## affection_events의 "gift" 타입(예: 모카가 호감도 임계값에서 커피를 선물) -
+## memento_received와 같은 구조, item_id만 이벤트 데이터에서 그대로 넘긴다.
+signal npc_gift_item_triggered(npc_id: String, item_id: String)
 signal npc_died(npc_id: String)
 signal murder_candidate_registered(npc_id: String)
 signal gift_given(npc_id: String)
@@ -71,6 +74,11 @@ var _definitions: Dictionary = {}
 var _affection: Dictionary = {}
 var _alive: Dictionary = {}
 var _completed_events: Dictionary = {}
+## npc_id -> {"threshold": int, "is_memento": bool} - 호감도 임계값을 넘긴
+## affection_event를 아직 실제로 보여주지 않은 상태. consume_pending_milestone()
+## 참고 - 2026-08-16 사용자 리포트: 예전엔 임계값 넘는 순간 대사 없이 바로
+## 추억의 물건이 가방에 들어갔음(대사를 실제로 본 뒤에 받아야 함).
+var _pending_milestone: Dictionary = {}
 var _murder_candidate_flagged: Dictionary = {}
 var _dead_npc_ids: Array[String] = []
 var _death_days: Dictionary = {}
@@ -185,17 +193,28 @@ func get_scent_color(npc_id: String) -> String:
 	return String(_active_scent.get(npc_id, ""))
 
 
-func get_food_preference(npc_id: String, food_name: String) -> FoodPreference:
+## restaurant.md: 완성된 요리 이름("찹 스테이크", "딸기 스무디" 등 data/cooking/recipes.json의
+## 복합 이름)은 preferred_food/disliked_food(원재료 이름, 예: "소고기", "베리")와
+## 절대 문자열이 일치하지 않아 이 함수가 요리 이름을 직접 받는 형태였을 때는 좋아하는
+## 재료 판정이 사실상 항상 실패했다(2026-08-14 발견, 근본 원인 수정). 대신 그 요리를
+## 만든 원재료 아이템 id 목록(CookingManager.cook()의 dish["ingredients"], 예:
+## ["cooked_beef", "salad_greens"])을 받아 items.json의 base_material로 원재료
+## 이름을 역추적해 판정한다. 두 재료 중 하나라도 선호 재료면 그 요리는 FAVORITE로
+## 친다(좋아하는 재료 하나만 들어가도 좋아하는 요리라는 게 자연스러운 판정).
+func get_food_preference_for_ingredients(npc_id: String, ingredient_item_ids: Array) -> FoodPreference:
 	var definition := get_definition(npc_id)
-	if (definition.get("preferred_food", []) as Array).has(food_name):
-		return FoodPreference.FAVORITE
-	if (definition.get("disliked_food", []) as Array).has(food_name):
-		return FoodPreference.DISLIKED
-	return FoodPreference.NEUTRAL
-
-
-func feed(npc_id: String, food_name: String) -> void:
-	feed_with_preference(npc_id, get_food_preference(npc_id, food_name))
+	var preferred: Array = definition.get("preferred_food", [])
+	var disliked: Array = definition.get("disliked_food", [])
+	var found_disliked := false
+	for item_id in ingredient_item_ids:
+		var base_material := String(InventoryManager.get_item_definition(String(item_id)).get("base_material", ""))
+		if base_material.is_empty():
+			continue
+		if preferred.has(base_material):
+			return FoodPreference.FAVORITE
+		if disliked.has(base_material):
+			found_disliked = true
+	return FoodPreference.DISLIKED if found_disliked else FoodPreference.NEUTRAL
 
 
 ## Lower-level entry point for callers that already know the reaction should
@@ -215,6 +234,13 @@ func feed_with_preference(npc_id: String, preference: FoodPreference) -> void:
 
 func send_email(npc_id: String) -> void:
 	_add_affection(npc_id, AFFECTION_GAIN_EMAIL)
+
+
+## dialogue.daily 안의 선택지(choice.options[].affection)가 호감도에 주는 영향을
+## 그대로 적용한다 - dialogue_screen.gd가 플레이어의 선택을 확정할 때 호출한다.
+func apply_dialogue_choice(npc_id: String, affection_delta: int) -> void:
+	if affection_delta != 0:
+		_add_affection(npc_id, affection_delta)
 
 
 ## npc.md's own table caps this at "1명만 살해당한 경우" (candidates 1-2 only),
@@ -241,8 +267,34 @@ func has_horror_mode_started() -> bool:
 	return not _dead_npc_ids.is_empty()
 
 
+const DEAD_PORTRAIT_SHADER_PATH := "res://scripts/shaders/grayscale_portrait.gdshader"
+var _dead_portrait_material: ShaderMaterial
+
+## horror_events.md "NPC 사망 - 초상화 회색 처리" - 죽은 NPC의 초상화를 보여주는
+## 화면(dialogue_screen.gd/mail_app.gd)이 공통으로 쓰는 흑백 셰이더 머티리얼.
+## 매번 새로 안 만들고 하나만 캐싱해서 재사용한다.
+func get_dead_portrait_material() -> ShaderMaterial:
+	if _dead_portrait_material == null:
+		_dead_portrait_material = ShaderMaterial.new()
+		_dead_portrait_material.shader = load(DEAD_PORTRAIT_SHADER_PATH)
+	return _dead_portrait_material
+
+
 func get_dead_npc_ids() -> Array[String]:
 	return _dead_npc_ids.duplicate()
+
+
+## 가장 최근에 사망한 NPC id("" = 아직 아무도 안 죽음) - HorrorEventManager가
+## 스토커 이메일의 "{victim_name}" 자리표시자를 실제 피해자 이름으로 채울 때 쓴다.
+func get_most_recent_death_npc_id() -> String:
+	var latest_id := ""
+	var latest_day := -1
+	for npc_id in _dead_npc_ids:
+		var day := get_death_day(npc_id)
+		if day > latest_day:
+			latest_day = day
+			latest_id = npc_id
+	return latest_id
 
 
 ## -1 if the NPC hasn't died (or died before this was tracked in a save).
@@ -280,28 +332,147 @@ func get_affection_tier(npc_id: String) -> String:
 
 
 ## Picks one dialogue entry (an ordered array of lines to show in sequence)
-## at random from today's pool: dialogue.daily[weekday_group][affection_tier],
-## with horror_conversation mixed in once any NPC has died, and
-## rain_conversation mixed in on rainy days (both are additive pools, not a
-## separate weekday x tier x weather matrix - keeps the JSON schema small).
-## Avoids repeating the same entry twice in a row when the pool has more than
-## one option.
+## at random from today's pool: dialogue.daily[weekday][affection_tier], with
+## horror_conversation mixed in once any NPC has died, and rain_conversation
+## mixed in on rainy days (both are additive pools, not a separate weekday x
+## tier x weather matrix - keeps the JSON schema small). 요일별로 대사가
+## 따로 있다(스케줄과 달리 3그룹으로 안 묶임, 사용자 지시 2026-08-12 - 잡담이
+## 3그룹으로 뭉쳐 있으니 너무 반복되는 느낌이라는 피드백. 스케줄은 여전히
+## get_weekday_group()의 3그룹을 그대로 쓴다). Avoids repeating the same
+## entry twice in a row when the pool has more than one option.
+const SAGE_NPC_ID := "sage"
+const POLI_NPC_ID := "poli"
+
+## 상점이 없는 스토리 NPC(폴리/세이지/라마)의 "자기 공간"(사용자 리포트,
+## 2026-08-17: "폴리 세이지도 자기 경찰서랑 신사 있는데?") - ShopManager엔
+## 물건 파는 상업 시설만 등록돼 있어서 이 셋은 안 잡힌다. 살해 대상 제외
+## NPC 3명뿐이라 앞으로 늘어날 일이 거의 없어 하드코딩으로 둔다.
+const STORY_NPC_HOME_MAP := {
+	"poli": "police_interior",
+	"sage": "shrine_interior",
+	"lama": "temple_interior",
+}
+
+
+## 추억의 물건 컷신 위치 조건용 - 상점 소유 NPC는 ShopManager 데이터를 그대로
+## 쓰고, 상점이 없는 스토리 NPC는 STORY_NPC_HOME_MAP으로 보완한다. 둘 다
+## 없으면 "" - 호출부가 위치 조건 자체를 안 거는 걸로 해석한다.
+func get_owned_space_map_id(npc_id: String) -> String:
+	var shop_map := ShopManager.get_owned_shop_map_id(npc_id)
+	if not shop_map.is_empty():
+		return shop_map
+	return String(STORY_NPC_HOME_MAP.get(npc_id, ""))
+
 func get_daily_dialogue(npc_id: String) -> Array:
+	## 호감도 마일스톤(추억의 물건 등) 대기 중이면 다른 무엇보다 최우선으로
+	## 보여준다 - 여기서 뽑히는 순간 consume_pending_milestone()이 신호를
+	## 내보내고(추억의 물건이면 이때 지급) 다시는 안 나온다. 다만 추억의 물건
+	## (is_memento)은 "그 NPC의 공간 안"일 때만 터지게 한다(사용자 지시,
+	## 2026-08-17 - 아무 데서나 뜨는 대신, 그 사람 공간에서 받는 장면으로).
+	## get_owned_space_map_id() 참고 - 상점(ShopManager) + 상점 없는 스토리
+	## NPC(STORY_NPC_HOME_MAP) 둘 다 커버. 그래도 못 찾으면(향후 추가 NPC
+	## 누락 등) 위치 조건 자체를 안 걸고 예전처럼 바로 터진다 - 영원히 못
+	## 받는 상태를 막기 위한 안전장치.
+	if _pending_milestone.has(npc_id):
+		var pending: Dictionary = _pending_milestone[npc_id]
+		var threshold := int(pending.get("threshold", -1))
+		var is_memento := bool(pending.get("is_memento", false))
+		var owned_space_map := get_owned_space_map_id(npc_id)
+		var location_ok := not is_memento or owned_space_map.is_empty() or GameManager.current_map_id == owned_space_map
+		if location_ok:
+			var milestone_lines: Array = get_milestone_dialogue(npc_id, threshold)
+			consume_pending_milestone(npc_id)
+			if not milestone_lines.is_empty():
+				return milestone_lines.duplicate()
+	## 세이지의 스토리 트리거 3종 - 조건이 맞으면 평소 잡담 로테이션을 완전히
+	## 건너뛰고 대체된다. 우선순위(더 구체적이고 드문 사건이 위): 무고한 NPC
+	## 독살(공범 엔딩) > 첫 살인 후 영혼을 보기 시작함 > 살인 대기 중 경고
+	## (하루 1회, horror_events.md). 셋 다 sage.json의 story_dialogue에서
+	## 실제 문구를 가져온다 - 코드에는 조건 판정만 있고 대사는 데이터에 둠.
+	if npc_id == SAGE_NPC_ID:
+		if HorrorEventManager.consume_sage_poisoned_innocent_trigger():
+			var lines: Array = get_definition(npc_id).get("story_dialogue", {}).get("player_poisoned_innocent_npc", [])
+			if not lines.is_empty():
+				return lines.duplicate()
+		elif HorrorEventManager.consume_sage_soul_sight_trigger():
+			var lines: Array = get_definition(npc_id).get("story_dialogue", {}).get("post_first_murder_soul_sight", [])
+			if not lines.is_empty():
+				return lines.duplicate()
+		elif HorrorEventManager.consume_sage_warning_trigger():
+			var warnings: Array = get_definition(npc_id).get("story_dialogue", {}).get("murder_warning_examples", [])
+			if not warnings.is_empty():
+				return (warnings.pick_random() as Array).duplicate()
 	var dialogue: Dictionary = get_definition(npc_id).get("dialogue", {})
 	var daily: Dictionary = dialogue.get("daily", {})
-	var group: Dictionary = daily.get(get_weekday_group(TimeManager.get_weekday()), {})
-	var pool: Array = (group.get(get_affection_tier(npc_id), []) as Array).duplicate()
+	var day: Dictionary = daily.get(TimeManager.get_weekday(), {})
+	var pool: Array = (day.get(get_affection_tier(npc_id), []) as Array).duplicate()
 	if WeatherManager.is_raining():
 		pool.append_array(dialogue.get("rain_conversation", []))
 	if has_horror_mode_started():
 		pool.append_array(dialogue.get("horror_conversation", []))
+	## 플레이어가 이 NPC에게 자유 작성 메일을 보냈고 아직 언급 안 됐으면, 오늘의
+	## 후보 풀에 mail_reaction 템플릿 하나를 더 끼워 넣는다 - "{player_mail_content}"를
+	## 실제 메일 본문으로 바로 치환해서 넣어둔다(EmailManager.clear_pending_mail_reaction()로
+	## 지우기 전에 내용을 먼저 읽어와야 하므로 여기서 치환까지 끝내는 게 안전함).
+	## 이게 뽑히면 아래에서 지워서 같은 메일이 두 번 언급되지 않게 한다.
+	var mail_reaction_index := -1
+	if EmailManager.has_pending_mail_reaction(npc_id):
+		var mail_templates: Array = dialogue.get("mail_reaction", [])
+		if not mail_templates.is_empty():
+			var mail_content := EmailManager.get_pending_mail_reaction_content(npc_id)
+			mail_reaction_index = pool.size()
+			pool.append(_substitute_mail_content(mail_templates.pick_random(), mail_content))
 	if pool.is_empty():
 		return []
 	var index := randi() % pool.size()
 	if pool.size() > 1 and index == int(_last_daily_dialogue_index.get(npc_id, -1)):
 		index = (index + 1) % pool.size()
 	_last_daily_dialogue_index[npc_id] = index
-	return pool[index]
+	if index == mail_reaction_index:
+		EmailManager.clear_pending_mail_reaction(npc_id)
+	var picked: Array = pool[index]
+	## murder_system.md 경찰 조사 - 살인 후 5일 이내 이 NPC와 처음 나누는
+	## 대화라면, 오늘의 잡담 앞에 알리바이 한 줄을 강제로 끼워 넣는다
+	## (MurderManager.consume_alibi_line() 참고, 한 번 나오면 다시 안 나옴).
+	## 목격 진술(consume_witness_line())도 선택 없이 곧바로 이어서 보여준다 -
+	## 플레이어가 놓칠 수 있는 선택지로 만들지 않는다(사용자 지시, 2026-08-17:
+	## "무조건 보게 만들거라"). 스토커의 거짓 알리바이가 나온 경우에만
+	## corroboration_line(가짜 뒷받침 근거)이 알리바이 바로 다음에 붙는다.
+	var alibi_line := MurderManager.consume_alibi_line(npc_id)
+	if not alibi_line.is_empty():
+		## 폴리는 이 "살인 후 첫 재회" 순간, 첫 번째 살인에 한해 일반 알리바이
+		## 대신 "그날 밤 기억이 없다" 고백(poli.json story_dialogue.
+		## first_murder_occurred)으로 완전히 대체한다(사용자 지시, 2026-08-17 -
+		## 새 트리거 안 만들고 이미 있는 alibi_pending 재사용). 두 번째 살인
+		## 이후엔(이미 한 번 고백했으므로) 폴리도 다른 NPC들처럼 평소 알리바이를
+		## 댄다.
+		if npc_id == POLI_NPC_ID and MurderManager.get_murder_count() == 1:
+			var confession: Array = get_definition(npc_id).get("story_dialogue", {}).get("first_murder_occurred", {}).get("lines", [])
+			if not confession.is_empty():
+				return confession.duplicate() + picked
+		var lines: Array = [alibi_line]
+		var corroboration_line := MurderManager.consume_stalker_corroboration_line(npc_id)
+		if not corroboration_line.is_empty():
+			lines.append(corroboration_line)
+		var witness_line := MurderManager.consume_witness_line(npc_id)
+		if not witness_line.is_empty():
+			lines.append(witness_line)
+		return lines + picked
+	return picked
+
+
+## dialogue.mail_reaction 템플릿(문자열 또는 {"text","emotion"} 줄의 배열) 안에
+## 있는 "{player_mail_content}"를 실제 메일 본문으로 바꿔치기한 새 배열을 만든다 -
+## 원본 JSON 데이터를 건드리지 않도록 깊은 복사 위에서 치환한다.
+func _substitute_mail_content(template: Array, mail_content: String) -> Array:
+	var result: Array = template.duplicate(true)
+	for i in result.size():
+		var line: Variant = result[i]
+		if line is Dictionary:
+			line["text"] = String(line.get("text", "")).replace("{player_mail_content}", mail_content)
+		else:
+			result[i] = String(line).replace("{player_mail_content}", mail_content)
+	return result
 
 
 func get_weekday_group(weekday: String) -> String:
@@ -309,10 +480,33 @@ func get_weekday_group(weekday: String) -> String:
 
 
 ## murder_system.md/horror_events.md: 사망한 NPC는 스케줄이 삭제된다.
+## shop.md 승계 규칙("한쪽이 죽으면 남은 쪽이 가게를 잇는다")을 스케줄에도
+## 반영한다(2026-08-16 사용자 확정 - "벨제 가게 자리에 벨제가 없는데 사용은
+## 되네, 셰퍼드가 봐준다는 설정이면 셰퍼드 스케줄을 벨제처럼 해야 할 거
+## 같다"). 2인 상점의 파트너가 죽으면, 남은 쪽은 자기 스케줄 대신 죽은
+## 파트너의 스케줄을 그대로 따른다 - 둘 다 살아있는 동안엔 원래 자기 것 그대로.
+func _get_effective_schedule(npc_id: String) -> Dictionary:
+	var dead_partner_id := _get_dead_shop_partner_id(npc_id)
+	if not dead_partner_id.is_empty():
+		return get_definition(dead_partner_id).get("schedule", {})
+	return get_definition(npc_id).get("schedule", {})
+
+
+func _get_dead_shop_partner_id(npc_id: String) -> String:
+	for shop_id in ShopManager.get_shop_ids():
+		var owners: Array = ShopManager.get_shop_definition(shop_id).get("owner_npc_ids", [])
+		if owners.size() < 2 or not owners.has(npc_id):
+			continue
+		for partner_id in owners:
+			if String(partner_id) != npc_id and not is_alive(String(partner_id)):
+				return String(partner_id)
+	return ""
+
+
 func get_current_schedule_state(npc_id: String) -> String:
 	if not is_alive(npc_id):
 		return ""
-	var schedule: Dictionary = get_definition(npc_id).get("schedule", {})
+	var schedule: Dictionary = _get_effective_schedule(npc_id)
 	var group: Dictionary = schedule.get(get_weekday_group(TimeManager.get_weekday()), {})
 	if group.is_empty():
 		return ""
@@ -325,6 +519,81 @@ func get_current_schedule_state(npc_id: String) -> String:
 	return current_state
 
 
+## get_current_schedule_state()와 같은 판정이지만 "지금"이 아니라 임의 요일·
+## 시각 기준으로 그 시점의 상태를 구한다(사용자 지시, 2026-08-17). 알리바이
+## 조사 시각을 살인 시각(22시, 다들 이미 자기 자리로 돌아가 있어 서로 겹칠
+## 일이 거의 없음)이 아니라 더 이른 시각으로 잡을 때 씀 - MurderManager의
+## ALIBI_CHECK_HOUR 참고.
+func get_schedule_state_at(npc_id: String, weekday: String, time_string: String, is_raining: bool) -> String:
+	if not is_alive(npc_id):
+		return ""
+	var schedule: Dictionary = _get_effective_schedule(npc_id)
+	var group: Dictionary = schedule.get(get_weekday_group(weekday), {})
+	if group.is_empty():
+		return ""
+	if bool(group.get("visible_only_when_raining", false)) and not is_raining:
+		return ""
+	var state := ""
+	for entry in group.get("entries", []):
+		if time_string >= String(entry.get("time", "00:00")):
+			state = String(entry.get("state", ""))
+	return state
+
+
+## murder_system.md 경찰 조사 확장(목격 증언, 사용자 지시 2026-08-17) - npc_id가
+## 주어진 요일·비 여부 기준으로 "하루 종일" 스케줄상 같은 맵에 시간대가
+## 겹쳤던 다른 생존 NPC들을 {"npc_id","map_id"} 딕셔너리 배열로 돌려준다.
+## map_id를 같이 주는 이유(사용자 지시, 2026-08-17) - "그날 [이름]을 봤어"만
+## 으론 어디서 봤는지가 없어서 플레이어가 알리바이와 대조할 수가 없다.
+## 정확한 자리(state 문자열)가 아니라 _spawn_index의 실제 map_id로 비교한다 -
+## "pond_standing_plaza4"처럼 접두어 문자열만으론 장소를 못 알아내는 마커도
+## 정확히 잡아내기 위함. 결과 해석은 호출부(MurderManager) 몫: 비어있으면
+## 아무도 못 봄, 하나 이상이면 그중 하나를 골라 이름+장소를 증언.
+func get_witness_candidates(npc_id: String, weekday: String, is_raining: bool) -> Array[Dictionary]:
+	var my_ranges := _get_day_map_ranges(npc_id, weekday, is_raining)
+	if my_ranges.is_empty():
+		return []
+	var result: Array[Dictionary] = []
+	for other_id in get_all_ids():
+		if other_id == npc_id or not is_alive(other_id):
+			continue
+		var overlap_map_id := _find_overlap_map_id(my_ranges, _get_day_map_ranges(other_id, weekday, is_raining))
+		if not overlap_map_id.is_empty():
+			result.append({"npc_id": other_id, "map_id": overlap_map_id})
+	return result
+
+
+## get_witness_candidates()용 - 하루치 스케줄 항목을 (map_id, 시작시각, 종료시각)
+## 구간 배열로 펼친다. 마지막 항목의 종료시각은 자정(24:00)까지로 본다.
+func _get_day_map_ranges(npc_id: String, weekday: String, is_raining: bool) -> Array[Dictionary]:
+	var schedule: Dictionary = _get_effective_schedule(npc_id)
+	var group: Dictionary = schedule.get(get_weekday_group(weekday), {})
+	if group.is_empty():
+		return []
+	if bool(group.get("visible_only_when_raining", false)) and not is_raining:
+		return []
+	var entries: Array = group.get("entries", [])
+	var ranges: Array[Dictionary] = []
+	for i in entries.size():
+		var state := String(entries[i].get("state", ""))
+		var map_id := String(_spawn_index.get(state, {}).get("map_id", ""))
+		if map_id.is_empty():
+			continue
+		var end_time := "24:00" if i == entries.size() - 1 else String(entries[i + 1].get("time", "24:00"))
+		ranges.append({"map_id": map_id, "start": String(entries[i].get("time", "00:00")), "end": end_time})
+	return ranges
+
+
+## 겹치는 첫 구간의 map_id를 돌려준다(없으면 ""). 두 사람이 하루에 여러 곳에서
+## 겹칠 수 있지만, 증언 한 줄엔 장소 하나만 쓰므로 첫 번째로 찾은 것만 쓴다.
+func _find_overlap_map_id(a: Array[Dictionary], b: Array[Dictionary]) -> String:
+	for ra in a:
+		for rb in b:
+			if String(ra["map_id"]) == String(rb["map_id"]) and String(ra["start"]) < String(rb["end"]) and String(rb["start"]) < String(ra["end"]):
+				return String(ra["map_id"])
+	return ""
+
+
 ## get_current_schedule_state()가 고르는 "지금 활성 상태" 바로 다음으로 오늘
 ## 안에서 바뀔 예정인 항목을 반환한다({"time":"HH:MM","state":...}). 오늘
 ## 더 이상 남은 항목이 없으면(지금이 이미 마지막 항목) 빈 Dictionary - 자정
@@ -333,7 +602,7 @@ func get_current_schedule_state(npc_id: String) -> String:
 func get_next_schedule_change(npc_id: String) -> Dictionary:
 	if not is_alive(npc_id):
 		return {}
-	var schedule: Dictionary = get_definition(npc_id).get("schedule", {})
+	var schedule: Dictionary = _get_effective_schedule(npc_id)
 	var group: Dictionary = schedule.get(get_weekday_group(TimeManager.get_weekday()), {})
 	if group.is_empty():
 		return {}
@@ -485,6 +754,7 @@ func get_save_data() -> Dictionary:
 			"current_position": _serialize_position(npc_id),
 			"death_day": get_death_day(npc_id),
 			"scent_color": get_scent_color(npc_id),
+			"pending_milestone": (_pending_milestone.get(npc_id, {}) as Dictionary).duplicate(),
 		}
 	return {
 		"npc_states": npc_states,
@@ -510,9 +780,19 @@ func load_save_data(data: Dictionary) -> void:
 		var scent_color := String(state.get("scent_color", ""))
 		if not scent_color.is_empty():
 			_active_scent[npc_id] = scent_color
+		var pending: Dictionary = state.get("pending_milestone", {})
+		if not pending.is_empty():
+			_pending_milestone[npc_id] = pending.duplicate()
 	_dead_npc_ids.clear()
 	for npc_id in data.get("dead_npc_ids", []):
 		_dead_npc_ids.append(String(npc_id))
+
+
+## 디버그 전용(game_manager.gd F8) - 살인 시스템 테스트용으로 호감도를
+## 곧장 특정 값까지 끌어올린다. _add_affection()을 그대로 거쳐가서 murder
+## candidate 등록/호감도 임계 이벤트 트리거가 실제 플레이와 동일하게 작동한다.
+func debug_set_affection(npc_id: String, value: int) -> void:
+	_add_affection(npc_id, value - get_affection(npc_id))
 
 
 func _add_affection(npc_id: String, amount: int) -> void:
@@ -542,6 +822,10 @@ func _affection_tier_rank(tier: String) -> int:
 			return 0
 
 
+## 임계값을 처음 넘은 순간 "완료됨" 표시(재중복 방지)까지는 바로 하지만,
+## 실제 신호(affection_event_triggered/memento_received)와 추억의 물건 지급은
+## 아직 안 한다 - NPCManager.consume_pending_milestone()이 그 대사가 실제로
+## 화면에 뜰 때(get_daily_dialogue()가 골라 보여줄 때) 대신 내보낸다.
 func _check_affection_events(npc_id: String, affection: int) -> void:
 	var completed: Array = _completed_events.get(npc_id, [])
 	for event in get_definition(npc_id).get("affection_events", []):
@@ -549,11 +833,31 @@ func _check_affection_events(npc_id: String, affection: int) -> void:
 		if affection >= threshold and not completed.has(threshold):
 			completed.append(threshold)
 			_completed_events[npc_id] = completed
-			affection_event_triggered.emit(npc_id, threshold)
-			if String(event.get("type", "")) == "memento":
-				memento_received.emit(npc_id)
-				# 웃음: 추억의 물건 건넬 때.
-				request_emote(npc_id, EMOTE_SMILE)
+			_pending_milestone[npc_id] = {"threshold": threshold, "is_memento": String(event.get("type", "")) == "memento"}
+
+
+## get_daily_dialogue()가 대기 중인 마일스톤 대사를 실제로 보여주기로 결정한
+## 순간 호출한다 - 그때서야 신호를 내보내고(추억의 물건이면 지급도 그때).
+func consume_pending_milestone(npc_id: String) -> void:
+	if not _pending_milestone.has(npc_id):
+		return
+	var pending: Dictionary = _pending_milestone[npc_id]
+	_pending_milestone.erase(npc_id)
+	var threshold := int(pending.get("threshold", -1))
+	affection_event_triggered.emit(npc_id, threshold)
+	if bool(pending.get("is_memento", false)):
+		memento_received.emit(npc_id)
+		# 웃음: 추억의 물건 건넬 때.
+		request_emote(npc_id, EMOTE_SMILE)
+
+
+## 호감도 임계값이 아니라 특정 dialogue.daily 대사 줄이 실제로 화면에 나왔을 때
+## 아이템을 선물하는 경우(예: 모카의 커피) - dialogue_screen.gd가 lines 배열
+## 안의 {"type":"gift","item_id":...} 줄을 만나면 호출한다.
+func grant_gift_item(npc_id: String, item_id: String) -> void:
+	npc_gift_item_triggered.emit(npc_id, item_id)
+	# 웃음: 선물(예: 커피)을 건넬 때.
+	request_emote(npc_id, EMOTE_SMILE)
 
 
 func _on_day_changed(_day: int, _weekday: String) -> void:

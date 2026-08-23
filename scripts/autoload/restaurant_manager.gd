@@ -31,7 +31,12 @@ const OPEN_HOUR := 10
 const CLOSE_HOUR := 16
 const NEW_GUEST_CUTOFF_HOUR := 14
 const NEW_GUEST_CUTOFF_MINUTE := 30
-const DAILY_VISITOR_COUNT := 5
+## 기존 5는 좌석 회전을 아무리 빨리 해도 하루 수입이 항상 낮게 막혀서
+## "숙련도가 늘수록 더 번다"는 느낌이 안 난다는 사용자 피드백으로 상향함.
+## NPC 전체가 13명뿐이라(data/npc/*.json) 그보다는 작게 잡아 상식적인
+## 상한을 유지 - 실질 상한은 이 값과 그날 스케줄상 보이는 NPC 수, 좌석 3개
+## 회전 속도 중 가장 작은 값으로 자연히 정해진다.
+const DAILY_VISITOR_COUNT := 10
 const EATING_DURATION_MINUTES := 30
 
 var is_open := false
@@ -173,10 +178,13 @@ func cook_and_serve(station_index: int, ingredient_a: String, ingredient_b: Stri
 	var npc_id: String = station["npc_id"]
 	station["dish"] = dish
 	station["eating_until"] = _absolute_minutes() + EATING_DURATION_MINUTES
-	if bool(dish.get("is_weird", false)):
-		NPCManager.feed_with_preference(npc_id, NPCManager.FoodPreference.DISLIKED)
-	else:
-		NPCManager.feed(npc_id, String(dish.get("name", "")))
+	var preference: int = NPCManager.FoodPreference.DISLIKED
+	if not bool(dish.get("is_weird", false)):
+		preference = NPCManager.get_food_preference_for_ingredients(npc_id, (dish.get("ingredients", []) as Array))
+	NPCManager.feed_with_preference(npc_id, preference)
+	# EmailManager가 dish_served를 듣고 "오늘 이 NPC가 선호 재료 요리를 받았는지"를
+	# 별도 계산 없이 그대로 읽어 event_invite 메일 내용을 고르는 데 쓴다.
+	dish["preference"] = preference
 	# 실제로 요리를 받아서 호감도가 반영된 시점에만 "오늘 방문 완료"로 친다 -
 	# 앉기만 하고 서빙 전에 쫓겨나면(_evict_unserved_customers) 방문한 게
 	# 아니므로 다음에 다시 앉을 수 있어야 한다.
@@ -222,7 +230,14 @@ func get_save_data() -> Dictionary:
 
 
 func load_save_data(data: Dictionary) -> void:
-	is_open = bool(data.get("is_open", false))
+	# is_open을 세이브 값 그대로 복원하면 안 된다 - 바로 아래에서 _stations를
+	# 전부 빈 상태로 리셋하는데(재접속 시 실제로 앉아있는 손님/조리 중인 요리가
+	# 있을 리 없음), is_open만 true로 살아있으면 "문은 열려있는데 아무도 없는"
+	# 상태가 되어 NPC 스케줄이 다시 레스토랑으로 몰려든다(사용자 리포트 -
+	# 게임 종료 후 재접속하면 레스토랑이 열린 채로 남아 NPC들이 우르르 들어옴).
+	# _on_day_changed()가 "하루가 바뀌면 무조건 닫힌 상태로 시작"하는 것과 같은
+	# 이유로, 재접속도 항상 닫힌 상태로 시작해서 플레이어가 직접 다시 열어야 한다.
+	is_open = false
 	_todays_visitors = (data.get("todays_visitors", []) as Array).duplicate()
 	_visited_today = (data.get("visited_today", {}) as Dictionary).duplicate()
 	_invited_npc_id = String(data.get("invited_npc_id", ""))

@@ -825,6 +825,17 @@ func _forget_npc(npc_id: String) -> void:
 	NPCManager.clear_npc_physical_spot(npc_id)
 
 
+## 살인 발견 씬(main.gd) 전용 - 스케줄이 계속 이 NPC를 어딘가로 움직이고
+## 있어도(내부 계산은 그대로 진행됨) 화면에는 안 보이게만 한다. 씬이 끝나면
+## 다시 false로 불러서 되돌려야 한다. 이 시점에 스프라이트가 아직 없으면
+## (플레이어가 이 NPC의 평소 맵에 없던 경우) 조용히 넘어간다 - 나중에
+## 스케줄상 다시 등장해도 그때는 정상적으로 보임.
+func set_npc_sprite_hidden(npc_id: String, hidden: bool) -> void:
+	var sprite: Node2D = _active_sprites.get(npc_id)
+	if sprite != null:
+		sprite.visible = not hidden
+
+
 ## Avoids typing the instance as the NPCSprite class_name on purpose: that
 ## resolution depends on the editor's global script class cache being fresh,
 ## which isn't guaranteed on a plain headless run. call() dispatches by name

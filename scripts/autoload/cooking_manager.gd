@@ -108,6 +108,7 @@ func cook(ingredient_a: String, ingredient_b: String, use_rat_poison: bool = fal
 		"price": int(definition.get("price", 0)),
 		"is_weird": final_id == WEIRD_DISH_ID,
 		"poisoned": use_rat_poison,
+		"ingredients": [ingredient_a, ingredient_b],
 	}
 	dish_cooked.emit(dish)
 	return dish

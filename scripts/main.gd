@@ -17,6 +17,7 @@ signal serving_area_interacted(station_index: int)
 signal kitchen_station_interacted(station_id: String)
 signal computer_interacted
 signal collection_interacted
+signal jukebox_interacted
 signal npc_talk_interacted(npc_id: String)
 ## StorageBoxManager - 근처에 이미 상자가 있을 때 E를 누르면(설치 아님, 열기).
 signal storage_box_interacted(cell: Vector2i)
@@ -27,7 +28,20 @@ const RESTAURANT_NOT_READY_MESSAGE := "먼저 레스토랑을 열자."
 const ALREADY_SERVED_MESSAGE := "이미 손님이 요리를 먹고 있다."
 const RESTAURANT_HOURS_MESSAGE := "오전 10시부터 오후 4시까지만 영업할 수 있다."
 const RESTAURANT_CANNOT_LEAVE_MESSAGE := "영업 중에는 레스토랑을 벗어날 수 없다."
+## horror_events.md "NPC 집 잠금" - "NPC맵=NPC가게"(사용자 확정 2026-08-16)라
+## 상점 맵으로 해석해서 막는다.
+const SHOP_LOCKED_MESSAGE := "문이 굳게 잠겨 있다."
+## 살인 대기 중인 밤(비 오는 중 + 22시 전)에 취침을 막을 때 쓰는 문구 - 첫
+## 살인 전엔 공포 요소를 인지시키면 안 되므로(CLAUDE.md) 노골적인 암시 없이
+## 평범한 "잠이 안 온다" 톤으로 잡았다. 문구는 임시 - 기획 확정 시 교체 가능.
+const SLEEPLESS_NIGHT_MESSAGE := "잠이 오지 않아."
 const MESSAGE_DURATION := 2.0
+## 밭갈기/물주기처럼 한 프레임에 즉시 끝나는 액션은 자체 지속시간이 없어서,
+## player.tool_overlay 사용 포즈가 최소 이만큼은 눈에 보이도록 붙잡아둔다
+## (낚시는 자체 대기시간이 있어 이 상수를 안 쓴다. 망치 회수는 사용자 지시로
+## 포즈 대상에서 제외, 2026-08-12).
+const TOOL_USE_HOLD_SECONDS := 0.35
+const FARM_TILE_HIGHLIGHT_BORDER := 2
 
 const FADE_DURATION := 0.2
 const UI_DIM_ALPHA := 0.5
@@ -67,6 +81,7 @@ const RESTAURANT_SIGN_OPEN_TEXTURE := preload("res://assets/ui/sign_open.png")
 const RESTAURANT_SIGN_CLOSE_TEXTURE := preload("res://assets/ui/sign_close.png")
 
 @onready var world_map: WorldMap = get_node_or_null("HomeMap") as WorldMap
+@onready var npc_world_manager: Node2D = get_node_or_null("HomeMap/NPCLayer") as Node2D
 @onready var player: PlayerController = get_node_or_null("HomeMap/Player") as PlayerController
 @onready var hud: Control = get_node_or_null("UI/HUD") as Control
 @onready var npc_layer: Node2D = get_node_or_null("HomeMap/NPCLayer") as Node2D
@@ -84,7 +99,17 @@ const RESTAURANT_SIGN_CLOSE_TEXTURE := preload("res://assets/ui/sign_close.png")
 @onready var livestock_confirm_popup: Control = get_node_or_null("UI/LivestockConfirmPopup") as Control
 @onready var book_screen: Control = get_node_or_null("UI/BookScreen") as Control
 @onready var storage_screen: Control = get_node_or_null("UI/StorageScreen") as Control
+@onready var jukebox_screen: Control = get_node_or_null("UI/JukeboxScreen") as Control
 @onready var _restaurant_sign: Sprite2D = get_node_or_null("HomeMap/RestaurantSign") as Sprite2D
+## horror_events.md "레스토랑 액자 이벤트" - Wall_deco 레이어의 액자 타일(15,2)
+## 위에 겹쳐 놓은 오버레이. RestaurantSign과 같은 방식으로 world_map 하위에
+## 미리 배치해두고, 살인 발생 후 첫 입장 때만 색을 빨갛게 튀겼다 되돌린다.
+@onready var _restaurant_frame_blood: ColorRect = get_node_or_null("HomeMap/RestaurantFrameBlood") as ColorRect
+const RESTAURANT_FRAME_CELL := Vector2i(15, 2)
+const RESTAURANT_FRAME_BLOOD_COLOR := Color(0.6, 0.0, 0.0, 0.85)
+const RESTAURANT_FRAME_BLOOD_IN_SECONDS := 0.15
+const RESTAURANT_FRAME_BLOOD_HOLD_SECONDS := 3.0
+const RESTAURANT_FRAME_BLOOD_OUT_SECONDS := 0.4
 ## main.tscn 안에서 이 노드의 기본 color는 불투명 검정이다(title_screen.gd가
 ## main.tscn으로 넘어가기 직전에 자기 화면을 먼저 검게 페이드하고 넘어오므로,
 ## 무거운 씬 인스턴싱이 끝난 첫 프레임에 게임 화면이 잠깐 안 가려진 채
@@ -103,7 +128,38 @@ const RESTAURANT_SIGN_CLOSE_TEXTURE := preload("res://assets/ui/sign_close.png")
 ## (world_map 노드 자체는 재생성되지 않으므로) 계속 재사용한다.
 var _box_preview: Sprite2D = null
 
+## 가구 설치 미리보기 - _box_preview와 완전히 같은 방식(world_map 자식,
+## _build_furniture_preview()에서 한 번만 생성)이지만 칸수(footprint)가
+## 아이템마다 달라서 크기/오프셋을 매 프레임 다시 계산한다.
+var _furniture_preview: Sprite2D = null
+
+## 바닥/벽 장식 설치 미리보기 - _furniture_preview와 완전히 같은 패턴
+## (day10, 벽장식 시스템 도입을 계기로 가구 옆에 나란히 추가).
+var _floor_decor_preview: Sprite2D = null
+var _wall_decor_preview: Sprite2D = null
+
+## 괭이/물뿌리개를 손에 들고 있을 때 밭갈기/물주기 대상 칸(플레이어가 서 있는
+## 칸 - FarmingManager.get_available_action()과 같은 기준)에 뜨는 반투명 칸
+## 표시 - _box_preview와 같은 패턴(world_map 자식, 한 번만 생성, modulate로
+## 흰색/붉은색만 바꿔가며 재사용). 실제 아이템 그림이 아니라 흰 정사각형
+## 하나를 코드로 만들어 쓴다(assets/ 폴더에 새 그림 추가 불가 - CLAUDE.md).
+var _farm_tile_highlight: Sprite2D = null
+
 var _is_transitioning := false
+## _on_murder_occurred() 진행 중에는 참 - 플레이어가 player.walk_to()로
+## 스크립트 이동하는 동안 워프 지점을 밟아도 _process()의 평소 "밟으면 자동
+## 다음 맵" 로직이 끼어들지 않게 막는다(끼어들면 같은 전환을 두 시스템이
+## 동시에 처리하려다 페이드가 서로 꼬여서 멈춰버림 - 실제로 이 버그로 게임이
+## 응답 없음 상태가 됐었음, 2026-08-16). 맵 전환은 이 씬이 진행되는 동안
+## _on_murder_occurred() 자신이 명시적으로만 처리한다.
+var _murder_scene_active := false
+## 괭이/물뿌리개 포즈 재생 중(TOOL_USE_HOLD_SECONDS)에 E를 한 번 더 누르면
+## _on_interact_pressed()가 재진입해서 perform_till()이 아직 커밋 안 된 같은
+## 칸을 "till"로 다시 판정 - 첫 호출이 끝나기 전에 두 번째 코루틴이 같은
+## 애니메이션/타이머를 새로 시작해버리는 레이스였다(사용자 리포트: "괭이질
+## 한 번 더 하면 안 갈아둔 상태로 복귀", 2026-08-16). 진행 중엔 새 농사
+## 액션을 아예 안 받는다.
+var _farm_action_active := false
 var _message_timer := 0.0
 var _sleep_prompt_shown := false
 var _is_sleep_transition_playing := false
@@ -155,15 +211,26 @@ func _ready() -> void:
 		status_screen.book_open_requested.connect(book_screen.open_book)
 	if storage_screen != null:
 		storage_box_interacted.connect(storage_screen.open_box)
+	if jukebox_screen != null:
+		jukebox_interacted.connect(jukebox_screen.open)
 	RestaurantManager.restaurant_opened.connect(_update_restaurant_sign)
 	RestaurantManager.restaurant_closed.connect(_update_restaurant_sign)
 	InventoryManager.item_used.connect(_on_item_used)
 	CookingManager.recipe_learned.connect(_on_recipe_learned)
 	TimeManager.player_collapsed.connect(_play_collapse_transition)
+	TimeManager.hour_changed.connect(_on_hour_changed)
+	FurnitureManager.furniture_changed.connect(_on_decor_changed)
+	FloorDecorManager.floor_decor_changed.connect(_on_decor_changed)
+	WallDecorManager.wall_decor_changed.connect(_on_decor_changed)
+	ShopManager.furniture_hammer_granted.connect(_on_furniture_hammer_granted)
+	FishingManager.fishing_ended.connect(_on_fishing_ended)
+	MurderManager.murder_occurred.connect(_on_murder_occurred)
 	_build_box_preview()
+	_build_furniture_preview()
+	_build_floor_decor_preview()
+	_build_wall_decor_preview()
+	_build_farm_tile_highlight()
 	_load_map("Home", "start_spawn")
-	if OS.is_debug_build():
-		GameManager._debug_give_test_equipment()
 
 
 func _on_item_used(item_id: String) -> void:
@@ -187,6 +254,164 @@ func _on_recipe_learned(recipe_id: String, via_item: bool) -> void:
 	_show_temporary_message("%s 레시피를 획득했다!" % recipe_name)
 
 
+## 23시가 되면 취침(24시 강제취침)이 머지않았음을 미리 알린다(사용자 지시).
+const SLEEPY_WARNING_HOUR := 23
+const SLEEPY_WARNING_MESSAGE := "졸려 쓰러질 거 같다..."
+
+
+func _on_hour_changed(hour: int) -> void:
+	if hour == SLEEPY_WARNING_HOUR:
+		_show_temporary_message(SLEEPY_WARNING_MESSAGE)
+
+
+## 가구/바닥장식/벽장식이 배치·회수될 때마다(emits_light인 아이템이 아니어도
+## 매번 호출되지만 개수가 적어 비용 무시 가능) 조명을 다시 계산한다 - 맵을
+## 나갔다 들어오지 않아도 조명 가구를 놓는 즉시 방이 밝아지도록.
+func _on_decor_changed() -> void:
+	if _lighting_layer == null or world_map == null:
+		return
+	_lighting_layer.rebuild_lights(world_map, GameManager.current_map_id.ends_with("_interior"), GameManager.current_map_id)
+
+
+## 가구/바닥장식/벽장식 회수(프롬프트 표시 + E 실행 둘 다)는 가구용 망치를
+## 손에 들고 있을 때만 동작한다(사용자 지시) - 그냥 지나갈 때마다 "E 가구
+## 회수" 프롬프트가 뜨는 게 거슬린다는 피드백 해결. 망치는 우디 가게에서
+## 가구/바닥장식/벽장식을 처음 사면 선물로 받는다(ShopManager 참고).
+func _is_furniture_hammer_equipped() -> bool:
+	return EquipmentManager.get_equipped(EquipmentManager.HAND_SLOT) == ShopManager.FURNITURE_HAMMER_ITEM_ID
+
+
+## 가구용 망치를 처음 받는 순간(사용자 지시: "구매창은 바로 닫히고 우디의
+## 말이 뜨고 전해받는게 낫다") - 상점 창을 닫고, 그 상점 주인이 선물 대사를
+## 하는 일회성 대화를 강제로 띄운다(dialogue_screen.open_special() 참고,
+## 요일/호감도 로테이션 없이 woody.json의 furniture_hammer_gift_lines만 그대로
+## 보여줌). 아직 대사가 안 채워져 있으면 dialogue_screen이 알아서 자리표시자로
+## 대체한다.
+func _on_furniture_hammer_granted(npc_id: String) -> void:
+	if shop_screen != null:
+		shop_screen.close()
+	if dialogue_screen != null:
+		var lines: Array = NPCManager.get_definition(npc_id).get("furniture_hammer_gift_lines", [])
+		dialogue_screen.open_special(npc_id, lines)
+
+
+const MURDER_DISCOVERY_MAP_ID := "plaza3"
+const MURDER_DISCOVERY_NPC_ID := "poli"
+const MURDER_DISCOVERY_TRIGGER := "murder_discovery"
+## plaza3.tmx의 Spawn 오브젝트 레이어에 이 이름으로 지점 하나를 추가해야
+## 한다(사용자 배치 예정) - 도착 후 폴리한테까지 마지막으로 뛰어가는 목적지.
+const MURDER_DISCOVERY_POLI_SPAWN := "poli_murder_scene"
+## 사용자 확정 경로표: 각 맵에서 plaza3 방향으로 가려면 어느 맵을 향해
+## 뛰어야 하는지. 표에 없는 맵(실내)은 "문(그 맵의 워프 아무거나)"으로
+## 향한다 - WorldMap.get_any_warp() 참고.
+const MURDER_RUN_CHAIN := {
+	"plaza5": "plaza4", "plaza4": "plaza2", "plaza2": "plaza1", "plaza1": "plaza3", "Home": "plaza1",
+}
+const POLI_DECOY_SCENE := preload("res://scenes/npc_sprite.tscn")
+
+## MurderManager.murder_occurred - 살인 발생 시각(오후 10시)에 플레이어가 뭘
+## 하고 있었든 강제로 끊고 들어가는 발견 씬(사용자 지시): 비명 → 지금 있는
+## 맵에서 plaza3까지 맵을 몇 개 거치든 실제로 뛰어감(MURDER_RUN_CHAIN을 한
+## 칸씩 따라가며 그 방향 워프까지 player.walk_to()로 뛰고, 워프를 밟으면
+## 평소 이동과 똑같이 _load_map()이 페이드와 함께 다음 맵으로 넘김) →
+## plaza3 도착 즉시 폴리를 그 자리에 세워두고(실제 스케줄 스프라이트는 숨기고
+## 자리표시용 분신을 하나 세움 - 스케줄이 그를 계속 다른 곳으로 끌고 가려는
+## 걸 그대로 두면 씬 도중 사라져 보이는 문제 방지) 그 옆까지 뛰어가서 강제
+## 대화. 대화가 끝나면 분신을 지우고 원래 스프라이트를 다시 보이게 한다.
+## murder_number는 지금 연출에서는 안 씀(1차/2차 동일 연출).
+func _on_murder_occurred(_victim_id: String, _murder_number: int) -> void:
+	_close_all_screens()
+	_murder_scene_active = true
+	AudioManager.play_sfx(AudioManager.SFX_SCREAM)
+	while GameManager.current_map_id != MURDER_DISCOVERY_MAP_ID:
+		var current_map_id := GameManager.current_map_id
+		var next_map_id := String(MURDER_RUN_CHAIN.get(current_map_id, ""))
+		var warp: Dictionary = world_map.get_warp_for_target_map(next_map_id) if not next_map_id.is_empty() else world_map.get_any_warp()
+		if warp.is_empty():
+			push_error("murder discovery run: no warp found from %s" % current_map_id)
+			_murder_scene_active = false
+			return
+		await player.walk_to(warp["position"])
+		await _load_map(String(warp["target_map"]), String(warp["target_spawn"]))
+	# 이 시각 plaza3에 스케줄상 이미 있던 다른 NPC들까지 배경에 태연히 서있으면
+	# 어색하다는 사용자 지적(2026-08-16) - 폴리(분신으로 대체) 포함 전원을
+	# 씬 동안 숨긴다.
+	_set_all_npc_sprites_hidden(true)
+	var poli_spawn: Vector2 = world_map.get_spawn_position(MURDER_DISCOVERY_POLI_SPAWN)
+	var scene_props: Array[Node2D] = []
+	if poli_spawn != Vector2.INF:
+		scene_props = _spawn_murder_discovery_poli_decoy(poli_spawn)
+		await player.walk_to(poli_spawn)
+	if dialogue_screen != null:
+		var trigger: Dictionary = NPCManager.get_definition(MURDER_DISCOVERY_NPC_ID).get("story_dialogue", {}).get(MURDER_DISCOVERY_TRIGGER, {})
+		dialogue_screen.open_special(MURDER_DISCOVERY_NPC_ID, (trigger.get("lines", []) as Array).duplicate())
+		await dialogue_screen.closed
+	# 대화가 끝나자마자 뚝 끊기지 않도록, 암전 → 분신/소품 정리 → 전원 다시
+	# 보이게 → 암전 해제로 씬을 마무리한다("살해현장이 사라진다"는 사용자
+	# 요청) - 플레이어는 같은 자리(plaza3)에서 다시 조작 가능해진다.
+	await _fade_out()
+	_cleanup_murder_discovery_scene_props(scene_props)
+	_set_all_npc_sprites_hidden(false)
+	_murder_scene_active = false
+	await _fade_in()
+
+
+func _set_all_npc_sprites_hidden(hidden: bool) -> void:
+	if npc_world_manager == null:
+		return
+	for npc_id in NPCManager.get_all_ids():
+		npc_world_manager.set_npc_sprite_hidden(npc_id, hidden)
+
+
+## 사용자가 아직 안 그려서 파일이 없을 수 있음 - ResourceLoader.exists()로
+## 확인해서 없으면 조용히 생략한다(다른 사용자 제공 에셋들과 동일 패턴).
+## 폴리 옆에 놓을 오프셋은 임의값 - 실제 그림 크기 보고 조정 필요.
+const POLI_SACK_TEXTURE_PATH := "res://assets/npc/poli_murder_sack.png"
+const POLI_SACK_OFFSET := Vector2(10, 4)
+
+## npc_world_manager.gd의 npc_sprite.tscn 인스턴스를 하나 더 만들어(같은
+## 씬이라 겉모습은 완전히 동일) 정해진 자리에 고정시켜둔다 - 진짜 스케줄
+## 스프라이트는 _set_all_npc_sprites_hidden()이 이미 숨겨둔 상태(호출부 참고).
+## 자루 그림이 있으면 그 옆에 같이 세워둔다(씬 전용 소품이라 정리 대상에
+## 같이 담아서 반환).
+func _spawn_murder_discovery_poli_decoy(spawn_position: Vector2) -> Array[Node2D]:
+	var decoy := POLI_DECOY_SCENE.instantiate() as Node2D
+	world_map.add_child(decoy)
+	decoy.call("set_npc_id", MURDER_DISCOVERY_NPC_ID)
+	decoy.call("snap_to", spawn_position)
+	decoy.call("face_down")
+	var nodes: Array[Node2D] = [decoy]
+	if ResourceLoader.exists(POLI_SACK_TEXTURE_PATH):
+		var sack := Sprite2D.new()
+		sack.texture = load(POLI_SACK_TEXTURE_PATH)
+		sack.position = spawn_position + POLI_SACK_OFFSET
+		world_map.add_child(sack)
+		nodes.append(sack)
+	return nodes
+
+
+func _cleanup_murder_discovery_scene_props(nodes: Array[Node2D]) -> void:
+	for node in nodes:
+		if node != null:
+			node.queue_free()
+
+
+## 살인 발견 씬처럼 플레이어가 뭘 하던 중이든 강제로 끼어드는 이벤트 전에,
+## 열려있을 수 있는 화면들을 방어적으로 닫는다 - close() 메서드가 있는
+## 화면만 골라 부른다(이 프로젝트 화면들은 전부 이 컨벤션을 따름).
+func _close_all_screens() -> void:
+	for screen in [shop_screen, cooking_screen, computer_screen, collection_screen, dialogue_screen, status_screen, kitchen_screen, serving_screen, fishing_screen, book_screen, storage_screen, jukebox_screen]:
+		if screen != null and screen.has_method("close"):
+			screen.close()
+
+
+## 낚시 사용 포즈(_on_interact_pressed의 FishingManager.start_fishing() 지점에서
+## 켰음)를 입질 대기든 미니게임이든 낚싯줄이 완전히 걷힌 시점에 끈다 - 성공/실패/
+## 취소(cancel_fishing()도 이 신호를 쏨, 2026-08-12) 전부 이 한 곳으로 모인다.
+func _on_fishing_ended(_result: Dictionary) -> void:
+	player.tool_overlay.stop()
+
+
 ## UI 창이 하나라도 열려있는 동안의 마우스 클릭에 공통 클릭 효과음을 준다
 ## (사용자 지시) - Control의 _gui_input이 이벤트를 "처리됨"으로 표시하면
 ## _unhandled_input까지 전파가 안 되므로(버튼 클릭 대부분이 여기 해당), 그
@@ -203,16 +428,37 @@ func _input(event: InputEvent) -> void:
 		AudioManager.play_sfx(AudioManager.SFX_CLICK)
 
 
-## 상자 미리보기가 떠 있을 때 좌클릭하면 그 자리에 설치한다(사용자 지시 -
-## E 대신 마우스 클릭). 모달이 열려있으면 _update_box_preview()가 이미
-## _box_preview.visible을 꺼두므로 여기서 다시 확인할 필요는 없다.
+## 상자/가구/바닥장식/벽장식 미리보기가 떠 있을 때 좌클릭하면 그 자리에
+## 설치한다(사용자 지시 - E 대신 마우스 클릭). 모달이 열려있으면
+## _update_box_preview()/_update_furniture_preview()/_update_floor_decor_preview()/
+## _update_wall_decor_preview()가 이미 각 preview.visible을 꺼두므로 여기서
+## 다시 확인할 필요는 없다. 손에 장착 가능한 아이템은 한 번에 하나뿐이라
+## 네 미리보기가 동시에 보이는 경우는 없다.
 func _unhandled_input(event: InputEvent) -> void:
-	if _box_preview == null or not _box_preview.visible:
+	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
 		return
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var message := StorageBoxManager.place_box(_box_preview.position)
-		if not message.is_empty():
-			_show_temporary_message(message)
+	if _box_preview != null and _box_preview.visible:
+		var box_message := StorageBoxManager.place_box(_box_preview.position)
+		if not box_message.is_empty():
+			_show_temporary_message(box_message)
+		get_viewport().set_input_as_handled()
+		return
+	if _furniture_preview != null and _furniture_preview.visible:
+		var furniture_message := FurnitureManager.place_furniture(_furniture_preview.position)
+		if not furniture_message.is_empty():
+			_show_temporary_message(furniture_message)
+		get_viewport().set_input_as_handled()
+		return
+	if _floor_decor_preview != null and _floor_decor_preview.visible:
+		var floor_decor_message := FloorDecorManager.place_floor_decor(_floor_decor_preview.position)
+		if not floor_decor_message.is_empty():
+			_show_temporary_message(floor_decor_message)
+		get_viewport().set_input_as_handled()
+		return
+	if _wall_decor_preview != null and _wall_decor_preview.visible:
+		var wall_decor_message := WallDecorManager.place_wall_decor(_wall_decor_preview.position)
+		if not wall_decor_message.is_empty():
+			_show_temporary_message(wall_decor_message)
 		get_viewport().set_input_as_handled()
 
 
@@ -228,6 +474,27 @@ func _update_restaurant_sign() -> void:
 	_restaurant_sign.texture = RESTAURANT_SIGN_OPEN_TEXTURE if RestaurantManager.is_open else RESTAURANT_SIGN_CLOSE_TEXTURE
 
 
+## RestaurantSign과 달리 이 오버레이는 벽에 평평하게 붙은 장식이라(플레이어
+## 앞뒤로 가려질 일이 없음) Y-sort 앵커 없이 타일 좌표를 그대로 픽셀로
+## 변환한다 - get_tile_sort_y()는 YSortAnchor가 정의된 칸에만 의미가 있다.
+## HorrorEventManager.consume_restaurant_frame_blood_trigger()가 참(=이번
+## 살인 건수에 대해 아직 안 보여줬음)일 때만 색을 튀긴다.
+func _maybe_play_restaurant_frame_blood_effect() -> void:
+	if _restaurant_frame_blood == null or world_map == null:
+		return
+	if not HorrorEventManager.consume_restaurant_frame_blood_trigger():
+		return
+	_restaurant_frame_blood.position = Vector2(RESTAURANT_FRAME_CELL) * 16.0
+	_restaurant_frame_blood.visible = true
+	_restaurant_frame_blood.color.a = 0.0
+	AudioManager.play_sfx(AudioManager.SFX_BLOOD)
+	var tween := create_tween()
+	tween.tween_property(_restaurant_frame_blood, "color", RESTAURANT_FRAME_BLOOD_COLOR, RESTAURANT_FRAME_BLOOD_IN_SECONDS)
+	tween.tween_interval(RESTAURANT_FRAME_BLOOD_HOLD_SECONDS)
+	tween.tween_property(_restaurant_frame_blood, "color:a", 0.0, RESTAURANT_FRAME_BLOOD_OUT_SECONDS)
+	tween.tween_callback(func() -> void: _restaurant_frame_blood.visible = false)
+
+
 func _process(delta: float) -> void:
 	_update_ui_blocking()
 	if world_map == null or player == null:
@@ -239,6 +506,10 @@ func _process(delta: float) -> void:
 	_close_serving_screen_if_out_of_range(interactable)
 	_close_storage_screen_if_out_of_range()
 	_update_box_preview()
+	_update_furniture_preview()
+	_update_floor_decor_preview()
+	_update_wall_decor_preview()
+	_update_farm_tile_highlight()
 	if _is_npc_talk_priority(interactable):
 		var talk_npc_id := String(_nearest_talkable_npc(player.position).get("npc_id", ""))
 		_handle_npc_encounter(talk_npc_id)
@@ -249,10 +520,14 @@ func _process(delta: float) -> void:
 			player.show_interaction_prompt(npc_prompt)
 		return
 	_handle_npc_encounter("")
+	if _murder_scene_active:
+		return
 	var warp: Dictionary = world_map.get_warp_at(player.position)
 	if not warp.is_empty():
 		if _is_building_transition(warp):
-			if _message_timer <= 0.0:
+			if _is_locked_shop_map(String(warp.get("target_map", ""))):
+				player.hide_interaction_prompt()
+			elif _message_timer <= 0.0:
 				player.show_interaction_prompt("E 이동")
 			return
 		player.hide_interaction_prompt()
@@ -263,9 +538,20 @@ func _process(delta: float) -> void:
 	# 물어본 뒤(아니오를 골랐어도) 그 자리에 계속 서 있는 동안 또 안 뜨게
 	# _sleep_prompt_shown으로 막고, 타일을 벗어나면 다시 물을 수 있게 푼다.
 	if interactable_name == "sleep":
-		if not _sleep_prompt_shown and sleep_confirm_popup != null:
+		if not _sleep_prompt_shown:
 			_sleep_prompt_shown = true
-			sleep_confirm_popup.open()
+			## TimeManager.sleep_now()는 시간을 분 단위로 흘려보내지 않고 바로
+			## 다음날로 점프해서, 22시(MurderManager.MURDER_HOUR)에 걸리는
+			## 판정(살인/밤 이벤트)이 통째로 스킵되는 문제가 있었다(사용자
+			## 리포트, 2026-08-17: "그럼 살인 스킵돼?"). 취침 자체를 못 하게
+			## 막아서, 22시를 실제 시계 흐름으로 반드시 통과하게 한다 - 그날
+			## 밤 정말 살인이 걸릴지는 여기서 확정 못 하지만(WeatherManager가
+			## "비 오고 대기 중"만 보므로 미확정), 조용히 지나쳤을 때보다
+			## 과하게 막는 쪽이 안전하다.
+			if WeatherManager.is_murder_pending() and WeatherManager.is_raining() and TimeManager.current_hour < MurderManager.MURDER_HOUR:
+				_show_temporary_message(SLEEPLESS_NIGHT_MESSAGE)
+			elif sleep_confirm_popup != null:
+				sleep_confirm_popup.open()
 		return
 	_sleep_prompt_shown = false
 	if interactable_name.begins_with(KITCHEN_STATION_PREFIX):
@@ -284,7 +570,7 @@ func _process(delta: float) -> void:
 		else:
 			player.hide_interaction_prompt()
 		return
-	if interactable_name == "computer" or interactable_name == "collection":
+	if interactable_name == "computer" or interactable_name == "collection" or interactable_name == "jukebox":
 		if _message_timer <= 0.0:
 			player.show_interaction_prompt("E 사용")
 		return
@@ -314,9 +600,31 @@ func _process(delta: float) -> void:
 			return
 		var box_info := StorageBoxManager.get_nearest_box(player.position, GameManager.current_map_id)
 		if not box_info.is_empty():
-			if _message_timer <= 0.0:
+			# 망치를 들고 있으면 상자도 "열기" 대신 "회수" 대상이다(사용자 지시 -
+			# 망치 들고 있는데 상자 열기만 뜨고 회수할 방법이 없어서 이상했다는
+			# 리포트). 망치가 없을 때는 기존 그대로 상자 열기.
+			if _is_furniture_hammer_equipped():
+				if _message_timer <= 0.0:
+					player.show_interaction_prompt("E 상자 회수")
+			elif _message_timer <= 0.0:
 				player.show_interaction_prompt("E 상자 열기")
 			return
+		if _is_furniture_hammer_equipped():
+			var furniture_info := FurnitureManager.get_nearest_furniture(player.position, GameManager.current_map_id)
+			if not furniture_info.is_empty():
+				if _message_timer <= 0.0:
+					player.show_interaction_prompt("E 가구 회수")
+				return
+			var wall_decor_info := WallDecorManager.get_nearest_wall_decor(player.position, GameManager.current_map_id)
+			if not wall_decor_info.is_empty():
+				if _message_timer <= 0.0:
+					player.show_interaction_prompt("E 그림 회수")
+				return
+			var floor_decor_info := FloorDecorManager.get_nearest_floor_decor(player.position, GameManager.current_map_id)
+			if not floor_decor_info.is_empty():
+				if _message_timer <= 0.0:
+					player.show_interaction_prompt("E 러그 회수")
+				return
 		if FishingManager.is_waiting_for_bite():
 			if _message_timer <= 0.0:
 				player.show_interaction_prompt("E 낚시 취소")
@@ -362,6 +670,8 @@ func _farm_action_prompt(action: String) -> String:
 			return "E 밭 갈기"
 		"water":
 			return "E 물 주기"
+		"needs_till":
+			return "E 물 주기"
 		"plant":
 			return "E 씨앗 심기"
 		"harvest":
@@ -397,12 +707,9 @@ func _handle_animal_interaction(stall_index: int) -> void:
 				pass
 			elif bool(request.get("denied", false)):
 				_show_temporary_message(String(request.get("message", "")))
-			elif not bool(request.get("needs_confirm", true)):
-				# 우유가 없는 동물(돼지 등)은 확인 팝업 없이 바로 도살한다(사용자 지시).
+			else:
+				# 확인 팝업 없이 바로 도살한다(모든 동물 공통, 사용자 지시).
 				_show_temporary_message(LivestockManager.perform_slaughter(stall_index))
-			elif livestock_confirm_popup != null:
-				_pending_slaughter_stall = stall_index
-				livestock_confirm_popup.open_with_message(String(request.get("message", "")))
 		_:
 			AudioManager.play_sfx(AudioManager.SFX_BEEP)
 			_show_temporary_message("여물/양동이/작은 칼을 손에 장착해야 한다.")
@@ -444,6 +751,7 @@ func _is_any_modal_open() -> bool:
 		or (livestock_confirm_popup != null and livestock_confirm_popup.modulate.a > 0.0) \
 		or (book_screen != null and book_screen.modulate.a > 0.0) \
 		or (storage_screen != null and storage_screen.visible) \
+		or (jukebox_screen != null and jukebox_screen.modulate.a > 0.0) \
 		or _is_sleep_transition_playing
 
 
@@ -537,7 +845,7 @@ func _update_box_preview() -> void:
 		return
 	var show_preview := not _is_any_modal_open() \
 		and EquipmentManager.get_equipped(EquipmentManager.HAND_SLOT) == StorageBoxManager.BOX_ITEM_ID \
-		and GameManager.current_map_id == StorageBoxManager.HOME_MAP_ID
+		and StorageBoxManager.is_placement_allowed(GameManager.current_map_id)
 	_box_preview.visible = show_preview
 	if not show_preview:
 		return
@@ -553,11 +861,172 @@ func _update_box_preview() -> void:
 	_box_preview.modulate = Color(1, 1, 1, 0.5) if valid else Color(1, 0.4, 0.4, 0.5)
 
 
+## 통짜 흰 사각형 대신 2px 테두리만 있는 정사각형 하나를 코드로 만들어 쓴다
+## (놓을 아이템 그림이 없으니, 사용자 지시로 채우기 대신 테두리로 변경,
+## 2026-08-12). WorldMap.FLAT_Z_INDEX(-1)를 써서 바닥 흙/작물 스프라이트와
+## 같은 층에 두고 캐릭터보다 아래에 그려지게 한다(원래 캐릭터 위에 그려지던
+## 버그 리포트).
+func _build_farm_tile_highlight() -> void:
+	_farm_tile_highlight = Sprite2D.new()
+	_farm_tile_highlight.visible = false
+	_farm_tile_highlight.z_index = WorldMap.FLAT_Z_INDEX
+	var size := WorldMap.TILE_SIZE
+	var image := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	image.fill(Color(0, 0, 0, 0))
+	for y in size:
+		for x in size:
+			var on_border := x < FARM_TILE_HIGHLIGHT_BORDER or x >= size - FARM_TILE_HIGHLIGHT_BORDER \
+				or y < FARM_TILE_HIGHLIGHT_BORDER or y >= size - FARM_TILE_HIGHLIGHT_BORDER
+			if on_border:
+				image.set_pixel(x, y, Color(1, 1, 1, 0.85))
+	_farm_tile_highlight.texture = ImageTexture.create_from_image(image)
+	world_map.add_child(_farm_tile_highlight)
+
+
+## 괭이/물뿌리개를 들고 밭(FarmingManager.FARM_MAP_ID)의 Farmable 칸 위에 서
+## 있을 때만 표시한다 - 같은 맵이어도 Farmable이 아닌 칸(길/잔디 등)에서는
+## 뜨면 안 된다는 리포트로 is_farmable_cell 체크 추가(2026-08-12). 할 수
+## 있고 없고에 따라 색을 바꾸지 않는다(사용자 지시) - 항상 같은 테두리로
+## 위치만 보여준다.
+func _update_farm_tile_highlight() -> void:
+	if _farm_tile_highlight == null:
+		return
+	var equipped := EquipmentManager.get_equipped(EquipmentManager.HAND_SLOT)
+	var show_highlight := not _is_any_modal_open() \
+		and (equipped == "hoe" or equipped == "watering_can") \
+		and GameManager.current_map_id == FarmingManager.FARM_MAP_ID \
+		and world_map.is_farmable_cell(player.position)
+	_farm_tile_highlight.visible = show_highlight
+	if not show_highlight:
+		return
+	var cell := Vector2i(int(player.position.x) / WorldMap.TILE_SIZE, int(player.position.y) / WorldMap.TILE_SIZE)
+	_farm_tile_highlight.position = Vector2(cell) * WorldMap.TILE_SIZE + Vector2.ONE * WorldMap.TILE_SIZE * 0.5
+
+
+## _build_box_preview()와 동일 - world_map 자식으로 한 번만 만들고 계속
+## 재사용한다.
+func _build_furniture_preview() -> void:
+	_furniture_preview = Sprite2D.new()
+	_furniture_preview.visible = false
+	_furniture_preview.z_index = 100
+	world_map.add_child(_furniture_preview)
+
+
+## _update_box_preview()와 같은 구조지만 아이템 id를 하드코딩하지 않는다
+## (category=="furniture"이면 어떤 가구든 동작 - 사용자 지시: 가구가 늘어나도
+## 코드 추가 불필요) - 대신 칸수(footprint)가 아이템마다 달라서 미리보기
+## 크기/오프셋/중심 좌표를 매 프레임 다시 계산한다.
+func _update_furniture_preview() -> void:
+	if _furniture_preview == null:
+		return
+	var equipped_id := EquipmentManager.get_equipped(EquipmentManager.HAND_SLOT)
+	var show_preview := not _is_any_modal_open() \
+		and InventoryManager.get_item_category(equipped_id) == "furniture" \
+		and FurnitureManager.is_placement_allowed(GameManager.current_map_id)
+	_furniture_preview.visible = show_preview
+	if not show_preview:
+		return
+	var mouse_world := world_map.get_global_mouse_position()
+	var anchor_cell := Vector2i(int(mouse_world.x) / WorldMap.TILE_SIZE, int(mouse_world.y) / WorldMap.TILE_SIZE)
+	var footprint := FurnitureManager.get_footprint(equipped_id)
+	var footprint_px := Vector2(footprint) * WorldMap.TILE_SIZE
+	var center := Vector2(anchor_cell) * WorldMap.TILE_SIZE + footprint_px / 2.0
+	var texture := FurnitureManager.get_preview_texture(equipped_id)
+	_furniture_preview.texture = texture
+	_furniture_preview.position = center
+	var height: float = texture.get_height() if texture != null else footprint_px.y
+	_furniture_preview.offset = Vector2(0, -(height - footprint_px.y) / 2.0)
+	var valid := FurnitureManager.can_place_furniture(equipped_id, center) \
+		and not FurnitureManager.has_furniture_overlap(GameManager.current_map_id, anchor_cell, footprint)
+	_furniture_preview.modulate = Color(1, 1, 1, 0.5) if valid else Color(1, 0.4, 0.4, 0.5)
+
+
+## _build_furniture_preview()와 완전히 동일 - world_map 자식으로 한 번만
+## 만들고 계속 재사용한다.
+func _build_floor_decor_preview() -> void:
+	_floor_decor_preview = Sprite2D.new()
+	_floor_decor_preview.visible = false
+	_floor_decor_preview.z_index = 100
+	world_map.add_child(_floor_decor_preview)
+
+
+## _update_furniture_preview()와 완전히 같은 구조(category=="floor_decor")지만
+## 맵 허용 판정과 배치 가능 판정을 FloorDecorManager로 위임한다.
+func _update_floor_decor_preview() -> void:
+	if _floor_decor_preview == null:
+		return
+	var equipped_id := EquipmentManager.get_equipped(EquipmentManager.HAND_SLOT)
+	var show_preview := not _is_any_modal_open() \
+		and InventoryManager.get_item_category(equipped_id) == "floor_decor" \
+		and FurnitureManager.is_placement_allowed(GameManager.current_map_id)
+	_floor_decor_preview.visible = show_preview
+	if not show_preview:
+		return
+	var mouse_world := world_map.get_global_mouse_position()
+	var anchor_cell := Vector2i(int(mouse_world.x) / WorldMap.TILE_SIZE, int(mouse_world.y) / WorldMap.TILE_SIZE)
+	var footprint := FloorDecorManager.get_footprint(equipped_id)
+	var footprint_px := Vector2(footprint) * WorldMap.TILE_SIZE
+	var center := Vector2(anchor_cell) * WorldMap.TILE_SIZE + footprint_px / 2.0
+	var texture := FloorDecorManager.get_preview_texture(equipped_id)
+	_floor_decor_preview.texture = texture
+	_floor_decor_preview.position = center
+	var height: float = texture.get_height() if texture != null else footprint_px.y
+	_floor_decor_preview.offset = Vector2(0, -(height - footprint_px.y) / 2.0)
+	var valid := FloorDecorManager.can_place_floor_decor(equipped_id, center) \
+		and not FloorDecorManager.has_floor_decor_overlap(GameManager.current_map_id, anchor_cell, footprint)
+	_floor_decor_preview.modulate = Color(1, 1, 1, 0.5) if valid else Color(1, 0.4, 0.4, 0.5)
+
+
+## _build_furniture_preview()와 완전히 동일.
+func _build_wall_decor_preview() -> void:
+	_wall_decor_preview = Sprite2D.new()
+	_wall_decor_preview.visible = false
+	_wall_decor_preview.z_index = 100
+	world_map.add_child(_wall_decor_preview)
+
+
+## _update_furniture_preview()와 같은 구조(category=="wall_decor")지만 맵 허용은
+## home_interior 하나뿐이고, 배치 가능 판정은 WallDecorManager.can_place_wall_decor()
+## (실제 벽 타일인지)가 겹침 판정까지 포함해서 대신한다.
+func _update_wall_decor_preview() -> void:
+	if _wall_decor_preview == null:
+		return
+	var equipped_id := EquipmentManager.get_equipped(EquipmentManager.HAND_SLOT)
+	var show_preview := not _is_any_modal_open() \
+		and InventoryManager.get_item_category(equipped_id) == "wall_decor" \
+		and WallDecorManager.ALLOWED_MAP_IDS.has(GameManager.current_map_id)
+	_wall_decor_preview.visible = show_preview
+	if not show_preview:
+		return
+	var mouse_world := world_map.get_global_mouse_position()
+	var anchor_cell := Vector2i(int(mouse_world.x) / WorldMap.TILE_SIZE, int(mouse_world.y) / WorldMap.TILE_SIZE)
+	var footprint := WallDecorManager.get_footprint(equipped_id)
+	var footprint_px := Vector2(footprint) * WorldMap.TILE_SIZE
+	var center := Vector2(anchor_cell) * WorldMap.TILE_SIZE + footprint_px / 2.0
+	var texture := WallDecorManager.get_preview_texture(equipped_id)
+	_wall_decor_preview.texture = texture
+	_wall_decor_preview.position = center
+	var height: float = texture.get_height() if texture != null else footprint_px.y
+	_wall_decor_preview.offset = Vector2(0, -(height - footprint_px.y) / 2.0)
+	var valid := WallDecorManager.can_place_wall_decor(equipped_id, center) \
+		and not WallDecorManager.has_wall_decor_overlap(GameManager.current_map_id, anchor_cell, footprint)
+	_wall_decor_preview.modulate = Color(1, 1, 1, 0.5) if valid else Color(1, 0.4, 0.4, 0.5)
+
+
 ## Building doors (entering/leaving a "*_interior" map) require an explicit E
 ## press; open-air plaza-to-plaza edges warp instantly on touch instead.
 func _is_building_transition(warp: Dictionary) -> bool:
 	var target_map := String(warp.get("target_map", ""))
 	return GameManager.current_map_id.ends_with("_interior") or target_map.ends_with("_interior")
+
+
+## horror_events.md "NPC 사망 - 집 잠금": map_id가 어느 상점의 map_id와
+## 일치하고, 그 상점이 shop.md 승계 규칙상 이미 "online"(운영 NPC 전원
+## 사망)으로 전환됐으면 잠긴 것으로 본다 - ShopManager.get_shop_mode()를
+## 그대로 재사용해서 1인/2인 상점 승계 규칙과 항상 일치하게 유지한다.
+func _is_locked_shop_map(map_id: String) -> bool:
+	var shop_id := ShopManager.get_shop_id_for_map(map_id)
+	return not shop_id.is_empty() and ShopManager.get_shop_mode(shop_id) == "online"
 
 
 ## skip_fade: 호출하는 쪽이 이미 화면을 검게 만들어 둔 상태에서 맵만 갈아
@@ -567,7 +1036,7 @@ func _is_building_transition(warp: Dictionary) -> bool:
 func _load_map(map_id: String, spawn_name: String, skip_fade: bool = false) -> void:
 	if world_map == null or player == null or _is_transitioning:
 		return
-	var map_path: String = String(WorldMap.MAP_PATHS.get(map_id, ""))
+	var map_path: String = WorldMap.get_map_path(map_id)
 	if map_path.is_empty():
 		push_error("Map is not registered: %s" % map_id)
 		return
@@ -582,7 +1051,7 @@ func _load_map(map_id: String, spawn_name: String, skip_fade: bool = false) -> v
 	world_map.load_map(map_path)
 	var is_indoor := map_id.ends_with("_interior")
 	if _lighting_layer != null:
-		_lighting_layer.rebuild_lights(world_map, is_indoor)
+		_lighting_layer.rebuild_lights(world_map, is_indoor, map_id)
 	if _weather_layer != null:
 		_weather_layer.set_indoor(is_indoor)
 	var spawn_position: Vector2 = world_map.get_spawn_position(spawn_name)
@@ -595,9 +1064,14 @@ func _load_map(map_id: String, spawn_name: String, skip_fade: bool = false) -> v
 		player.hide_interaction_prompt()
 		GameManager.set_current_map(map_id)
 		_update_restaurant_sign()
+		if map_id == RESTAURANT_SIGN_MAP_ID:
+			_maybe_play_restaurant_frame_blood_effect()
 		LivestockManager.set_world_map(world_map, map_id)
 		FarmingManager.set_world_map(world_map, map_id)
 		StorageBoxManager.set_world_map(world_map, map_id)
+		FurnitureManager.set_world_map(world_map, map_id)
+		FloorDecorManager.set_world_map(world_map, map_id)
+		WallDecorManager.set_world_map(world_map, map_id)
 		if was_indoor != is_indoor:
 			AudioManager.play_sfx(AudioManager.SFX_DOOR)
 	if not skip_fade:
@@ -664,7 +1138,7 @@ func _on_interact_pressed() -> void:
 	# 처리한다(대화 넘기기 등) - 여기서 또 월드 상호작용(계산대/조리대 등)까지
 	# 같이 처리하면, NPC가 자기 근무지 바로 옆에 서 있을 때 대화 넘기려고 누른
 	# E가 계산대까지 같이 눌러버리는 문제가 생긴다.
-	if _is_any_modal_open():
+	if _is_any_modal_open() or _murder_scene_active:
 		return
 	var interactable := world_map.get_interactable_at(player.position)
 	if _is_npc_talk_priority(interactable):
@@ -688,6 +1162,9 @@ func _on_interact_pressed() -> void:
 		if GameManager.current_map_id == RESTAURANT_SIGN_MAP_ID and not RestaurantManager.can_player_leave():
 			_show_temporary_message(RESTAURANT_CANNOT_LEAVE_MESSAGE)
 			return
+		if _is_locked_shop_map(String(warp["target_map"])):
+			_show_temporary_message(SHOP_LOCKED_MESSAGE)
+			return
 		_load_map(warp["target_map"], warp["target_spawn"])
 		return
 	if not interactable.is_empty():
@@ -699,14 +1176,43 @@ func _on_interact_pressed() -> void:
 		return
 	var box_info := StorageBoxManager.get_nearest_box(player.position, GameManager.current_map_id)
 	if not box_info.is_empty():
-		storage_box_interacted.emit(box_info["cell"])
+		if _is_furniture_hammer_equipped():
+			var box_message := StorageBoxManager.remove_box(GameManager.current_map_id, box_info["cell"])
+			if not box_message.is_empty():
+				_show_temporary_message(box_message)
+		else:
+			storage_box_interacted.emit(box_info["cell"])
 		return
+	if _is_furniture_hammer_equipped():
+		var furniture_info := FurnitureManager.get_nearest_furniture(player.position, GameManager.current_map_id)
+		if not furniture_info.is_empty():
+			# 보관 상자와 달리 UI를 열 필요가 없는 즉시 액션이라 별도 신호 없이
+			# 바로 처리한다(내부 슬롯이 없어 항상 즉시 회수 가능 - 확정 범위).
+			var message := FurnitureManager.remove_furniture(GameManager.current_map_id, furniture_info["anchor_cell"])
+			if not message.is_empty():
+				_show_temporary_message(message)
+			return
+		var wall_decor_info := WallDecorManager.get_nearest_wall_decor(player.position, GameManager.current_map_id)
+		if not wall_decor_info.is_empty():
+			var wall_decor_message := WallDecorManager.remove_wall_decor(GameManager.current_map_id, wall_decor_info["anchor_cell"])
+			if not wall_decor_message.is_empty():
+				_show_temporary_message(wall_decor_message)
+			return
+		var floor_decor_info := FloorDecorManager.get_nearest_floor_decor(player.position, GameManager.current_map_id)
+		if not floor_decor_info.is_empty():
+			var floor_decor_message := FloorDecorManager.remove_floor_decor(GameManager.current_map_id, floor_decor_info["anchor_cell"])
+			if not floor_decor_message.is_empty():
+				_show_temporary_message(floor_decor_message)
+			return
 	if FishingManager.is_waiting_for_bite():
+		# cancel_fishing()이 fishing_ended를 쏴서 _on_fishing_ended가 포즈를
+		# 정리한다(2026-08-12) - 여기서 따로 stop() 안 불러도 됨.
 		FishingManager.cancel_fishing()
 		return
 	if FishingManager.can_start_fishing() and world_map.is_water_cell(player.get_facing_tile_position()) and not InventoryManager.is_full():
 		if FishingManager.start_fishing():
 			AudioManager.play_sfx(AudioManager.SFX_BUBBLE)
+			player.tool_overlay.start("fishing_rod")
 		return
 	# 농사는 낚시와 달리 바라보는 칸이 아니라 지금 서 있는 칸을 대상으로
 	# 한다(사용자 지시, _process()의 프롬프트 판정과 동일 기준이어야 함).
@@ -714,12 +1220,32 @@ func _on_interact_pressed() -> void:
 	match FarmingManager.get_available_action(farm_position):
 		"till":
 			# 마른/젖은 흙 그림이 바로 보이니 문구 없이 조용히 처리(사용자
-			# 지시, "plant"/"water"와 같은 이유).
+			# 지시, "plant"/"water"와 같은 이유). 포즈가 먼저 재생되고 그게
+			# 끝나는 시점에 흙이 바뀌도록 순서를 뒤집었다(사용자 지시,
+			# 2026-08-12 - 즉각 반응이라 갬성이 없다는 피드백. 스타듀 밸리처럼
+			# 휘두르는 동작에 살짝 시간이 걸리는 느낌).
+			if _farm_action_active:
+				return
+			_farm_action_active = true
+			player.tool_overlay.start("hoe", TOOL_USE_HOLD_SECONDS)
+			await get_tree().create_timer(TOOL_USE_HOLD_SECONDS).timeout
 			FarmingManager.perform_till(farm_position)
+			_farm_action_active = false
 		"water":
 			# 젖은 흙 그림이 바로 보이니 문구 없이 조용히 처리(사용자 지시,
-			# "plant"와 같은 이유).
+			# "plant"와 같은 이유). "till"과 같은 이유로 포즈 재생 후 흙이
+			# 바뀌도록 순서를 뒤집었다(2026-08-12).
+			if _farm_action_active:
+				return
+			_farm_action_active = true
+			player.tool_overlay.start("watering_can", TOOL_USE_HOLD_SECONDS)
+			await get_tree().create_timer(TOOL_USE_HOLD_SECONDS).timeout
 			FarmingManager.perform_water(farm_position)
+			_farm_action_active = false
+		"needs_till":
+			# 물뿌리개를 든 채 아직 안 간 밭에 물을 주려 한 경우(사용자 지시,
+			# 2026-08-12) - 포즈 없이 안내 문구만 띄운다.
+			_show_temporary_message("먼저 밭을 갈아야 한다.")
 		"plant":
 			# 씨앗 그림이 바로 보이니 문구 없이 조용히 처리(사용자 지시) - 빈
 			# 문자열을 _show_temporary_message에 넘기면 빈 프롬프트가 잠깐
@@ -797,6 +1323,9 @@ func _handle_interaction(interactable: Dictionary) -> void:
 		return
 	if interactable_name == "collection":
 		collection_interacted.emit()
+		return
+	if interactable_name == "jukebox":
+		jukebox_interacted.emit()
 		return
 	if interactable_name.begins_with(SERVING_AREA_PREFIX):
 		var station_index := interactable_name.trim_prefix(SERVING_AREA_PREFIX).to_int() - 1

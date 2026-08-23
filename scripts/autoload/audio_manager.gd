@@ -6,7 +6,10 @@ extends Node
 ## track is tied to being on RESTAURANT_MAP_ID (GameManager.current_map_id),
 ## not to RestaurantManager.is_open, so the day/night switch never fires
 ## while the player is inside the restaurant (사용자 확정: 레스토랑 맵에서는
-## 영업 여부와 무관하게 밤 브금으로 안 바뀜). Rain SFX loops on top of
+## 영업 여부와 무관하게 밤 브금으로 안 바뀜). BGM_RESTAURANT은 이제 고정값이
+## 아니라 JukeboxManager가 고른 곡의 폴백(주크박스 UI에서 곡을 바꾸면
+## _on_jukebox_song_selected가 즉시 반영) - 레스토랑 맵의 "브금"이라는 개념
+## 자체는 그대로 유지된다. Rain SFX loops on top of
 ## whatever BGM is playing whenever WeatherManager.is_raining() and the
 ## player is outdoors (실내에서는 weather_overlay.gd처럼 날씨 연출을 꺼서
 ## 시각 효과와 맞춘다). 실내에서 비가 올 때는 대신 SFX_INTERIOR_RAIN이
@@ -103,6 +106,17 @@ const SFX_UI_TAB := "res://assets/audio/sfx/sfx_ui_tab.mp3"
 ## 실내/실외 경계를 넘을 때(main.gd._load_map()가 이전 맵과 새 맵의
 ## "_interior" 여부가 다를 때만 재생).
 const SFX_DOOR := "res://assets/audio/sfx/sfx_door.mp3"
+## horror_events.md "집 이벤트" - HorrorEventManager.knock_event_triggered가
+## 발생하면 재생. 사용자 지시로 3번 반복해서 들려준다(_play_knock_sequence).
+const SFX_KNOCK := "res://assets/audio/sfx/sfx_knock.mp3"
+const KNOCK_REPEAT_COUNT := 3
+## horror_events.md "레스토랑 액자 이벤트" - main.gd가 살인 발생 이후 레스토랑에
+## 입장할 때마다 재생(_maybe_play_restaurant_frame_blood_effect). 파일이
+## 없으면 play_sfx()가 조용히 무시하므로 파일을 안 넣어도 에러는 안 남.
+const SFX_BLOOD := "res://assets/audio/sfx/sfx_blood.mp3"
+## 살인 발생 시각(main.gd의 살인 발견 씬 시작 직전) 재생 - 파일 없으면
+## play_sfx()가 조용히 무시.
+const SFX_SCREAM := "res://assets/audio/sfx/sfx_scream.mp3"
 ## 조리 중(냄비/프라이팬/믹서기) 소리 - play_cooking_sfx()가 duration_seconds가
 ## 지나면 재생 중이어도 강제로 멈춘다(사용자 지시: "프로그레스바 100% 차기
 ## 전까지"만). data/cooking/cooking_stations.json의 tool_name("냄비"/
@@ -239,6 +253,8 @@ func _ready() -> void:
 	ShopManager.item_purchased.connect(_on_item_purchased)
 	FishingManager.fishing_ended.connect(_on_fishing_ended)
 	NPCManager.memento_received.connect(_on_memento_received)
+	HorrorEventManager.knock_event_triggered.connect(_on_knock_event_triggered)
+	NPCManager.npc_gift_item_triggered.connect(_on_npc_gift_item_triggered)
 	InventoryManager.gift_given.connect(_on_gift_given)
 	# InventoryManager.recipe_learned가 아니라 CookingManager.recipe_learned에
 	# 연결해야 한다 - Inventory 쪽은 레시피 아이템을 "쓸 때마다"(이미 아는
@@ -246,6 +262,7 @@ func _ready() -> void:
 	# via_item으로 그중에서도 "아이템으로 배운 경우"만 다시 걸러진다
 	# (_on_recipe_learned 참고).
 	CookingManager.recipe_learned.connect(_on_recipe_learned)
+	JukeboxManager.song_selected.connect(_on_jukebox_song_selected)
 	_is_indoor = GameManager.current_map_id.ends_with("_interior")
 
 
@@ -272,7 +289,8 @@ func set_world_map(world_map: WorldMap) -> void:
 
 func _get_target_bgm() -> String:
 	if GameManager.current_map_id == RESTAURANT_MAP_ID:
-		return BGM_RESTAURANT
+		var jukebox_path := JukeboxManager.get_current_bgm_path()
+		return jukebox_path if not jukebox_path.is_empty() else BGM_RESTAURANT
 	return BGM_NIGHT if TimeManager.current_hour >= NIGHT_BGM_START_HOUR else BGM_MAIN
 
 
@@ -535,6 +553,32 @@ func _on_memento_received(_npc_id: String) -> void:
 	play_sfx(SFX_MEMORY)
 
 
+func _on_knock_event_triggered() -> void:
+	_play_knock_sequence()
+
+
+## play_sfx()는 재생될 때마다 새 AudioStreamPlayer를 만들고 끝나면 스스로
+## 지우는 fire-and-forget 방식이라, 겹치지 않게 "N번 반복"을 표현하려면
+## 재생이 끝날 때까지 기다렸다가 다시 트는 전용 플레이어가 하나 필요하다.
+func _play_knock_sequence() -> void:
+	if not ResourceLoader.exists(SFX_KNOCK):
+		return
+	var player := AudioStreamPlayer.new()
+	player.bus = BUS_SFX
+	player.stream = load(SFX_KNOCK)
+	add_child(player)
+	for i in KNOCK_REPEAT_COUNT:
+		player.play()
+		await player.finished
+	player.queue_free()
+
+
+## 추억의 물건과 같은 소리 재사용 - NPC가 플레이어에게 주는 쪽도 "습득"이라는
+## 점에서 같은 부류(_on_recipe_learned의 재사용 판단과 동일한 근거).
+func _on_npc_gift_item_triggered(_npc_id: String, _item_id: String) -> void:
+	play_sfx(SFX_MEMORY)
+
+
 func _on_gift_given(_npc_id: String, _item_id: String) -> void:
 	play_sfx(SFX_GIFT)
 
@@ -546,6 +590,13 @@ func _on_gift_given(_npc_id: String, _item_id: String) -> void:
 func _on_recipe_learned(_recipe_id: String, via_item: bool) -> void:
 	if via_item:
 		play_sfx(SFX_MEMORY)
+
+
+## 주크박스 화면에서 곡을 바꾸는 즉시 반영한다 - _on_map_changed/_on_hour_changed와
+## 달리 맵/시간 변화 없이도 브금이 바뀌어야 하는 유일한 경우라 직접 듣는다.
+func _on_jukebox_song_selected(_song_id: String) -> void:
+	if GameManager.current_map_id == RESTAURANT_MAP_ID:
+		play_bgm(_get_target_bgm())
 
 
 ## 단발성 효과음 재생 - 파일이 없으면(아직 안 넣었으면) 조용히 넘어간다.

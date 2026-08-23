@@ -40,6 +40,9 @@ const WALK_FRAME_INTERVAL := 0.5
 
 @onready var _interaction_prompt: Label = $InteractionPrompt
 @onready var _sprite: Sprite2D = $Sprite2D
+## 도구 사용 포즈 + 손 위치 아이콘 담당(scripts/player/player_tool_overlay.gd) -
+## main.gd가 밭갈기/낚시 등 액션 지점에서 이 노드를 직접 start()/stop()한다.
+@onready var tool_overlay: PlayerToolOverlay = $ToolOverlay
 
 var _map_size := Vector2i.ZERO
 var _movement_enabled := true
@@ -70,6 +73,11 @@ var _speed_effect_is_debuff := false
 ## (_update_animation()의 애니메이션 전환과 같은 기준 - 걷기 프레임이 도는
 ## 동안에만 true).
 var _is_moving := false
+
+## 컷신 전용 스크립트 이동(walk_to() 참고) - 0이 아니면 _get_move_direction()이
+## 실제 키 입력 대신 이 값을 돌려준다. 그래서 충돌/애니메이션/발소리 등
+## _physics_process()의 나머지 로직은 평소 이동과 완전히 동일하게 재사용된다.
+var _scripted_move_direction := Vector2.ZERO
 
 
 func _ready() -> void:
@@ -243,6 +251,10 @@ func _unhandled_input(event: InputEvent) -> void:
 ## 번갈아, 아니면 정지 프레임) - facing_direction 기준이라 방향키를 안 눌러도
 ## 마지막으로 보던 방향을 그대로 유지한다.
 func _update_animation(delta: float, is_moving: bool) -> void:
+	if tool_overlay.is_active():
+		_set_frame(tool_overlay.get_frame(facing_direction))
+		tool_overlay.update_position(facing_direction)
+		return
 	if is_moving:
 		_walk_frame_timer += delta
 		if _walk_frame_timer >= WALK_FRAME_INTERVAL:
@@ -264,9 +276,42 @@ func _set_frame(frame_index: int) -> void:
 
 
 func _get_move_direction() -> Vector2:
+	if _scripted_move_direction != Vector2.ZERO:
+		return _scripted_move_direction
 	var horizontal := float(Input.is_key_pressed(KEY_D)) - float(Input.is_key_pressed(KEY_A))
 	var vertical := float(Input.is_key_pressed(KEY_S)) - float(Input.is_key_pressed(KEY_W))
 	return Vector2(horizontal, vertical).normalized()
+
+
+## 컷신에서 키 입력 없이 목표 지점까지 뛰어가게 한다(main.gd의 살인 발견
+## 씬 등). _scripted_move_direction을 매 프레임 목표 방향으로 갱신하는
+## 방식이라, 충돌/걷기 애니메이션/발소리 전부 평소 이동 로직 그대로 재사용됨.
+## 2026-08-16: 처음엔 목표까지 직선으로 밀고 나가는 방식이었는데, 가구 등
+## 오브젝트에 걸려서 못 지나가는 버그 발견(사용자 리포트) - NPC 이동에 이미
+## 쓰이는 WorldMap.find_path()로 바꿔서 장애물을 실제로 피해가는 경로를
+## 구한 뒤, 그 경유점을 순서대로 따라간다.
+## RUN_SPEED_MULTIPLIER로 평소보다 빠르게(뛰는 느낌) 움직이고, 경유점 하나당
+## SCRIPTED_WALK_TIMEOUT_SECONDS를 넘기면(벽에 낌 등 예외 상황 안전장치)
+## 그 경유점은 포기하고 다음으로 넘어간다.
+const RUN_SPEED_MULTIPLIER := 1.8
+const SCRIPTED_WALK_ARRIVAL_DISTANCE := 3.0
+const SCRIPTED_WALK_TIMEOUT_SECONDS := 10.0
+
+func walk_to(target_position: Vector2) -> void:
+	set_movement_enabled(true)
+	var previous_speed_modifier := _speed_modifier
+	_speed_modifier = RUN_SPEED_MULTIPLIER
+	var waypoints: PackedVector2Array = _world_map.find_path(position, target_position) if _world_map != null else PackedVector2Array()
+	if waypoints.is_empty():
+		waypoints = PackedVector2Array([target_position])
+	for waypoint in waypoints:
+		var elapsed := 0.0
+		while position.distance_to(waypoint) > SCRIPTED_WALK_ARRIVAL_DISTANCE and elapsed < SCRIPTED_WALK_TIMEOUT_SECONDS:
+			_scripted_move_direction = (waypoint - position).normalized()
+			await get_tree().physics_frame
+			elapsed += get_physics_process_delta_time()
+	_scripted_move_direction = Vector2.ZERO
+	_speed_modifier = previous_speed_modifier
 
 
 ## npc_sprite.gd의 같은 이름 함수와 동일한 규칙 - 4방향 스프라이트로 대각선
