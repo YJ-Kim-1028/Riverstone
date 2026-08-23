@@ -133,6 +133,10 @@
             {"text": "오늘도 평소처럼 일하려고 했는데.", "emotion": "sad"},
             {"text": "손이 자꾸 떨려서 못 하겠어.", "emotion": "sad"},
             {"text": "미안, 나답지 않게 눈물이 나오려고 하네.", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            "이번엔 괜찮은 척도 못 하겠어.",
+            {"text": "그냥 무서워. 그렇게만 말할래.", "emotion": "sad"}
         ]
     },
     "furniture_hammer_gift_lines": ["{player_name}!, 드디어 내가 만든 가구를 사줬구나.",
@@ -284,7 +288,10 @@
             ["너 메일 보냈더라! '{player_mail_content}'라니, 나 완전 헤헤거렸잖아. 티 났나?"],
             ["'{player_mail_content}'라니. 어? 아니, 이상하다는 거 아니고! 그냥 좋았다고."]
         ],
-        "horror_conversation": []
+        "horror_conversation": [
+            [{"text": "{victim_name}이 주문했던 가구, 아직도 스케치가 남아있어.", "emotion": "sad"}, "버리지도 못하고 그냥 갖고 있어."],
+            ["일하다가 문득 {victim_name} 웃던 얼굴이 생각나.", {"text": "...미안, 갑자기 눈물 나려고 하네.", "emotion": "sad"}]
+        ]
     },
     "emails": {
         "greeting": [

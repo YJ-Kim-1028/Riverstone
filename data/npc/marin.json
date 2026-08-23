@@ -111,6 +111,11 @@
         "murder_grief": [
             {"text": "그 사람... 좋은 곳으로 갔으면 좋겠다.", "emotion": "sad"},
             {"text": "그런 사람한테 나쁜 일이 생기면 안 되는 거였는데.", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            "또 이런 일이... 이번엔 진짜 무서워.",
+            {"text": "이젠 누구도 안전하다고 못 느끼겠어.", "emotion": "sad"},
+            "나 이제 진짜 겁나."
         ]
     },
     "dialogue": {
@@ -261,7 +266,10 @@
             ["야, 너 나한테 메일 보냈지! '{player_mail_content}'라니, 완전 웃겨!"],
             [{"text": "너가 보낸 메일 봤어! '{player_mail_content}'라니, 완전 오글거려! 근데 기분은 좋았어.", "emotion": "happy"}]
         ],
-        "horror_conversation": []
+        "horror_conversation": [
+            ["{victim_name}이랑 마주치면 인사만 하던 사이였는데, 요즘은 그 인사가 그리워.", {"text": "별거 아니었는데 왜 이렇게 생각나지.", "emotion": "sad"}],
+            ["공 차다가 문득 {victim_name} 생각났어. 이유는 나도 몰라."]
+        ]
     },
     "emails": {
         "greeting": [

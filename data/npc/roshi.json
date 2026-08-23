@@ -89,6 +89,11 @@
             {"text": "이런 일이 생겼는데 낚시나 하고 있어도 되는 건지 모르겠군.", "emotion": "sad"},
             {"text": "마린한텐 당분간 혼자 돌아다니지 말라고 해뒀어.", "emotion": "sad"},
             {"text": "나야 뭐, 상관없지만... 그 애만 무사하면 돼.", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            "이런 일이 두 번이나 생기다니.",
+            {"text": "가족들 걱정에 밤에 잠이 안 와.", "emotion": "sad"},
+            "나이가 들면 무뎌질 줄 알았는데, 무섭다는 감정에는 그런 게 없나 봐."
         ]
     },
     "dialogue": {
@@ -230,7 +235,10 @@
         "mail_reaction": [
             ["'{player_mail_content}'라니, 오랜만에 받은 편지라서 감회가 새롭더군. 고맙네.", "답장할 방법을 몰라서 직접 얼굴을 보고 말하네."]
         ],
-        "horror_conversation": []
+        "horror_conversation": [
+            ["바다 보다가 문득 {victim_name} 생각이 났어. 왜인지는 모르겠지만.", {"text": "마린한텐 티 안 내지만, 나도 사람인지라.", "emotion": "sad"}],
+            ["예전엔 {victim_name}이 종종 배 대는 걸 도와줬었는데, 요즘은 나 혼자야."]
+        ]
     },
     "emails": {
         "greeting": [

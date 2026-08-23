@@ -107,6 +107,11 @@
             {"text": "근데 자꾸 그 생각만 하면 내가 먼저 무너질 것 같아서, 애써 안 하려고.", "emotion": "sad"},
             "기도라도 열심히 해야지, 별수 있나."
         ],
+        "murder_grief_2": [
+            "한 번은 그렇다 쳐도, 두 번은...",
+            {"text": "이제 기도로도 잘 안 무뎌져.", "emotion": "sad"},
+            "이 마을에 진짜 무슨 일이 벌어지고 있는 건지 무서워."
+        ],
         "partner_death_reaction": [
             {"text": "왜 하필 모카야. 걔가 나한테 어떤 사람이었는데.", "emotion": "sad"},
             {"text": "차라리 벨제였으면... 아니, 이런 생각 하면 안 되는데. 근데 자꾸 그런 생각이 들어.", "emotion": "sad"},
@@ -255,7 +260,10 @@
             [{"text": "'{player_mail_content}'라니! 이런 거 받으면 하루 종일 기분 좋아. 또 보내줘.", "emotion": "happy"}],
             [{"text": "'{player_mail_content}'라니, 나 오늘 하루 종일 실실 웃었어. 티 났으면 어떡하지.", "emotion": "happy"}]
         ],
-        "horror_conversation": []
+        "horror_conversation": [
+            ["{victim_name} 얘기, 요즘은 잘 안 꺼내려고 해.", {"text": "근데 가끔 목장 일 하다가 불쑥 생각나. 그럴 때마다 좀 힘들어.", "emotion": "sad"}],
+            [{"text": "기도할 때 {victim_name}의 이름도 같이 올려.", "emotion": "sad"}, "그거 말고는 딱히 할 수 있는 게 없더라고."]
+        ]
     },
     "emails": {
         "greeting": [

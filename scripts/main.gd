@@ -315,6 +315,14 @@ const POLI_DECOY_SCENE := preload("res://scenes/npc_sprite.tscn")
 const MURDER_DISCOVERY_REACTION_DELAY_SECONDS := 5.0
 const MURDER_DISCOVERY_AFTERMATH_DELAY_SECONDS := 2.5
 
+## 2차 살인은 1차와 다른 씬으로 간다(사용자 지시, 2026-08-23 - "더 대담해진
+## 범행"): plaza3까지 뛰어가는 대신, 시체가 플레이어 집(Home.tmx) 앞에
+## 놓이고 플레이어가 나중에 직접 돌아왔을 때 발견한다. Home.tmx의 Spawn
+## 레이어에 이 이름으로 지점 하나를 추가해야 한다(사용자 배치 예정).
+const SECOND_MURDER_SACK_SPAWN := "second_murder_sack_home"
+const SECOND_MURDER_DISCOVERY_TRIGGER := "second_murder_discovery"
+const SECOND_MURDER_POLI_OFFSET := Vector2(10, 4)
+
 ## MurderManager.murder_occurred - 살인 발생 시각(오후 10시)에 플레이어가 뭘
 ## 하고 있었든 강제로 끊고 들어가는 발견 씬(사용자 지시): 비명 → 지금 있는
 ## 맵에서 plaza3까지 맵을 몇 개 거치든 실제로 뛰어감(MURDER_RUN_CHAIN을 한
@@ -324,8 +332,13 @@ const MURDER_DISCOVERY_AFTERMATH_DELAY_SECONDS := 2.5
 ## 자리표시용 분신을 하나 세움 - 스케줄이 그를 계속 다른 곳으로 끌고 가려는
 ## 걸 그대로 두면 씬 도중 사라져 보이는 문제 방지) 그 옆까지 뛰어가서 강제
 ## 대화. 대화가 끝나면 분신을 지우고 원래 스프라이트를 다시 보이게 한다.
-## murder_number는 지금 연출에서는 안 씀(1차/2차 동일 연출).
-func _on_murder_occurred(_victim_id: String, _murder_number: int) -> void:
+## 2차 살인(murder_number==2)은 여기서 바로 끊고 들어가지 않는다 - 아래
+## _run_second_murder_discovery_scene() 참고. MurderManager가 대기 플래그를
+## 쥐고 있다가, 플레이어가 나중에 Home으로 돌아올 때 _process()가 확인해서
+## 그때 씬을 재생한다.
+func _on_murder_occurred(_victim_id: String, murder_number: int) -> void:
+	if murder_number == 2:
+		return
 	_close_all_screens()
 	_murder_scene_active = true
 	AudioManager.play_sfx(AudioManager.SFX_SCREAM)
@@ -358,6 +371,51 @@ func _on_murder_occurred(_victim_id: String, _murder_number: int) -> void:
 	# 대화가 끝나자마자 뚝 끊기지 않도록, 잠깐 정지 → 암전 → 분신/소품 정리 →
 	# 전원 다시 보이게 → 암전 해제로 씬을 마무리한다("살해현장이 사라진다"는
 	# 사용자 요청) - 플레이어는 같은 자리(plaza3)에서 다시 조작 가능해진다.
+	await get_tree().create_timer(MURDER_DISCOVERY_AFTERMATH_DELAY_SECONDS).timeout
+	await _fade_out()
+	_cleanup_murder_discovery_scene_props(scene_props)
+	_set_all_npc_sprites_hidden(false)
+	_murder_scene_active = false
+	await _fade_in()
+
+
+## _process()가 "플레이어가 Home에 있고, 2차 살인 발견이 대기 중"일 때
+## 호출한다. 자루만 먼저 보여주고(플레이어가 직접 발견하는 순간) 잠깐 뒤에
+## 암전 → 폴리가 도착한 걸로 처리(분신 배치) → 암전 해제 → 강제 대화 →
+## 마무리, 순서는 1차 발견 씬과 동일하되 뛰어가는 구간이 없다.
+func _run_second_murder_discovery_scene() -> void:
+	_murder_scene_active = true
+	MurderManager.consume_second_murder_discovery_pending()
+	_close_all_screens()
+	AudioManager.play_sfx(AudioManager.SFX_SCREAM)
+	## 사용자 지시(2026-08-23): 시체가 있는 동안은 1차 발견 씬 때처럼 마을에
+	## 아무도 지나다니지 않는 게 맞다 - 자루가 보이기 전부터(씬 시작 즉시)
+	## 미리 전원 숨겨둔다.
+	_set_all_npc_sprites_hidden(true)
+	var sack_spawn: Vector2 = world_map.get_spawn_position(SECOND_MURDER_SACK_SPAWN)
+	var scene_props: Array[Node2D] = []
+	if sack_spawn != Vector2.INF and ResourceLoader.exists(POLI_SACK_TEXTURE_PATH):
+		var sack := Sprite2D.new()
+		sack.texture = load(POLI_SACK_TEXTURE_PATH)
+		sack.position = sack_spawn
+		world_map.add_child(sack)
+		scene_props.append(sack)
+	await get_tree().create_timer(MURDER_DISCOVERY_REACTION_DELAY_SECONDS).timeout
+	await _fade_out()
+	if sack_spawn != Vector2.INF:
+		var poli_decoy := POLI_DECOY_SCENE.instantiate() as Node2D
+		world_map.add_child(poli_decoy)
+		poli_decoy.call("set_npc_id", MURDER_DISCOVERY_NPC_ID)
+		poli_decoy.call("snap_to", sack_spawn + SECOND_MURDER_POLI_OFFSET)
+		poli_decoy.call("face_down")
+		scene_props.append(poli_decoy)
+	await _fade_in()
+	if dialogue_screen != null:
+		var trigger: Dictionary = NPCManager.get_definition(MURDER_DISCOVERY_NPC_ID).get("story_dialogue", {}).get(SECOND_MURDER_DISCOVERY_TRIGGER, {})
+		var lines: Array = (trigger.get("lines", []) as Array).duplicate()
+		if not lines.is_empty():
+			dialogue_screen.open_special(MURDER_DISCOVERY_NPC_ID, lines)
+			await dialogue_screen.closed
 	await get_tree().create_timer(MURDER_DISCOVERY_AFTERMATH_DELAY_SECONDS).timeout
 	await _fade_out()
 	_cleanup_murder_discovery_scene_props(scene_props)
@@ -508,6 +566,10 @@ func _maybe_play_restaurant_frame_blood_effect() -> void:
 func _process(delta: float) -> void:
 	_update_ui_blocking()
 	if world_map == null or player == null:
+		return
+	if not _murder_scene_active and not _is_transitioning and GameManager.current_map_id == "Home" \
+			and MurderManager.is_second_murder_discovery_pending():
+		_run_second_murder_discovery_scene()
 		return
 	if _message_timer > 0.0:
 		_message_timer = max(_message_timer - delta, 0.0)

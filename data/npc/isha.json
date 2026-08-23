@@ -132,6 +132,11 @@
             {"text": "시신은... 내가 확인했어.", "emotion": "sad"},
             {"text": "의사로서 본 게 처음이 아닌데도, 이번엔 손이 떨리더라.", "emotion": "sad"},
             {"text": "내가 뭘 더 할 수 있었을까, 자꾸 그 생각만 나.", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            "또 내가 확인해야 했어.",
+            {"text": "이번엔 손이 안 떨렸어. 그게 더 무서워.", "emotion": "sad"},
+            "내가 이런 것에 무뎌지고 있다는 게, 의사로서도 사람으로서도 무서워."
         ]
     },
     "dialogue": {
@@ -282,7 +287,10 @@
         "mail_reaction": [
             ["'{player_mail_content}'라니, 이런 편지 주고받는 거는 해본 적이 없는데.", "공부한다고 바빠서 연애를 해본 적이 없거든.", "기분이 새롭네. 고마워."]
         ],
-        "horror_conversation": []
+        "horror_conversation": [
+            ["오늘 진료 기록 정리하다가 {victim_name}의 차트를 봤어.", {"text": "이제 와서 뭘 고칠 수 있는 것도 아닌데, 손이 안 떨어지더라.", "emotion": "sad"}],
+            [{"text": "가끔 병원 문 닫을 때쯤, {victim_name}이 늦게라도 들어올 것 같은 기분이 들어.", "emotion": "sad"}, "당연히 아무도 안 오지만."]
+        ]
     },
     "emails": {
         "greeting": [

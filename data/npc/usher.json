@@ -96,6 +96,11 @@
             {"text": "마을에 이런 일이 생기다니, 믿기지가 않아.", "emotion": "sad"},
             {"text": "다들 무섭다고 하는데... 나도 그래. 당연히 그렇지.", "emotion": "sad"},
             {"text": "얼른 잡혔으면 좋겠다.", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            {"text": "두 번째라니, 정말 믿기지가 않아.", "emotion": "sad"},
+            "이번엔 나도 진짜 무서워. 농담이 아니라.",
+            "빨리 잡혔으면 좋겠다. 진심으로."
         ]
     },
     "dialogue": {
@@ -239,7 +244,10 @@
             ["'{player_mail_content}' — 이거 완전 소설 대사로 써도 되겠는데? 진지하게 하는 말이야."],
             [{"text": "메일 봤어. '{player_mail_content}'라니, 완전 낭만적이잖아. 나 이런 거 좋아하는 거 알지?", "emotion": "happy"}]
         ],
-        "horror_conversation": []
+        "horror_conversation": [
+            [{"text": "{victim_name} 얘기가 자꾸 소설에 스며들어. 의도한 것도 아닌데.", "emotion": "sad"}, "이상하지, 안 쓰려고 해도 자꾸 손이 그리로 가."],
+            ["서점에 {victim_name}이 사갔던 책이 아직 재고로 남아있어.", {"text": "괜히 그 칸만 못 건드리겠더라.", "emotion": "sad"}]
+        ]
     },
     "emails": {
         "greeting": [

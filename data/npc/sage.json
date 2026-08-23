@@ -91,6 +91,12 @@
             {"text": "...아직도 그 기운이 남아있어.", "emotion": "sad"},
             {"text": "말로 설명하긴 어려운데.", "emotion": "sad"},
             {"text": "조심해.", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            "...두 번째야.",
+            {"text": "경고했는데도 이렇게 됐네.", "emotion": "sad"},
+            "내가 더 힘이 있었더라면, 이런 식으로 무력하게 지켜보지만은 않았을 텐데.",
+            "미안해."
         ]
     },
     "dialogue": {
@@ -193,7 +199,10 @@
         "mail_reaction": [
             ["메일 봤어. '{player_mail_content}'.", "무슨 뜻인지 이해하긴 힘들지만, 잘 기억하고 있을게."]
         ],
-        "horror_conversation": []
+        "horror_conversation": [
+            [{"text": "그 기운이 완전히 사라지질 않아.", "emotion": "sad"}, "여전히 이 근처 어딘가에 남아있는 것 같아."],
+            ["가끔 {victim_name}이 앉았던 자리에 눈이 가.", {"text": "기운이 아직 옅게 남아있어서 그런가 봐.", "emotion": "sad"}]
+        ]
     },
     "emails": {
         "greeting": [],

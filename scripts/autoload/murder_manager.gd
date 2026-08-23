@@ -19,6 +19,10 @@ const MURDER_HOUR := 22
 ## NPC들이 아직 밖에 나와 있어 알리바이/목격 진술 둘 다 훨씬 유의미해진다.
 const ALIBI_CHECK_HOUR := 18
 const MAX_STALKER_MURDERS := 2
+## 사용자 지시(2026-08-23): 두 번째 살인이 첫 번째 직후 며칠 만에 터지면
+## 스토커 이메일(3일 간격 순차 발송)이 다 나오기도 전에 다음 사건이 덮친다 -
+## 직전 살인일로부터 최소 이만큼은 지나야 다음 살인 조건 판정을 시작한다.
+const MIN_DAYS_BETWEEN_MURDERS := 14
 
 ## ending.md 체포 엔딩: 2명을 죽인 뒤 "세 번째 살해 대상이 확정된" 상태여야
 ## 하므로, 대기열에는 최대 3명(실제 희생자 2 + 체포 엔딩용 3번째)까지만 받는다.
@@ -55,6 +59,12 @@ var _candidate_queue: Array[String] = []
 var _resolved_candidates: Dictionary = {}
 var _cases: Array = []
 var _murder_count := 0
+## 두 번째 살인은 plaza3로 뛰어가는 1차 발견 씬 대신, 시체가 플레이어 집
+## (Home.tmx) 앞에 놓이고 플레이어가 나중에 직접 발견하는 씬으로 간다(사용자
+## 지시, 2026-08-23 - "더 대담해진 범행"). main.gd가 플레이어가 Home에
+## 들어올 때마다 이 플래그를 확인해서 씬을 재생한다 - 세이브 사이에도 안
+## 잊어버리게 여기서 관리한다.
+var _second_murder_home_pending := false
 
 ## 2026-08-16 사용자 확정: 살인 발생 후 5일 이내에 처음 만나는 생존 NPC는
 ## 대화 첫 줄로 그날 밤 알리바이를 무조건 진술한다(한 번 말하면 다시 안 함).
@@ -129,7 +139,15 @@ func get_usher_death_method() -> String:
 ## murder_system.md: "조건 미충족 시 다음 날 동일 조건 재검사" - 대상이 있는 한
 ## WeatherManager가 3일 이내 비를 강제하도록 계속 신호를 보낸다.
 func has_pending_victim() -> bool:
-	return _get_next_queued_candidate() != ""
+	return _get_next_queued_candidate() != "" and not _is_murder_cooldown_active()
+
+
+## MIN_DAYS_BETWEEN_MURDERS 참고. 아직 아무도 안 죽었으면 쿨다운 자체가 없다.
+func _is_murder_cooldown_active() -> bool:
+	if _cases.is_empty():
+		return false
+	var last_murder_day := int(_cases[_cases.size() - 1].get("day", -1))
+	return TimeManager.current_day < last_murder_day + MIN_DAYS_BETWEEN_MURDERS
 
 
 func get_case_count() -> int:
@@ -270,6 +288,7 @@ func get_save_data() -> Dictionary:
 		"usher_death_method": _usher_death_method,
 		"alibi_pending": _alibi_pending.duplicate(),
 		"alibi_deadline_day": _alibi_deadline_day,
+		"second_murder_home_pending": _second_murder_home_pending,
 	}
 
 
@@ -290,6 +309,7 @@ func load_save_data(data: Dictionary) -> void:
 	_stalker_killed = bool(data.get("stalker_killed", false))
 	_living_with_stalker = bool(data.get("living_with_stalker", false))
 	_usher_death_method = String(data.get("usher_death_method", ""))
+	_second_murder_home_pending = bool(data.get("second_murder_home_pending", false))
 	_update_pending_state()
 
 
@@ -327,6 +347,8 @@ func _on_npc_poisoned(npc_id: String) -> void:
 func _on_minute_passed(hour: int, minute: int) -> void:
 	if hour != MURDER_HOUR or minute != 0 or has_ending_achieved() or _stalker_killed:
 		return
+	if _is_murder_cooldown_active():
+		return
 	var candidate_id := _get_next_queued_candidate()
 	if candidate_id.is_empty() or not WeatherManager.is_raining():
 		return
@@ -347,8 +369,12 @@ func _get_next_queued_candidate() -> String:
 	return ""
 
 
-## murder_system.md 예시: 플레이어/스토커/피해자 중 어느 둘도 같은 맵에 있으면
-## 안 된다 (세 명이 서로 다른 맵에 있어야 함).
+## murder_system.md 예시가 실제로 보여준 건 "플레이어가 스토커/피해자 둘 중
+## 하나와 같은 맵에 있으면 안 된다"는 것뿐이다(사용자 정정, 2026-08-23 -
+## 스토커와 피해자는 같은 맵이어도 무방하다, 오히려 자연스럽다. 문제는
+## 플레이어 눈앞에서 목격 가능한 상황이 되는 것뿐). 살인 자체는 murder_system.md
+## "살해" 절에 따라 항상 피해자의 집에서 일어나는 것으로 처리되므로, 여기서
+## 보는 위치는 스케줄상 22시 시점 위치일 뿐 실제 범행 장소와는 무관하다.
 func _positions_allow_murder(victim_id: String) -> bool:
 	var stalker_id := NPCManager.get_stalker_id()
 	var stalker_position := NPCManager.get_npc_world_position(stalker_id)
@@ -358,7 +384,7 @@ func _positions_allow_murder(victim_id: String) -> bool:
 	var player_map := GameManager.current_map_id
 	var stalker_map := String(stalker_position.get("map_id", ""))
 	var victim_map := String(victim_position.get("map_id", ""))
-	return player_map != stalker_map and player_map != victim_map and stalker_map != victim_map
+	return player_map != stalker_map and player_map != victim_map
 
 
 func _commit_murder(victim_id: String) -> void:
@@ -366,9 +392,19 @@ func _commit_murder(victim_id: String) -> void:
 	_record_case(victim_id)
 	NPCManager.kill_npc(victim_id)
 	_murder_count += 1
+	if _murder_count == 2:
+		_second_murder_home_pending = true
 	_refresh_alibi_pending(victim_id)
 	_update_pending_state()
 	murder_occurred.emit(victim_id, _murder_count)
+
+
+func is_second_murder_discovery_pending() -> bool:
+	return _second_murder_home_pending
+
+
+func consume_second_murder_discovery_pending() -> void:
+	_second_murder_home_pending = false
 
 
 ## ending.md 체포 엔딩: "실제 살인은 발생하지 않는다. 살인 조건 충족 시점에

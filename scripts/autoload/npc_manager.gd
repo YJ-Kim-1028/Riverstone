@@ -434,7 +434,11 @@ func get_daily_dialogue(npc_id: String) -> Array:
 	if WeatherManager.is_raining():
 		pool.append_array(dialogue.get("rain_conversation", []))
 	if has_horror_mode_started():
-		pool.append_array(dialogue.get("horror_conversation", []))
+		## 사용자 지시(2026-08-23): "그 사람" 대신 실제 희생자 이름으로 - 가장
+		## 최근 사건의 피해자 이름을 {victim_name} 자리에 채운다.
+		var victim_name: String = String(get_definition(get_most_recent_death_npc_id()).get("name", "그 사람"))
+		for entry in (dialogue.get("horror_conversation", []) as Array):
+			pool.append(_substitute_victim_name(entry, victim_name))
 	## 플레이어가 이 NPC에게 자유 작성 메일을 보냈고 아직 언급 안 됐으면, 오늘의
 	## 후보 풀에 mail_reaction 템플릿 하나를 더 끼워 넣는다 - "{player_mail_content}"를
 	## 실제 메일 본문으로 바로 치환해서 넣어둔다(EmailManager.clear_pending_mail_reaction()로
@@ -479,9 +483,16 @@ func get_daily_dialogue(npc_id: String) -> Array:
 			if not confession.is_empty():
 				return confession.duplicate()
 		var lines: Array = []
-		var grief_lines: Array = get_definition(npc_id).get("story_dialogue", {}).get("murder_grief", [])
+		## 2차 이후 살인은 애도 대사가 1차랑 겹치면 안 되니(사용자 지시,
+		## 2026-08-23) "murder_grief_<N>"이 있으면 그걸 우선 쓰고, 없으면
+		## murder_grief로 폴백한다 - 지금까지처럼 murder_grief만 있는 NPC도
+		## 그대로 동작.
+		var story_dialogue: Dictionary = get_definition(npc_id).get("story_dialogue", {})
+		var numbered_key := "murder_grief_%d" % MurderManager.get_murder_count()
+		var grief_lines: Array = story_dialogue.get(numbered_key, story_dialogue.get("murder_grief", []))
 		if not grief_lines.is_empty():
-			lines.append_array(grief_lines.duplicate())
+			var grief_victim_name: String = String(get_definition(get_most_recent_death_npc_id()).get("name", "그 사람"))
+			lines.append_array(_substitute_victim_name(grief_lines, grief_victim_name))
 		lines.append(alibi_line)
 		var corroboration_line := MurderManager.consume_stalker_corroboration_line(npc_id)
 		if not corroboration_line.is_empty():
@@ -516,6 +527,19 @@ func _substitute_mail_content(template: Array, mail_content: String) -> Array:
 			line["text"] = String(line.get("text", "")).replace("{player_mail_content}", mail_content)
 		else:
 			result[i] = String(line).replace("{player_mail_content}", mail_content)
+	return result
+
+
+## dialogue.horror_conversation 항목 안의 "{victim_name}"을 가장 최근 사건의
+## 피해자 이름으로 바꿔치기한다 - _substitute_mail_content()와 동일한 패턴.
+func _substitute_victim_name(template: Array, victim_name: String) -> Array:
+	var result: Array = template.duplicate(true)
+	for i in result.size():
+		var line: Variant = result[i]
+		if line is Dictionary:
+			line["text"] = String(line.get("text", "")).replace("{victim_name}", victim_name)
+		else:
+			result[i] = String(line).replace("{victim_name}", victim_name)
 	return result
 
 

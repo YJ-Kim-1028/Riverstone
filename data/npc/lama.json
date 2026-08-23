@@ -95,6 +95,11 @@
             {"text": "...오늘은 농담 안 할게.", "emotion": "sad"},
             {"text": "이런 일엔 익숙해질 수가 없네.", "emotion": "sad"},
             {"text": "명복이나 빌어줘야지, 나는.", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            "또 향을 피웠어.",
+            {"text": "이번엔 손이 좀 떨리더군.", "emotion": "sad"},
+            "믿음이 다 무슨 소용인가 싶다가도, 그것마저 없으면 뭘 하나 싶어서."
         ]
     },
     "dialogue": {
@@ -245,7 +250,10 @@
         "mail_reaction": [
             [{"text": "메일 봤어. '{player_mail_content}'라니, 이런 것도 다 인연이지. 흐흐, 너무 진지하게 듣지는 말고.", "emotion": "happy"}]
         ],
-        "horror_conversation": []
+        "horror_conversation": [
+            ["불상 앞에 향 하나 더 놓고 왔어. {victim_name} 몫으로.", {"text": "믿음이고 뭐고, 그냥 그러고 싶더라고.", "emotion": "sad"}],
+            ["가끔 {victim_name}의 목소리가 마당에서 들리는 것 같아. 착각인 거 알면서도 돌아보게 돼."]
+        ]
     },
     "emails": {
         "greeting": [
