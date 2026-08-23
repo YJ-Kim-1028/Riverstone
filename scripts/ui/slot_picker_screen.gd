@@ -20,6 +20,17 @@ signal closed
 const MODE_NEW_GAME := "new_game"
 const MODE_CONTINUE := "continue"
 
+## 이 화면만 기본 엔진 테마 그대로라 "밤티"(다른 화면과 안 어울림) 피드백을
+## 받아 추가 - character_creation_screen.gd/각종 confirm_popup.gd와 동일한
+## button.png/button_hover.png 9-슬라이스 스타일로 통일.
+const BUTTON_TEXTURE := preload("res://assets/ui/button.png")
+const BUTTON_HOVER_TEXTURE := preload("res://assets/ui/button_hover.png")
+const BUTTON_TEXT_COLOR := Color(0.25, 0.15, 0.08)
+## title_screen.gd와 동일한 이유 - "disabled" 스타일박스를 안 채우면(이 화면은
+## 이어하기에서 빈 슬롯, 새 게임에서 이미 찬 슬롯이 항상 disabled라 자주
+## 보임) Godot 기본 테마의 밋밋한 사각형으로 보인다.
+const DISABLED_TINT := Color(0.55, 0.55, 0.55)
+
 @onready var _title_label: Label = $Panel/Margin/VBox/TitleLabel
 @onready var _slot_buttons: Array = [
 	$Panel/Margin/VBox/SlotList/SlotRow1/SlotButton,
@@ -32,11 +43,7 @@ const MODE_CONTINUE := "continue"
 	$Panel/Margin/VBox/SlotList/SlotRow3/DeleteButton,
 ]
 @onready var _back_button: Button = $Panel/Margin/VBox/BackButton
-## 노드/씬 이름은 원래 목적(새 게임 덮어쓰기 확인)을 따서 지어진 이름 그대로
-## 뒀지만, 이제 이 화면에서 쓰는 유일한 용도는 슬롯 삭제 확인이다(덮어쓰기
-## 경로 자체가 없어졌음) - save_overwrite_confirm_popup.gd 자체는 메시지를
-## 그때그때 받는 범용 확인창이라 내용 변경 없이 그대로 재사용.
-@onready var _confirm_popup: Control = $SaveOverwriteConfirmPopup
+@onready var _confirm_popup: Control = $SlotDeleteConfirmPopup
 
 var _mode := MODE_NEW_GAME
 var _pending_delete_slot := -1
@@ -45,11 +52,37 @@ var _pending_delete_slot := -1
 func _ready() -> void:
 	visible = false
 	_back_button.pressed.connect(close)
+	_style_button(_back_button)
 	for i in _slot_buttons.size():
 		var slot := i + 1
 		_slot_buttons[i].pressed.connect(_on_slot_pressed.bind(slot))
 		_delete_buttons[i].pressed.connect(_on_delete_pressed.bind(slot))
+		_style_button(_slot_buttons[i])
+		_style_button(_delete_buttons[i])
 	_confirm_popup.confirmed.connect(_on_delete_confirmed)
+
+
+func _style_button(button: Button) -> void:
+	button.add_theme_stylebox_override("normal", _build_button_style(BUTTON_TEXTURE))
+	button.add_theme_stylebox_override("hover", _build_button_style(BUTTON_HOVER_TEXTURE))
+	button.add_theme_stylebox_override("pressed", _build_button_style(BUTTON_HOVER_TEXTURE))
+	button.add_theme_stylebox_override("disabled", _build_button_style(BUTTON_TEXTURE, DISABLED_TINT))
+	button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	button.add_theme_color_override("font_color", BUTTON_TEXT_COLOR)
+	button.add_theme_color_override("font_hover_color", BUTTON_TEXT_COLOR)
+	button.add_theme_color_override("font_pressed_color", BUTTON_TEXT_COLOR)
+	button.add_theme_color_override("font_disabled_color", BUTTON_TEXT_COLOR.lerp(Color.BLACK, 0.3))
+
+
+func _build_button_style(texture: Texture2D, tint: Color = Color.WHITE) -> StyleBoxTexture:
+	var style := StyleBoxTexture.new()
+	style.texture = texture
+	style.modulate_color = tint
+	style.texture_margin_left = 8
+	style.texture_margin_right = 8
+	style.texture_margin_top = 4
+	style.texture_margin_bottom = 4
+	return style
 
 
 func _unhandled_input(event: InputEvent) -> void:

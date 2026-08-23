@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/ui/slot_picker_screen.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/ui/frame_9slice.png" id="2_frame"]
-[ext_resource type="PackedScene" path="res://scenes/ui/save_overwrite_confirm_popup.tscn" id="3_overwrite_popup"]
+[ext_resource type="PackedScene" path="res://scenes/ui/slot_delete_confirm_popup.tscn" id="3_delete_popup"]
 
 [node name="SlotPickerScreen" type="Control"]
 anchor_right = 1.0
@@ -20,9 +20,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -80.0
-offset_top = -65.0
+offset_top = -85.0
 offset_right = 80.0
-offset_bottom = 65.0
+offset_bottom = 85.0
 texture = ExtResource("2_frame")
 patch_margin_left = 16
 patch_margin_top = 16
@@ -44,7 +44,7 @@ theme_override_constants/separation = 6
 [node name="TitleLabel" type="Label" parent="Panel/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 0
-theme_override_font_sizes/font_size = 9
+theme_override_font_sizes/font_size = 7
 theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
 horizontal_alignment = 1
 text = "새로 시작하기"
@@ -63,14 +63,14 @@ theme_override_constants/separation = 4
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_font_sizes/font_size = 6
+theme_override_font_sizes/font_size = 5
 text = "1번 슬롯"
 
 [node name="DeleteButton" type="Button" parent="Panel/Margin/VBox/SlotList/SlotRow1"]
-custom_minimum_size = Vector2(26, 0)
+custom_minimum_size = Vector2(24, 12)
 layout_mode = 2
-size_flags_vertical = 3
-theme_override_font_sizes/font_size = 6
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 5
 text = "삭제"
 
 [node name="SlotRow2" type="HBoxContainer" parent="Panel/Margin/VBox/SlotList"]
@@ -82,14 +82,14 @@ theme_override_constants/separation = 4
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_font_sizes/font_size = 6
+theme_override_font_sizes/font_size = 5
 text = "2번 슬롯"
 
 [node name="DeleteButton" type="Button" parent="Panel/Margin/VBox/SlotList/SlotRow2"]
-custom_minimum_size = Vector2(26, 0)
+custom_minimum_size = Vector2(24, 12)
 layout_mode = 2
-size_flags_vertical = 3
-theme_override_font_sizes/font_size = 6
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 5
 text = "삭제"
 
 [node name="SlotRow3" type="HBoxContainer" parent="Panel/Margin/VBox/SlotList"]
@@ -101,21 +101,21 @@ theme_override_constants/separation = 4
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_font_sizes/font_size = 6
+theme_override_font_sizes/font_size = 5
 text = "3번 슬롯"
 
 [node name="DeleteButton" type="Button" parent="Panel/Margin/VBox/SlotList/SlotRow3"]
-custom_minimum_size = Vector2(26, 0)
+custom_minimum_size = Vector2(24, 12)
 layout_mode = 2
-size_flags_vertical = 3
-theme_override_font_sizes/font_size = 6
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 5
 text = "삭제"
 
 [node name="BackButton" type="Button" parent="Panel/Margin/VBox"]
 custom_minimum_size = Vector2(0, 16)
 layout_mode = 2
 size_flags_vertical = 0
-theme_override_font_sizes/font_size = 7
+theme_override_font_sizes/font_size = 5
 text = "뒤로"
 
-[node name="SaveOverwriteConfirmPopup" parent="." instance=ExtResource("3_overwrite_popup")]
+[node name="SlotDeleteConfirmPopup" parent="." instance=ExtResource("3_delete_popup")]
