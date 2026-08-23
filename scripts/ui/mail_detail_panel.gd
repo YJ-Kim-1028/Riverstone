@@ -10,6 +10,15 @@ extends Control
 
 
 func show_email(entry: Dictionary, is_sent: bool) -> void:
+	## 스토커 이메일 전용 효과음(사용자 지시, 2026-08-24) - EmailManager._add_mail()이
+	## 저장한 category로 구분한다.
+	## 사칭 메일(impersonation)도 스토커 메일과 같은 소름끼치는 소리로 취급한다
+	## (사용자 지시, 2026-08-24).
+	var category := String(entry.get("category", ""))
+	if category == "stalker" or category == "impersonation":
+		AudioManager.play_sfx(AudioManager.SFX_STALKER_MAIL)
+	else:
+		AudioManager.play_sfx(AudioManager.SFX_MAIL_OPEN)
 	# {player_name} 자리표시자 - mail_list_panel.gd와 동일하게 제목도 치환.
 	_title_label.text = String(entry.get("title", "")).replace("{player_name}", GameManager.player_name)
 	var npc_id := String(entry.get("npc_id", ""))
