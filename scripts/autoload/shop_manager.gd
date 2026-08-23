@@ -142,7 +142,12 @@ func get_purchase_count(item_id: String) -> int:
 ## 어셔의 책처럼 순차 공개되는 항목용 - listing에 unlocks_after(선행 item_id)가
 ## 있으면, 그 선행 아이템을 구매한 뒤 unlock_delay_days일 이상 지나야 통과한다.
 ## 두 필드가 없는 일반 항목은 항상 true(기존 동작 그대로).
+## 2026-08-23 사용자 지시: 쥐약(rat_poison)은 첫 번째 살인이 실제로 일어나기
+## 전까지는 구매할 수 없어야 한다(그 전에 사서 미리 독살할 수 있으면 공포
+## 시스템 순서가 깨짐) - listing에 "requires_murder": true를 걸어서 처리.
 func _is_release_unlocked(listing: Dictionary) -> bool:
+	if bool(listing.get("requires_murder", false)) and MurderManager.get_murder_count() < 1:
+		return false
 	var prerequisite := String(listing.get("unlocks_after", ""))
 	if prerequisite.is_empty():
 		return true

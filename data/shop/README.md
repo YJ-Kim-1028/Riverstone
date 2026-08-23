@@ -39,6 +39,8 @@
 
 `marr_shop`(잡화점)에 `purchase_limit: 1`로 등록되어 있어 자동으로 "1회 구매, 재판매 불가"가 지켜진다. 사용 여부는 `CookingManager.has_used_rat_poison()`이 별도로 추적하고(구매와 사용은 다른 개념), 두 정보 모두 세이브에 남는다.
 
+`"requires_murder": true`도 걸려있다(2026-08-23) - 스토커의 첫 번째 살인이 실제로 일어나기 전까지는 구매 목록에서 아예 숨겨진다. 그 전에 미리 사서 독살할 수 있으면 "첫 살인 전까지 공포 요소를 인지해서는 안 된다"는 CLAUDE.md 규칙과 살인 시스템 순서가 어긋나기 때문. `_is_release_unlocked()`(shop_manager.gd)가 `MurderManager.get_murder_count() < 1`이면 `unlocks_after`와 별개로 무조건 막는다.
+
 ## 월드 상호작용
 
 `main.gd`가 계산대(`cash_register`)와 상호작용하면 그 오브젝트의 `shop_id` 프로퍼티를 읽어 `shop_interacted(shop_id)` 신호를 쏜다. 실제 구매 UI(상품 목록을 보여주고 고르는 화면)는 아직 없어서, 지금은 이 신호를 받아 화면을 띄우는 쪽이 없는 상태 — UI 작업 때 이 신호를 구독하면 된다.

@@ -4,13 +4,13 @@
         "map_id": "general_interior",
         "owner_npc_ids": ["marr"],
         "stock": [
-            {"item_id": "rat_poison", "price": 1000, "purchase_limit": 1},
-            {"item_id": "teddy_bear", "price": 1500},
-            {"item_id": "wildflower_bouquet", "price": 500},
-            {"item_id": "rose_bouquet", "price": 800},
-            {"item_id": "perfume_blue_de_ocean", "price": 2000},
-            {"item_id": "perfume_mr_lilac", "price": 2000},
-            {"item_id": "perfume_pale_light", "price": 2000},
+            {"item_id": "rat_poison", "price": 1500, "purchase_limit": 1, "requires_murder": true},
+            {"item_id": "teddy_bear", "price": 3000},
+            {"item_id": "wildflower_bouquet", "price": 1000},
+            {"item_id": "rose_bouquet", "price": 1600},
+            {"item_id": "perfume_blue_de_ocean", "price": 3500},
+            {"item_id": "perfume_mr_lilac", "price": 3500},
+            {"item_id": "perfume_pale_light", "price": 3500},
             {"item_id": "inventory_expansion"}
         ],
         "planned_stock": ["gift_items (선물용 아이템, 구체적인 목록 미정)"]
