@@ -308,6 +308,12 @@ const MURDER_RUN_CHAIN := {
 	"plaza5": "plaza4", "plaza4": "plaza2", "plaza2": "plaza1", "plaza1": "plaza3", "Home": "plaza1",
 }
 const POLI_DECOY_SCENE := preload("res://scenes/npc_sprite.tscn")
+## 사용자 피드백(2026-08-23): 도착하자마자 바로 대사가 시작돼서 자루/폴리를
+## 볼 틈이 없었음 - 폴리 위에 슬픈 이모트를 띄우고 이 시간만큼 멈춘 뒤에
+## 대사를 시작한다. 대사가 끝난 직후에도 곧장 암전되어 자루가 잘 안 보인다는
+## 지적이 있어 페이드 전에도 같은 시간만큼 멈춘다.
+const MURDER_DISCOVERY_REACTION_DELAY_SECONDS := 5.0
+const MURDER_DISCOVERY_AFTERMATH_DELAY_SECONDS := 2.5
 
 ## MurderManager.murder_occurred - 살인 발생 시각(오후 10시)에 플레이어가 뭘
 ## 하고 있었든 강제로 끊고 들어가는 발견 씬(사용자 지시): 비명 → 지금 있는
@@ -342,13 +348,17 @@ func _on_murder_occurred(_victim_id: String, _murder_number: int) -> void:
 	if poli_spawn != Vector2.INF:
 		scene_props = _spawn_murder_discovery_poli_decoy(poli_spawn)
 		await player.walk_to(poli_spawn)
+		if not scene_props.is_empty():
+			scene_props[0].call("show_emote", NPCManager.EMOTE_DEJECTED, MURDER_DISCOVERY_REACTION_DELAY_SECONDS)
+		await get_tree().create_timer(MURDER_DISCOVERY_REACTION_DELAY_SECONDS).timeout
 	if dialogue_screen != null:
 		var trigger: Dictionary = NPCManager.get_definition(MURDER_DISCOVERY_NPC_ID).get("story_dialogue", {}).get(MURDER_DISCOVERY_TRIGGER, {})
 		dialogue_screen.open_special(MURDER_DISCOVERY_NPC_ID, (trigger.get("lines", []) as Array).duplicate())
 		await dialogue_screen.closed
-	# 대화가 끝나자마자 뚝 끊기지 않도록, 암전 → 분신/소품 정리 → 전원 다시
-	# 보이게 → 암전 해제로 씬을 마무리한다("살해현장이 사라진다"는 사용자
-	# 요청) - 플레이어는 같은 자리(plaza3)에서 다시 조작 가능해진다.
+	# 대화가 끝나자마자 뚝 끊기지 않도록, 잠깐 정지 → 암전 → 분신/소품 정리 →
+	# 전원 다시 보이게 → 암전 해제로 씬을 마무리한다("살해현장이 사라진다"는
+	# 사용자 요청) - 플레이어는 같은 자리(plaza3)에서 다시 조작 가능해진다.
+	await get_tree().create_timer(MURDER_DISCOVERY_AFTERMATH_DELAY_SECONDS).timeout
 	await _fade_out()
 	_cleanup_murder_discovery_scene_props(scene_props)
 	_set_all_npc_sprites_hidden(false)

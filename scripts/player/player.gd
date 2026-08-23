@@ -293,7 +293,9 @@ func _get_move_direction() -> Vector2:
 ## RUN_SPEED_MULTIPLIER로 평소보다 빠르게(뛰는 느낌) 움직이고, 경유점 하나당
 ## SCRIPTED_WALK_TIMEOUT_SECONDS를 넘기면(벽에 낌 등 예외 상황 안전장치)
 ## 그 경유점은 포기하고 다음으로 넘어간다.
-const RUN_SPEED_MULTIPLIER := 1.8
+## 2026-08-23: 살인 발견 씬에서 너무 빨리 지나가 상황 파악이 안 된다는
+## 사용자 피드백으로 1.8 -> 1.3으로 낮춤.
+const RUN_SPEED_MULTIPLIER := 1.3
 const SCRIPTED_WALK_ARRIVAL_DISTANCE := 3.0
 const SCRIPTED_WALK_TIMEOUT_SECONDS := 10.0
 

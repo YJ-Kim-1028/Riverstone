@@ -142,12 +142,15 @@ func _build_emote_sprite() -> void:
 ## 화면에 있으면 호출한다(.call()로 이름 기반 호출 - 다른 크로스-스크립트 참조와
 ## 동일하게 정적 타입 캐스팅 대신 이름 기반으로 통일한 규칙을 따름).
 ## 텍스처를 못 찾으면(에셋 미준비) 조용히 아무 일도 하지 않는다.
-func show_emote(emote_id: String) -> void:
+## duration을 생략하면 평소처럼 EMOTE_DISPLAY_DURATION만큼만 보인다 - 살인
+## 발견 씬처럼 더 오래 띄워야 하는 경우에만 넘긴다(main.gd 참고).
+func show_emote(emote_id: String, duration: float = EMOTE_DISPLAY_DURATION) -> void:
 	var texture := NPCManager.get_emote_icon_texture(emote_id)
 	if texture == null:
 		return
 	_emote_sprite.texture = texture
 	_emote_sprite.visible = true
+	_emote_timer.wait_time = duration
 	_emote_timer.start()
 
 
