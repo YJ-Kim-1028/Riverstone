@@ -42,6 +42,18 @@ func refresh() -> void:
 	_icon.texture = InventoryManager.get_item_icon_texture(item_id) if not item_id.is_empty() else null
 	var count := EquipmentManager.get_equipped_count(slot_name)
 	_count_label.text = str(count) if count > 1 else ""
+	## 인벤토리 그리드 슬롯(equipment_panel.gd의 _tooltip_for())과 동일한
+	## 형식의 마우스 오버 툴팁 - 사용자 지시, 2026-08-24.
+	tooltip_text = _tooltip_for(item_id)
+
+
+func _tooltip_for(item_id: String) -> String:
+	if item_id.is_empty():
+		return ""
+	var definition := InventoryManager.get_item_definition(item_id)
+	var name_text := String(definition.get("name", ""))
+	var description_text := String(definition.get("description", ""))
+	return "%s\n%s" % [name_text, description_text] if not description_text.is_empty() else name_text
 
 
 func _can_drop_data(_at_position: Vector2, data) -> bool:

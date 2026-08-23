@@ -847,7 +847,7 @@
         "name": "미끼",
         "category": "material",
         "subtype": "",
-        "description": "오징어를 낚을 확률이 증가한다.",
+        "description": "인벤토리에 있으면 낚시 시 자동으로 사용된다. 오징어를 낚을 확률이 증가한다.",
         "icon": "res://assets/icon/Tools.png",
         "icon_index": 10
     },
