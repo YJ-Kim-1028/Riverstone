@@ -111,10 +111,7 @@ func _refresh() -> void:
 		if has_save:
 			var summary := SaveManager.get_save_summary(slot)
 			var info := "%s - %d일차" % [String(summary.get("player_name", "")), int(summary.get("day", 1))]
-			if _mode == MODE_NEW_GAME:
-				button.text = "%d번 슬롯\n%s\n(이어하기에서 삭제 후 이용 가능)" % [slot, info]
-			else:
-				button.text = "%d번 슬롯\n%s" % [slot, info]
+			button.text = "%d번 슬롯\n%s" % [slot, info]
 		else:
 			button.text = "%d번 슬롯\n(비어있음)" % slot
 		# 이어하기 모드: 빈 슬롯은 못 고름. 새 게임 모드: 이미 데이터가 있는
