@@ -7,9 +7,9 @@ extends Control
 
 signal closed
 
-const ROW_FONT_SIZE := 7
-const DESCRIPTION_FONT_SIZE := 5
-const HEADER_FONT_SIZE := 8
+const ROW_FONT_SIZE := 6
+const DESCRIPTION_FONT_SIZE := 4
+const HEADER_FONT_SIZE := 7
 
 const BUTTON_TEXTURE := preload("res://assets/ui/button.png")
 const BUTTON_HOVER_TEXTURE := preload("res://assets/ui/button_hover.png")
@@ -137,7 +137,7 @@ func _build_row(shop_id: String, listing: Dictionary) -> Control:
 	price_row.add_child(price_icon)
 
 	var price_label := Label.new()
-	price_label.text = str(price)
+	price_label.text = EconomyManager.format_gold(price)
 	price_label.add_theme_font_size_override("font_size", DESCRIPTION_FONT_SIZE)
 	price_label.modulate = BUTTON_TEXT_COLOR
 	price_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -166,9 +166,10 @@ func _build_button_style(texture: Texture2D) -> StyleBoxTexture:
 
 
 func _on_buy_pressed(shop_id: String, item_id: String) -> void:
-	if ShopManager.buy(shop_id, item_id):
+	var failure_reason := ShopManager.buy(shop_id, item_id)
+	if failure_reason.is_empty():
 		_message_label.text = "주문했습니다. 다음 날 오전 9시에 배송됩니다."
 	else:
-		_message_label.text = ""
+		_message_label.text = failure_reason
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
 	_refresh_rows()

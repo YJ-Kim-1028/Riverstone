@@ -29,6 +29,8 @@ const CATEGORY_STACK_LIMITS := {
 	"material": 99,
 	"dish": 99,
 	"furniture": 99,
+	"floor_decor": 99,
+	"wall_decor": 99,
 	"gift": 5,
 	"tool": 1,
 	"rat_poison": 1,
@@ -39,9 +41,10 @@ const CATEGORY_STACK_LIMITS := {
 	"book": 1,
 	"equipment": 1,
 	"cooked_ingredient": 99,
+	"record": 1,
 }
 
-const NON_DISCARDABLE_CATEGORIES := ["tool", "rat_poison", "memento", "recipe", "quest_item", "book"]
+const NON_DISCARDABLE_CATEGORIES := ["tool", "rat_poison", "memento", "recipe", "quest_item", "book", "record"]
 
 var slot_count := DEFAULT_SLOT_COUNT
 
@@ -62,14 +65,60 @@ func _ready() -> void:
 	# 덮어쓰므로, 여기서 준 것과 무관하게 저장된 상태만 남는다.
 	add_item("hoe", 1)
 	add_item("watering_can", 1)
+	# 보관 상자도 하나는 기본 지급(사용자 지시) - 위 도구들과 동일한 이유로
+	# 여기서 줘도 세이브 로드 시에는 저장된 상태로 덮어써진다.
+	add_item("storage_box", 1)
 	NPCManager.memento_received.connect(_on_memento_received)
+	NPCManager.npc_gift_item_triggered.connect(_on_npc_gift_item_triggered)
 	TimeManager.day_changed.connect(_on_day_changed)
 
 
 const ICON_GRID_SIZE := 16
 
+## 색상 커스터마이징 가구("base_id@색1-색2-색3" 형태의 합성 id,
+## build_colored_item_id() 참고)는 items.json에 없다 - 최초 조회 시 base 정의를
+## 복제해서 "colors"(hex 문자열 배열)/"base_item_id" 필드만 얹어 즉석에서
+## 만들고 _item_catalog에 캐시해둔다(다음부터는 그냥 캐시 히트). 세이브
+## 파일에는 이 문자열 자체가 item_id로 저장되므로, 재접속 후에도 같은 로직으로
+## 항상 재구성된다 - 별도 저장 로직이 필요 없다.
 func get_item_definition(item_id: String) -> Dictionary:
-	return _item_catalog.get(item_id, {})
+	if _item_catalog.has(item_id):
+		return _item_catalog[item_id]
+	if not item_id.contains("@"):
+		return {}
+	var parts := item_id.split("@", true, 1)
+	if parts.size() != 2:
+		return {}
+	var base_id := parts[0]
+	var base_definition: Dictionary = _item_catalog.get(base_id, {})
+	if base_definition.is_empty():
+		return {}
+	var colors: Array = []
+	for hex in parts[1].split("-"):
+		colors.append(String(hex))
+	var definition := base_definition.duplicate(true)
+	definition["id"] = item_id
+	definition["base_item_id"] = base_id
+	definition["colors"] = colors
+	_item_catalog[item_id] = definition
+	return definition
+
+
+## 구매 시 고른 색을 반영한 합성 item_id를 만든다(예: "chair@d95763-4f78d9").
+## FurnitureManager 등 배치 시스템은 이 문자열도 그냥 평범한 item_id 하나로만
+## 취급하므로 인벤토리/장비/저장 로직을 전혀 건드릴 필요가 없다 - 위
+## get_item_definition()의 지연 생성 분기가 실제 정의를 만들어준다. 호출
+## 즉시 get_item_definition()을 한 번 태워서 캐시에 등록해둔다(반환 직후부터
+## 바로 조회 가능하도록).
+func build_colored_item_id(base_item_id: String, colors: Array[Color]) -> String:
+	var hex_joined := ""
+	for i in colors.size():
+		if i > 0:
+			hex_joined += "-"
+		hex_joined += colors[i].to_html(false)
+	var item_id := "%s@%s" % [base_item_id, hex_joined]
+	get_item_definition(item_id)
+	return item_id
 
 
 ## Most category icon files (Gift.png, Food.png, Tools.png, ...) are
@@ -78,7 +127,11 @@ func get_item_definition(item_id: String) -> Dictionary:
 ## right) and, if the sheet has more than one row, icon_row (0-based, default
 ## 0 = the first row). Without icon_index, no icon is shown yet (rather than
 ## handing UI the whole multi-icon sheet as if it were this one item's icon).
-func get_item_icon_texture(item_id: String) -> Texture2D:
+## row_override lets a caller pick a different row than the item's own
+## icon_row while keeping the same sheet/column - player_tool_overlay.gd uses
+## this for the front-facing pose variant some tools have drawn one row below
+## their normal icon (2026-08-12).
+func get_item_icon_texture(item_id: String, row_override: int = -1) -> Texture2D:
 	var definition := get_item_definition(item_id)
 	## 실제 아이콘 그림이 아직 없는 임시 아이템(예: 장비 테스트용)은 스프라이트
 	## 시트 대신 "icon_color"(hex) 하나로 단색 아이콘을 대신 쓸 수 있다.
@@ -92,7 +145,7 @@ func get_item_icon_texture(item_id: String) -> Texture2D:
 	if sheet == null:
 		return null
 	var column := int(definition["icon_index"])
-	var row := int(definition.get("icon_row", 0))
+	var row := row_override if row_override >= 0 else int(definition.get("icon_row", 0))
 	var atlas := AtlasTexture.new()
 	atlas.atlas = sheet
 	atlas.region = Rect2(column * ICON_GRID_SIZE, row * ICON_GRID_SIZE, ICON_GRID_SIZE, ICON_GRID_SIZE)
@@ -106,7 +159,7 @@ func _flat_color_texture(color: Color) -> Texture2D:
 
 
 func is_item_known(item_id: String) -> bool:
-	return _item_catalog.has(item_id)
+	return not get_item_definition(item_id).is_empty()
 
 
 func get_item_category(item_id: String) -> String:
@@ -409,6 +462,13 @@ func _on_memento_received(npc_id: String) -> void:
 		push_warning("Inventory full - could not deliver memento item: %s" % item_id)
 
 
+func _on_npc_gift_item_triggered(npc_id: String, item_id: String) -> void:
+	if item_id.is_empty():
+		return
+	if not add_item(item_id, 1):
+		push_warning("Inventory full - could not deliver NPC gift item: %s from %s" % [item_id, npc_id])
+
+
 func _on_day_changed(_day: int, _weekday: String) -> void:
 	_gifted_today.clear()
 
@@ -420,8 +480,18 @@ func _item_name(item_id: String) -> String:
 ## add_item()/can_add_item()이 공유하는 용량 계산 - 원래 add_item() 안에
 ## 그대로 있던 로직을 뮤테이션 없이 재사용할 수 있도록 분리한 것뿐, 판정
 ## 결과는 이전과 동일하다.
+##
+## _item_catalog.has(item_id)로 직접 조회하면 안 된다(예전 버그) - 가구
+## 색상 커스터마이징의 합성 item_id(예: "chair@a9794a")는 items.json에 없고
+## get_item_definition()이 처음 호출될 때 지연 생성/등록되는데, 게임을 새로
+## 켠 직후에는 아직 한 번도 조회된 적이 없어 _item_catalog에 없는 상태다.
+## load_save_data() -> add_item() -> _can_fit()로 이어지는 로드 경로가 바로
+## 이 함수라서, 여기서 카탈로그를 직접 봤더니 재접속 시 색칠된 가구가 전부
+## "알 수 없는 아이템"으로 판정되어 조용히 사라지는 버그가 있었다(사용자
+## 리포트). get_item_definition()을 거치면 그 자리에서 바로 등록되므로
+## 해결된다.
 func _can_fit(item_id: String, count: int) -> bool:
-	if count <= 0 or not _item_catalog.has(item_id):
+	if count <= 0 or get_item_definition(item_id).is_empty():
 		return false
 	var stack_limit := get_stack_limit(item_id)
 	if _is_unique_item(item_id) and get_item_count(item_id) + count > 1:

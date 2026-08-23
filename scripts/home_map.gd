@@ -78,6 +78,7 @@ const MAP_PATHS := {
 	"plaza3": "res://assets/map/plaza3.tmx",
 	"plaza4": "res://assets/map/plaza4.tmx",
 	"plaza5": "res://assets/map/plaza5.tmx",
+	"basement_interior": "res://assets/interior/basement_interior.tmx",
 	"book_interior": "res://assets/interior/book_interior.tmx",
 	"cafe_interior": "res://assets/interior/cafe_interior.tmx",
 	"cowshed_interior": "res://assets/interior/cowshed_interior.tmx",
@@ -94,14 +95,50 @@ const MAP_PATHS := {
 	"temple_interior": "res://assets/interior/temple_interior.tmx",
 }
 
+## 집 확장(EconomyManager.house_level, 사용자가 우디 상점에서 구매)에 쓰는
+## 레벨별 실내 맵 경로 - "home_interior" map_id 자체는 그대로 두고(FurnitureManager
+## 등 모든 배치 시스템이 이 id로 저장하므로 절대 바꾸면 안 됨), 실제로 로드할
+## .tmx 파일만 레벨에 따라 바꾼다. 레벨 2/3 파일은 아직 사용자가 안 그렸을 수
+## 있어서(assets/ 폴더는 Claude Code 수정 금지) get_map_path()가 파일 존재
+## 여부를 확인해서 없으면 레벨 1로 조용히 대체한다. 파일 존재 확인은
+## FileAccess.file_exists()를 쓴다 - .tmx는 XMLParser로 직접 읽는 원시 파일이라
+## (아래 load_map()의 parser.open(map_path) 참고) Godot 리소스 로더에 등록된
+## 형식이 아니고, ResourceLoader.exists()는 그런 파일에 대해 항상 false를
+## 반환해서 실제로 파일이 있어도 매번 레벨 1로 되돌아가는 버그가 있었다
+## (사용자 리포트: "집 구매했는데 안 넓어짐" - house_level은 정상적으로 2로
+## 저장돼 있었는데도 지도가 그대로였음).
+const HOME_INTERIOR_LEVEL_PATHS := {
+	1: "res://assets/interior/home_interior.tmx",
+	2: "res://assets/interior/home_interior_2.tmx",
+	3: "res://assets/interior/home_interior_3.tmx",
+}
+
+## main.gd._load_map()가 map_id를 실제 파일 경로로 바꿀 때 쓴다 - "home_interior"만
+## HOME_INTERIOR_LEVEL_PATHS를 거쳐가고, 나머지 전부는 MAP_PATHS를 그대로 쓴다
+## (기존 동작 변경 없음).
+static func get_map_path(map_id: String) -> String:
+	if map_id == "home_interior":
+		var level := EconomyManager.house_level
+		var tiered_path := String(HOME_INTERIOR_LEVEL_PATHS.get(level, ""))
+		if not tiered_path.is_empty() and FileAccess.file_exists(tiered_path):
+			return tiered_path
+	return String(MAP_PATHS.get(map_id, ""))
+
+
 ## MAP_PATHS를 거꾸로 뒤져서 이 경로의 map_id를 찾는다 - TILE_SET_RESOURCES가
-## map_id 기준이라 필요하다. 등록 안 된 경로(예외적으로 커스텀 경로를 직접
-## 지정한 경우)면 빈 문자열 - TILE_SET_RESOURCES.get("")이 항상 null이라
-## 안전하게 기존 Sprite2D 방식으로 대체된다.
+## map_id 기준이라 필요하다. HOME_INTERIOR_LEVEL_PATHS의 레벨 2/3 경로도 같이
+## 훑는다 - 안 그러면 그 맵을 불러올 때 map_id를 못 찾아서 TILE_SET_RESOURCES가
+## null이 되고 렌더링이 예전 Sprite2D 방식으로 조용히 대체되는 회귀가 생긴다.
+## 등록 안 된 경로(예외적으로 커스텀 경로를 직접 지정한 경우)면 빈 문자열 -
+## TILE_SET_RESOURCES.get("")이 항상 null이라 안전하게 기존 Sprite2D 방식으로
+## 대체된다.
 static func _map_id_for_path(path: String) -> String:
 	for map_id in MAP_PATHS:
 		if String(MAP_PATHS[map_id]) == path:
 			return map_id
+	for level in HOME_INTERIOR_LEVEL_PATHS:
+		if String(HOME_INTERIOR_LEVEL_PATHS[level]) == path:
+			return "home_interior"
 	return ""
 
 
@@ -348,6 +385,17 @@ func is_farmable_cell(world_position: Vector2) -> bool:
 	return index >= 0 and index < gids.size() and int(gids[index]) != 0
 
 
+## "Wall" 레이어 소속 칸인지 - WallDecorManager가 벽장식을 실제 벽 타일에만
+## 부착시키는 데 쓴다. is_water_cell()과 완전히 같은 방식, 레이어 1개만 본다.
+## "Wall" 레이어가 없는 맵(예: Home 마당)에서는 항상 false.
+func is_wall_cell(world_position: Vector2) -> bool:
+	var cell := Vector2i(int(world_position.x) / TILE_SIZE, int(world_position.y) / TILE_SIZE)
+	var map_columns := int(_map_size.x / TILE_SIZE)
+	var index := cell.y * map_columns + cell.x
+	var gids: Array = _layer_gids.get("Wall", [])
+	return index >= 0 and index < gids.size() and int(gids[index]) != 0
+
+
 ## AudioManager가 발소리 재생/전환에 쓴다("Path" 밟으면 sfx_footstep,
 ## "Ground" 밟으면 sfx_groundFootstep, 사용자 지시) - is_water_cell()과 동일한
 ## _layer_gids 조회 방식. 두 레이어 다 없는 칸(실내 바닥 등)이면 "".
@@ -402,6 +450,14 @@ func get_warp_for_target_map(target_map_id: String) -> Dictionary:
 		if String(warp.get("target_map", "")) == target_map_id:
 			return warp
 	return {}
+
+
+## 살인 발견 씬(main.gd)이 "실내에 있으면 문 쪽으로" 뛰어갈 때 쓴다 - 실내
+## 맵은 보통 워프가 하나(나가는 문)뿐이라 그냥 첫 번째를 쓴다. 워프가 여러 개인
+## 실내(드묾)라면 의도한 문이 아닐 수 있음 - 그럴 땐 get_warp_for_target_map()으로
+## 바꿔야 함.
+func get_any_warp() -> Dictionary:
+	return _warps[0] if not _warps.is_empty() else {}
 
 
 ## Interactable과 동일하게 점(반경 판정)/사각형(범위 판정) 둘 다 지원한다.
@@ -492,6 +548,26 @@ func set_area_blocked(center: Vector2, size: Vector2, blocked: bool) -> void:
 				_blocked_cells[cell] = true
 			else:
 				_blocked_cells.erase(cell)
+
+
+## set_area_blocked()의 쓰기 쪽과 정확히 같은 center/size 계산을 그대로
+## 미러링한 읽기 쪽 - FurnitureManager가 다중 칸 설치 가능 여부를 검사하는 데
+## 쓴다(is_cell_blocked()와 동일하게, 맵 범위 밖 칸은 무조건 막힌 것으로 처리).
+func is_area_blocked(center: Vector2, size: Vector2) -> bool:
+	var top_left: Vector2 = center - size / 2.0
+	var col_start := roundi(top_left.x / TILE_SIZE)
+	var row_start := roundi(top_left.y / TILE_SIZE)
+	var col_count := maxi(roundi(size.x / TILE_SIZE), 1)
+	var row_count := maxi(roundi(size.y / TILE_SIZE), 1)
+	var map_columns := int(_map_size.x / TILE_SIZE)
+	var map_rows := int(_map_size.y / TILE_SIZE)
+	for row in range(row_start, row_start + row_count):
+		for col in range(col_start, col_start + col_count):
+			if col < 0 or row < 0 or col >= map_columns or row >= map_rows:
+				return true
+			if _blocked_cells.has(Vector2i(col, row)):
+				return true
+	return false
 
 
 ## Reads only the Spawn object layer of a .tmx file (no tile rendering, no
@@ -717,6 +793,24 @@ static func compute_point_along_path(map_path: String, from_position: Vector2, t
 	if path.is_empty():
 		return from_position
 	return advance_along_path(path, traveled_distance)["position"]
+
+
+## EconomyManager.upgrade_house()가 집 레벨이 올라가 실제로 로드할 .tmx가
+## 바뀔 때 쓴다 - 두 지도의 spawn_name 스폰 지점(예: "home_enterance", 현관문)이
+## 같은 물리적 위치를 가리킨다고 보고, 그 절대좌표 차이를 칸 단위로 돌려준다.
+## 방을 다시 그리면서 기존 바닥을 밀어야 했던 경우(예: 위쪽에 공간을 넣으려고
+## 전체를 아래로 옮김) 이 값만큼 이미 저장된 가구/장식/보관함 좌표도 같이
+## 옮겨야 허공에 뜨지 않는다(사용자 리포트, 2026-08-10). 오프셋을 코드에
+## 하드코딩하지 않고 항상 그 시점의 실제 .tmx 두 장을 가볍게 비교하는 이유는,
+## 나중에 지도를 또 고치면 하드코딩된 값이 조용히 어긋날 수 있기 때문.
+static func get_room_anchor_shift(old_map_path: String, new_map_path: String, spawn_name: String) -> Vector2i:
+	if old_map_path.is_empty() or new_map_path.is_empty() or old_map_path == new_map_path:
+		return Vector2i.ZERO
+	var old_spawn := _get_lightweight_map(old_map_path).get_spawn_position(spawn_name)
+	var new_spawn := _get_lightweight_map(new_map_path).get_spawn_position(spawn_name)
+	if not old_spawn.is_finite() or not new_spawn.is_finite():
+		return Vector2i.ZERO
+	return Vector2i((new_spawn - old_spawn) / float(TILE_SIZE))
 
 
 func _match_element(parser: XMLParser, _visible: bool, _reading: bool, object_group: String, current_object: Dictionary) -> void:

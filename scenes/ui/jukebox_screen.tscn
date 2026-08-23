@@ -1,0 +1,73 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/jukebox_screen.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/frame_9slice.png" id="2_frame"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_book_prev.png" id="3_prev"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_book_next.png" id="4_next"]
+
+[node name="JukeboxScreen" type="Control"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -75.0
+offset_top = -44.0
+offset_right = 75.0
+offset_bottom = -8.0
+script = ExtResource("1_script")
+
+[node name="Background" type="NinePatchRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("2_frame")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="Margin" type="MarginContainer" parent="Background"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 6.0
+offset_right = -8.0
+offset_bottom = -6.0
+
+[node name="HBox" type="HBoxContainer" parent="Background/Margin"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 6
+
+[node name="PrevButton" type="TextureButton" parent="Background/Margin/HBox"]
+custom_minimum_size = Vector2(10, 11)
+layout_mode = 2
+size_flags_vertical = 4
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("3_prev")
+
+[node name="Icon" type="TextureRect" parent="Background/Margin/HBox"]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NameLabel" type="Label" parent="Background/Margin/HBox"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 5
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "Nice to Serve You"
+
+[node name="NextButton" type="TextureButton" parent="Background/Margin/HBox"]
+custom_minimum_size = Vector2(10, 11)
+layout_mode = 2
+size_flags_vertical = 4
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("4_next")

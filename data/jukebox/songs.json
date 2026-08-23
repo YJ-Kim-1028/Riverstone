@@ -1,0 +1,26 @@
+{
+    "song_nice_to_serve_you": {
+        "id": "song_nice_to_serve_you",
+        "name": "Nice to Serve You",
+        "bgm_path": "res://assets/audio/bgm/bgm_restaurant.mp3",
+        "icon": "res://assets/icon/Records.png",
+        "icon_index": 0,
+        "unlocked_by_default": true
+    },
+    "song_chiptune": {
+        "id": "song_chiptune",
+        "name": "Chip tune",
+        "bgm_path": "res://assets/audio/bgm/bgm_chiptune.mp3",
+        "icon": "res://assets/icon/Records.png",
+        "icon_index": 1,
+        "item_id": "record_chiptune"
+    },
+    "song_city_pop": {
+        "id": "song_city_pop",
+        "name": "City pop",
+        "bgm_path": "res://assets/audio/bgm/bgm_citypop.mp3",
+        "icon": "res://assets/icon/Records.png",
+        "icon_index": 2,
+        "item_id": "record_city_pop"
+    }
+}

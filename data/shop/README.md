@@ -16,6 +16,17 @@
 
 **가축(소/돼지)은 인벤토리 아이템이 아니다.** `planned_stock`에 `livestock:cow`처럼 적어뒀지만, 이건 가방에 들어가는 물건이 아니라 외양간에 배치되는 동물이라 아직 없는 축산 시스템의 몫이다. `ShopManager.buy()`는 현재 `item_id`가 `data/items/items.json`에 실제로 등록된 경우만 처리하므로, 가축을 실제로 팔려면 축산 시스템을 만들 때 `buy()`에 `livestock:` 접두사를 다르게 처리하는 분기를 추가해야 한다.
 
+## 순차 공개 상품 (`unlocks_after` / `unlock_delay_days`)
+
+어셔의 책(`usher_shop`)처럼 "한 권씩 순서대로 풀리는" 상품은 `stock` 항목에 아래 두 필드를 추가하면 된다:
+```json
+{"item_id": "book_perfect_alibi", "price": 200, "purchase_limit": 1, "unlocks_after": "book_beyond_the_door", "unlock_delay_days": 3}
+```
+* `unlocks_after` — 이 항목이 등장하려면 먼저 구매되어 있어야 하는 선행 `item_id`. 아직 안 샀으면 목록에서 아예 빠진다(`purchase_limit` 초과 항목과 동일하게 숨김 처리).
+* `unlock_delay_days` — 선행 항목을 구매한 날(`TimeManager.current_day`)로부터 최소 며칠이 지나야 하는지. 두 조건(구매 + 경과일) 모두 만족해야 `get_stock()`에 나타난다.
+* 언제 구매했는지는 `ShopManager._purchase_days`(SaveData의 `purchase_days`)가 아이템별로 기록한다 - 재구매해도 최초 구매일을 유지한다.
+* 두 필드가 없으면 기존과 동일하게 항상 노출(다른 상점 전부 이 필드 없이 그대로 동작).
+
 ## 상점 승계 (`get_shop_mode`)
 
 `shop.md`를 읽어보면 "승계 규칙이 있는 상점(벨제/셰퍼드, 마린/로시)"과 "승계 규칙이 없는 나머지 상점(사망 즉시 온라인 전환)"이 서로 다른 절로 나뉘어 있지만, 실제 판정 로직은 동일하다 — **`owner_npc_ids` 중 한 명이라도 살아있으면 평소처럼 대면 구매(`in_person`), 전원 사망하면 온라인(`online`)**. 1인 상점은 그 한 명이 곧 "전원"이라 같은 규칙으로 자연스럽게 처리된다. 그래서 상점마다 승계 방식을 별도로 태그하지 않고 `owner_npc_ids` 배열 하나로 통일했다.

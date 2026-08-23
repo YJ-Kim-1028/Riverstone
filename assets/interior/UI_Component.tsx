@@ -241,6 +241,11 @@
    <property name="collision" type="bool" value="true"/>
   </properties>
  </tile>
+ <tile id="241">
+  <properties>
+   <property name="collision" type="bool" value="true"/>
+  </properties>
+ </tile>
  <tile id="243">
   <properties>
    <property name="collision" type="bool" value="true"/>

@@ -54,9 +54,40 @@
         "map_id": "furniture_interior",
         "owner_npc_ids": ["woody"],
         "stock": [
-            {"item_id": "storage_box", "price": 1000}
+            {"item_id": "house_upgrade"},
+            {"item_id": "storage_box", "price": 1000},
+            {"item_id": "chair", "price": 800},
+            {"item_id": "sofa", "price": 2200},
+            {"item_id": "display_table", "price": 1500},
+            {"item_id": "bookshelf_33", "price": 2000},
+            {"item_id": "bookshelf_23", "price": 1800},
+            {"item_id": "bookshelf_22", "price": 1500},
+            {"item_id": "cabinet_23", "price": 1600},
+            {"item_id": "kitchen_cabinet", "price": 2200},
+            {"item_id": "jukebox", "price": 3000},
+            {"item_id": "glass_display_shelf", "price": 2400},
+            {"item_id": "blinder", "price": 1700},
+            {"item_id": "drink_fridge", "price": 2000},
+            {"item_id": "stove", "price": 2400},
+            {"item_id": "desk", "price": 1300},
+            {"item_id": "vase_1", "price": 1200},
+            {"item_id": "vase_2", "price": 1400},
+            {"item_id": "vase_3", "price": 1400},
+            {"item_id": "vase_4", "price": 1400},
+            {"item_id": "bed", "price": 2800},
+            {"item_id": "iron_cabinet", "price": 1400},
+            {"item_id": "light", "price": 1800},
+            {"item_id": "standing_light", "price": 1800},
+            {"item_id": "candle", "price": 1200},
+            {"item_id": "shrine_light", "price": 3000},
+            {"item_id": "temple_light", "price": 300},
+            {"item_id": "round_carpet", "price": 1600},
+            {"item_id": "rect_carpet", "price": 2000},
+            {"item_id": "rect_carpet_2", "price": 2000},
+            {"item_id": "welcome_carpet", "price": 1200},
+            {"item_id": "memo", "price": 1100}
         ],
-        "planned_stock": ["chair", "bookshelf", "flowerpot"]
+        "planned_stock": []
     },
     "usher_shop": {
         "name": "서점",
@@ -64,18 +95,20 @@
         "owner_npc_ids": ["usher"],
         "stock": [
             {"item_id": "recipe_random", "price": 1000, "purchase_limit": 2},
-            {"item_id": "book_beyond_the_door", "price": 200, "purchase_limit": 1},
-            {"item_id": "book_perfect_alibi", "price": 200, "purchase_limit": 1},
-            {"item_id": "book_life_as_a_cat", "price": 200, "purchase_limit": 1},
-            {"item_id": "book_culprit_is_here", "price": 200, "purchase_limit": 1},
-            {"item_id": "book_love_in_three_seconds", "price": 200, "purchase_limit": 1},
-            {"item_id": "book_resolve_before_death", "price": 200, "purchase_limit": 1},
-            {"item_id": "book_last_summer", "price": 200, "purchase_limit": 1},
-            {"item_id": "book_detectives_last_trace", "price": 200, "purchase_limit": 1},
-            {"item_id": "book_unsent_letter", "price": 200, "purchase_limit": 1},
-            {"item_id": "book_girl_in_the_alley", "price": 200, "purchase_limit": 1}
+            {"item_id": "book_beyond_the_door", "price": 1800, "purchase_limit": 1},
+            {"item_id": "book_perfect_alibi", "price": 1800, "purchase_limit": 1, "unlocks_after": "book_beyond_the_door", "unlock_delay_days": 2},
+            {"item_id": "book_life_as_a_cat", "price": 1800, "purchase_limit": 1, "unlocks_after": "book_perfect_alibi", "unlock_delay_days": 2},
+            {"item_id": "book_culprit_is_here", "price": 1800, "purchase_limit": 1, "unlocks_after": "book_life_as_a_cat", "unlock_delay_days": 2},
+            {"item_id": "book_love_in_three_seconds", "price": 1800, "purchase_limit": 1, "unlocks_after": "book_culprit_is_here", "unlock_delay_days": 2},
+            {"item_id": "book_resolve_before_death", "price": 1800, "purchase_limit": 1, "unlocks_after": "book_love_in_three_seconds", "unlock_delay_days": 2},
+            {"item_id": "book_last_summer", "price": 1800, "purchase_limit": 1, "unlocks_after": "book_resolve_before_death", "unlock_delay_days": 2},
+            {"item_id": "book_detectives_last_trace", "price": 1800, "purchase_limit": 1, "unlocks_after": "book_last_summer", "unlock_delay_days": 2},
+            {"item_id": "book_unsent_letter", "price": 1800, "purchase_limit": 1, "unlocks_after": "book_detectives_last_trace", "unlock_delay_days": 2},
+            {"item_id": "book_girl_in_the_alley", "price": 1800, "purchase_limit": 1, "unlocks_after": "book_unsent_letter", "unlock_delay_days": 2},
+            {"item_id": "record_chiptune", "price": 5000, "purchase_limit": 1},
+            {"item_id": "record_city_pop", "price": 5000, "purchase_limit": 1}
         ],
-        "planned_stock": ["music (음악, 세부 미정, 오디오 시스템 자체가 없음)"]
+        "planned_stock": []
     },
     "isha_shop": {
         "name": "병원",
@@ -91,7 +124,7 @@
         "map_id": "cafe_interior",
         "owner_npc_ids": ["mocha"],
         "stock": [
-            {"item_id": "americano", "price": 100}
+            {"item_id": "americano", "price": 1000}
         ],
         "planned_stock": []
     }

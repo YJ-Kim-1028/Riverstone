@@ -31,16 +31,26 @@ func _ready() -> void:
 	_update_darkness(TimeManager.current_hour, TimeManager.current_minute)
 
 
-## main.gd가 맵을 새로 불러올 때마다 호출한다 - 이전 맵의 조명을 지우고
-## 새 맵의 get_light_source_positions()로 다시 만든다. is_indoor는 실내
-## 맵인지(가로등처럼 밤에만 켜지는 게 아니라 실내 전등처럼 항상 켜져
-## 있어야 하는지) 구분하는 값 - main.gd가 map_id의 "_interior" 여부로 넘겨준다.
-func rebuild_lights(world_map: WorldMap, is_indoor: bool) -> void:
+## main.gd가 맵을 새로 불러올 때마다, 그리고 조명 가구가 배치/회수될 때마다
+## 호출한다 - 이전 조명을 지우고 새로 만든다. 위치는 맵이 직접 그린 정적
+## "Light" 타일(world_map.get_light_source_positions())과, 플레이어가 배치한
+## 조명 가구/바닥장식/벽장식(FurnitureManager 등 3개 매니저의
+## get_light_source_positions(map_id), emits_light인 아이템만) 둘 다 합친다.
+## is_indoor는 실내 맵인지(가로등처럼 밤에만 켜지는 게 아니라 실내 전등처럼
+## 항상 켜져 있어야 하는지) 구분하는 값 - main.gd가 map_id의 "_interior" 여부로
+## 넘겨준다. map_id는 world_map 자신은 자기 id를 모르므로 별도로 받는다(맵
+## 로드 도중 아직 각 매니저의 set_world_map()이 불리기 전이어도, 매니저들의
+## 배치 Dictionary는 map_id별로 이미 다 갖고 있어서 조회 가능).
+func rebuild_lights(world_map: WorldMap, is_indoor: bool, map_id: String) -> void:
 	_is_indoor = is_indoor
 	for light in _lights:
 		light.queue_free()
 	_lights.clear()
-	for light_position in world_map.get_light_source_positions():
+	var light_positions := world_map.get_light_source_positions() \
+		+ FurnitureManager.get_light_source_positions(map_id) \
+		+ FloorDecorManager.get_light_source_positions(map_id) \
+		+ WallDecorManager.get_light_source_positions(map_id)
+	for light_position in light_positions:
 		var light := PointLight2D.new()
 		light.texture = _light_texture
 		light.color = LIGHT_COLOR

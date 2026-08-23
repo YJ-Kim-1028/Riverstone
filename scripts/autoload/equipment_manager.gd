@@ -22,7 +22,13 @@ const HAND_SLOT := "hand"
 ## "손에 장착 후 상호작용" UX로 만들기로 함(사용자 지시). 개수는 여물과
 ## 달리 1개씩만 든다(STACKABLE_CATEGORIES에는 없음 - 선물은 한 번에 한
 ## NPC에게 하나씩 주는 개별 행동이라 스택 들기가 안 맞음).
-const EQUIPPABLE_CATEGORIES := ["equipment", "tool", "material", "gift"]
+## "furniture"도 포함하는 이유: 가구도 보관 상자와 같은 "손에 들고 마우스로
+## 설치" UX(FurnitureManager) - 개수는 도구처럼 1개씩만(STACKABLE_CATEGORIES에
+## 없음, 한 번에 하나씩 들고 설치).
+## "floor_decor"/"wall_decor"도 포함하는 이유: 바닥/벽 장식도 가구와 완전히
+## 같은 "손에 들고 마우스로 설치" UX(FloorDecorManager/WallDecorManager) -
+## 개수도 가구와 동일하게 1개씩만.
+const EQUIPPABLE_CATEGORIES := ["equipment", "tool", "material", "gift", "furniture", "floor_decor", "wall_decor"]
 ## 여물처럼 스택 가능한 재료를 장착할 땐 인벤토리에 있는 만큼 전부 손에
 ## 들고, consume_equipped()로 한 개씩 소모한다 - 하나 주고 다시 장착하고를
 ## 반복하지 않게 하기 위함(사용자 지시: "5개를 샀으면 장비창에 5개가

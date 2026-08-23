@@ -53,4 +53,4 @@ theme_override_constants/separation = 9
 [node name="MessageLabel" type="Label" parent="ScaledContent/Margin/VBox"]
 layout_mode = 2
 autowrap_mode = 2
-theme_override_font_sizes/font_size = 6
+theme_override_font_sizes/font_size = 5

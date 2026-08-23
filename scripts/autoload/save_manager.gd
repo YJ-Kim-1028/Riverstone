@@ -117,6 +117,7 @@ func _gather_save_data() -> Dictionary:
 			"cheek_color": GameManager.cheek_color,
 			"outfit_color_1": GameManager.outfit_color_1,
 			"outfit_color_2": GameManager.outfit_color_2,
+			"outfit_color_3": GameManager.outfit_color_3,
 			"shoe_color": GameManager.shoe_color,
 			"accessory_color": GameManager.accessory_color,
 			"outfit_id": GameManager.outfit_id,
@@ -142,6 +143,10 @@ func _gather_save_data() -> Dictionary:
 		"livestock": LivestockManager.get_save_data(),
 		"farming": FarmingManager.get_save_data(),
 		"storage_boxes": StorageBoxManager.get_save_data(),
+		"jukebox": JukeboxManager.get_save_data(),
+		"furniture": FurnitureManager.get_save_data(),
+		"floor_decor": FloorDecorManager.get_save_data(),
+		"wall_decor": WallDecorManager.get_save_data(),
 	}
 
 
@@ -184,8 +189,9 @@ func _apply_save_data(data: Dictionary) -> void:
 		"skin_color": player.get("skin_color", "f8e7da"),
 		"eye_color": player.get("eye_color", "38b57a"),
 		"cheek_color": player.get("cheek_color", "f4a6b3"),
-		"outfit_color_1": player.get("outfit_color_1", "9a9a9a"),
-		"outfit_color_2": player.get("outfit_color_2", "565656"),
+		"outfit_color_1": player.get("outfit_color_1", "d6d6d6"),
+		"outfit_color_2": player.get("outfit_color_2", "a8a8a8"),
+		"outfit_color_3": player.get("outfit_color_3", "727272"),
 		"shoe_color": player.get("shoe_color", "9a9a9a"),
 		"accessory_color": player.get("accessory_color", "9a9a9a"),
 		"outfit_id": player.get("outfit_id", ""),
@@ -209,3 +215,7 @@ func _apply_save_data(data: Dictionary) -> void:
 	LivestockManager.load_save_data(data.get("livestock", {}))
 	FarmingManager.load_save_data(data.get("farming", {}))
 	StorageBoxManager.load_save_data(data.get("storage_boxes", {}))
+	JukeboxManager.load_save_data(data.get("jukebox", {}))
+	FurnitureManager.load_save_data(data.get("furniture", {}))
+	FloorDecorManager.load_save_data(data.get("floor_decor", {}))
+	WallDecorManager.load_save_data(data.get("wall_decor", {}))

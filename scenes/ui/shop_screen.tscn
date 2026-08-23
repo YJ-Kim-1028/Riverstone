@@ -59,7 +59,7 @@ theme_override_constants/separation = 3
 [node name="MessageLabel" type="Label" parent="Background/Margin/VBox"]
 layout_mode = 2
 autowrap_mode = 2
-theme_override_font_sizes/font_size = 7
+theme_override_font_sizes/font_size = 5
 
 [node name="CloseButton" type="TextureButton" parent="Background"]
 anchor_left = 1.0
@@ -112,7 +112,7 @@ theme_override_constants/separation = 6
 layout_mode = 2
 autowrap_mode = 2
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 7
+theme_override_font_sizes/font_size = 5
 text = "어느 칸에 배치할까요?"
 
 [node name="StallRow" type="HBoxContainer" parent="StallPicker/Panel/Margin/VBox"]
@@ -122,5 +122,87 @@ theme_override_constants/separation = 4
 
 [node name="CancelButton" type="Button" parent="StallPicker/Panel/Margin/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 7
+theme_override_font_sizes/font_size = 5
+text = "취소"
+
+[node name="ColorPicker" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Dim" type="ColorRect" parent="ColorPicker"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.6)
+
+[node name="Panel" type="NinePatchRect" parent="ColorPicker"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -95.0
+offset_top = -80.0
+offset_right = 95.0
+offset_bottom = 80.0
+texture = ExtResource("1_frame")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="Margin" type="MarginContainer" parent="ColorPicker/Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+
+[node name="VBox" type="VBoxContainer" parent="ColorPicker/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="MessageLabel" type="Label" parent="ColorPicker/Panel/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 5
+text = "색을 골라주세요"
+
+[node name="PreviewRect" type="TextureRect" parent="ColorPicker/Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(0, 32)
+
+[node name="SlotsScroll" type="ScrollContainer" parent="ColorPicker/Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="SlotsMargin" type="MarginContainer" parent="ColorPicker/Panel/Margin/VBox/SlotsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_right = 6
+
+[node name="SlotsContainer" type="VBoxContainer" parent="ColorPicker/Panel/Margin/VBox/SlotsScroll/SlotsMargin"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="ButtonRow" type="HBoxContainer" parent="ColorPicker/Panel/Margin/VBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 6
+
+[node name="BuyButton" type="Button" parent="ColorPicker/Panel/Margin/VBox/ButtonRow"]
+custom_minimum_size = Vector2(45, 16)
+layout_mode = 2
+theme_override_font_sizes/font_size = 5
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+text = "구매"
+
+[node name="CancelButton" type="Button" parent="ColorPicker/Panel/Margin/VBox/ButtonRow"]
+custom_minimum_size = Vector2(45, 16)
+layout_mode = 2
+theme_override_font_sizes/font_size = 5
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
 text = "취소"

@@ -55,16 +55,50 @@ func spend(amount: int) -> bool:
 	return true
 
 
+## 골드/가격 표시용 천 단위 구분 쉼표 포맷(예: 1234567 -> "1,234,567") - HUD
+## 골드 표시와 상점 가격 표시가 공유한다. GDScript에 내장 천단위 포맷이 없어서
+## 직접 문자열을 조립한다.
+func format_gold(amount: int) -> String:
+	var is_negative := amount < 0
+	var digits := str(absi(amount))
+	var grouped := ""
+	var count := 0
+	for i in range(digits.length() - 1, -1, -1):
+		grouped = digits[i] + grouped
+		count += 1
+		if count % 3 == 0 and i != 0:
+			grouped = "," + grouped
+	return ("-" if is_negative else "") + grouped
+
+
 ## -1 once house_level is already at MAX_HOUSE_LEVEL.
 func get_house_upgrade_cost() -> int:
 	return int(HOUSE_UPGRADE_COST.get(house_level + 1, -1))
+
+
+## home_interior 지도가 레벨마다 다른 .tmx 파일(WorldMap.HOME_INTERIOR_LEVEL_PATHS)이라,
+## 그 사이 방을 다시 그리면서 기존 바닥이 밀렸을 수 있다 - "home_enterance"
+## 스폰 지점을 기준으로 옛/새 지도의 좌표 차이를 구해서, 이미 배치해둔 가구/
+## 장식/보관함도 같이 옮긴다(WorldMap.get_room_anchor_shift() 참고). 안 그러면
+## 집을 넓힌 순간 기존에 놓아둔 물건들이 화면에 허공에 뜬 것처럼 보인다
+## (사용자 리포트, 2026-08-10).
+const HOME_INTERIOR_MAP_ID := "home_interior"
+const HOME_INTERIOR_ANCHOR_SPAWN := "home_enterance"
 
 
 func upgrade_house() -> bool:
 	var cost := get_house_upgrade_cost()
 	if cost < 0 or not spend(cost):
 		return false
+	var old_map_path := WorldMap.get_map_path(HOME_INTERIOR_MAP_ID)
 	house_level += 1
+	var new_map_path := WorldMap.get_map_path(HOME_INTERIOR_MAP_ID)
+	var shift := WorldMap.get_room_anchor_shift(old_map_path, new_map_path, HOME_INTERIOR_ANCHOR_SPAWN)
+	if shift != Vector2i.ZERO:
+		FurnitureManager.shift_map_placements(HOME_INTERIOR_MAP_ID, shift)
+		FloorDecorManager.shift_map_placements(HOME_INTERIOR_MAP_ID, shift)
+		WallDecorManager.shift_map_placements(HOME_INTERIOR_MAP_ID, shift)
+		StorageBoxManager.shift_map_placements(HOME_INTERIOR_MAP_ID, shift)
 	house_upgraded.emit(house_level)
 	return true
 

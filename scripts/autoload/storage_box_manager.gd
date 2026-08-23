@@ -7,15 +7,23 @@ extends Node
 ## map_id 레이어가 하나 더 있다.
 ## 설치: 손(EquipmentManager.HAND_SLOT)에 storage_box를 장착하면 main.gd가
 ## 마우스 아래 칸에 반투명 미리보기를 띄우고, 좌클릭하면 그 자리에 설치한다
-## (사용자 지시 - 스타듀처럼 마우스로 위치를 보면서 설치). 오직 HOME_MAP_ID
-## (집)에서만 설치 가능(사용자 지시 - 다른 맵은 배치 대상 아님).
+## (사용자 지시 - 스타듀처럼 마우스로 위치를 보면서 설치). 처음엔 오직
+## HOME_MAP_ID(마당)에서만 설치 가능했으나(사용자 지시), 2026-08-10 집
+## 실내/지하실에도 보관함을 못 놓는 게 이상하다는 사용자 리포트로 ALLOWED_MAP_IDS
+## 로 확장함(FurnitureManager와 동일한 방식).
 ## 회수: 상자가 비어있을 때만 가능(내용물 있는 채로 회수하는 기능은 없음 -
 ## "아이템이 사라지는 상자"를 만들지 않기 위한 단순화).
 
 const BOX_ITEM_ID := "storage_box"
 const BOX_SLOT_COUNT := 24            ## 6열 x 4줄
-## 설치 가능한 유일한 맵(사용자 지시) - FarmingManager.FARM_MAP_ID와 같은 값.
+## 설치 가능한 맵들 - Home(마당)은 FarmingManager.FARM_MAP_ID와 같은 값 유지.
+## home_interior/basement_interior는 사용자 지시로 추가됨.
 const HOME_MAP_ID := "Home"
+const ALLOWED_MAP_IDS := {"Home": true, "home_interior": true, "basement_interior": true}
+
+
+func is_placement_allowed(map_id: String) -> bool:
+	return ALLOWED_MAP_IDS.has(map_id)
 ## 충돌은 항상 타일 하나(16x16)만 막는다 - 그림 크기와는 무관(_apply_box_visual
 ## 참고). 닫힌 그림(16x16)과 열린 그림(16x32, 뚜껑 때문에 세로로 김)의 실제
 ## 높이가 서로 달라서, 각 텍스처의 실제 높이를 기준으로 매번 offset을 다시
@@ -42,7 +50,7 @@ var _open_cell := Vector2i(-999999, -999999)
 
 
 func can_place_box(world_position: Vector2) -> bool:
-	return _world_map != null and _current_map_id == HOME_MAP_ID and not _world_map.is_cell_blocked(world_position)
+	return _world_map != null and is_placement_allowed(_current_map_id) and not _world_map.is_cell_blocked(world_position)
 
 
 ## main.gd가 설치 미리보기 스프라이트에 쓴다 - 항상 닫힌 그림을 보여준다.
@@ -85,19 +93,19 @@ func _item_name(item_id: String) -> String:
 	return String(InventoryManager.get_item_definition(item_id).get("name", item_id))
 
 
-## EquipmentManager.HAND_SLOT에 storage_box가 장착돼 있어야 하고, HOME_MAP_ID
-## 위여야 하고, 대상 칸(마우스 아래 칸 - main.gd 미리보기 참고)이 막혀있지
-## 않고 이미 다른 상자가 없어야 한다. 성공하면 빈 문자열, 실패하면 main.gd가
-## _show_temporary_message()로 그대로 표시할 한글 메시지를 반환한다
-## (LivestockManager.perform_feed()와 동일한 관례).
+## EquipmentManager.HAND_SLOT에 storage_box가 장착돼 있어야 하고,
+## ALLOWED_MAP_IDS 위여야 하고, 대상 칸(마우스 아래 칸 - main.gd 미리보기
+## 참고)이 막혀있지 않고 이미 다른 상자가 없어야 한다. 성공하면 빈 문자열,
+## 실패하면 main.gd가 _show_temporary_message()로 그대로 표시할 한글 메시지를
+## 반환한다(LivestockManager.perform_feed()와 동일한 관례).
 func place_box(world_position: Vector2) -> String:
 	if EquipmentManager.get_equipped(EquipmentManager.HAND_SLOT) != BOX_ITEM_ID:
 		return ""
 	if _world_map == null:
 		return ""
-	if _current_map_id != HOME_MAP_ID:
+	if not is_placement_allowed(_current_map_id):
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "집에서만 설치할 수 있다."
+		return "집 안이나 마당에서만 설치할 수 있다."
 	var cell := _world_to_cell(world_position)
 	if has_box_at(_current_map_id, cell):
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
@@ -244,6 +252,20 @@ func set_world_map(world_map: WorldMap, map_id: String) -> void:
 	_current_map_id = map_id
 	for cell in (_boxes.get(map_id, {}) as Dictionary):
 		_spawn_sprite(cell)
+
+
+## EconomyManager.upgrade_house()가 지도 좌표계가 바뀌었을 때 호출한다
+## (WorldMap.get_room_anchor_shift() 참고) - furniture_manager.gd의 같은
+## 이름 함수와 동일한 패턴.
+func shift_map_placements(map_id: String, delta_cells: Vector2i) -> void:
+	if delta_cells == Vector2i.ZERO or not _boxes.has(map_id):
+		return
+	var shifted: Dictionary = {}
+	for cell in (_boxes[map_id] as Dictionary):
+		shifted[cell + delta_cells] = (_boxes[map_id] as Dictionary)[cell]
+	_boxes[map_id] = shifted
+	if map_id == _current_map_id:
+		set_world_map(_world_map, _current_map_id)
 
 
 func get_save_data() -> Dictionary:

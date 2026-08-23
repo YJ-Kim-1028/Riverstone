@@ -4,8 +4,8 @@ extends Control
 ## 신호로 open_shop(shop_id)를 호출한다. 판매 목록이 없는 상품은 shop.md 문서
 ## 그대로 planned_stock에만 있고 stock은 비어있을 수 있다 (data/shop/README.md).
 
-const ROW_FONT_SIZE := 7
-const DESCRIPTION_FONT_SIZE := 5
+const ROW_FONT_SIZE := 6
+const DESCRIPTION_FONT_SIZE := 4
 
 const BUTTON_TEXTURE := preload("res://assets/ui/button.png")
 const BUTTON_HOVER_TEXTURE := preload("res://assets/ui/button_hover.png")
@@ -27,6 +27,9 @@ const INVENTORY_EXPANSION_ITEM_ID := "inventory_expansion"
 const INVENTORY_EXPANSION_ICON_SHEET := "res://assets/icon/Tools.png"
 const INVENTORY_EXPANSION_ICON_INDEX := 13
 const INVENTORY_EXPANSION_ICON_GRID_SIZE := 16
+## 집 확장 - ShopManager.HOUSE_UPGRADE_ITEM_ID와 동일한 값.
+const HOUSE_UPGRADE_ITEM_ID := "house_upgrade"
+const HOUSE_UPGRADE_ICON := preload("res://assets/img/furniture/house_upgrade_icon.png")
 
 @onready var _rows_scroll: ScrollContainer = $Background/Margin/VBox/RowsScroll
 @onready var _rows: VBoxContainer = $Background/Margin/VBox/RowsScroll/RowsMargin/Rows
@@ -36,10 +39,82 @@ const INVENTORY_EXPANSION_ICON_GRID_SIZE := 16
 @onready var _stall_message_label: Label = $StallPicker/Panel/Margin/VBox/MessageLabel
 @onready var _stall_row: HBoxContainer = $StallPicker/Panel/Margin/VBox/StallRow
 @onready var _stall_cancel_button: Button = $StallPicker/Panel/Margin/VBox/CancelButton
+@onready var _color_picker: Control = $ColorPicker
+@onready var _color_message_label: Label = $ColorPicker/Panel/Margin/VBox/MessageLabel
+@onready var _color_preview_rect: TextureRect = $ColorPicker/Panel/Margin/VBox/PreviewRect
+@onready var _color_slots_scroll: ScrollContainer = $ColorPicker/Panel/Margin/VBox/SlotsScroll
+@onready var _color_slots_container: VBoxContainer = $ColorPicker/Panel/Margin/VBox/SlotsScroll/SlotsMargin/SlotsContainer
+@onready var _color_buy_button: Button = $ColorPicker/Panel/Margin/VBox/ButtonRow/BuyButton
+@onready var _color_cancel_button: Button = $ColorPicker/Panel/Margin/VBox/ButtonRow/CancelButton
 
 var _shop_id := ""
 var _is_open := false
 var _pending_livestock_item_id := ""
+
+## 가구/바닥장식/벽장식 색상 커스터마이징용(색 2/3 슬롯). 2026-08-10까지는
+## character_creation_screen.gd의 SWATCH_COLORS(고정 12개, 스와치 버튼 12개짜리
+## 씬 레이아웃과 1:1로 묶여있음)와 값을 동일하게 맞춰뒀었는데, 사용자가 이
+## 팔레트만 26개(선명한 색 13 + 파스텔 13)로 확장 지정하면서 두 팔레트가
+## 의도적으로 갈라졌다 - SWATCH_COLORS는 캐릭터 생성 화면 UI가 정확히 12칸
+## 고정이라 그대로 12개 유지, 이 배열만 늘어난 상태(따로 갱신 요청 전까지는
+## 서로 다른 값으로 유지).
+const SWATCH_PALETTE: Array[Color] = [
+	Color("d94a38"), # Red
+	Color("e67e22"), # Orange
+	Color("f2c230"), # Yellow
+	Color("8bcf3f"), # Lime
+	Color("43b84f"), # Green
+	Color("3fcf9a"), # Mint
+	Color("4aa8f0"), # Sky Blue
+	Color("3f73e8"), # Blue
+	Color("8b57e6"), # Purple
+	Color("e65fae"), # Pink
+	Color("a8642a"), # Brown
+	Color("2d1e18"), # Black
+	Color("f08a84"), # Pastel Red
+	Color("f5b26b"), # Pastel Orange
+	Color("f5de7a"), # Pastel Yellow
+	Color("b7de72"), # Pastel Lime
+	Color("8fd38a"), # Pastel Green
+	Color("8fe0c5"), # Pastel Mint
+	Color("8ecdf2"), # Pastel Sky
+	Color("8faef2"), # Pastel Blue
+	Color("b59bf0"), # Pastel Purple
+	Color("f2a8d1"), # Pastel Pink
+	Color("c99a72"), # Pastel Brown
+	Color("f8f1dd"), # Cream
+	Color("4a3327"), # Dark Brown
+]
+## 색 1(회색 3단계 마커, 명암 자동 계산)은 가구 대부분이 나무 재질이라 일반
+## 팔레트 대신 원목 색상만 고르게 한다(사용자 지정 - 나무 느낌이 나는 색만
+## 일부러 골라온 목록). 색 2/3(마젠타/형광녹색 마커)은 계속 SWATCH_PALETTE.
+## 2026-08-10: 기존 값도 뿌옇게 느껴진다는 사용자 피드백으로 더 채도 높은
+## 색으로 세 차례 전체 교체(사용자 지정, 최신 값 기준).
+const WOOD_PALETTE: Array[Color] = [
+	Color("472f1d"), # Dark Walnut
+	Color("8d562c"), # Classic Oak
+	Color("c97a22"), # Golden Oak
+	Color("d97f1f"), # Orange Oak
+	Color("e19328"), # Honey Wood
+	Color("e88a1a"), # Amber Wood
+	Color("c45a1e"), # Autumn Wood
+	Color("b63c2c"), # Cherry Wood
+	Color("922e24"), # Red Mahogany
+	Color("d96a18"), # Pumpkin Wood
+	Color("c85b19"), # Copper Wood
+	Color("f0a43a"), # Bright Maple
+]
+const SWATCH_BUTTON_SIZE := Vector2(14, 8)
+const SWATCH_GRID_COLUMNS := 6
+const SWATCH_BORDER_COLOR := Color(0.25, 0.15, 0.08)
+const COLOR_SLOT_LABELS := ["색 1", "색 2", "색 3"]
+
+var _pending_color_item_id := ""
+var _pending_color_world_sprite_path := ""
+var _pending_color_slots: Array[Color] = []
+## 마커별로 실제 그림에 있는지([색1, 색2, 색3]) - 색1 없이 색2만 있는 그림
+## (vase2~4 등)에서 색1 슬롯을 건너뛰는 데 쓴다(_build_color_slot_rows 참고).
+var _pending_color_present: Array[bool] = [false, false, false]
 
 
 func _ready() -> void:
@@ -51,7 +126,25 @@ func _ready() -> void:
 	_close_button.pressed.connect(close)
 	_stall_cancel_button.pressed.connect(_close_stall_picker)
 	_set_stall_picker_open(false)
-	_style_scrollbar()
+	_color_buy_button.pressed.connect(_on_color_buy_pressed)
+	_color_cancel_button.pressed.connect(_close_color_picker)
+	_set_color_picker_open(false)
+	# 확대 필터를 명시적으로 지정 안 해두면 상속 체인에 따라 부드럽게(linear)
+	# 보간될 수 있어서 - 픽셀아트가 경계에서 뭉개져 흐릿해 보이는 걸 막기 위해
+	# 항상 니어레스트로 고정한다(icon_rect들과 동일한 의도).
+	# expand_mode는 기본값(EXPAND_KEEP_SIZE)을 그대로 둔다 - PreviewRect의
+	# custom_minimum_size 너비가 0이라(씬 파일 참고), EXPAND_IGNORE_SIZE로
+	# 바꾸면 텍스처 크기를 최소 크기 계산에서 무시하게 되어 실제 폭이 0으로
+	# 줄어들어 그림이 아예 안 보이는 버그가 있었다(모든 가구에서 재현,
+	# 사용자 리포트) - 기본값이어야 텍스처 크기만큼 자동으로 폭을 잡는다.
+	_color_preview_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	for button in [_color_buy_button, _color_cancel_button]:
+		button.add_theme_stylebox_override("normal", _build_button_style(BUTTON_TEXTURE))
+		button.add_theme_stylebox_override("hover", _build_button_style(BUTTON_HOVER_TEXTURE))
+		button.add_theme_stylebox_override("pressed", _build_button_style(BUTTON_HOVER_TEXTURE))
+		button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	_style_scrollbar(_rows_scroll)
+	_style_scrollbar(_color_slots_scroll)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -69,6 +162,7 @@ func open_shop(shop_id: String) -> void:
 func close() -> void:
 	_set_open(false)
 	_close_stall_picker()
+	_close_color_picker()
 	_refresh_rows()
 
 
@@ -146,6 +240,12 @@ func _build_row(listing: Dictionary) -> Control:
 		icon_rect.texture = _inventory_expansion_icon_texture()
 		price = EconomyManager.get_inventory_expansion_cost()
 		is_maxed = price < 0
+	elif item_id == HOUSE_UPGRADE_ITEM_ID:
+		display_name = "집 확장"
+		display_description = "집 내부를 더 넓게 만든다."
+		icon_rect.texture = HOUSE_UPGRADE_ICON
+		price = EconomyManager.get_house_upgrade_cost()
+		is_maxed = price < 0
 	else:
 		var definition := InventoryManager.get_item_definition(item_id)
 		display_name = String(definition.get("name", item_id))
@@ -210,7 +310,7 @@ func _build_row(listing: Dictionary) -> Control:
 		price_row.add_child(price_icon)
 
 	var price_label := Label.new()
-	price_label.text = "최대" if is_maxed else str(price)
+	price_label.text = "최대" if is_maxed else EconomyManager.format_gold(price)
 	price_label.add_theme_font_size_override("font_size", DESCRIPTION_FONT_SIZE)
 	price_label.modulate = BUTTON_TEXT_COLOR
 	price_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -221,13 +321,17 @@ func _build_row(listing: Dictionary) -> Control:
 
 func _inventory_expansion_icon_texture() -> Texture2D:
 	if not ResourceLoader.exists(INVENTORY_EXPANSION_ICON_SHEET):
-		var image := Image.create(12, 12, false, Image.FORMAT_RGBA8)
-		image.fill(Color(0.6, 0.5, 0.3))
-		return ImageTexture.create_from_image(image)
+		return _flat_color_icon_texture(Color(0.6, 0.5, 0.3))
 	var atlas := AtlasTexture.new()
 	atlas.atlas = load(INVENTORY_EXPANSION_ICON_SHEET)
 	atlas.region = Rect2(INVENTORY_EXPANSION_ICON_INDEX * INVENTORY_EXPANSION_ICON_GRID_SIZE, 0, INVENTORY_EXPANSION_ICON_GRID_SIZE, INVENTORY_EXPANSION_ICON_GRID_SIZE)
 	return atlas
+
+
+func _flat_color_icon_texture(color: Color) -> Texture2D:
+	var image := Image.create(12, 12, false, Image.FORMAT_RGBA8)
+	image.fill(color)
+	return ImageTexture.create_from_image(image)
 
 
 func _build_row_style() -> StyleBoxFlat:
@@ -252,8 +356,8 @@ func _build_button_style(texture: Texture2D) -> StyleBoxTexture:
 ## Godot's default ScrollContainer scrollbar is a thick engine-styled gray
 ## bar that doesn't match this UI's look and doesn't fit the small panel -
 ## shrink it and flatten its colors instead of drawing a new asset for it.
-func _style_scrollbar() -> void:
-	var scrollbar := _rows_scroll.get_v_scroll_bar()
+func _style_scrollbar(scroll: ScrollContainer) -> void:
+	var scrollbar := scroll.get_v_scroll_bar()
 	scrollbar.custom_minimum_size = Vector2(SCROLLBAR_WIDTH, 0)
 	var track := StyleBoxFlat.new()
 	track.bg_color = Color(0, 0, 0, 0.15)
@@ -271,12 +375,141 @@ func _on_buy_pressed(item_id: String) -> void:
 	if item_id.begins_with(LIVESTOCK_PREFIX):
 		_open_stall_picker(item_id)
 		return
-	if ShopManager.buy(_shop_id, item_id):
+	if item_id != INVENTORY_EXPANSION_ITEM_ID:
+		var world_sprite_path := String(InventoryManager.get_item_definition(item_id).get("world_sprite", ""))
+		var present := FurnitureAppearance.detect_present_markers(world_sprite_path)
+		if present.has(true):
+			_open_color_picker(item_id, world_sprite_path, present)
+			return
+	var failure_reason := ShopManager.buy(_shop_id, item_id)
+	if failure_reason.is_empty():
 		_message_label.text = "구매했습니다."
 	else:
-		_message_label.text = ""
+		_message_label.text = failure_reason
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
 	_refresh_rows()
+
+
+## 그림에 색 마커가 있는 아이템(가구/바닥장식/벽장식)은 바로 사지 않고, 색을
+## 고르는 패널을 먼저 연다(사용자 지시) - 마커별로 실제 있는지는 그림을
+## 스캔해 자동으로 정해진다(FurnitureAppearance.detect_present_markers).
+## present는 [색1 있음, 색2 있음, 색3 있음] - 색1 없이 색2만 있는 그림도
+## 있어서(vase2~4 등) 마지막으로 있는 마커 인덱스까지만 슬롯을 만들되, 중간에
+## 없는 자리(예: 색1)는 _build_color_slot_rows()가 UI에서 건너뛴다. 기본
+## 선택색은 팔레트를 슬롯마다 하나씩 돌려가며 미리 채워서 처음부터
+## 미리보기가 비어 보이지 않게 한다 - 없는 자리는 고정 자리표시 색(어차피
+## 그 마커가 그림에 없어서 렌더링에 전혀 영향 없음, 같은 아이템끼리 스택이
+## 갈리지 않도록 항상 같은 값을 씀).
+const ABSENT_MARKER_PLACEHOLDER := Color("808080")
+
+
+func _open_color_picker(item_id: String, world_sprite_path: String, present: Array[bool]) -> void:
+	_pending_color_item_id = item_id
+	_pending_color_world_sprite_path = world_sprite_path
+	_pending_color_present = present
+	var last_present_index := -1
+	for i in present.size():
+		if present[i]:
+			last_present_index = i
+	_pending_color_slots.clear()
+	for i in (last_present_index + 1):
+		if present[i]:
+			var palette := _palette_for_slot(i)
+			_pending_color_slots.append(palette[i % palette.size()])
+		else:
+			_pending_color_slots.append(ABSENT_MARKER_PLACEHOLDER)
+	var definition := InventoryManager.get_item_definition(item_id)
+	_color_message_label.text = "%s 색을 골라주세요" % String(definition.get("name", item_id))
+	_build_color_slot_rows()
+	_refresh_color_preview()
+	_set_color_picker_open(true)
+
+
+## 색 1(회색 마커)은 가구 재질이 대부분 나무라 WOOD_PALETTE, 색 2/3(마젠타/
+## 형광녹색 마커)은 일반 SWATCH_PALETTE를 쓴다(사용자 지정).
+func _palette_for_slot(slot_index: int) -> Array[Color]:
+	return WOOD_PALETTE if slot_index == 0 else SWATCH_PALETTE
+
+
+## 슬롯마다 라벨 + 팔레트 스와치 그리드(SwatchRow, character_creation_screen.gd와
+## 동일한 6열 구성) 한 줄씩 새로 만든다 - 아이템마다 슬롯 수가 달라서 매번
+## 새로 지어야 한다(기존 노드 재사용 안 함).
+func _build_color_slot_rows() -> void:
+	for child in _color_slots_container.get_children():
+		child.queue_free()
+	for slot_index in _pending_color_slots.size():
+		if not _pending_color_present[slot_index]:
+			continue
+		var label := Label.new()
+		label.text = COLOR_SLOT_LABELS[slot_index] if slot_index < COLOR_SLOT_LABELS.size() else "색 %d" % (slot_index + 1)
+		label.add_theme_font_size_override("font_size", DESCRIPTION_FONT_SIZE)
+		_color_slots_container.add_child(label)
+		var grid := GridContainer.new()
+		grid.columns = SWATCH_GRID_COLUMNS
+		grid.add_theme_constant_override("h_separation", 2)
+		grid.add_theme_constant_override("v_separation", 2)
+		_color_slots_container.add_child(grid)
+		for color in _palette_for_slot(slot_index):
+			var swatch := Button.new()
+			swatch.custom_minimum_size = SWATCH_BUTTON_SIZE
+			swatch.focus_mode = Control.FOCUS_NONE
+			_style_swatch_button(swatch, color, color.is_equal_approx(_pending_color_slots[slot_index]))
+			swatch.pressed.connect(_on_swatch_pressed.bind(slot_index, color))
+			grid.add_child(swatch)
+
+
+func _style_swatch_button(button: Button, color: Color, is_selected: bool) -> void:
+	var style := StyleBoxFlat.new()
+	style.bg_color = color
+	var border_width := 2 if is_selected else 1
+	style.border_width_left = border_width
+	style.border_width_top = border_width
+	style.border_width_right = border_width
+	style.border_width_bottom = border_width
+	style.border_color = SWATCH_BORDER_COLOR
+	button.add_theme_stylebox_override("normal", style)
+	button.add_theme_stylebox_override("hover", style)
+	button.add_theme_stylebox_override("pressed", style)
+	button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+
+
+func _on_swatch_pressed(slot_index: int, color: Color) -> void:
+	_pending_color_slots[slot_index] = color
+	_build_color_slot_rows()
+	_refresh_color_preview()
+
+
+## 고른 색 그대로 FurnitureAppearance로 즉석 리컬러해서 미리보기에 보여준다
+## (구매 전 프리뷰라 캐싱 없이 매번 새로 계산 - 그림이 작아 비용 문제 없음).
+func _refresh_color_preview() -> void:
+	var image := FurnitureAppearance.build_recolored_image(_pending_color_world_sprite_path, _pending_color_slots)
+	_color_preview_rect.texture = ImageTexture.create_from_image(image) if image != null else null
+
+
+func _on_color_buy_pressed() -> void:
+	var item_id := _pending_color_item_id
+	var colors := _pending_color_slots.duplicate()
+	_close_color_picker()
+	var failure_reason := ShopManager.buy(_shop_id, item_id, -1, colors)
+	if failure_reason.is_empty():
+		_message_label.text = "구매했습니다."
+	else:
+		_message_label.text = failure_reason
+		AudioManager.play_sfx(AudioManager.SFX_BEEP)
+	_refresh_rows()
+
+
+func _close_color_picker() -> void:
+	_pending_color_item_id = ""
+	_pending_color_world_sprite_path = ""
+	_pending_color_slots.clear()
+	_pending_color_present = [false, false, false]
+	_set_color_picker_open(false)
+
+
+func _set_color_picker_open(is_open: bool) -> void:
+	_color_picker.modulate.a = 1.0 if is_open else 0.0
+	_apply_mouse_filter_recursive(_color_picker, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
 
 
 ## 가축은 배치할 칸을 먼저 골라야 해서, 산 자리에서 바로 확정하지 않고 이
@@ -309,10 +542,11 @@ func _close_stall_picker() -> void:
 func _on_stall_chosen(stall_index: int) -> void:
 	var item_id := _pending_livestock_item_id
 	_close_stall_picker()
-	if ShopManager.buy(_shop_id, item_id, stall_index):
+	var failure_reason := ShopManager.buy(_shop_id, item_id, stall_index)
+	if failure_reason.is_empty():
 		_message_label.text = "구매했습니다."
 	else:
-		_message_label.text = ""
+		_message_label.text = failure_reason
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
 	_refresh_rows()
 

@@ -24,6 +24,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/livestock_confirm_popup.tscn" id="23_livestock_confirm_popup"]
 [ext_resource type="PackedScene" path="res://scenes/ui/book_screen.tscn" id="24_book_screen"]
 [ext_resource type="PackedScene" path="res://scenes/ui/storage_screen.tscn" id="25_storage_screen"]
+[ext_resource type="PackedScene" path="res://scenes/ui/jukebox_screen.tscn" id="26_jukebox_screen"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("3_main")
@@ -33,6 +34,13 @@ script = ExtResource("3_main")
 [node name="RestaurantSign" type="Sprite2D" parent="HomeMap"]
 visible = false
 z_index = 0
+
+[node name="RestaurantFrameBlood" type="ColorRect" parent="HomeMap"]
+visible = false
+z_index = 5
+size = Vector2(16, 16)
+color = Color(0.6, 0, 0, 0)
+mouse_filter = 2
 
 [node name="Player" parent="HomeMap" instance=ExtResource("2_player")]
 position = Vector2(320, 300)
@@ -117,6 +125,8 @@ color = Color(0, 0, 0, 0)
 [node name="BookScreen" parent="UI" instance=ExtResource("24_book_screen")]
 
 [node name="StorageScreen" parent="UI" instance=ExtResource("25_storage_screen")]
+
+[node name="JukeboxScreen" parent="UI" instance=ExtResource("26_jukebox_screen")]
 
 [node name="TransitionLayer" type="CanvasLayer" parent="."]
 layer = 3
