@@ -41,6 +41,11 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _open() -> void:
+	## 물귀신 가짜 입질(FishingManager.is_ghost_bite())은 이 두더지 게임 UI를
+	## 아예 안 연다(사용자 지시, 2026-08-24) - main.gd의 _on_fishing_ended가
+	## 대신 사운드+독백으로 연출한다.
+	if FishingManager.is_ghost_bite():
+		return
 	visible = true
 	_result_label.visible = false
 	_result_icon.visible = false

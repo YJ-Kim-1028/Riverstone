@@ -147,6 +147,11 @@ static func _map_id_for_path(path: String) -> String:
 var _map_size := Vector2i.ZERO
 var _tilesets: Array[Dictionary] = []
 var _spawns: Dictionary = {}
+## name -> Rect2(top-left, size) - "EffectArea" 오브젝트 레이어 전용(사용자
+## 지시, 2026-08-24). "Spawn"은 점 하나짜리 좌표만 표현하는데, 화면 오버레이
+## 효과(예: 레스토랑 액자 핏자국)처럼 실제 그림 크기만큼 영역이 필요한
+## 경우엔 이 레이어를 따로 쓴다. get_effect_area() 참고.
+var _effect_areas: Dictionary = {}
 var _warps: Array[Dictionary] = []
 var _interactables: Array[Dictionary] = []
 var _ysort_anchors: Array[Dictionary] = []
@@ -242,6 +247,7 @@ func load_map(next_map_path: String, render: bool = true) -> void:
 	_clear_tiles()
 	_tilesets.clear()
 	_spawns.clear()
+	_effect_areas.clear()
 	_warps.clear()
 	_interactables.clear()
 	_ysort_anchors.clear()
@@ -365,14 +371,23 @@ func is_cell_blocked(world_position: Vector2) -> bool:
 ## 다음 로드 전까지 유지되므로(_compute_light_source_positions()가 이미
 ## 같은 방식으로 "Light" 레이어를 읽는 선례가 있음) 별도 캐시 없이 바로 조회한다.
 func is_water_cell(world_position: Vector2) -> bool:
+	return _is_cell_in_layer(world_position, "Water") or _is_cell_in_layer(world_position, "Pond")
+
+
+## "Water"(바다)만 본다 - "Pond"(마을 곳곳의 작은 연못)는 제외. 낚시 캐스팅의
+## 2칸째 허용 판정 전용(사용자 지시, 2026-08-24: "2칸으로 하니까 너무 먼데,
+## 바다일 때만 적용 안 되나? 강일 때도 되니까 좀 그렇네" - 여울 버퍼가 넓은
+## 건 바다 해안선뿐이라 연못/강은 원래 1칸 판정 그대로 두는 게 맞음).
+func is_sea_cell(world_position: Vector2) -> bool:
+	return _is_cell_in_layer(world_position, "Water")
+
+
+func _is_cell_in_layer(world_position: Vector2, layer_name: String) -> bool:
 	var cell := Vector2i(int(world_position.x) / TILE_SIZE, int(world_position.y) / TILE_SIZE)
 	var map_columns := int(_map_size.x / TILE_SIZE)
 	var index := cell.y * map_columns + cell.x
-	for layer_name in ["Water", "Pond"]:
-		var gids: Array = _layer_gids.get(layer_name, [])
-		if index >= 0 and index < gids.size() and int(gids[index]) != 0:
-			return true
-	return false
+	var gids: Array = _layer_gids.get(layer_name, [])
+	return index >= 0 and index < gids.size() and int(gids[index]) != 0
 
 
 ## "Farmable" 레이어 소속 칸인지 - FarmingManager가 괭이질 가능 여부 판정에
@@ -434,6 +449,13 @@ func get_distance_to_nearest_pond(world_position: Vector2) -> float:
 func get_spawn_position(spawn_name: String) -> Vector2:
 	var resolved_name: String = String(SPAWN_ALIASES.get(spawn_name, spawn_name))
 	return _spawns.get(resolved_name, Vector2.INF)
+
+
+## "EffectArea" 레이어 전용(_effect_areas 참고) - 못 찾으면 position.x가
+## INF인 Rect2를 돌려준다(get_spawn_position()의 Vector2.INF와 동일한
+## "없음" 관례). 호출부는 result.position == Vector2.INF로 확인할 것.
+func get_effect_area(area_name: String) -> Rect2:
+	return _effect_areas.get(area_name, Rect2(Vector2.INF, Vector2.ZERO))
 
 
 ## plaza1~5처럼 한 맵에 목적지별 입구가 여러 개 있는 경우, 이 맵 안에서
@@ -944,6 +966,9 @@ func _store_object(object_group: String, object: Dictionary) -> void:
 		return
 	if object_group == "Spawn":
 		_spawns[object["name"]] = object["position"]
+	elif object_group == "EffectArea":
+		var size: Vector2 = object["size"]
+		_effect_areas[object["name"]] = Rect2((object["position"] as Vector2) - size / 2.0, size)
 	elif object_group == "Warp" and object["name"] != NON_PLAYER_WARP_NAME:
 		var target_map := String(object.get("target_map", object.get("target_name", "")))
 		var target_spawn := String(object.get("target_spawn", ""))

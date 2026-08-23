@@ -11,7 +11,7 @@ extends Node
 signal bite_started
 signal fishing_ended(result: Dictionary)  ## {"success": bool, "item_id": String, "added_to_inventory": bool, "used_bait": bool}
 
-enum Phase { IDLE, WAITING_FOR_BITE, MINIGAME }
+enum Phase { IDLE, WAITING_FOR_BITE, MINIGAME, GHOST_VANISH }
 
 ## 아래 수치는 낚시 메커닉을 규정한 기획 문서가 없어 전부 임의 결정 - 기획
 ## 확정 시 조정.
@@ -26,12 +26,29 @@ const BAIT_SQUID_WEIGHT_BONUS := 25
 ## 시작 시점) 미리 정해져 있어야 fishing_fish.gd가 처음부터 맞는 난이도로
 ## 움직인다 - 예전엔 성공 시점(_resolve_catch)에만 어종을 정했는데, 그러면
 ## 미니게임 도중엔 어종을 몰라서 난이도를 못 나눴다.
+## squid는 원래 appear 0.4 / hide 0.6 / hits 7로 다른 어종보다 더 어렵게
+## 잡았는데, 실제로 해보니 "개어렵다"는 피드백(사용자 리포트, 2026-08-24)이
+## 와서 완화 - hits는 다른 어종과 동일한 6으로 낮추고, appear/hide는 살짝만
+## 더 빡빡하게 남겨서(0.45/0.55) squid가 여전히 조금 더 어려운 어종이라는
+## 차별화는 유지한다.
 const SPECIES_DIFFICULTY := {
 	"salmon": {"appear": 0.5, "hide": 0.5, "hits": 6},
 	"mackerel": {"appear": 0.5, "hide": 0.5, "hits": 6},
-	"squid": {"appear": 0.4, "hide": 0.6, "hits": 7},
+	"squid": {"appear": 0.45, "hide": 0.55, "hits": 6},
 }
 const DEFAULT_DIFFICULTY := {"appear": 0.5, "hide": 0.5, "hits": 6}
+
+## 공포 연출(사용자 지시, 2026-08-24): plaza3(시체가 발견됐던 곳)에서 첫 살인
+## 이후 낚시하면, 확률적으로 진짜 입질 대신 "물귀신"이 낚아채는 가짜 입질이
+## 온다 - 미니게임 UI는 아예 안 열고(fishing_screen.gd가 is_ghost_bite()를
+## 보고 스스로 안 연다), 대신 물고기 등장 효과음(SFX_FISHING_APPEAR)을 짧은
+## 간격으로 여러 번 반복 재생해서 "뭔가와 씨름하는" 느낌을 준 뒤 뚝 끊고
+## 실패 처리한다 - 이후 연출(호러 사운드 + 독백)은 main.gd의
+## _on_fishing_ended가 이어받는다(미끼/낚싯대 소모는 평소 실패와 동일하게 없음).
+const GHOST_BITE_MAP_ID := "plaza3"
+const GHOST_BITE_CHANCE := 0.35
+const GHOST_STRUGGLE_DURATION_SECONDS := 1.3
+const GHOST_STRUGGLE_SFX_INTERVAL_SECONDS := 0.12
 
 var _phase := Phase.IDLE
 var _bite_wait_elapsed := 0.0
@@ -39,6 +56,8 @@ var _bite_wait_duration := 0.0
 var _minigame_elapsed := 0.0
 var _hit_count := 0
 var _current_species := ""
+var _is_ghost_bite := false
+var _ghost_struggle_sfx_elapsed := 0.0
 
 
 func _process(delta: float) -> void:
@@ -46,11 +65,23 @@ func _process(delta: float) -> void:
 		Phase.WAITING_FOR_BITE:
 			_bite_wait_elapsed += delta
 			if _bite_wait_elapsed >= _bite_wait_duration:
-				_phase = Phase.MINIGAME
 				_minigame_elapsed = 0.0
-				_hit_count = 0
-				_roll_species()
+				if _is_ghost_bite:
+					_phase = Phase.GHOST_VANISH
+					_ghost_struggle_sfx_elapsed = 0.0
+				else:
+					_phase = Phase.MINIGAME
+					_hit_count = 0
+					_roll_species()
 				bite_started.emit()
+		Phase.GHOST_VANISH:
+			_minigame_elapsed += delta
+			_ghost_struggle_sfx_elapsed += delta
+			if _ghost_struggle_sfx_elapsed >= GHOST_STRUGGLE_SFX_INTERVAL_SECONDS:
+				_ghost_struggle_sfx_elapsed = 0.0
+				AudioManager.play_sfx(AudioManager.SFX_FISHING_APPEAR)
+			if _minigame_elapsed >= GHOST_STRUGGLE_DURATION_SECONDS:
+				_finish({"success": false, "item_id": "", "ghost": true})
 		Phase.MINIGAME:
 			_minigame_elapsed += delta
 			if _minigame_elapsed >= MINIGAME_TIME_LIMIT_SECONDS:
@@ -67,6 +98,9 @@ func start_fishing() -> bool:
 	_phase = Phase.WAITING_FOR_BITE
 	_bite_wait_elapsed = 0.0
 	_bite_wait_duration = randf_range(BITE_WAIT_MIN_SECONDS, BITE_WAIT_MAX_SECONDS)
+	_is_ghost_bite = GameManager.current_map_id == GHOST_BITE_MAP_ID \
+			and MurderManager.get_murder_count() > 0 \
+			and randf() < GHOST_BITE_CHANCE
 	return true
 
 
@@ -87,6 +121,12 @@ func is_waiting_for_bite() -> bool:
 
 func is_biting() -> bool:
 	return _phase == Phase.MINIGAME
+
+
+## fishing_screen.gd가 bite_started를 받았을 때 미니게임 UI를 열지 말지
+## 판단하는 용도 - 물귀신 가짜 입질은 UI 없이 사운드+독백으로만 연출한다.
+func is_ghost_bite() -> bool:
+	return _is_ghost_bite
 
 
 ## 입질 대기든 미니게임이든, 낚싯줄이 나가 있는 동안엔 전부 true - main.gd가
