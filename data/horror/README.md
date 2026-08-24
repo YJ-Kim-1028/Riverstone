@@ -12,12 +12,12 @@
 
 **엔딩 3종 (`ending.md`)**
 * **진실 엔딩** — 플레이어가 독약으로 스토커(어셔) 본인을 죽이면 즉시 발동. 이후 살인/스토커 이메일 전부 중단.
-* **체포 엔딩** — 대기열에는 원래 최대 2명(실제 희생자)까지가 아니라 **3명까지** 등록되도록 바꿨다. 2명이 죽은 뒤 3번째 대상에 대해서도 여느 때처럼 비/오후10시/맵 분리 조건이 충족되면, 실제로 죽이는 대신 **경찰이 개입해 3번째 대상은 살고 스토커가 그 자리에서 자결**한다(`usher_death_method = "self_killed"`). 이 부분은 `NPCManager.is_murder_candidate()`가 원래 "이미 1명만 죽은 경우"로 후보 등록을 막고 있어서 구조적으로 불가능했는데, ending.md를 반영하며 그 제한을 풀고 대신 `MurderManager`가 대기열 길이(최대 3)로 캡을 관리하도록 옮겼다.
+* **체포 엔딩** — 대기열에는 원래 최대 2명(실제 희생자)까지가 아니라 **3명까지** 등록되도록 바꿨다. 2명이 죽은 뒤 3번째 대상에 대해서도 여느 때처럼 비/오후10시/맵 분리 조건이 충족되면, 실제로 죽이는 대신 **경찰이 개입해 3번째 대상은 살고, 어셔가 그 대상을 칼로 위협하는 순간 폴리가 정당방위로 사살**한다(`usher_death_method = "shot_by_poli"`, 사용자 확정 2026-08-24 - 원래는 자결이었으나 "그냥 폴리가 죽이게"로 변경). 이 부분은 `NPCManager.is_murder_candidate()`가 원래 "이미 1명만 죽은 경우"로 후보 등록을 막고 있어서 구조적으로 불가능했는데, ending.md를 반영하며 그 제한을 풀고 대신 `MurderManager`가 대기열 길이(최대 3)로 캡을 관리하도록 옮겼다. 실제 컷신(경고 사격 → book_interior로 강제 이동 → 대치 → 총소리 → 나레이션 → 나이프 드롭 → 어셔 마지막 한마디)은 main.gd의 `_play_arrest_ending_sequence()` 참고.
 * **공범 엔딩** — 플레이어의 독살 대상이 스토커가 아니라 무고한 NPC일 경우. 체포→위증→석방→동거 플래그를 전부 세운다.
 * 세 엔딩은 `MurderManager.get_achieved_ending()`(`""`/`"truth"`/`"arrest"`/`"accomplice"`)으로 하나만 기록되며, 하나라도 달성되면 이후 살인 진행 자체를 멈춰서 "엔딩 중복 달성 불가능" 규칙을 지킨다. 마을 생활 콘텐츠(요리/상점/호감도 등) 자체는 계속 이용 가능 — 애초에 그쪽 시스템들은 엔딩 여부를 신경 쓰지 않게 만들어져 있다.
 
 **`HorrorEventManager`**
-* 첫 살인 이후 매일 밤(`TimeManager.night_events_enabled`, 22시) 플레이어가 `home_interior`에 있으면 30% 확률로 노크 이벤트.
+* 첫 살인 이후 매일 밤(`TimeManager.night_events_enabled`, `NIGHT_EVENT_HOUR` = 21시) 플레이어가 `home_interior`에 있으면 30% 확률로 노크 이벤트(`AudioManager.SFX_KNOCK2` 1회 재생, 재생 중엔 `AudioManager.is_knock_playing()`으로 이동 잠금). F10 디버그 키로 강제 발동 가능(`HorrorEventManager.debug_trigger_knock_event()`). 소리가 끝나면 혼잣말 → 그날 밤 실제로 집 밖에 나갔다 왔는지에 따라 "...아무도 없다." 반응. `TimeManager.day_changed`에 걸려서 날짜가 바뀌면 그 밤의 "확인 대기" 상태가 리셋된다.
 * 세이지의 경고 대사(`get_sage_warning_lines()`) — "살인 조건을 충족하는 날"을 "비가 오고 있고 아직 처리 안 된 대상이 있는 날"로 해석했다. 스토커의 위치까지는 세이지가 알 방법이 없어서 그 조건은 제외했다.
 * NPC 사망 다음날 사망자 명의 이메일(`impersonation_email_ready`) — `data/horror/impersonation_emails.json`에서 내용을 가져온다.
 
