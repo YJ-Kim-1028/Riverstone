@@ -61,6 +61,20 @@
             ]
         }
     },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "shrine_sitting",
+        "npc_spawn": "sage_heart_npc",
+        "player_spawn": "sage_heart_player",
+        "emote": "excited",
+        "lines": [
+            {"text": "안녕, 운세보러 왔어?", "emotion": "happy"},
+            "오늘 운세, 궁금해?",
+            "...진짜 봐줄까 말까 고민 중이야.",
+            {"text": "농담이야. 앉아. 봐줄게.", "emotion": "happy"},
+            {"text": "음... 오늘은 좋은 일이 있을 것 같은데?", "emotion": "happy"}
+        ]
+    },
     "affection_events": [
         {
             "threshold": 100,
@@ -207,7 +221,7 @@
     "emails": {
         "greeting": [],
         "event_invite": [
-            {"title": "잘 먹었어", "lines": ["초대해줘서 고마웠어.", "그런 자리도 가끔은 나쁘지 않네."]},
+            {"title": "나쁘지 않았어", "lines": ["초대해줘서 고마웠어.", "그런 자리도 가끔은 나쁘지 않네."]},
             {"title": "우유 들어간 요리, 나쁘지 않았어", "requires_favorite_food": true, "lines": ["어제 우유 들어간 요리 나왔을 때 정말 좋았어.", "입에 맞더라. 또 해줘."]}
         ],
         "gift_thanks": [],

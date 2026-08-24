@@ -69,6 +69,19 @@
             ]
         }
     },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "furniture_working",
+        "npc_spawn": "woody_heart_npc",
+        "player_spawn": "woody_heart_player",
+        "lines": [
+            "어? 오늘따라 자주 보인다?",
+            {"text": "낯 안 가려서 다행이지, 나였으면 되게 편했겠다 싶어. 헤헤.", "emotion": "happy"},
+            "아무튼 반가워서 그냥 말 걸어봤어!",
+            {"text": "참, 이거 요즘 연습 삼아 만들어본 건데... 너 가져.", "emotion": "happy"},
+            {"type": "gift", "item_id": "vase_1"}
+        ]
+    },
     "affection_events": [
         {
             "threshold": 60,
@@ -137,7 +150,15 @@
         "murder_grief_2": [
             "이번엔 괜찮은 척도 못 하겠어.",
             {"text": "그냥 무서워. 그렇게만 말할래.", "emotion": "sad"}
-        ]
+        ],
+        "suspicion_talk_2": {
+            "requires_alive": "marr",
+            "lines": [
+                "범인이 빨리 잡히면 좋겠어. 사람들이 서로를 의심하는 걸 보고 싶지 않아.",
+                "모카가 나한테 마르가 의심된다고 하던데, 나는 그렇게 생각 안 해.",
+                "진짜 범인이 누구일지도 모르면서 무턱대고 의심부터 하면 안 되는 거야. 안 그래?"
+            ]
+        }
     },
     "furniture_hammer_gift_lines": ["{player_name}!, 드디어 내가 만든 가구를 사줬구나.",
         "마음에 들었으면 좋겠다.",

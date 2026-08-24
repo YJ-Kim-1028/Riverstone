@@ -64,6 +64,18 @@
             ]
         }
     },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "book_working",
+        "npc_spawn": "usher_heart_npc",
+        "player_spawn": "usher_heart_player",
+        "lines": [
+            "참, 요즘 뭐 재밌게 읽어? 나도 좀 참고하게.",
+            "너 얘기 들으면 은근 흥미로운 사람인 거 같아.",
+            "혹시 괜찮으면, 네 얘기로 소설 써도 될까?",
+            {"text": "물론 진짜로 쓸진 모르겠지만... 그냥, 그러고 싶어졌어.", "emotion": "happy"}
+        ]
+    },
     "murder_alibi_lie": {
         "location_label": "신사",
         "corroboration_line": "그러고보니, 세이지가 요즘 좀 안 좋은 기운이 느껴진다고 하더라고. 혹시 너도 들었어?"
@@ -101,6 +113,45 @@
             {"text": "두 번째라니, 정말 믿기지가 않아.", "emotion": "sad"},
             "이번엔 나도 진짜 무서워. 농담이 아니라.",
             "빨리 잡혔으면 좋겠다. 진심으로."
+        ],
+        "suspicion_talk_2": {
+            "requires_alive": "marr",
+            "lines": [
+                {"text": "사람들이 서로 범인일까 의심하고 있어. 두루두루 친했던 시간은 다 옛날 얘기야.", "emotion": "sad"},
+                {"text": "마르가 제일 의심 받나 봐. 뭐... 무리는 아니지.", "emotion": "sad"},
+                "그 애, 내 책중에서 심리/추리 분야만 사간 거 알아?",
+                "그래서 나도 뭔가 꺼림직하더라고. 단순히 취향일 수도 있지만 말이야."
+            ]
+        },
+        "accomplice_testimony": [
+            {"text": "잠시만요. 제가 증언하겠습니다.", "emotion": "sad"},
+            {"text": "{player_name}, 마르의 잡화점에서 쥐약을 구매한 건 사실입니다.", "emotion": "angry"},
+            {"text": "그러나 그는 음식점을 운영하고 있고, 오래 전부터 들쥐로 인한 스트레스가 심하다고 말해왔습니다.", "emotion": "angry"},
+            {"text": "그는 쥐를 박멸하기 위해 약을 구입 했을 뿐, 사람에게 사용하진 않았습니다.", "emotion": "angry"},
+            {"text": "또한, 마르의 차트는 수기로 작성한 것이고 그만큼 놓치는 판매 내역도 있었을 겁니다.", "emotion": "angry"},
+            {"text": "판매 내역 하나로 {player_name}을(를) 범인으로 몰기엔 증거가 충분하지 않습니다.", "emotion": "angry"},
+            {"text": "{victim_name}, 그가 범인이었고 죄책감에 스스로 쥐약을 사서 자살을 했을지 모르는 일입니다.", "emotion": "sad"}
+        ],
+        "accomplice_move_in": [
+            {"text": "이제야 둘만 남았네요.", "emotion": "happy"},
+            {"text": "다행이에요.", "emotion": "happy"},
+            {"text": "당신이 저와 비슷한 사람인 줄 알았다면, 더 일찍 모습을 드러냈을텐데.", "emotion": "happy"}
+        ],
+        "arrest_scene_final_words": [
+            "...",
+            "하, 이것 참 난감하네.",
+            {"text": "{player_name}, 네가 이 꼴을 보게 하고 싶진 않았는데.", "emotion": "angry"},
+            {"text": "이봐요, 폴리. 가족이니, 뭐니. 좆까라그래요.", "emotion": "angry"},
+            {"text": "나에게 진심으로 다가와준 건 {player_name}밖에 없었어.", "emotion": "sad"},
+            {"text": "그래서 널 너무 가지고 싶었어.", "emotion": "sad"},
+            "{player_name}.",
+            {"text": "너만 괜찮다면 우리 함께 하지 않을래?", "emotion": "happy"}
+        ],
+        "arrest_scene_last_breath": [
+            {"text": "...", "emotion": "sad"},
+            {"text": "하하.... 하...", "emotion": "sad"},
+            {"text": "{player_name}, 너와 행복하고 싶었는데.", "emotion": "sad"},
+            {"text": "나는 고작 이런 욕심조차도...", "emotion": "sad"}
         ]
     },
     "dialogue": {
@@ -259,6 +310,7 @@
             {"title": "베리 디저트, 진심임", "requires_favorite_food": true, "lines": ["어제 나온 베리 요리, 진짜 완전 맛있었어.", "먹으면서 소설 소재가 막 떠오르더라. 근데 다 잊어버렸어.", "또 불러줘. 다음엔 기억해볼게."]},
             {"title": "초대 고마워", "lines": ["어제 초대해줘서 고마워.", "덕분에 오랜만에 글 안 쓰고 놀았어.", "가끔은 이런 것도 나쁘지 않더라."]}
         ],
+        "alibi_reminder": {"title": "잘 지내고 있어?", "lines": ["너희 집 앞이었다니, 진짜 소름 돋더라. 너 괜찮은 거야?", "{player_name}, 마음 환기 시키러 서점에 한번 와."]},
         "gift_thanks": [
             {"title": "이거, 다음 소설에 슬쩍 넣어도 돼?", "lines": ["선물 고마워. 진짜 완전 취향이야.", "이거 다음 소설에 살짝 등장시켜도 될까 ? 물론 이름은 다르게 할게.", "뭐, 아무도 안 읽으니까 상관없으려나."]},
             {"title": "고마워", "lines": ["선물 받고 완전 신났어.", "책상 위에 잘 올려뒀어. 글 쓰다 막히면 한 번씩 쳐다볼 거야.", "진짜 고마워."]}

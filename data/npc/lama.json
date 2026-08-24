@@ -65,6 +65,19 @@
             ]
         }
     },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "temple_sitting",
+        "npc_spawn": "lama_heart_npc",
+        "player_spawn": "lama_heart_player",
+        "lines": [
+            "기도하러 왔어?",
+            "무슨 일인데? 내가 들어줄게.",
+            "가능하다면 내가 그 소원 이루어주고.",
+            "로또 1등 같은 거 아니지?",
+            {"text": "흐흐, 난 그런 건 못해.", "emotion": "happy"}
+        ]
+    },
     "affection_events": [
         {
             "threshold": 60,
