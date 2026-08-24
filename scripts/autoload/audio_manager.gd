@@ -130,6 +130,14 @@ const SFX_KNOCK := "res://assets/audio/sfx/sfx_knock2.mp3"
 ## 살인 발생 시각(main.gd의 살인 발견 씬 시작 직전) 재생 - 파일 없으면
 ## play_sfx()가 조용히 무시.
 const SFX_SCREAM := "res://assets/audio/sfx/sfx_scream.mp3"
+## 체포 엔딩(사용자 지시, 2026-08-24) - 경고 사격(플레이어가 달려가게 만드는
+## 트리거)과 자결, 두 번 재생된다. 파일 없으면 play_sfx()가 조용히 무시.
+const SFX_GUNSHOT := "res://assets/audio/sfx/sfx_gunshot.mp3"
+## 원본이 너무 크다는 사용자 피드백(2026-08-24) - 70% 음량 ≈ 20*log10(0.7).
+const SFX_GUNSHOT_VOLUME_DB := -3.1
+## 체포 엔딩 마무리 나레이션 직후(어셔가 쥐고 있던 나이프가 바닥에 떨어지는
+## 소리, 사용자 지시 2026-08-24). 파일 없으면 play_sfx()가 조용히 무시.
+const SFX_KNIFE_DROP := "res://assets/audio/sfx/sfx_knife_drop.mp3"
 ## 조리 중(냄비/프라이팬/믹서기) 소리 - play_cooking_sfx()가 duration_seconds가
 ## 지나면 재생 중이어도 강제로 멈춘다(사용자 지시: "프로그레스바 100% 차기
 ## 전까지"만). data/cooking/cooking_stations.json의 tool_name("냄비"/
@@ -585,6 +593,12 @@ signal knock_sequence_finished
 
 func is_knock_playing() -> bool:
 	return _is_knock_playing
+
+
+## _on_knock_event_triggered()가 밤 노크 이벤트에서 쓰는 것과 같은 시퀀스를
+## 스크립트된 컷신(공범 엔딩 등)에서도 그대로 재사용할 수 있게 공개한다.
+func play_knock_sequence() -> void:
+	await _play_knock_sequence()
 
 
 func _play_knock_sequence() -> void:

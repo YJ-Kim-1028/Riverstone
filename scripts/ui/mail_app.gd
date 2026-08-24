@@ -90,6 +90,13 @@ func open() -> void:
 	_show_list(View.INBOX_LIST)
 
 
+## computer_screen.gd 참고 - 공범 엔딩 컷신에서 이 메일 창의 닫기/뒤로가기
+## 버튼을 잠깐 막을 때 쓴다.
+func set_interaction_locked(locked: bool) -> void:
+	_close_button.disabled = locked
+	_back_button.disabled = locked
+
+
 func _show_list(view: View) -> void:
 	_last_list_view = view
 	_set_active(_info_popup, false)

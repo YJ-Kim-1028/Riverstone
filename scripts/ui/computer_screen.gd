@@ -19,6 +19,11 @@ enum Screen { DESKTOP, MAIL, SHOP }
 
 var _is_open := false
 var _current_screen := Screen.DESKTOP
+## 공범 엔딩(사용자 지시, 2026-08-24): 스토커 메일을 연 순간부터 일정 시간
+## 동안은 플레이어가 직접 닫을 수 없어야 한다 - ESC/전원 버튼/메일 창의
+## 뒤로가기·닫기 버튼을 전부 막는다. main.gd가 force_close()로 강제로 닫을
+## 때만 예외.
+var _interaction_locked := false
 
 
 func _ready() -> void:
@@ -37,7 +42,7 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not _is_open or not (event is InputEventKey) or not event.pressed or event.echo:
+	if not _is_open or _interaction_locked or not (event is InputEventKey) or not event.pressed or event.echo:
 		return
 	if event.keycode == KEY_ESCAPE:
 		if _current_screen == Screen.DESKTOP:
@@ -52,7 +57,21 @@ func open() -> void:
 
 
 func close() -> void:
+	if _interaction_locked:
+		return
 	_set_open(false)
+
+
+## main.gd의 공범 엔딩 컷신 전용 - 잠금 여부와 상관없이 강제로 닫는다.
+func force_close() -> void:
+	set_interaction_locked(false)
+	_set_open(false)
+
+
+func set_interaction_locked(locked: bool) -> void:
+	_interaction_locked = locked
+	_onoff_button.disabled = locked
+	_mail_window.set_interaction_locked(locked)
 
 
 func _open_mail() -> void:

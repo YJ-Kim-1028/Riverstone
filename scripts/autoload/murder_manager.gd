@@ -10,6 +10,7 @@ signal player_murder_committed(victim_id: String)
 signal truth_ending_triggered
 signal arrest_ending_triggered(spared_npc_id: String)
 signal accomplice_ending_triggered(victim_id: String)
+signal alibi_reminder_ready(npc_id: String, title: String, lines: Array)
 
 const MURDER_HOUR := 22
 ## 알리바이 조사 기준 시각(사용자 지시, 2026-08-17) - 22시(살인 시각)는 다들
@@ -32,6 +33,11 @@ const MAX_CANDIDATES := 3
 ## 않아서(04_locations에 상점/공용 공간만 있음), 발견 장소는 이 문자열로만
 ## 남긴다. 실제 "피해자 집으로 이동 처리"는 시각적으로 할 맵이 없어 생략했다.
 const DISCOVERY_LOCATION := "피해자의 집"
+
+## 엔딩 컷신용 내레이션(초상화 없는 나레이터 대사) 저장소. NPC 초상화가 있는
+## 대사(어셔의 증언/동거 대사 등)는 각 npc.json의 story_dialogue에 있고, 여기
+## endings.json은 그 사이사이를 잇는 화자 없는 문장만 담는다.
+const ENDINGS_DATA_PATH := "res://data/horror/endings.json"
 
 const LOCATION_NAMES := {
 	"hospital": "병원", "pasture": "목장", "farm": "농가게", "cafe": "카페",
@@ -74,9 +80,32 @@ var _second_murder_home_pending := false
 const ALIBI_WINDOW_DAYS := 5
 var _alibi_pending: Dictionary = {}
 var _alibi_deadline_day := -1
+var _alibi_start_day := -1
+
+## 2차 살인 이후 한정(사용자 지시, 2026-08-24): 알리바이 대화를 아직 못 나눈
+## NPC를 놓치기 쉽다는 지적 - 살인 발생일로부터 이 일수가 지나도록 못
+## 만났으면 그 NPC 앞으로 메일 1통을 보내 찾아오라고 재촉한다. npc_id -> true
+## (한 번 보내면 다시 안 보냄). 대상은 emails.alibi_reminder 필드를 가진
+## NPC로만 한정(벨제/모카/셰퍼드/어셔).
+const ALIBI_REMINDER_DELAY_DAYS := 3
+var _alibi_reminder_sent: Dictionary = {}
 
 ## ending.md: "엔딩은 중복 달성이 불가능하다" - "" | "truth" | "arrest" | "accomplice".
 var _ending_achieved := ""
+
+## 독약이 서빙된 그날은 바로 안 죽고, 다음날 하루가 바뀌는 순간 실제로 죽고
+## 엔딩 컷신이 시작된다(사용자 지시, 2026-08-24 - "독약을 서빙하고 다음날이
+## 되면 npc가 죽고, 다음날이 되자마자 이벤트가 시작"). npc_id가 비어있으면
+## 대기 중인 게 없다는 뜻.
+var _pending_poison_victim := ""
+var _endings_data: Dictionary = {}
+
+## 공범 엔딩 컷신(메일 대기~어셔 이사)이 끝까지 재생됐는지(사용자 지시,
+## 2026-08-24 - "컷씬하다가 게임 꺼버리면?"). 맵 이동 시점에 자동저장이 걸려서
+## 컷신 도중 종료하면 진행 상태 자체는 안 남는데, 이 플래그로 "엔딩은
+## 확정됐는데 마무리를 못 봤다"는 걸 구분해서 main.gd가 다음 접속 때 이어서
+## 보여줄 수 있게 한다.
+var _accomplice_sequence_completed := false
 
 var _player_used_poison := false
 var _player_killed_npc_id := ""
@@ -91,7 +120,33 @@ func _ready() -> void:
 	NPCManager.murder_candidate_registered.connect(_on_candidate_registered)
 	RestaurantManager.npc_poisoned.connect(_on_npc_poisoned)
 	TimeManager.minute_passed.connect(_on_minute_passed)
+	TimeManager.day_changed.connect(_on_day_changed)
+	_endings_data = _load_json(ENDINGS_DATA_PATH)
 	_update_pending_state()
+
+
+func _load_json(path: String) -> Dictionary:
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		push_error("Ending data file could not be opened: %s" % path)
+		return {}
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	if not (parsed is Dictionary):
+		push_error("Ending data file is not valid JSON: %s" % path)
+		return {}
+	return parsed
+
+
+## 엔딩 컷신에서 화자 없는 내레이션 한 토막을 가져온다(예: "accomplice",
+## "arrest_narration"). 없으면 빈 배열 - 호출부가 조용히 그 구간을 건너뛴다.
+func get_ending_narration(ending_id: String, section: String) -> Array:
+	return (_endings_data.get(ending_id, {}) as Dictionary).get(section, []) as Array
+
+
+## get_ending_narration()과 같은 데이터지만, 메일처럼 title+lines가 같이
+## 필요한 구간용({"title": ..., "lines": [...]}).
+func get_ending_mail(ending_id: String, section: String) -> Dictionary:
+	return (_endings_data.get(ending_id, {}) as Dictionary).get(section, {}) as Dictionary
 
 
 func get_murder_count() -> int:
@@ -122,6 +177,16 @@ func is_accomplice_ending() -> bool:
 
 func is_living_with_stalker() -> bool:
 	return _living_with_stalker
+
+
+func is_accomplice_sequence_completed() -> bool:
+	return _accomplice_sequence_completed
+
+
+## main.gd가 공범 엔딩 컷신(마무리 나레이션까지)을 실제로 끝까지 재생했을 때만
+## 부른다.
+func mark_accomplice_sequence_completed() -> void:
+	_accomplice_sequence_completed = true
 
 
 func has_player_used_poison() -> bool:
@@ -275,10 +340,12 @@ func _describe_map(map_id: String) -> String:
 ## 진술이 있어도 최신 사건 기준으로 덮어쓴다(둘 다 들고 있게 하지 않음).
 func _refresh_alibi_pending(victim_id: String) -> void:
 	_alibi_pending.clear()
+	_alibi_reminder_sent.clear()
 	for npc_id in NPCManager.get_all_ids():
 		if npc_id == victim_id or not NPCManager.is_alive(npc_id):
 			continue
 		_alibi_pending[npc_id] = true
+	_alibi_start_day = TimeManager.current_day
 	_alibi_deadline_day = TimeManager.current_day + ALIBI_WINDOW_DAYS
 
 
@@ -298,7 +365,11 @@ func get_save_data() -> Dictionary:
 		"usher_death_method": _usher_death_method,
 		"alibi_pending": _alibi_pending.duplicate(),
 		"alibi_deadline_day": _alibi_deadline_day,
+		"alibi_start_day": _alibi_start_day,
+		"alibi_reminder_sent": _alibi_reminder_sent.duplicate(),
 		"second_murder_home_pending": _second_murder_home_pending,
+		"pending_poison_victim": _pending_poison_victim,
+		"accomplice_sequence_completed": _accomplice_sequence_completed,
 	}
 
 
@@ -314,12 +385,16 @@ func load_save_data(data: Dictionary) -> void:
 	_player_killed_npc_id = String(data.get("player_killed_npc_id", ""))
 	_alibi_pending = (data.get("alibi_pending", {}) as Dictionary).duplicate()
 	_alibi_deadline_day = int(data.get("alibi_deadline_day", -1))
+	_alibi_start_day = int(data.get("alibi_start_day", -1))
+	_alibi_reminder_sent = (data.get("alibi_reminder_sent", {}) as Dictionary).duplicate()
 	_arrested = bool(data.get("arrested", false))
 	_accomplice_ending = bool(data.get("accomplice_ending", false))
 	_stalker_killed = bool(data.get("stalker_killed", false))
 	_living_with_stalker = bool(data.get("living_with_stalker", false))
 	_usher_death_method = String(data.get("usher_death_method", ""))
+	_accomplice_sequence_completed = bool(data.get("accomplice_sequence_completed", false))
 	_second_murder_home_pending = bool(data.get("second_murder_home_pending", false))
+	_pending_poison_victim = String(data.get("pending_poison_victim", ""))
 	_update_pending_state()
 
 
@@ -332,10 +407,16 @@ func _on_candidate_registered(npc_id: String) -> void:
 
 ## murder_system.md "플레이어 살인": 독약으로 단 한 번만 살해 가능. 대상이
 ## 스토커 본인이면 ending.md의 진실 엔딩, 무고한 NPC면 공범 엔딩으로 갈린다.
+## 서빙 즉시 죽이지 않는다 - _pending_poison_victim에 표시만 해두고, 다음날
+## _on_day_changed()에서 실제로 죽이면서 엔딩 컷신을 시작한다.
 func _on_npc_poisoned(npc_id: String) -> void:
-	if _player_used_poison or has_ending_achieved():
+	if _player_used_poison or has_ending_achieved() or not _pending_poison_victim.is_empty():
 		return
 	_player_used_poison = true
+	_pending_poison_victim = npc_id
+
+
+func _finalize_player_poison(npc_id: String) -> void:
 	_player_killed_npc_id = npc_id
 	_resolved_candidates[npc_id] = true
 	_record_case(npc_id)
@@ -368,6 +449,39 @@ func _on_minute_passed(hour: int, minute: int) -> void:
 		_trigger_arrest_ending(candidate_id)
 	else:
 		_commit_murder(candidate_id)
+
+
+## 2차 살인 이후에만(사용자 지시, 2026-08-24 - "2번째 살인 이후로는") 동작한다.
+## 알리바이 창(ALIBI_WINDOW_DAYS)이 열려 있는 동안, 아직 대화를 못 나눈 NPC가
+## ALIBI_REMINDER_DELAY_DAYS일 넘게 방치되면 그 NPC 앞으로 메일을 한 번
+## 보낸다. 알리바이를 이미 나눴으면(_alibi_pending에서 빠짐) 대상에서
+## 자동으로 제외된다. 대상은 emails.alibi_reminder 필드를 가진 NPC로만
+## 한정한다(사용자 지시, 2026-08-24) - 마르를 실제로 몰아가는 벨제/모카/
+## 셰퍼드/어셔 4명만 해당, 방어하거나 무관한 NPC는 굳이 재촉할 이유가 없다는
+## 판단. 몰아가는 대상(마르)이 이미 죽었으면 story_dialogue.suspicion_talk_2의
+## requires_alive를 그대로 재사용해 조용히 건너뛴다.
+func _on_day_changed(day: int, _weekday: String) -> void:
+	if not _pending_poison_victim.is_empty():
+		var victim_id := _pending_poison_victim
+		_pending_poison_victim = ""
+		_finalize_player_poison(victim_id)
+	if _murder_count != 2 or day > _alibi_deadline_day:
+		return
+	if day - _alibi_start_day < ALIBI_REMINDER_DELAY_DAYS:
+		return
+	for npc_id in _alibi_pending.keys():
+		if not bool(_alibi_pending[npc_id]) or bool(_alibi_reminder_sent.get(npc_id, false)):
+			continue
+		var definition: Dictionary = NPCManager.get_definition(npc_id)
+		var reminder: Dictionary = definition.get("emails", {}).get("alibi_reminder", {})
+		var lines: Array = reminder.get("lines", [])
+		if lines.is_empty():
+			continue
+		var requires_alive: String = String(definition.get("story_dialogue", {}).get("suspicion_talk_2", {}).get("requires_alive", ""))
+		if not requires_alive.is_empty() and not NPCManager.is_alive(requires_alive):
+			continue
+		_alibi_reminder_sent[npc_id] = true
+		alibi_reminder_ready.emit(npc_id, String(reminder.get("title", "")), lines)
 
 
 func _get_next_queued_candidate() -> String:
@@ -425,7 +539,9 @@ func _trigger_arrest_ending(spared_npc_id: String) -> void:
 	_resolved_candidates[spared_npc_id] = true
 	_arrested = true
 	_stalker_killed = true
-	_usher_death_method = "self_killed"
+	## 사용자 확정(2026-08-24): 어셔가 스스로 목숨을 끊는 게 아니라, 살아남은
+	## 3번째 대상을 칼로 위협하는 순간 폴리가 정당방위로 쏜다.
+	_usher_death_method = "shot_by_poli"
 	_ending_achieved = "arrest"
 	NPCManager.kill_npc(NPCManager.get_stalker_id())
 	_update_pending_state()

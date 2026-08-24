@@ -65,6 +65,7 @@ func _ready() -> void:
 	TimeManager.day_changed.connect(_on_day_changed)
 	HorrorEventManager.impersonation_email_ready.connect(_on_impersonation_email_ready)
 	HorrorEventManager.stalker_email_ready.connect(_on_stalker_email_ready)
+	MurderManager.alibi_reminder_ready.connect(_on_alibi_reminder_ready)
 
 
 ## 메일함 UI는 게임 내 "N일차"가 아니라 플레이어가 실제로 메일을 주고받은
@@ -123,6 +124,13 @@ func mark_read(email_id: int) -> void:
 			entry["read"] = true
 			inbox_updated.emit()
 			return
+
+
+func is_mail_read(email_id: int) -> bool:
+	for entry in _inbox:
+		if int(entry.get("id", -1)) == email_id:
+			return bool(entry.get("read", false))
+	return false
 
 
 func can_send_email_today() -> bool:
@@ -322,7 +330,15 @@ func _on_stalker_email_ready(sender_id: String, title: String, lines: Array) -> 
 	_add_mail(sender_id, "stalker", title, lines)
 
 
-func _add_mail(npc_id: String, category: String, title: String, lines: Array) -> void:
+## MurderManager._on_day_changed() - 2차 살인 알리바이 창이 열려 있는데 3일
+## 넘게 대화를 못 나눈 NPC가 보내는 재촉 메일.
+func _on_alibi_reminder_ready(npc_id: String, title: String, lines: Array) -> void:
+	_add_mail(npc_id, "alibi_reminder", title, lines)
+
+
+## 반환값은 main.gd의 엔딩 컷신처럼 "이 메일이 실제로 읽힐 때까지 기다리기"가
+## 필요한 호출부를 위한 것 - 대부분의 기존 호출부는 그냥 무시한다.
+func _add_mail(npc_id: String, category: String, title: String, lines: Array) -> Dictionary:
 	var entry := {
 		"id": _next_id,
 		"npc_id": npc_id,
@@ -336,3 +352,12 @@ func _add_mail(npc_id: String, category: String, title: String, lines: Array) ->
 	_inbox.append(entry)
 	mail_received.emit(entry)
 	inbox_updated.emit()
+	return entry
+
+
+## 엔딩 컷신 등 특정 서사 지점에서 스토커 메일을 즉시 한 통 보낼 때 쓴다.
+## 발신인은 평소 순차 발송되는 스토커 메일과 동일하게 HorrorEventManager.
+## STALKER_SENDER_ID("???")를 재사용 - 초상화 없이 "???"라는 발신인만 뜬다.
+func send_stalker_mail(title: String, lines: Array) -> int:
+	var entry := _add_mail(HorrorEventManager.STALKER_SENDER_ID, "stalker", title, lines)
+	return int(entry.get("id", -1))

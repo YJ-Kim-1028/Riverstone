@@ -114,6 +114,11 @@ const SELF_SCENT_COLORS := ["blue", "purple", "white"]
 ## NPCWorldManager가 도착/출발 시점마다 갱신한다
 ## (set_npc_physical_spot/clear_npc_physical_spot).
 var _npc_physical_spot: Dictionary = {}
+## npc_id -> bool - heart_event_30(호감도 30 최초 이벤트, 2026-08-24) 시청 여부.
+## affection_events의 _shown_events와 별개로 관리한다 - 별도 스키마(anchor_state/
+## scene_map_id 등)를 쓰고 main.gd가 직접 트리거하는 구조라 대기열(pending_milestone)을
+## 안 거친다.
+var _shown_heart_events: Dictionary = {}
 
 
 func _ready() -> void:
@@ -361,6 +366,15 @@ func get_affection_tier(npc_id: String) -> String:
 ## entry twice in a row when the pool has more than one option.
 const SAGE_NPC_ID := "sage"
 const POLI_NPC_ID := "poli"
+## 공범 엔딩(사용자 지시, 2026-08-24) - 어셔가 플레이어와 동거를 시작하면 매일
+## 밤 자기 서점 대신 집으로 온다. 집 레벨(EconomyManager.house_level)에 따라
+## home_interior.tmx/_2.tmx/_3.tmx가 통째로 바뀌는 별개 파일이라(사용자 지적,
+## 2026-08-24), 세 파일 전부의 Spawn 레이어에 이 이름으로 지점이 있어야 한다
+## (사용자 배치 예정). _resolve_usher_home_position()이 매번 "지금 집 레벨의"
+## 파일을 새로 읽으므로(_spawn_index 캐시 미사용) 셋 중 어느 파일에 지점이
+## 없으면 그 레벨에서만 조용히 안 보이게 된다(에러 없음).
+const USHER_NPC_ID := "usher"
+const USHER_LIVING_WITH_PLAYER_STATE := "usher_home_standing"
 ## 셰퍼드/모카 불륜 관계 - get_daily_dialogue()의 partner_death_reaction 참고.
 const PARTNER_DEATH_PAIRS := {
 	"shepherd": "mocha",
@@ -500,6 +514,15 @@ func get_daily_dialogue(npc_id: String) -> Array:
 		var witness_line := MurderManager.consume_witness_line(npc_id)
 		if not witness_line.is_empty():
 			lines.append(witness_line)
+		## 2차 살인 이후에만 마을 사람들이 서로 용의자를 지목하는 소문 대사를
+		## 덧붙인다(사용자 지시, 2026-08-24). requires_alive에 적힌 NPC가 이미
+		## 죽었으면(그 자신이 피해자가 됐거나 먼저 살해당했으면) 조용히 건너뛴다.
+		if MurderManager.get_murder_count() == 2:
+			var suspicion: Dictionary = story_dialogue.get("suspicion_talk_2", {})
+			var suspicion_lines: Array = suspicion.get("lines", [])
+			var requires_alive: String = String(suspicion.get("requires_alive", ""))
+			if not suspicion_lines.is_empty() and (requires_alive.is_empty() or is_alive(requires_alive)):
+				lines.append_array(suspicion_lines)
 		return lines
 	## 셰퍼드/모카는 서로 불륜 상대다(shepherd.json/mocha.json special_notes) -
 	## 둘 중 한쪽이 살해당하면, 남은 쪽에게는 위 애도+알리바이 대화 다음번
@@ -551,23 +574,51 @@ func get_weekday_group(weekday: String) -> String:
 ## shop.md 승계 규칙("한쪽이 죽으면 남은 쪽이 가게를 잇는다")을 스케줄에도
 ## 반영한다(2026-08-16 사용자 확정 - "벨제 가게 자리에 벨제가 없는데 사용은
 ## 되네, 셰퍼드가 봐준다는 설정이면 셰퍼드 스케줄을 벨제처럼 해야 할 거
-## 같다"). 2인 상점의 파트너가 죽으면, 남은 쪽은 자기 스케줄 대신 죽은
-## 파트너의 스케줄을 그대로 따른다 - 둘 다 살아있는 동안엔 원래 자기 것 그대로.
+## 같다"). 자세한 승계 방향은 SHOP_PRIMARY_OPERATOR/_get_dead_shop_partner_id()
+## 참고 - 주 운영자가 죽었을 때만 보조가 그 스케줄을 잇고, 둘 다 살아있거나
+## 보조가 죽었을 땐 원래 자기 것 그대로.
 func _get_effective_schedule(npc_id: String) -> Dictionary:
+	if npc_id == USHER_NPC_ID and MurderManager.is_living_with_stalker():
+		return _usher_living_with_player_schedule()
 	var dead_partner_id := _get_dead_shop_partner_id(npc_id)
 	if not dead_partner_id.is_empty():
 		return get_definition(dead_partner_id).get("schedule", {})
 	return get_definition(npc_id).get("schedule", {})
 
 
-func _get_dead_shop_partner_id(npc_id: String) -> String:
-	for shop_id in ShopManager.get_shop_ids():
-		var owners: Array = ShopManager.get_shop_definition(shop_id).get("owner_npc_ids", [])
-		if owners.size() < 2 or not owners.has(npc_id):
+## 요일군(월수목/화금/주말) 전부 마지막 스케줄 항목(=서점 마감 후 상태, 지금은
+## 전부 21:00 "book_working")만 USHER_LIVING_WITH_PLAYER_STATE로 바꿔치기한다 -
+## 낮 동안 서점 운영은 그대로 두고 "퇴근길"만 집으로 바꾸는 것.
+func _usher_living_with_player_schedule() -> Dictionary:
+	var base: Dictionary = (get_definition(USHER_NPC_ID).get("schedule", {}) as Dictionary).duplicate(true)
+	for group_key in base.keys():
+		var entries: Array = (base[group_key] as Dictionary).get("entries", [])
+		if entries.is_empty():
 			continue
-		for partner_id in owners:
-			if String(partner_id) != npc_id and not is_alive(String(partner_id)):
-				return String(partner_id)
+		var last_entry: Dictionary = entries[entries.size() - 1]
+		last_entry["state"] = USHER_LIVING_WITH_PLAYER_STATE
+	return base
+
+
+## 2인 상점에서 실제로 상점을 지키는 "주 운영자"(벨제/마린 - 스케줄이 거의
+## 항상 "_working")가 죽었을 때만, 한가하게 돌아다니던 "보조"(셰퍼드/로시 -
+## "_looking"/"_sitting" 위주)가 그 스케줄을 대신 쓴다(사용자 지적,
+## 2026-08-24 - "벨제가 셰퍼드의 스케줄을 대신하면, 상점을 운영할 사람이
+## 없어. 벨제나 마린은 로시의 죽음을 대체할 필요가 없어"). 예전엔 양방향으로
+## 동작해서, 보조가 죽으면 오히려 주 운영자가 보조의 "돌아다니는" 스케줄로
+## 끌려가 상점이 실질적으로 비어버리는 버그가 있었다. 셰퍼드/로시처럼 array
+## 순서만으론 누가 주 운영자인지 알 수 없어서(로시가 먼저 나오지만 실제
+## 운영자는 마린) shops.json 구조는 안 건드리고 여기 표로만 관리한다.
+const SHOP_PRIMARY_OPERATOR := {
+	"shepherd": "belje",
+	"roshi": "marin",
+}
+
+
+func _get_dead_shop_partner_id(npc_id: String) -> String:
+	var primary_id := String(SHOP_PRIMARY_OPERATOR.get(npc_id, ""))
+	if not primary_id.is_empty() and not is_alive(primary_id):
+		return primary_id
 	return ""
 
 
@@ -690,6 +741,8 @@ func get_next_schedule_change(npc_id: String) -> Dictionary:
 func resolve_state_position(state: String) -> Dictionary:
 	if state.is_empty():
 		return {}
+	if state == USHER_LIVING_WITH_PLAYER_STATE:
+		return _resolve_usher_home_position()
 	var spawn: Dictionary = _spawn_index.get(state, {})
 	if spawn.is_empty():
 		return {}
@@ -743,11 +796,30 @@ func get_schedule_only_position(npc_id: String) -> Dictionary:
 	var state := get_current_schedule_state(npc_id)
 	if state.is_empty():
 		return {}
+	if state == USHER_LIVING_WITH_PLAYER_STATE:
+		return _resolve_usher_home_position()
 	var spawn: Dictionary = _spawn_index.get(state, {})
 	if spawn.is_empty():
 		push_warning("No spawn point found for schedule state '%s' (npc: %s)" % [state, npc_id])
 		return {}
 	return spawn.duplicate()
+
+
+## _spawn_index는 부팅 시점에 home_interior "레벨 1" 파일만 읽어서 만들어져
+## 있어서(WorldMap.MAP_PATHS가 고정 경로), 집을 업그레이드한 플레이어에겐
+## 좌표가 안 맞을 수 있다는 지적(사용자, 2026-08-24 - "2,3 레벨이 되면 아예
+## 맵이 바뀌는 거 아니야?"). 그래서 이 상태만 캐시를 안 쓰고 호출될 때마다
+## WorldMap.get_map_path()로 "지금 집 레벨의" 실제 파일을 다시 읽어서 정확한
+## 좌표를 구한다 - home_interior_2/3.tmx에도 같은 이름(usher_home_standing)의
+## 스폰 지점이 있어야 한다(사용자 배치 예정, 3개 파일 전부).
+func _resolve_usher_home_position() -> Dictionary:
+	var path := WorldMap.get_map_path("home_interior")
+	if path.is_empty():
+		return {}
+	var spawns: Dictionary = WorldMap.parse_spawns(path)
+	if not spawns.has(USHER_LIVING_WITH_PLAYER_STATE):
+		return {}
+	return {"map_id": "home_interior", "position": spawns[USHER_LIVING_WITH_PLAYER_STATE]}
 
 
 # 아래는 겹침 자동 보정 시도(사용자 요청 범위 밖이라 되돌림, 2026-08-01) -
@@ -825,6 +897,7 @@ func get_save_data() -> Dictionary:
 			"scent_color": get_scent_color(npc_id),
 			"pending_milestone": (_pending_milestone.get(npc_id, []) as Array).duplicate(true),
 			"shown_events": (_shown_events.get(npc_id, []) as Array).duplicate(),
+			"heart_event_30_shown": has_shown_heart_event(npc_id),
 		}
 	return {
 		"npc_states": npc_states,
@@ -848,6 +921,7 @@ func load_save_data(data: Dictionary) -> void:
 		for threshold in (state.get("shown_events", []) as Array):
 			shown.append(int(threshold))
 		_shown_events[npc_id] = shown
+		_shown_heart_events[npc_id] = bool(state.get("heart_event_30_shown", false))
 		_murder_candidate_flagged[npc_id] = bool(state.get("murder_candidate_flagged", false))
 		_partner_death_reaction_shown[npc_id] = bool(state.get("partner_death_reaction_shown", false))
 		_talked_today[npc_id] = bool(state.get("talked_today", false))
@@ -938,6 +1012,20 @@ func _check_affection_events(npc_id: String, affection: int) -> void:
 
 func has_shown_event(npc_id: String, threshold: int) -> bool:
 	return (_shown_events.get(npc_id, []) as Array).has(threshold)
+
+
+## heart_event_30(호감도 30 최초 이벤트) 데이터 - 없는 NPC(폴리 등)는 빈
+## Dictionary. main.gd의 _maybe_trigger_heart_event()가 트리거 조건 판정에 쓴다.
+func get_heart_event_30(npc_id: String) -> Dictionary:
+	return get_definition(npc_id).get("heart_event_30", {})
+
+
+func has_shown_heart_event(npc_id: String) -> bool:
+	return bool(_shown_heart_events.get(npc_id, false))
+
+
+func mark_heart_event_shown(npc_id: String) -> void:
+	_shown_heart_events[npc_id] = true
 
 
 ## get_daily_dialogue()가 대기 중인 마일스톤 대사를 실제로 보여주기로 결정한

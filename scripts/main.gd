@@ -16,6 +16,9 @@ signal serving_area_interacted(station_index: int)
 ## 그대로 쓴다.
 signal kitchen_station_interacted(station_id: String)
 signal computer_interacted
+## 공범 엔딩(사용자 지시, 2026-08-24) - 노크 이후 문 앞에서 E를 눌러 어셔를
+## 맞이하는 순간.
+signal accomplice_door_answered
 signal collection_interacted
 signal jukebox_interacted
 signal npc_talk_interacted(npc_id: String)
@@ -31,6 +34,9 @@ const RESTAURANT_CANNOT_LEAVE_MESSAGE := "영업 중에는 레스토랑을 벗�
 ## horror_events.md "NPC 집 잠금" - "NPC맵=NPC가게"(사용자 확정 2026-08-16)라
 ## 상점 맵으로 해석해서 막는다.
 const SHOP_LOCKED_MESSAGE := "문이 굳게 잠겨 있다."
+## 공범 엔딩(사용자 지시, 2026-08-24) - 스토커 메일을 확인하기 전엔 집 밖으로
+## 못 나간다.
+const ACCOMPLICE_CANNOT_LEAVE_MESSAGE := "왠지 지금은 밖에 나가면 안 될 것 같다."
 ## 살인 대기 중인 밤(비 오는 중 + 22시 전)에 취침을 막을 때 쓰는 문구 - 첫
 ## 살인 전엔 공포 요소를 인지시키면 안 되므로(CLAUDE.md) 노골적인 암시 없이
 ## 평범한 "잠이 안 온다" 톤으로 잡았다. 문구는 임시 - 기획 확정 시 교체 가능.
@@ -62,6 +68,8 @@ const COLLAPSE_DEBUFF_PERCENT := -0.30
 const COLLAPSE_DEBUFF_MINUTES := 180
 const HOSPITAL_MAP_ID := "hospital_interior"
 const HOSPITAL_WAKE_SPAWN := "hospital_lying_player"
+
+const HEART_EVENT_AFFECTION_THRESHOLD := 30
 
 ## restaurant_interior.tmx의 Wall_deco 레이어에 원래 그려져 있던 팻말 타일(OPEN,
 ## GID 312/313, 칸 좌표 col6~7/row14, 픽셀로는 (96,224)~(128,240))과 정확히
@@ -167,6 +175,19 @@ var _is_transitioning := false
 ## 응답 없음 상태가 됐었음, 2026-08-16). 맵 전환은 이 씬이 진행되는 동안
 ## _on_murder_occurred() 자신이 명시적으로만 처리한다.
 var _murder_scene_active := false
+## 공범 엔딩(사용자 지시, 2026-08-24): 어셔가 이사오기 전, 집에 갇힌 채 스토커
+## 메일을 확인해야 하는 구간에서만 참 - _murder_scene_active와 달리 이동/E
+## 상호작용(컴퓨터로 메일 확인 등)은 그대로 허용하고 "집 밖으로 나가는 워프"만
+## 막는다.
+var _accomplice_awaiting_mail_read := false
+## 노크 소리가 끝난 뒤, 문 앞에서 E를 누르길 기다리는 단계(사용자 지시,
+## 2026-08-24). 이때 문 워프는 평소처럼 밖으로 안 나가고 accomplice_door_answered
+## 신호만 쏜다.
+var _accomplice_awaiting_door_open := false
+## heart_event_30(호감도 30 최초 이벤트, 2026-08-24 사용자 지시 - "스듀식"
+## 컷신) 재생 중에만 참 - E 상호작용을 막는다(이동은 player.walk_to()가
+## _scripted_move_direction으로 실제 입력을 덮어써서 별도로 안 막아도 된다).
+var _heart_event_active := false
 ## 괭이/물뿌리개 포즈 재생 중(TOOL_USE_HOLD_SECONDS)에 E를 한 번 더 누르면
 ## _on_interact_pressed()가 재진입해서 perform_till()이 아직 커밋 안 된 같은
 ## 칸을 "till"로 다시 판정 - 첫 호출이 끝나기 전에 두 번째 코루틴이 같은
@@ -241,12 +262,18 @@ func _ready() -> void:
 	AudioManager.knock_sequence_finished.connect(_on_knock_sequence_finished)
 	TimeManager.day_changed.connect(_on_day_changed_clear_knock_check)
 	MurderManager.murder_occurred.connect(_on_murder_occurred)
+	MurderManager.accomplice_ending_triggered.connect(_on_accomplice_ending_triggered)
+	MurderManager.truth_ending_triggered.connect(_on_truth_ending_triggered)
+	MurderManager.arrest_ending_triggered.connect(_on_arrest_ending_triggered)
 	_build_box_preview()
 	_build_furniture_preview()
 	_build_floor_decor_preview()
 	_build_wall_decor_preview()
 	_build_farm_tile_highlight()
-	_load_map("Home", "start_spawn")
+	await _load_map("Home", "start_spawn")
+	## _load_map()이 끝나 _is_transitioning이 풀린 뒤에 불러야 안에서 또
+	## _load_map()을 부르는 이 함수가 씹히지 않는다.
+	_maybe_resume_accomplice_ending()
 
 
 func _on_item_used(item_id: String) -> void:
@@ -347,6 +374,58 @@ const SECOND_MURDER_PLAYER_MONOLOGUE: Array[String] = [
 	"설마...",
 	"일단... 신고부터 해야겠다.",
 ]
+
+## 공범 엔딩(사용자 지시, 2026-08-24): 독약이 서빙된 다음날, 실제로 죽으면서
+## 시작되는 컷신. 순서: 체포 내레이션 → 마을 사람들이 (스토커와 다른 수법에)
+## 술렁이는 반응 몽타주(초상화 있는 진짜 대화, 죽었거나 story_dialogue에
+## poison_victim_reaction이 없는 NPC는 조용히 건너뜀) → 어셔의 위증 →
+## 위증 이후 내레이션 → 어셔가 집에 들어옴 → 마무리 내레이션. 내레이션은
+## data/horror/endings.json(MurderManager.get_ending_narration())에서,
+## 초상화 있는 대사는 각 npc.json의 story_dialogue에서 가져온다.
+const ACCOMPLICE_ENDING_ID := "accomplice"
+## 사용자 지시(2026-08-24): 모카/이샤/라마 반응 삭제, 폴리 단독으로.
+const POISON_REACTION_NPC_IDS: Array[String] = ["poli"]
+const POISON_REACTION_KEY := "poison_victim_reaction"
+const ACCOMPLICE_TESTIMONY_KEY := "accomplice_testimony"
+## 어셔의 위증 직후 폴리가 반응하는 자리(사용자 지시, 2026-08-24 - "이후에도
+## 폴리가 대사하는 공간이 있었으면 좋겠어"). poli.json의 story_dialogue에 둠.
+const ACCOMPLICE_RELEASE_KEY := "accomplice_release"
+const ACCOMPLICE_MOVE_IN_KEY := "accomplice_move_in"
+const USHER_NPC_ID := "usher"
+const ENDING_BEAT_DELAY_SECONDS := 1.5
+## 시간 경과 내레이션 이후, 어셔가 이사오기 전에 플레이어가 집에 갇혀 스토커
+## 메일을 확인하는 구간(사용자 지시, 2026-08-24). home_interior.tmx의 Spawn
+## 레이어에 이미 있는 지점("home_enterance")을 그대로 재사용 - 새로 안 만듦.
+const ACCOMPLICE_MAIL_MAP_ID := "home_interior"
+const ACCOMPLICE_MAIL_SPAWN := "home_enterance"
+## 메일을 연 순간부터 강제로 붙잡아두는 시간(사용자 지시, 2026-08-24 - "1분
+## 뒤에 자동으로 창이 닫히고 이때까지 사용자가 직접 닫지 못함").
+const ACCOMPLICE_MAIL_FORCE_READ_SECONDS := 60.0
+
+## 체포 엔딩(사용자 지시, 2026-08-24): 경고 사격 소리 → 지금 있는 맵에서
+## book_interior(어셔의 서점)까지 실제로 뛰어감(WorldMap.find_map_route()의
+## BFS 최단경로 - MURDER_RUN_CHAIN처럼 수동 표를 새로 안 만들어도 어디서든
+## 동작함) → 도착하면 폴리/어셔/살아남은 3번째 대상(spared_npc_id) 분신을
+## 각자 자리에 세우고 플레이어도 지정 자리로 이동 → 폴리 경고 → 어셔의 마지막
+## 말 → 자결 총소리 → 페이드 → 마무리 내레이션. book_interior.tmx의 Spawn
+## 레이어에 아래 4개 지점이 필요하다(사용자 배치 예정).
+const ARREST_ENDING_ID := "arrest"
+const ARREST_SCENE_MAP_ID := "book_interior"
+const ARREST_SCENE_PLAYER_SPAWN := "arrest_scene_player"
+const ARREST_SCENE_POLI_SPAWN := "arrest_scene_poli"
+const ARREST_SCENE_USHER_SPAWN := "arrest_scene_usher"
+const ARREST_SCENE_VICTIM_SPAWN := "arrest_scene_victim"
+const ARREST_SCENE_WARNING_KEY := "arrest_scene_warning"
+const ARREST_SCENE_FINAL_WORDS_KEY := "arrest_scene_final_words"
+## 어셔의 마지막 말에 폴리가 한 번 더 받아치는 자리(사용자 지시, 2026-08-24 -
+## "티키타카 할 수 있도록"). poli.json의 story_dialogue에 둠.
+const ARREST_SCENE_REACTION_KEY := "arrest_scene_reaction"
+## 나이프 떨어지는 소리 직후, 죽어가는 어셔의 마지막 한 마디(사용자 지시,
+## 2026-08-24). usher.json의 story_dialogue에 둠.
+const ARREST_SCENE_LAST_BREATH_KEY := "arrest_scene_last_breath"
+## 마무리 나레이션 사이, 기절한 대상을 업은 폴리가 플레이어에게 건네는 마지막
+## 한마디(사용자 지시, 2026-08-24). poli.json의 story_dialogue에 둠.
+const ARREST_SCENE_FAREWELL_KEY := "arrest_scene_farewell"
 
 ## 물귀신 가짜 입질(FishingManager.is_ghost_bite()) 직후 플레이어 혼잣말
 ## (사용자 작성, 2026-08-24) - 씨름하는 듯한 반복 효과음이 뚝 끊긴 다음
@@ -520,6 +599,319 @@ func _continue_second_murder_discovery() -> void:
 	_murder_scene_active = false
 	MurderManager.consume_second_murder_discovery_pending()
 	await _fade_in()
+
+
+func _on_accomplice_ending_triggered(_victim_id: String) -> void:
+	await _play_accomplice_ending_sequence()
+
+
+## 진실 엔딩(사용자 작성, 2026-08-24) - 화자 없는 내레이션 한 토막뿐이라 맵
+## 이동이 없다. 그래서 공범 엔딩과 달리 재접속 시 이어보기 안전장치가
+## 필요없다 - 자동저장이 걸릴 시점(맵 이동) 자체가 이 안에 없어서, 도중에
+## 꺼도 다음 접속 때 _pending_poison_victim이 그대로 남아있어 알아서 처음부터
+## 다시 재생된다(murder_manager.gd의 day_changed 처리 참고).
+func _on_truth_ending_triggered() -> void:
+	_murder_scene_active = true
+	_close_all_screens()
+	await _play_narration_beat("truth", "closing_narration")
+	_murder_scene_active = false
+
+
+func _on_arrest_ending_triggered(spared_npc_id: String) -> void:
+	await _play_arrest_ending_sequence(spared_npc_id)
+
+
+## 순서/스폰 지점은 ARREST_ENDING_ID 상수 근처 주석 참고.
+func _play_arrest_ending_sequence(spared_npc_id: String) -> void:
+	_murder_scene_active = true
+	_close_all_screens()
+	AudioManager.play_sfx(AudioManager.SFX_GUNSHOT, AudioManager.SFX_GUNSHOT_VOLUME_DB)
+	var route := WorldMap.find_map_route(GameManager.current_map_id, ARREST_SCENE_MAP_ID)
+	for next_map_id in route:
+		var warp: Dictionary = world_map.get_warp_for_target_map(next_map_id)
+		if warp.is_empty():
+			warp = world_map.get_any_warp()
+		if warp.is_empty():
+			push_error("arrest ending run: no warp found from %s" % GameManager.current_map_id)
+			_murder_scene_active = false
+			return
+		await player.walk_to(warp["position"])
+		await _load_map(String(warp["target_map"]), String(warp["target_spawn"]))
+	_set_all_npc_sprites_hidden(true)
+	var scene_props: Array[Node2D] = []
+	var poli_spawn: Vector2 = world_map.get_spawn_position(ARREST_SCENE_POLI_SPAWN)
+	if poli_spawn != Vector2.INF:
+		scene_props.append(_spawn_npc_decoy(MURDER_DISCOVERY_NPC_ID, poli_spawn))
+	var usher_spawn: Vector2 = world_map.get_spawn_position(ARREST_SCENE_USHER_SPAWN)
+	if usher_spawn != Vector2.INF:
+		scene_props.append(_spawn_npc_decoy(USHER_NPC_ID, usher_spawn))
+	var victim_spawn: Vector2 = world_map.get_spawn_position(ARREST_SCENE_VICTIM_SPAWN)
+	if not spared_npc_id.is_empty() and victim_spawn != Vector2.INF:
+		scene_props.append(_spawn_npc_decoy(spared_npc_id, victim_spawn))
+	var player_spawn: Vector2 = world_map.get_spawn_position(ARREST_SCENE_PLAYER_SPAWN)
+	if player_spawn != Vector2.INF:
+		await player.walk_to(player_spawn)
+	await get_tree().create_timer(ENDING_BEAT_DELAY_SECONDS).timeout
+	await _play_npc_beat(MURDER_DISCOVERY_NPC_ID, ARREST_SCENE_WARNING_KEY)
+	await _play_npc_beat(USHER_NPC_ID, ARREST_SCENE_FINAL_WORDS_KEY)
+	await _play_npc_beat(MURDER_DISCOVERY_NPC_ID, ARREST_SCENE_REACTION_KEY)
+	## "총소리만 빵 하고 끝낼거야" (사용자 지시, 2026-08-24) - 대사 끝나면
+	## 바로 총소리 + 암전, 여운 없이 끊는다.
+	AudioManager.play_sfx(AudioManager.SFX_GUNSHOT, AudioManager.SFX_GUNSHOT_VOLUME_DB)
+	await _fade_out()
+	await _play_arrest_closing_narration(spared_npc_id)
+	AudioManager.play_sfx(AudioManager.SFX_KNIFE_DROP)
+	await _play_npc_beat(USHER_NPC_ID, ARREST_SCENE_LAST_BREATH_KEY)
+	await _play_narration_beat(ARREST_ENDING_ID, "aftermath_narration")
+	await _play_npc_beat(MURDER_DISCOVERY_NPC_ID, ARREST_SCENE_FAREWELL_KEY)
+	await _play_narration_beat(ARREST_ENDING_ID, "final_narration")
+	_cleanup_murder_discovery_scene_props(scene_props)
+	_set_all_npc_sprites_hidden(false)
+	_murder_scene_active = false
+	await _fade_in()
+
+
+## _spawn_murder_discovery_poli_decoy()의 범용 버전 - 폴리 전용이 아니라 아무
+## npc_id나 특정 위치에 세울 때 쓴다(체포 엔딩: 폴리/어셔/살아남은 3번째 대상).
+func _spawn_npc_decoy(npc_id: String, spawn_position: Vector2) -> Node2D:
+	var decoy := POLI_DECOY_SCENE.instantiate() as Node2D
+	world_map.add_child(decoy)
+	decoy.call("set_npc_id", npc_id)
+	decoy.call("snap_to", spawn_position)
+	decoy.call("face_down")
+	return decoy
+
+
+## 순서(사용자 지시, 2026-08-24): 발견 → 마을 반응(폴리) → 체포 → 어셔 위증 →
+## 위증 직후 내레이션 → 폴리의 석방 반응 → 시간 경과 내레이션 → 동거 →
+## 마무리. 내용은 ACCOMPLICE_ENDING_ID 상수 근처 주석 참고.
+func _play_accomplice_ending_sequence() -> void:
+	_murder_scene_active = true
+	_close_all_screens()
+	await _play_narration_beat(ACCOMPLICE_ENDING_ID, "discovery_narration")
+	await get_tree().create_timer(ENDING_BEAT_DELAY_SECONDS).timeout
+	for npc_id in POISON_REACTION_NPC_IDS:
+		if not NPCManager.is_alive(npc_id):
+			continue
+		var lines: Array = (NPCManager.get_definition(npc_id).get("story_dialogue", {}).get(POISON_REACTION_KEY, []) as Array).duplicate()
+		if lines.is_empty():
+			continue
+		if dialogue_screen != null:
+			dialogue_screen.open_special(npc_id, lines)
+			await dialogue_screen.closed
+		await get_tree().create_timer(ENDING_BEAT_DELAY_SECONDS).timeout
+	await _fade_out()
+	await _fade_in()
+	await _play_narration_beat(ACCOMPLICE_ENDING_ID, "arrest_narration")
+	await _play_npc_beat(USHER_NPC_ID, ACCOMPLICE_TESTIMONY_KEY)
+	await _play_narration_beat(ACCOMPLICE_ENDING_ID, "post_testimony_narration")
+	await _play_npc_beat(MURDER_DISCOVERY_NPC_ID, ACCOMPLICE_RELEASE_KEY)
+	await _play_narration_beat(ACCOMPLICE_ENDING_ID, "time_skip_narration")
+	await _play_accomplice_home_arrival_sequence()
+
+
+## time_skip_narration 이후 부분만 따로 뗀 이유(사용자 지시, 2026-08-24 -
+## "컷씬하다가 게임 꺼버리면?"): 이 지점부터 home_interior로 맵이 바뀌면서
+## 자동저장이 걸리는데, 그 뒤로 게임을 끄면 이 아래 내용(메일 대기~어셔 이사)은
+## 다시 안 나온다. 그래서 _maybe_resume_accomplice_ending()이 다음 접속 때
+## 이 함수만 다시 부를 수 있게 별도 함수로 분리했다 - discovery_narration부터
+## 다시 보여줄 필요는 없으므로(이미 지나간 사건) 여기서부터 재생.
+func _play_accomplice_home_arrival_sequence() -> void:
+	await _load_map(ACCOMPLICE_MAIL_MAP_ID, ACCOMPLICE_MAIL_SPAWN)
+	## 메일 확인/문 앞 대기 중엔 _murder_scene_active를 잠깐 풀어야 컴퓨터 E
+	## 상호작용(메일함 열기)과 이동이 막히지 않는다 - 대신 _accomplice_awaiting_mail_read/
+	## _accomplice_awaiting_door_open이 문 워프만 따로 막는다(둘 다
+	## _play_accomplice_mail_wait_beat() 안에서 관리).
+	_murder_scene_active = false
+	await _play_accomplice_mail_wait_beat()
+	_murder_scene_active = true
+	await _fade_out()
+	await _fade_in()
+	await _play_npc_beat(USHER_NPC_ID, ACCOMPLICE_MOVE_IN_KEY)
+	await _play_narration_beat(ACCOMPLICE_ENDING_ID, "closing_narration")
+	_murder_scene_active = false
+	MurderManager.mark_accomplice_sequence_completed()
+
+
+## 게임을 새로 켤 때(_ready()에서 호출) - 공범 엔딩은 확정됐는데 마무리 컷신을
+## 끝까지 못 봤으면(중간에 게임을 껐으면) 이어서 보여준다.
+func _maybe_resume_accomplice_ending() -> void:
+	if MurderManager.get_achieved_ending() != "accomplice":
+		return
+	if MurderManager.is_accomplice_sequence_completed():
+		return
+	_murder_scene_active = true
+	_close_all_screens()
+	await _play_accomplice_home_arrival_sequence()
+
+
+## 플레이어가 home_interior에서 눈을 뜬 채로, 스토커 메일을 실제로 열어
+## 읽을 때까지 집 밖으로 나갈 수 없다(사용자 지시, 2026-08-24). stalker_mail
+## 내용이 아직 없으면(TODO) 조용히 건너뛴다 - 이때는 잠금 자체도 안 건다.
+## 순서(사용자 지시, 2026-08-24): 메일 도착 → 플레이어가 직접 열람할 때까지
+## 대기(집 밖 워프만 막힘, 컴퓨터 상호작용은 허용) → 열람 즉시 메일 창을
+## ACCOMPLICE_MAIL_FORCE_READ_SECONDS 동안 강제로 붙잡아둠(직접 못 닫음) →
+## 시간 다 되면 강제로 닫힘 → 노크 소리 → 문 앞에서 E를 눌러야 다음 단계로.
+func _play_accomplice_mail_wait_beat() -> void:
+	var mail: Dictionary = MurderManager.get_ending_mail(ACCOMPLICE_ENDING_ID, "stalker_mail")
+	var lines: Array = mail.get("lines", [])
+	if lines.is_empty():
+		return
+	_accomplice_awaiting_mail_read = true
+	var mail_id := EmailManager.send_stalker_mail(String(mail.get("title", "")), lines)
+	AudioManager.play_sfx(AudioManager.SFX_STALKER_MAIL)
+	if mail_id >= 0:
+		while not EmailManager.is_mail_read(mail_id):
+			await EmailManager.inbox_updated
+		if computer_screen != null:
+			computer_screen.set_interaction_locked(true)
+			await get_tree().create_timer(ACCOMPLICE_MAIL_FORCE_READ_SECONDS).timeout
+			computer_screen.force_close()
+	_accomplice_awaiting_mail_read = false
+	await AudioManager.play_knock_sequence()
+	_accomplice_awaiting_door_open = true
+	await accomplice_door_answered
+
+
+## 화자 없는 나레이션 한 토막 - 내용이 없으면(TODO 등) 조용히 건너뛴다.
+func _play_narration_beat(ending_id: String, section: String) -> void:
+	var lines: Array = MurderManager.get_ending_narration(ending_id, section)
+	if lines.is_empty() or dialogue_screen == null:
+		return
+	dialogue_screen.open_special("", lines.duplicate())
+	await dialogue_screen.closed
+
+
+## 체포 엔딩 전용 - endings.json의 {spared_name}은 dialogue_screen.gd가 자동
+## 치환해주는 {player_name}/{victim_name}과 달리 여기서 직접 채워야 한다
+## (spared_npc_id는 그때그때 다른 NPC라 범용 치환 목록에 넣기보다 이 한
+## 곳에서만 처리).
+func _play_arrest_closing_narration(spared_npc_id: String) -> void:
+	var lines: Array = MurderManager.get_ending_narration(ARREST_ENDING_ID, "closing_narration")
+	if lines.is_empty() or dialogue_screen == null:
+		return
+	var spared_name := String(NPCManager.get_definition(spared_npc_id).get("name", ""))
+	var substituted: Array = []
+	for line in lines:
+		if line is Dictionary:
+			var entry: Dictionary = (line as Dictionary).duplicate()
+			entry["text"] = String(entry.get("text", "")).replace("{spared_name}", spared_name)
+			substituted.append(entry)
+		else:
+			substituted.append(String(line).replace("{spared_name}", spared_name))
+	dialogue_screen.open_special("", substituted)
+	await dialogue_screen.closed
+
+
+## npc.json의 story_dialogue[key] 배열을 초상화 있는 대사로 보여준다.
+func _play_npc_beat(npc_id: String, story_dialogue_key: String) -> void:
+	var lines: Array = (NPCManager.get_definition(npc_id).get("story_dialogue", {}).get(story_dialogue_key, []) as Array).duplicate()
+	if lines.is_empty() or dialogue_screen == null:
+		return
+	dialogue_screen.open_special(npc_id, lines)
+	await dialogue_screen.closed
+
+
+## heart_event_30(호감도 30 최초 이벤트, 사용자 지시 2026-08-24 - "스듀식"
+## 컷신) - 맵 진입 시점마다 조건을 만족하는 NPC가 있는지 검사해서 자동으로
+## 튼다. 한 번에 하나만 트리거하고, 나머지는 다음 맵 진입 때 다시 검사한다.
+## 다른 컷신(엔딩/공범 대기) 도중엔 끼어들지 않는다.
+func _maybe_trigger_heart_event(map_id: String) -> void:
+	if _murder_scene_active or _heart_event_active \
+			or _accomplice_awaiting_mail_read or _accomplice_awaiting_door_open:
+		return
+	for npc_id in NPCManager.get_all_ids():
+		if not NPCManager.is_alive(npc_id):
+			continue
+		var event: Dictionary = NPCManager.get_heart_event_30(npc_id)
+		if event.is_empty() or NPCManager.has_shown_heart_event(npc_id):
+			continue
+		if NPCManager.get_affection(npc_id) < HEART_EVENT_AFFECTION_THRESHOLD:
+			continue
+		var anchor_state := String(event.get("anchor_state", ""))
+		# anchor_state가 "지금 이 시간대엔 이 NPC가 정말 활동 중"이라는 대용
+		# 조건 역할도 겸한다 - 로시(비 오는 날만)/마린(평일 저녁대만)처럼 항상
+		# 뜨진 않는 NPC도 자연스럽게 그 시간까지 기다리게 된다.
+		if anchor_state.is_empty() or NPCManager.get_current_schedule_state(npc_id) != anchor_state:
+			continue
+		var anchor_pos: Dictionary = NPCManager.resolve_state_position(anchor_state)
+		if String(anchor_pos.get("map_id", "")) != map_id:
+			continue
+		await _play_heart_event(npc_id, event)
+		return
+
+
+## heart_event_30 재생 - npc_spawn/player_spawn은 사용자가 직접 tmx에 찍어둔
+## 스폰이라(2026-08-24 사용자 지시), 아직 안 찍혀있으면 아무 것도 안 하고
+## 조용히 넘어간다(다음에 다시 조건을 만족하면 재시도). scene_map_id가
+## anchor_state의 실제 위치와 다르면(벨제/플로라의 "같이 나가자" 연출)
+## lead_out_lines를 먼저 보여준 뒤 _load_map()으로 이동한다(페이드 아웃/인은
+## _load_map()이 대신 해준다). 시작/종료 페이드는 사용자 지시(2026-08-24).
+func _play_heart_event(npc_id: String, event: Dictionary) -> void:
+	if world_map == null or player == null:
+		return
+	var anchor_state := String(event.get("anchor_state", ""))
+	var anchor_pos: Dictionary = NPCManager.resolve_state_position(anchor_state)
+	var anchor_map_id := String(anchor_pos.get("map_id", ""))
+	var scene_map_id := String(event.get("scene_map_id", ""))
+	if scene_map_id.is_empty():
+		scene_map_id = anchor_map_id
+	var relocating := scene_map_id != anchor_map_id
+	var npc_spawn_name := String(event.get("npc_spawn", ""))
+	var player_spawn_name := String(event.get("player_spawn", ""))
+	var npc_spawn_position := Vector2.INF
+	if relocating:
+		var dest_path := WorldMap.get_map_path(scene_map_id)
+		if dest_path.is_empty():
+			return
+		var dest_spawns: Dictionary = WorldMap.parse_spawns(dest_path)
+		if not dest_spawns.has(npc_spawn_name) or not dest_spawns.has(player_spawn_name):
+			return
+	else:
+		npc_spawn_position = world_map.get_spawn_position(npc_spawn_name)
+		if npc_spawn_position == Vector2.INF or world_map.get_spawn_position(player_spawn_name) == Vector2.INF:
+			return
+	_heart_event_active = true
+	if relocating:
+		var lead_out_lines: Array = (event.get("lead_out_lines", []) as Array).duplicate(true)
+		if not lead_out_lines.is_empty() and dialogue_screen != null:
+			dialogue_screen.open_special(npc_id, lead_out_lines)
+			await dialogue_screen.closed
+		if npc_world_manager != null:
+			npc_world_manager.set_npc_sprite_hidden(npc_id, true)
+		await _fade_out()
+		await _load_map(scene_map_id, player_spawn_name, true)
+		npc_spawn_position = world_map.get_spawn_position(npc_spawn_name)
+	else:
+		await _fade_out()
+		player.position = world_map.get_spawn_position(player_spawn_name)
+		if npc_world_manager != null:
+			npc_world_manager.set_npc_sprite_hidden(npc_id, true)
+	var decoy: Node2D = null
+	if npc_spawn_position != Vector2.INF:
+		decoy = _spawn_npc_decoy(npc_id, npc_spawn_position)
+	await _fade_in()
+	await _play_heart_event_dialogue(npc_id, event)
+	await _fade_out()
+	if decoy != null:
+		decoy.queue_free()
+	if npc_world_manager != null:
+		npc_world_manager.set_npc_sprite_hidden(npc_id, false)
+	await _fade_in()
+	_heart_event_active = false
+
+
+## emote(세이지의 말풍선 등)가 있으면 대사창을 열기 전에 잠깐 먼저 보여준다.
+func _play_heart_event_dialogue(npc_id: String, event: Dictionary) -> void:
+	var emote := String(event.get("emote", ""))
+	if not emote.is_empty():
+		NPCManager.request_emote(npc_id, emote)
+		await get_tree().create_timer(0.6).timeout
+	var lines: Array = (event.get("lines", []) as Array).duplicate(true)
+	if dialogue_screen != null and not lines.is_empty():
+		dialogue_screen.open_special(npc_id, lines)
+		await dialogue_screen.closed
+	NPCManager.mark_heart_event_shown(npc_id)
 
 
 func _set_all_npc_sprites_hidden(hidden: bool) -> void:
@@ -736,7 +1128,13 @@ func _process(delta: float) -> void:
 			player.show_interaction_prompt(npc_prompt)
 		return
 	_handle_npc_encounter("")
+	## 기절해서 병원으로 실려간 경우(_play_collapse_transition, 워프 타일 체크를
+	## 안 거치고 _load_map을 직접 부름) 대비 - 집에 있을 때만 잠그면, 병원에
+	## 옮겨진 순간 자동으로 풀려서 병원 밖으로 못 나가는 소프트락을 피한다
+	## (사용자 지적, 2026-08-24 - "기절해도 병원 안가? 워프차단하면").
 	if _murder_scene_active:
+		return
+	if _accomplice_awaiting_mail_read and GameManager.current_map_id == ACCOMPLICE_MAIL_MAP_ID:
 		return
 	var warp: Dictionary = world_map.get_warp_at(player.position)
 	if not warp.is_empty():
@@ -892,6 +1290,8 @@ func _farm_action_prompt(action: String) -> String:
 			return "E 씨앗 심기"
 		"harvest":
 			return "E 수확"
+		"untill":
+			return "E 갈아엎기"
 		_:
 			return ""
 
@@ -973,6 +1373,12 @@ func _is_any_modal_open() -> bool:
 
 ## _is_any_modal_open()과 같지만 kitchen_screen은 제외한다 - 위 함수 주석 참고.
 func _should_pause_time() -> bool:
+	## 공범 엔딩(사용자 지시, 2026-08-24 - "시간도 안 흐르고 집 밖으로 못
+	## 나가게 하는 게 좋을 거 같은데") - 메일 대기/문 앞 대기 구간 내내 시간을
+	## 멈춘다. 취침 강제(TimeManager.player_collapsed)가 이 구간에 끼어들
+	## 여지 자체를 없앤다.
+	if _accomplice_awaiting_mail_read or _accomplice_awaiting_door_open:
+		return true
 	if kitchen_screen != null and kitchen_screen.visible:
 		return false
 	return _is_any_modal_open()
@@ -1363,6 +1769,7 @@ func _load_map(map_id: String, spawn_name: String, skip_fade: bool = false) -> v
 		if dialogue_screen != null:
 			dialogue_screen.open_special("", KNOCK_CHECK_RESULT_MONOLOGUE.duplicate())
 	_is_transitioning = false
+	_maybe_trigger_heart_event(map_id)
 
 
 func _fade_out() -> void:
@@ -1424,7 +1831,7 @@ func _on_interact_pressed() -> void:
 	# 처리한다(대화 넘기기 등) - 여기서 또 월드 상호작용(계산대/조리대 등)까지
 	# 같이 처리하면, NPC가 자기 근무지 바로 옆에 서 있을 때 대화 넘기려고 누른
 	# E가 계산대까지 같이 눌러버리는 문제가 생긴다.
-	if _is_any_modal_open() or _murder_scene_active:
+	if _is_any_modal_open() or _murder_scene_active or _heart_event_active:
 		return
 	if _second_murder_sack_awaiting_interaction and _second_murder_sack_node != null \
 			and player.position.distance_to(_second_murder_sack_position) <= SECOND_MURDER_SACK_INTERACT_RADIUS:
@@ -1446,6 +1853,16 @@ func _on_interact_pressed() -> void:
 		return
 	var warp: Dictionary = world_map.get_warp_at(player.position)
 	if not warp.is_empty() and _is_building_transition(warp):
+		# 공범 엔딩(사용자 지시, 2026-08-24): 노크 소리가 끝난 뒤 문 앞에서 E를
+		# 누르면 평소처럼 밖으로 나가는 대신 어셔를 맞이하는 컷신으로 이어진다.
+		if _accomplice_awaiting_door_open and GameManager.current_map_id == ACCOMPLICE_MAIL_MAP_ID:
+			_accomplice_awaiting_door_open = false
+			accomplice_door_answered.emit()
+			return
+		# 공범 엔딩: 스토커 메일을 확인할 때까지 집 밖으로 나갈 수 없다.
+		if _accomplice_awaiting_mail_read and GameManager.current_map_id == ACCOMPLICE_MAIL_MAP_ID:
+			_show_temporary_message(ACCOMPLICE_CANNOT_LEAVE_MESSAGE)
+			return
 		# restaurant.md: "영업 중엔 레스토랑을 벗어날 수 없다 - 외출하려면 먼저
 		# 영업을 종료해야 한다." RestaurantManager.can_player_leave()는 이미
 		# 있었는데 아무도 호출을 안 해서 실제로는 막히지 않고 있었다.
@@ -1543,6 +1960,16 @@ func _on_interact_pressed() -> void:
 			FarmingManager.perform_plant(farm_position)
 		"harvest":
 			_show_temporary_message(FarmingManager.perform_harvest(farm_position))
+		"untill":
+			# "till"과 같은 이유로 포즈 재생 후 맨땅으로 되돌린다(사용자 지시,
+			# 2026-08-24).
+			if _farm_action_active:
+				return
+			_farm_action_active = true
+			player.tool_overlay.start("hoe", TOOL_USE_HOLD_SECONDS)
+			await get_tree().create_timer(TOOL_USE_HOLD_SECONDS).timeout
+			FarmingManager.perform_untill(farm_position)
+			_farm_action_active = false
 
 
 func _nearest_talkable_npc(position: Vector2) -> Dictionary:
