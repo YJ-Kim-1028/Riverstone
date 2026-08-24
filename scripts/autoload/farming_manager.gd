@@ -84,6 +84,12 @@ func get_available_action(world_position: Vector2) -> String:
 		return "water"
 	if _seed_to_crop.has(equipped) and String(plot.get("crop_type", "")).is_empty():
 		return "plant"
+	## 이미 갈아둔 빈 땅(작물 없음)에 괭이를 다시 쓰면 맨땅으로 되돌린다(사용자
+	## 지시, 2026-08-24 - "괭이질 한번 더 하면 맨땅으로 돌아가게 해줘"). 작물이
+	## 심어져 있으면(crop_type 비어있지 않음) 여기 안 걸리므로 실수로 작물을
+	## 갈아엎을 일은 없다.
+	if equipped == "hoe" and String(plot.get("crop_type", "")).is_empty():
+		return "untill"
 	return ""
 
 
@@ -105,6 +111,18 @@ func perform_till(world_position: Vector2) -> String:
 	_spawn_plot_sprites(cell)
 	AudioManager.play_sfx(AudioManager.SFX_DIGGING)
 	# 마른/젖은 흙 그림이 바로 보이니 별도 문구 없이 조용히 처리한다(사용자 지시).
+	return ""
+
+
+## get_available_action()이 "untill"을 돌려줄 때만(이미 갈아둔 빈 땅 + 괭이
+## 장착) 호출된다 - perform_till()과 반대 방향, 맨땅으로 되돌린다.
+func perform_untill(world_position: Vector2) -> String:
+	if get_available_action(world_position) != "untill":
+		return ""
+	var cell := _world_to_cell(world_position)
+	_despawn_plot_sprites(cell)
+	_plots.erase(cell)
+	AudioManager.play_sfx(AudioManager.SFX_DIGGING)
 	return ""
 
 
