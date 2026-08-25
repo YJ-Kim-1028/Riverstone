@@ -120,10 +120,15 @@ func _ready() -> void:
 
 
 ## 이 NPC가 지금 화면(현재 맵)에 없으면 조용히 무시한다 - 안 보이는 반응은
-## 큐잉하지 않는다(NPCManager.npc_emote_requested 참고).
-func _on_npc_emote_requested(npc_id: String, emote_id: String) -> void:
+## 큐잉하지 않는다(NPCManager.npc_emote_requested 참고). duration이 0
+## 이하면 NPCSprite.show_emote()의 기본 인자를 그대로 쓰게 생략한다.
+func _on_npc_emote_requested(npc_id: String, emote_id: String, duration: float) -> void:
 	var sprite: Node2D = _active_sprites.get(npc_id)
-	if sprite != null:
+	if sprite == null:
+		return
+	if duration > 0.0:
+		sprite.call("show_emote", emote_id, duration)
+	else:
 		sprite.call("show_emote", emote_id)
 
 
@@ -834,6 +839,41 @@ func set_npc_sprite_hidden(npc_id: String, hidden: bool) -> void:
 	var sprite: Node2D = _active_sprites.get(npc_id)
 	if sprite != null:
 		sprite.visible = not hidden
+
+
+## 호감도 100(추억의 물건) 컷신 전용(main.gd) - 지금 이 맵에서 실제로 보이는
+## 그 NPC의 좌표. 화면에 없으면(다른 맵에 있거나 이동 중이면) Vector2.INF -
+## 호출부가 이걸로 "지금 근처에 있는지" 자체를 판정한다.
+func get_active_npc_position(npc_id: String) -> Vector2:
+	var sprite: Node2D = _active_sprites.get(npc_id)
+	return sprite.position if sprite != null else Vector2.INF
+
+
+## 호감도 100(추억의 물건) 컷신 전용(main.gd) - NPC를 실시간 좌표(target)로
+## 걸어가게 하고 도착할 때까지 기다린다. 스케줄 엔진(_reconcile_tick)은
+## TimeManager.minute_passed에서만 도는데, 이 컷신 내내 TimeManager가 멈춰
+## 있어서(main.gd의 _memento_event_active가 _is_any_modal_open()에 걸림)
+## 도중에 스케줄 이동이 끼어들 걱정 없이 스케줄 전용이던 _start_same_map_walk()을
+## 그대로 재사용해도 안전하다. 경로를 못 찾으면 그 안에서 즉시 snap_to()로
+## 처리되므로(is_walking()이 계속 false) 바로 반환된다.
+const NPC_WALK_TIMEOUT_SECONDS := 5.0
+
+
+func walk_npc_to_position(npc_id: String, target: Vector2) -> void:
+	if not _active_sprites.has(npc_id):
+		return
+	var sprite: Node2D = _active_sprites[npc_id]
+	# 이 함수를 부르는 시점(main.gd의 호감도 100 컷신)엔 이미 TimeManager가
+	# 멈춰 있다 - NPCSprite._process()가 평소엔 시간 정지 중 걷기를 멈추지만
+	# (스케줄 이동이 컷신 중에 배경에서 계속 걷는 걸 막는 용도), 이 걸음은
+	# 그 컷신 자체가 시킨 걸음이라 예외로 둬야 한다(사용자 리포트, 2026-08-26).
+	sprite.call("set_ignore_time_pause", true)
+	_start_same_map_walk(npc_id, target)
+	var elapsed := 0.0
+	while bool(sprite.call("is_walking")) and elapsed < NPC_WALK_TIMEOUT_SECONDS:
+		await get_tree().physics_frame
+		elapsed += get_physics_process_delta_time()
+	sprite.call("set_ignore_time_pause", false)
 
 
 ## Avoids typing the instance as the NPCSprite class_name on purpose: that

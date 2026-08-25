@@ -9,7 +9,7 @@ extends Control
 
 signal closed
 
-enum View { INBOX_LIST, SENT_LIST, INVITE_HISTORY, DETAIL, COMPOSE }
+enum View { INBOX_LIST, SENT_LIST, INVITE_HISTORY, REQUEST_LIST, DETAIL, COMPOSE }
 
 const BUTTON_TEXTURE := preload("res://assets/ui/btn_computer.png")
 
@@ -20,6 +20,7 @@ const BUTTON_TEXTURE := preload("res://assets/ui/btn_computer.png")
 @onready var _inbox_button: Button = $ScaledContent/Margin/HBox/Sidebar/NavVBox/InboxButton
 @onready var _sent_button: Button = $ScaledContent/Margin/HBox/Sidebar/NavVBox/SentButton
 @onready var _invite_history_button: Button = $ScaledContent/Margin/HBox/Sidebar/NavVBox/InviteHistoryButton
+@onready var _request_button: Button = $ScaledContent/Margin/HBox/Sidebar/NavVBox/RequestButton
 @onready var _compose_button: Button = $ScaledContent/Margin/HBox/Sidebar/NavVBox/ComposeButton
 @onready var _compose_vbox: Control = $ScaledContent/Margin/HBox/Sidebar/ComposeVBox
 @onready var _compose_send_button: Button = $ScaledContent/Margin/HBox/Sidebar/ComposeVBox/SendButton
@@ -41,6 +42,7 @@ func _ready() -> void:
 	_inbox_button.pressed.connect(func() -> void: _show_list(View.INBOX_LIST))
 	_sent_button.pressed.connect(func() -> void: _show_list(View.SENT_LIST))
 	_invite_history_button.pressed.connect(func() -> void: _show_list(View.INVITE_HISTORY))
+	_request_button.pressed.connect(func() -> void: _show_list(View.REQUEST_LIST))
 	_compose_button.pressed.connect(_show_compose)
 	_compose_send_button.pressed.connect(func() -> void: _compose_panel.send())
 	_compose_panel.send_succeeded.connect(func(is_invite: bool) -> void:
@@ -48,8 +50,10 @@ func _ready() -> void:
 	_compose_panel.info_requested.connect(func(message: String) -> void: _show_info_popup(message))
 	_info_ok_button.pressed.connect(_on_info_popup_ok_pressed)
 	_list_panel.row_selected.connect(_on_row_selected)
+	_list_panel.request_selected.connect(_on_request_row_selected)
+	_detail_panel.claim_pressed.connect(_on_claim_pressed)
 	_set_active(_info_popup, false)
-	for button in [_inbox_button, _sent_button, _invite_history_button, _compose_button, _compose_send_button]:
+	for button in [_inbox_button, _sent_button, _invite_history_button, _request_button, _compose_button, _compose_send_button]:
 		(button as Button).add_theme_stylebox_override("normal", _build_button_style())
 		(button as Button).add_theme_stylebox_override("hover", _build_button_style())
 		(button as Button).add_theme_stylebox_override("pressed", _build_button_style())
@@ -115,6 +119,8 @@ func _show_list(view: View) -> void:
 			_list_panel.display(EmailManager.get_sent_mail(), true)
 		View.INVITE_HISTORY:
 			_list_panel.display_invite_history(EmailManager.get_invite_history())
+		View.REQUEST_LIST:
+			_list_panel.display_requests(EmailManager.get_active_requests())
 		_:
 			pass
 
@@ -155,6 +161,34 @@ func _on_row_selected(email_id: int) -> void:
 		_detail_panel.show_email(entry, is_sent)
 		_update_portrait(String(entry.get("npc_id", "")))
 		return
+
+
+## 요청함 항목 클릭(사용자 지시, 2026-08-25) - _on_row_selected()와 같은 레이아웃
+## 전환이지만 id가 문자열이라 별도 신호/조회 경로를 쓴다.
+func _on_request_row_selected(request_id: String) -> void:
+	for entry in EmailManager.get_active_requests():
+		if String(entry.get("id", "")) != request_id:
+			continue
+		EmailManager.mark_request_read(request_id)
+		_set_active(_info_popup, false)
+		_set_active(_sidebar_background, false)
+		_set_active(_nav_vbox, false)
+		_set_active(_compose_vbox, false)
+		_set_active(_portrait_box, true)
+		_set_active(_back_button, true)
+		_set_active(_list_panel, false)
+		_set_active(_detail_panel, true)
+		_set_active(_compose_panel, false)
+		_detail_panel.show_request(entry, EmailManager.is_request_objective_met(request_id))
+		_update_portrait(String(entry.get("npc_id", "")))
+		return
+
+
+## 완료 버튼(사용자 지시) - 성공하면 보상 지급 안내 후 요청함으로 돌아간다.
+## 실패(목표 미달성 등)는 버튼이 애초에 비활성화돼 있어 정상 경로로는 안 일어남.
+func _on_claim_pressed(request_id: String) -> void:
+	if EmailManager.claim_request(request_id):
+		_show_info_popup("보상을 받았다.", func() -> void: _show_list(View.REQUEST_LIST))
 
 
 ## 자세히보기에서 사이드바 자리(원래 수신함/발신함 버튼이 있던 곳)에 발신인

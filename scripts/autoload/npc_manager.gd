@@ -12,12 +12,25 @@ signal memento_received(npc_id: String)
 ## memento_received와 같은 구조, item_id만 이벤트 데이터에서 그대로 넘긴다.
 signal npc_gift_item_triggered(npc_id: String, item_id: String)
 signal npc_died(npc_id: String)
+## 도감 완성 보상(제단 부활, 사용자 지시 2026-08-25) 전용 - revive_npc() 참고.
+signal npc_revived(npc_id: String)
 signal murder_candidate_registered(npc_id: String)
 signal gift_given(npc_id: String)
 ## NPC 머리 위 이모지 반응(백로그 스펙 확정, 이번에 구현) - npc_world_manager.gd가
 ## 듣고 있다가 그 NPC가 지금 화면에 보이면 NPCSprite.show_emote()를 호출한다.
 ## 화면에 없으면 조용히 무시된다(큐잉 안 함 - 안 보이는 반응은 의미 없음).
-signal npc_emote_requested(npc_id: String, emote_id: String)
+## duration이 0 이하면 NPCSprite의 기본 지속시간을 그대로 쓴다 - 호감도 100
+## 컷신(사용자 지시, 2026-08-25 - "이모지 오래 보여주기")처럼 평소보다 오래
+## 띄우고 싶을 때만 명시적으로 넘긴다.
+signal npc_emote_requested(npc_id: String, emote_id: String, duration: float)
+## 추억의 물건(memento) 마일스톤이 대기 큐에 들어간 채로 며칠째 소비가 안 되는
+## NPC용 안전장치(사용자 지시, 2026-08-25 - "선물만 주다 120까지 가버리면
+## 대사를 아예 못 받고 지나칠 수 있잖아... 메일이라도 보내야되나"). 대화를
+## 통해서만 소비되는 마일스톤 구조상, 대화 없이 선물/식사/메일로만 호감도를
+## 올리면 이론상 놓칠 수 있어 추가함. email_manager.gd가 듣고 있다가 그
+## NPC의 emails.memento_reminder를 메일함에 꽂는다. 딱 한 번만 보낸다 - 그래도
+## 안 가면(사용자 지시) 그건 플레이어의 선택으로 취급하고 재촉하지 않는다.
+signal memento_reminder_ready(npc_id: String, title: String, lines: Array)
 
 enum FoodPreference { NEUTRAL, FAVORITE, DISLIKED }
 
@@ -27,6 +40,10 @@ const MIN_AFFECTION := 0
 const MAX_AFFECTION := 150
 const MEMENTO_AFFECTION := 100
 const MURDER_CANDIDATE_AFFECTION := 120
+## 추억의 물건 마일스톤이 며칠째 대기 상태면 알림 메일을 보낼지(사용자 지시,
+## 2026-08-25) - 2차 살인 알리바이 재촉 메일(murder_manager.gd)과 같은 3일
+## 기준으로 맞춘다.
+const MEMENTO_REMINDER_DELAY_DAYS := 3
 
 const AFFECTION_TIER_MID := 50
 const AFFECTION_TIER_HIGH := 100
@@ -37,6 +54,9 @@ const AFFECTION_GAIN_MEAL := 1
 const AFFECTION_GAIN_FAVORITE_MEAL := 5
 const AFFECTION_LOSS_DISLIKED_MEAL := -5
 const AFFECTION_GAIN_EMAIL := 3
+## 요청함 완료 보상(사용자 지시, 2026-08-25 - "퀘스트 완료하면... 호감도 3정도
+## 오르는게 좋지않을까") - 선물/메일 보낼 때와 같은 값으로 통일.
+const AFFECTION_GAIN_REQUEST_COMPLETE := 3
 
 ## 이모지 스펙(2026-08-06 브레인스토밍, 2026-08-07 아트 반영) 8종 중 트리거가
 ## 확정된 5종만 여기서 문자열 상수로 노출한다 - 물음표/불편/부끄는 아직 배정된
@@ -88,6 +108,13 @@ var _shown_events: Dictionary = {}
 ## 나중 것이 먼저 것을 덮어써서 하나가 통째로 씹혔음 - 배열 대기열로 바꿔서
 ## 넘은 순서 그대로 하나씩 소비되게 함.
 var _pending_milestone: Dictionary = {}
+## npc_id -> 추억의 물건 마일스톤이 큐에 들어간 날(TimeManager.current_day) -
+## MEMENTO_REMINDER_DELAY_DAYS 경과 판정용. consume_pending_milestone()에서
+## 지워진다.
+var _memento_pending_since_day: Dictionary = {}
+## npc_id -> bool - 추억의 물건 알림 메일을 이미 보냈는지(중복 발송 방지, 딱
+## 한 번만).
+var _memento_reminder_sent: Dictionary = {}
 var _murder_candidate_flagged: Dictionary = {}
 ## npc_id -> bool - PARTNER_DEATH_PAIRS 참고, get_daily_dialogue()가 채운다.
 var _partner_death_reaction_shown: Dictionary = {}
@@ -189,10 +216,11 @@ func give_gift(npc_id: String, amount: int = AFFECTION_GAIN_GIFT, scent_color: S
 
 ## 이 NPC가 지금 화면에 보이면 npc_world_manager.gd가 머리 위에 emote_id
 ## 아이콘을 잠깐 띄운다. 알 수 없는 emote_id는 조용히 무시한다(오타 방지).
-func request_emote(npc_id: String, emote_id: String) -> void:
+## duration_override는 0 이하면 무시(기본 지속시간 사용).
+func request_emote(npc_id: String, emote_id: String, duration_override: float = 0.0) -> void:
 	if not EMOTE_COLUMN_INDEX.has(emote_id):
 		return
-	npc_emote_requested.emit(npc_id, emote_id)
+	npc_emote_requested.emit(npc_id, emote_id, duration_override)
 
 
 ## CookingManager.get_recipe_icon_texture()와 동일한 슬라이싱 방식 - 시트가
@@ -252,6 +280,8 @@ func feed_with_preference(npc_id: String, preference: FoodPreference) -> void:
 			request_emote(npc_id, EMOTE_HEART)
 		FoodPreference.DISLIKED:
 			_add_affection(npc_id, AFFECTION_LOSS_DISLIKED_MEAL)
+			# 곤란함: 비선호 음식 서빙받았을 때(사용자 지시, 2026-08-25).
+			request_emote(npc_id, EMOTE_UNCOMFORTABLE)
 		_:
 			_add_affection(npc_id, AFFECTION_GAIN_MEAL)
 
@@ -265,6 +295,13 @@ func send_email(npc_id: String) -> void:
 func apply_dialogue_choice(npc_id: String, affection_delta: int) -> void:
 	if affection_delta != 0:
 		_add_affection(npc_id, affection_delta)
+
+
+## email_manager.gd의 claim_request()가 요청 완료 보상을 지급할 때 호출 -
+## 부탁을 들어준 셈이니 호감도가 조금 오른다(사용자 지시, 2026-08-25).
+func add_request_completion_affection(npc_id: String) -> void:
+	if is_alive(npc_id):
+		_add_affection(npc_id, AFFECTION_GAIN_REQUEST_COMPLETE)
 
 
 ## npc.md's own table caps this at "1명만 살해당한 경우" (candidates 1-2 only),
@@ -285,6 +322,31 @@ func kill_npc(npc_id: String) -> void:
 	_dead_npc_ids.append(npc_id)
 	_death_days[npc_id] = TimeManager.current_day
 	npc_died.emit(npc_id)
+
+
+## RevivalManager/main.gd의 제단 부활 컷신이 호출 - "관계가 완전히 처음부터
+## 다시 시작"되도록(사용자 지시, 2026-08-25) 사망 이전의 관계 진행 상태를
+## 전부 초기화한다. 이미 받은 추억의 물건 자체(CollectionManager 도감 기록)는
+## 건드리지 않는다 - 죽기 전 정당하게 받은 것이므로 영구 보존, 여기서는
+## "다시 100을 찍으면 또 받을 수 있는 상태"로 재무장할 뿐이다.
+func revive_npc(npc_id: String) -> void:
+	if is_alive(npc_id):
+		return
+	_alive[npc_id] = true
+	_dead_npc_ids.erase(npc_id)
+	_death_days.erase(npc_id)
+	## _add_affection()은 is_alive()가 false면 조용히 무시하므로, 반드시
+	## 위에서 _alive를 먼저 true로 바꾼 뒤에 호출해야 한다.
+	_add_affection(npc_id, 0 - get_affection(npc_id))
+	_completed_events[npc_id] = []
+	_shown_events[npc_id] = []
+	_pending_milestone[npc_id] = []
+	_shown_heart_events[npc_id] = false
+	_murder_candidate_flagged[npc_id] = false
+	_partner_death_reaction_shown[npc_id] = false
+	_memento_pending_since_day.erase(npc_id)
+	_memento_reminder_sent[npc_id] = false
+	npc_revived.emit(npc_id)
 
 
 func has_horror_mode_started() -> bool:
@@ -366,6 +428,22 @@ func get_affection_tier(npc_id: String) -> String:
 ## entry twice in a row when the pool has more than one option.
 const SAGE_NPC_ID := "sage"
 const POLI_NPC_ID := "poli"
+## 세이지 운세 보기(사용자 지시, 2026-08-25 - "세이지 메리트가 너무 없다") -
+## 하루 일상 대사(스토리 대사 제외) 끝에 "봐줄까?" 선택지를 붙인다. 좋은/나쁜
+## 결과는 player.apply_speed_effect()(모카 커피 버프/기절 디버프와 같은
+## 시스템)를 그대로 재사용 - 완전히 새 버프 종류를 만들지 않는다.
+const FORTUNE_GOOD_CHANCE := 0.7
+const FORTUNE_BUFF_PERCENT := 0.20
+## 10%는 체감이 안 된다는 지적(사용자 지시, 2026-08-26) - 기절 디버프(-30%,
+## main.gd COLLAPSE_DEBUFF_PERCENT)보다는 약하지만 확실히 티나는 -20%로.
+const FORTUNE_DEBUFF_PERCENT := -0.20
+## 1게임분=현실 1초(CLAUDE.md)라서, 180게임분이 정확히 "현실 3분"(사용자 지시)과
+## 같다 - 기절 디버프(COLLAPSE_DEBUFF_MINUTES, main.gd)와 같은 환산.
+const FORTUNE_DURATION_MINUTES := 180
+## 오늘 이미 운세를 물어봤는지(수락/거절 상관없이) - TimeManager.current_day와
+## 비교하는 방식이라 day_changed 신호를 따로 구독할 필요가 없다(email_manager.gd의
+## _last_greeting_day와 같은 패턴).
+var _fortune_offered_day := -1
 ## 공범 엔딩(사용자 지시, 2026-08-24) - 어셔가 플레이어와 동거를 시작하면 매일
 ## 밤 자기 서점 대신 집으로 온다. 집 레벨(EconomyManager.house_level)에 따라
 ## home_interior.tmx/_2.tmx/_3.tmx가 통째로 바뀌는 별개 파일이라(사용자 지적,
@@ -410,25 +488,48 @@ func get_daily_dialogue(npc_id: String) -> Array:
 	## get_owned_space_map_id() 참고 - 상점(ShopManager) + 상점 없는 스토리
 	## NPC(STORY_NPC_HOME_MAP) 둘 다 커버. 그래도 못 찾으면(향후 추가 NPC
 	## 누락 등) 위치 조건 자체를 안 걸고 예전처럼 바로 터진다 - 영원히 못
-	## 받는 상태를 막기 위한 안전장치.
+	## 받는 상태를 막기 위한 안전장치. 인벤토리 자리(inventory_ok)도 같은
+	## 이유로 확인한다(사용자 리포트, 2026-08-25) - 자리가 없는데 그냥
+	## 터뜨리면 InventoryManager.add_item()이 조용히 실패하고 이 마일스톤은
+	## 이미 "봤음" 처리라 다시는 못 받아 도감 100% 수집이 영구히 막힘.
+	## requires_alive(다른 NPC를 현재형으로 언급하는 대사)는 앞의 둘과 달리
+	## "영원히 못 풀리는" 조건이라(죽은 NPC는 되살아나지 않음) 막고 대기시키면
+	## 뒤에 대기 중인 다른 마일스톤(추억의 물건 포함)까지 영영 막힌다 - 그래서
+	## while로 돌면서 조용히 건너뛴다(대사 없이 consume만, 화면엔 아무 것도 안
+	## 보여줌).
 	var pending_queue: Array = _pending_milestone.get(npc_id, [])
-	if not pending_queue.is_empty():
+	while not pending_queue.is_empty():
 		var pending: Dictionary = pending_queue[0]
+		var requires_alive_npc := String(pending.get("requires_alive", ""))
+		if not requires_alive_npc.is_empty() and not is_alive(requires_alive_npc):
+			consume_pending_milestone(npc_id)
+			pending_queue = _pending_milestone.get(npc_id, [])
+			continue
 		var threshold := int(pending.get("threshold", -1))
 		var is_memento := bool(pending.get("is_memento", false))
 		var owned_space_map := get_owned_space_map_id(npc_id)
 		var location_ok := not is_memento or owned_space_map.is_empty() or GameManager.current_map_id == owned_space_map
-		if location_ok:
+		var inventory_ok := not is_memento or InventoryManager.can_add_item("memento_%s" % npc_id, 1)
+		if location_ok and inventory_ok:
 			var milestone_lines: Array = get_milestone_dialogue(npc_id, threshold)
 			consume_pending_milestone(npc_id)
 			if not milestone_lines.is_empty():
 				return milestone_lines.duplicate()
+		break
 	## 세이지의 스토리 트리거 3종 - 조건이 맞으면 평소 잡담 로테이션을 완전히
 	## 건너뛰고 대체된다. 우선순위(더 구체적이고 드문 사건이 위): 무고한 NPC
 	## 독살(공범 엔딩) > 첫 살인 후 영혼을 보기 시작함 > 살인 대기 중 경고
 	## (하루 1회, horror_events.md). 셋 다 sage.json의 story_dialogue에서
 	## 실제 문구를 가져온다 - 코드에는 조건 판정만 있고 대사는 데이터에 둠.
 	if npc_id == SAGE_NPC_ID:
+		## 영혼의 결정 설명(사용자 지시, 2026-08-25 - "그 아이템을 가진채로
+		## 세이지에게 말을 걸면 딱 한번 대사 이벤트가 뜨게 돼") - 다른 세이지
+		## 전용 트리거들보다 먼저 확인한다. 딱 한 번만 나온다.
+		if InventoryManager.has_item(RevivalManager.SOUL_CRYSTAL_ITEM_ID) and not RevivalManager.has_explained_soul_crystal():
+			var explanation: Array = RevivalManager.get_narration("soul_crystal_explanation")
+			if not explanation.is_empty():
+				RevivalManager.mark_soul_crystal_explained()
+				return explanation.duplicate()
 		if HorrorEventManager.consume_sage_poisoned_innocent_trigger():
 			var lines: Array = get_definition(npc_id).get("story_dialogue", {}).get("player_poisoned_innocent_npc", [])
 			if not lines.is_empty():
@@ -486,6 +587,9 @@ func get_daily_dialogue(npc_id: String) -> Array:
 	## 2026-08-17: "무조건 보게 만들거라").
 	var alibi_line := MurderManager.consume_alibi_line(npc_id)
 	if not alibi_line.is_empty():
+		# 눈물: 살인 사건 스토리 대화(애도/알리바이/목격 진술)일 때(사용자 지시,
+		# 2026-08-25) - 아래 두 분기(폴리 고백/일반 애도) 둘 다 해당.
+		request_emote(npc_id, EMOTE_DEJECTED)
 		## 폴리는 이 "살인 후 첫 재회" 순간, 첫 번째 살인에 한해 일반 알리바이
 		## 대신 "그날 밤 기억이 없다" 고백(poli.json story_dialogue.
 		## first_murder_occurred)으로 완전히 대체한다(사용자 지시, 2026-08-17 -
@@ -536,7 +640,54 @@ func get_daily_dialogue(npc_id: String) -> Array:
 			if not reaction.is_empty():
 				_partner_death_reaction_shown[npc_id] = true
 				return reaction.duplicate()
+	if npc_id == SAGE_NPC_ID:
+		var fortune_lines := _build_fortune_offer_lines()
+		if not fortune_lines.is_empty():
+			picked = picked.duplicate(true)
+			picked.append_array(fortune_lines)
 	return picked
+
+
+## 세이지 전용(호출부에서 이미 SAGE_NPC_ID로 걸러서 부름) - 오늘 이미 물어봤으면
+## 빈 배열(못 보는 날이 있어도 괜찮다는 사용자 지시라 별도 예외 처리 불필요).
+## 물어봤다는 표시는 실제로 이 배열이 오늘의 대사에 붙어 나가는 이 순간
+## 남긴다 - 좋은/나쁜 결과는 여기서 미리 굴려서 대사(fortune.good_lines/
+## bad_lines)와 실제 효과(buff 타입 줄, dialogue_screen.gd가 처리)를 같이 묶는다.
+func _build_fortune_offer_lines() -> Array:
+	if _fortune_offered_day == TimeManager.current_day:
+		return []
+	var fortune: Dictionary = get_definition(SAGE_NPC_ID).get("fortune", {})
+	var offer_line := String(fortune.get("offer_line", ""))
+	if offer_line.is_empty():
+		return []
+	var is_debuff := randf() >= FORTUNE_GOOD_CHANCE
+	var pool: Array = fortune.get("bad_lines" if is_debuff else "good_lines", [])
+	if pool.is_empty():
+		return []
+	_fortune_offered_day = TimeManager.current_day
+	var result_line: String = String(pool[randi() % pool.size()])
+	var percent := FORTUNE_DEBUFF_PERCENT if is_debuff else FORTUNE_BUFF_PERCENT
+	return [
+		offer_line,
+		{
+			"type": "choice",
+			"options": [
+				{
+					"label": String(fortune.get("accept_label", "봐줘")),
+					"affection": 0,
+					"response": [
+						result_line,
+						{"type": "buff", "percent": percent, "duration_minutes": FORTUNE_DURATION_MINUTES, "is_debuff": is_debuff},
+					],
+				},
+				{
+					"label": String(fortune.get("decline_label", "괜찮아")),
+					"affection": 0,
+					"response": (fortune.get("decline_response", []) as Array).duplicate(true),
+				},
+			],
+		},
+	]
 
 
 ## dialogue.mail_reaction 템플릿(문자열 또는 {"text","emotion"} 줄의 배열) 안에
@@ -560,10 +711,43 @@ func _substitute_victim_name(template: Array, victim_name: String) -> Array:
 	for i in result.size():
 		var line: Variant = result[i]
 		if line is Dictionary:
-			line["text"] = String(line.get("text", "")).replace("{victim_name}", victim_name)
+			line["text"] = apply_korean_particles(String(line.get("text", "")), "{victim_name}", victim_name)
 		else:
-			result[i] = String(line).replace("{victim_name}", victim_name)
+			result[i] = apply_korean_particles(String(line), "{victim_name}", victim_name)
 	return result
+
+
+## 데이터(horror_conversation, endings.json, stalker_emails.json 등)에는
+## 항상 받침 있는 조사("{victim_name}이", "{victim_name}은", "{victim_name}을")로
+## 적혀있는데, 실제 피해자 이름에 받침이 없으면("로시", "벨제" 등) 문법이
+## 틀어진다(사용자 리포트, 2026-08-26 - "셰퍼드 뒤지니까 셰퍼드이 라고
+## 뜨네"). 이름의 마지막 글자 받침 유무를 직접 계산해서 이/가, 은/는, 을/를을
+## 알맞게 바꿔친다 - dialogue_screen.gd/horror_event_manager.gd도 같은
+## 함수를 재사용한다(전부 이 오토로드를 통해 호출 가능).
+const KOREAN_PARTICLE_PAIRS := {
+	"이": "가",
+	"은": "는",
+	"을": "를",
+}
+
+
+func apply_korean_particles(text: String, placeholder: String, name: String) -> String:
+	if not name.is_empty():
+		var has_batchim := _has_korean_batchim(name)
+		for with_batchim in KOREAN_PARTICLE_PAIRS:
+			var without_batchim: String = KOREAN_PARTICLE_PAIRS[with_batchim]
+			var particle: String = with_batchim if has_batchim else without_batchim
+			text = text.replace(placeholder + with_batchim, name + particle)
+	return text.replace(placeholder, name)
+
+
+func _has_korean_batchim(text: String) -> bool:
+	if text.is_empty():
+		return false
+	var last_char := text.unicode_at(text.length() - 1)
+	if last_char < 0xAC00 or last_char > 0xD7A3:
+		return false
+	return (last_char - 0xAC00) % 28 != 0
 
 
 func get_weekday_group(weekday: String) -> String:
@@ -898,10 +1082,13 @@ func get_save_data() -> Dictionary:
 			"pending_milestone": (_pending_milestone.get(npc_id, []) as Array).duplicate(true),
 			"shown_events": (_shown_events.get(npc_id, []) as Array).duplicate(),
 			"heart_event_30_shown": has_shown_heart_event(npc_id),
+			"memento_pending_since_day": int(_memento_pending_since_day.get(npc_id, -1)),
+			"memento_reminder_sent": bool(_memento_reminder_sent.get(npc_id, false)),
 		}
 	return {
 		"npc_states": npc_states,
 		"dead_npc_ids": _dead_npc_ids,
+		"fortune_offered_day": _fortune_offered_day,
 	}
 
 
@@ -942,9 +1129,15 @@ func load_save_data(data: Dictionary) -> void:
 			pending_queue.append((pending_raw as Dictionary).duplicate())
 		if not pending_queue.is_empty():
 			_pending_milestone[npc_id] = pending_queue
+		var pending_since := int(state.get("memento_pending_since_day", -1))
+		if pending_since >= 0:
+			_memento_pending_since_day[npc_id] = pending_since
+		if bool(state.get("memento_reminder_sent", false)):
+			_memento_reminder_sent[npc_id] = true
 	_dead_npc_ids.clear()
 	for npc_id in data.get("dead_npc_ids", []):
 		_dead_npc_ids.append(String(npc_id))
+	_fortune_offered_day = int(data.get("fortune_offered_day", -1))
 
 
 ## 디버그 전용(game_manager.gd F8) - 살인 시스템 테스트용으로 호감도를
@@ -1006,8 +1199,18 @@ func _check_affection_events(npc_id: String, affection: int) -> void:
 		completed.append(threshold)
 		_completed_events[npc_id] = completed
 		var queue: Array = _pending_milestone.get(npc_id, [])
-		queue.append({"threshold": threshold, "is_memento": String(event.get("type", "")) == "memento"})
+		queue.append({
+			"threshold": threshold,
+			"is_memento": String(event.get("type", "")) == "memento",
+			## 다른 NPC를 현재형으로 언급하는 대사(예: 이샤가 "오늘 플로라가
+			## 왔어")가 그 NPC 사망 후에도 나오지 않게 - suspicion_talk_2와
+			## 같은 필드명(사용자 지시, 2026-08-25). get_daily_dialogue()가
+			## 소비 시점에 확인한다(대상이 그때 이미 죽어있을 수도 있어서).
+			"requires_alive": String(event.get("requires_alive", "")),
+		})
 		_pending_milestone[npc_id] = queue
+		if String(event.get("type", "")) == "memento" and not _memento_pending_since_day.has(npc_id):
+			_memento_pending_since_day[npc_id] = TimeManager.current_day
 
 
 func has_shown_event(npc_id: String, threshold: int) -> bool:
@@ -1028,6 +1231,25 @@ func mark_heart_event_shown(npc_id: String) -> void:
 	_shown_heart_events[npc_id] = true
 
 
+## 대기 중인 마일스톤이 추억의 물건이고(requires_alive가 있다면 그 조건까지
+## 통과) 지금 당장 보여줄 수 있는 상태면 그 threshold를, 아니면 -1을
+## 반환한다. main.gd의 호감도 100 컷신(사용자 지시, 2026-08-25 - "NPC가 다가와서
+## 시작") 자동 트리거 판정용 - get_daily_dialogue()의 마일스톤 소비 로직과
+## 별개로 E 없이 근접만으로 터지는 경로라 여기서 따로 판정해야 한다. 위치/
+## 인벤토리 조건은 여기서 안 보고 호출부(main.gd)가 직접 확인한다.
+func get_pending_memento_threshold(npc_id: String) -> int:
+	var queue: Array = _pending_milestone.get(npc_id, [])
+	if queue.is_empty():
+		return -1
+	var pending: Dictionary = queue[0]
+	if not bool(pending.get("is_memento", false)):
+		return -1
+	var requires_alive_npc := String(pending.get("requires_alive", ""))
+	if not requires_alive_npc.is_empty() and not is_alive(requires_alive_npc):
+		return -1
+	return int(pending.get("threshold", -1))
+
+
 ## get_daily_dialogue()가 대기 중인 마일스톤 대사를 실제로 보여주기로 결정한
 ## 순간 호출한다 - 그때서야 신호를 내보내고(추억의 물건이면 지급도 그때).
 func consume_pending_milestone(npc_id: String) -> void:
@@ -1046,8 +1268,10 @@ func consume_pending_milestone(npc_id: String) -> void:
 	affection_event_triggered.emit(npc_id, threshold)
 	if bool(pending.get("is_memento", false)):
 		memento_received.emit(npc_id)
-		# 웃음: 추억의 물건 건넬 때.
-		request_emote(npc_id, EMOTE_SMILE)
+		# 하트: 추억의 물건 건넬 때(사용자 지시, 2026-08-25).
+		request_emote(npc_id, EMOTE_HEART)
+		_memento_pending_since_day.erase(npc_id)
+		_memento_reminder_sent.erase(npc_id)
 	_recheck_gated_events()
 
 
@@ -1077,6 +1301,22 @@ func _on_day_changed(_day: int, _weekday: String) -> void:
 			continue
 		if randf() < SELF_SCENT_CHANCE:
 			_active_scent[npc_id] = SELF_SCENT_COLORS[randi() % SELF_SCENT_COLORS.size()]
+	_check_memento_reminders()
+
+
+func _check_memento_reminders() -> void:
+	for npc_id in _memento_pending_since_day.keys():
+		if bool(_memento_reminder_sent.get(npc_id, false)) or not is_alive(npc_id):
+			continue
+		var since_day := int(_memento_pending_since_day[npc_id])
+		if TimeManager.current_day - since_day < MEMENTO_REMINDER_DELAY_DAYS:
+			continue
+		var reminder: Dictionary = get_definition(npc_id).get("emails", {}).get("memento_reminder", {})
+		var lines: Array = reminder.get("lines", [])
+		if lines.is_empty():
+			continue
+		_memento_reminder_sent[npc_id] = true
+		memento_reminder_ready.emit(npc_id, String(reminder.get("title", "")), lines)
 
 
 func _serialize_position(npc_id: String) -> Dictionary:

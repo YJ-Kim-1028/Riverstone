@@ -247,12 +247,12 @@ func _build_slot(entry: Dictionary, is_recipe: bool) -> TextureButton:
 		if not pairs_text.is_empty():
 			tooltip += "\n" + pairs_text
 	slot.set_meta(&"tooltip_text", tooltip)
-	# 추억의 물건은 아직 개별 아이콘이 없어서(사용자 확정) slot_book만 쓰지만,
-	# 레시피는 CookingManager.get_recipe_icon_texture()로 이미 실제 요리
-	# 그림이 있으므로(restaurant_dish_layer.gd 등에서 재사용 중) 획득한 것만
-	# 슬롯 배경 위에 겹쳐 보여준다.
-	if is_recipe and acquired:
-		var icon_texture := CookingManager.get_recipe_icon_texture(String(entry.get("recipe_id", "")))
+	# 레시피는 CookingManager.get_recipe_icon_texture()로, 추억의 물건은
+	# memento.png(사용자가 2026-08-25 13장 직접 그려 등록)로 InventoryManager를
+	# 통해 실제 그림을 얻는다 - 둘 다 획득한 것만 슬롯 배경 위에 겹쳐 보여준다.
+	if acquired:
+		var icon_texture: Texture2D = CookingManager.get_recipe_icon_texture(String(entry.get("recipe_id", ""))) if is_recipe \
+			else InventoryManager.get_item_icon_texture("memento_%s" % String(entry.get("npc_id", "")))
 		if icon_texture != null:
 			var icon := TextureRect.new()
 			icon.texture = icon_texture

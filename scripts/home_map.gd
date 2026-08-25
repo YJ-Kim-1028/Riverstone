@@ -224,6 +224,13 @@ var _tile_map_layers: Dictionary = {}
 ## 되살리는 데 필요한 정보 - cell(Vector2i) -> {source_id, atlas_coords, alt_id}.
 var _tilemap_door_cells: Dictionary = {}
 var _tilemap_door_layer: TileMapLayer = null
+## Door와 같은 방식(칸 지우기/되살리기)이 필요한 다른 레이어들 - 지금은 베리
+## 덤불(BerryBushManager)의 "Grass" 레이어 하나뿐이지만, Door처럼 레이어당
+## 전용 변수를 새로 만드는 대신 범용으로 뒀다(erase_toggleable_cell()/
+## restore_toggleable_cell()/find_toggleable_clusters() 참고). 키는
+## "레이어이름:칸x,칸y" -> {source_id, atlas_coords, alt_id, layer}.
+const TOGGLEABLE_TILE_LAYERS := {"Grass": true}
+var _toggleable_tile_cells: Dictionary = {}
 ## TILE_SET_RESOURCES는 preload라 WorldMap 인스턴스마다 새로 만들어지지 않고
 ## 전부 같은 리소스를 공유한다 - 텍스처->source_id, (좌표+y_sort_origin)->대체
 ## 타일 id 캐시도 인스턴스가 아니라 리소스 자체에 속한 정보라 static으로 공유
@@ -260,6 +267,7 @@ func load_map(next_map_path: String, render: bool = true) -> void:
 	_tile_map_layers.clear()
 	_tilemap_door_cells.clear()
 	_tilemap_door_layer = null
+	_toggleable_tile_cells.clear()
 	_active_tile_set = TILE_SET_RESOURCES.get(_map_id_for_path(next_map_path))
 
 	var parser := XMLParser.new()
@@ -550,6 +558,70 @@ func set_door_open(door_interactable: Dictionary, open: bool) -> void:
 			_blocked_cells.erase(cell)
 		else:
 			_blocked_cells[cell] = true
+
+
+## TOGGLEABLE_TILE_LAYERS 소속 레이어의 한 칸을 지운다(set_door_open()의
+## "닫기"와 동일한 트릭) - BerryBushManager가 베리를 딴 순간 "Grass"(열매 있는
+## 그림) 칸만 지우면, 같은 자리에 이미 그려져 있던 "Grass_empty"(빈 덤불)가
+## 자연히 드러난다(_place_tilemap_cell 주석의 "나중 레이어가 이긴다" 규칙 -
+## Grass가 Grass_empty보다 나중에 로드되는 레이어라 평소엔 위에 그려짐).
+func erase_toggleable_cell(layer_name: String, cell: Vector2i) -> void:
+	var layer: TileMapLayer = _tile_map_layers.get(layer_name)
+	if layer != null:
+		layer.erase_cell(cell)
+
+
+## erase_toggleable_cell()로 지운 칸을 원래 그림으로 되돌린다(하루 지나 베리가
+## 다시 열릴 때).
+func restore_toggleable_cell(layer_name: String, cell: Vector2i) -> void:
+	var data: Dictionary = _toggleable_tile_cells.get("%s:%d,%d" % [layer_name, cell.x, cell.y], {})
+	if data.is_empty():
+		return
+	(data["layer"] as TileMapLayer).set_cell(cell, data["source_id"], data["atlas_coords"], data["alt_id"])
+
+
+## layer_name에 실제로 그려진 칸들을 4방향 인접 클러스터로 묶어서 돌려준다
+## ([{"id": String, "cells": Array[Vector2i], "center": Vector2}, ...]) -
+## BerryBushManager가 이걸로 "덤불이 몇 개, 어디에 있는지"를 기획자가 Tiled에
+## 그린 그림만 보고 자동으로 알아낸다(별도 스폰 좌표 불필요). id는 클러스터의
+## 가장 작은 칸 좌표로 만들어서 같은 맵을 다시 로드해도 항상 같은 값이 나온다
+## (세이브에 그 id로 "오늘 땄음" 여부를 기록하기 때문에 안정적이어야 함).
+func find_toggleable_clusters(layer_name: String) -> Array[Dictionary]:
+	var occupied: Dictionary = {}
+	var prefix := "%s:" % layer_name
+	for key in _toggleable_tile_cells:
+		if String(key).begins_with(prefix):
+			var coords := String(key).substr(prefix.length()).split(",")
+			occupied[Vector2i(int(coords[0]), int(coords[1]))] = true
+	var visited: Dictionary = {}
+	var clusters: Array[Dictionary] = []
+	var neighbor_offsets := [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
+	for start_cell in occupied:
+		if visited.has(start_cell):
+			continue
+		var cluster_cells: Array[Vector2i] = []
+		var queue: Array[Vector2i] = [start_cell]
+		visited[start_cell] = true
+		while not queue.is_empty():
+			var current: Vector2i = queue.pop_back()
+			cluster_cells.append(current)
+			for offset in neighbor_offsets:
+				var neighbor: Vector2i = current + offset
+				if occupied.has(neighbor) and not visited.has(neighbor):
+					visited[neighbor] = true
+					queue.append(neighbor)
+		var top_left := cluster_cells[0]
+		var center := Vector2.ZERO
+		for cell in cluster_cells:
+			if cell.x < top_left.x or (cell.x == top_left.x and cell.y < top_left.y):
+				top_left = cell
+			center += Vector2(cell) * TILE_SIZE + Vector2.ONE * TILE_SIZE * 0.5
+		clusters.append({
+			"id": "%d_%d" % [top_left.x, top_left.y],
+			"cells": cluster_cells,
+			"center": center / cluster_cells.size(),
+		})
+	return clusters
 
 
 ## 정적 타일(레이어)이 아니라 런타임에 동적으로 배치되는 오브젝트(외양간 소/
@@ -1425,6 +1497,9 @@ func _place_tilemap_cell(source_id: int, local_tile_id: int, columns: int, cell:
 	if layer_name == "Door":
 		_tilemap_door_cells[cell] = {"source_id": source_id, "atlas_coords": atlas_coords, "alt_id": alt_id}
 		_tilemap_door_layer = layer
+	elif TOGGLEABLE_TILE_LAYERS.has(layer_name):
+		var key := "%s:%d,%d" % [layer_name, cell.x, cell.y]
+		_toggleable_tile_cells[key] = {"source_id": source_id, "atlas_coords": atlas_coords, "alt_id": alt_id, "layer": layer}
 
 
 ## layer_name(Tiled 레이어 이름)에 대응하는 TileMapLayer 노드를 이번 로드에서

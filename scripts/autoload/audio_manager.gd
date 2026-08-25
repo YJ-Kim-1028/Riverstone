@@ -181,6 +181,9 @@ const SFX_HARVEST := "res://assets/audio/sfx/sfx_harvest.mp3"
 const SFX_ITEM_PICKING := "res://assets/audio/sfx/sfx_item_picking.mp3"
 ## 추억의 물건을 받을 때(NPCManager.memento_received) - 사용자 지시.
 const SFX_MEMORY := "res://assets/audio/sfx/sfx_memory.mp3"
+## 영혼의 결정 지급 컷신 전용 바람 소리(사용자 지시, 2026-08-26) - plaza5에서
+## 영혼이 날아오를 때/플레이어에게 내려올 때 두 번 재생(main.gd 참고).
+const SFX_WIND := "res://assets/audio/sfx/sfx_wind.mp3"
 ## NPC에게 선물을 줄 때(InventoryManager.gift_given) - 사용자 지시.
 const SFX_GIFT := "res://assets/audio/sfx/sfx_gift.mp3"
 ## 실패 피드백 전용(사용자 지시 - 예전 play_beep() 합성음 대신 이 파일).

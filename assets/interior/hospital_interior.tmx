@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="15" height="13" tilewidth="16" tileheight="16" infinite="0" nextlayerid="13" nextobjectid="28">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="15" height="13" tilewidth="16" tileheight="16" infinite="0" nextlayerid="13" nextobjectid="30">
  <tileset firstgid="1" source="UI_Component.tsx"/>
  <tileset firstgid="257" source="hospital.tsx"/>
  <tileset firstgid="513" source="restaurant.tsx"/>
@@ -156,6 +156,8 @@
   <object id="9" name="hospital_sitting" x="56" y="176"/>
   <object id="12" name="hospital_enterance" x="126.5" y="197"/>
   <object id="27" name="hospital_lying_player" x="176" y="184"/>
+  <object id="28" name="isha_heart_npc" x="80" y="85"/>
+  <object id="29" name="isha_heart_player" x="112" y="85"/>
  </objectgroup>
  <objectgroup id="10" name="Interactable" visible="0" locked="1">
   <object id="10" name="cash_register" x="55" y="127.875" width="16" height="16">

@@ -366,7 +366,7 @@
   <object id="8" name="plaza4_enterance_plaza2" x="239.697" y="481.394"/>
   <object id="9" name="temple_exit" x="62" y="70"/>
   <object id="10" name="plaza4_enterance_plaza5" x="27.9394" y="215.697"/>
-  <object id="11" name="plaza4_pond_sitting" x="176" y="392"/>
+  <object id="11" name="plaza4_pond_sitting" x="176" y="400"/>
   <object id="12" name="plaza4_standing" x="103.333" y="194.667"/>
   <object id="51" name="pond_standing_plaza4" x="240" y="48"/>
   <object id="52" name="shadow_figure_plaza4" x="128" y="16"/>

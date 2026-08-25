@@ -40,6 +40,7 @@ func _refresh_rows() -> void:
 		var empty_label := Label.new()
 		empty_label.text = "온라인으로 전환된 상점이 없습니다."
 		empty_label.add_theme_font_size_override("font_size", ROW_FONT_SIZE)
+		empty_label.add_theme_color_override("font_color", Color.BLACK)
 		_rows.add_child(empty_label)
 		return
 	for shop_id in online_shop_ids:
@@ -60,6 +61,7 @@ func _build_header(shop_id: String) -> Label:
 	var label := Label.new()
 	label.text = String(ShopManager.get_shop_definition(shop_id).get("name", shop_id))
 	label.add_theme_font_size_override("font_size", HEADER_FONT_SIZE)
+	label.add_theme_color_override("font_color", Color.BLACK)
 	return label
 
 
@@ -95,12 +97,14 @@ func _build_row(shop_id: String, listing: Dictionary) -> Control:
 	name_label.text = String(definition.get("name", item_id))
 	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	name_label.add_theme_font_size_override("font_size", ROW_FONT_SIZE)
+	name_label.add_theme_color_override("font_color", Color.BLACK)
 	text_column.add_child(name_label)
 
 	var description_label := Label.new()
 	description_label.text = String(definition.get("description", ""))
 	description_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	description_label.add_theme_font_size_override("font_size", DESCRIPTION_FONT_SIZE)
+	description_label.add_theme_color_override("font_color", Color.BLACK)
 	text_column.add_child(description_label)
 
 	var buy_button := Button.new()

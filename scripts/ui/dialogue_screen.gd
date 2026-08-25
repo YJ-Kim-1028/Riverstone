@@ -25,10 +25,27 @@ const DEFAULT_EMOTION := "default"
 ## 플레이어가 고른 option의 response(줄 배열)가 선택 직후 바로 이어서 보여진다.
 const CHOICE_TYPE := "choice"
 
+## 동적 선택지 줄: {"type": "dynamic_choice", "options": [{"label","callback"}, ...]}.
+## CHOICE_TYPE과 화면/조작(▲▼ E, 라벨 목록)은 완전히 같지만 static JSON이
+## 아니라 코드에서 그때그때 만든 목록을 보여줄 때 쓴다(사용자 지시,
+## 2026-08-25 - "제단 선택도 npc 대화할 때처럼 하단에서, UI 창 느낌 아니게").
+## 호감도/response 자동 처리 대신, 고른 option의 callback(Callable)을 그대로
+## 호출한다 - 이어서 보여줄 대사가 있으면 콜백이 push_lines()를 부르고, 끝낼
+## 거면 close()를 부른다(둘 중 하나는 반드시 호출해야 함).
+const DYNAMIC_CHOICE_TYPE := "dynamic_choice"
+
 ## 선물 트리거 줄: {"type": "gift", "item_id": "..."}. 화면에 아무것도 띄우지
 ## 않고 그 자리에서 바로 아이템을 지급한 뒤 다음 줄로 넘어간다(사용자 지시 -
 ## 호감도 임계값이 아니라 "이 대사가 실제로 나왔을 때" 선물이 되어야 한다).
 const GIFT_TYPE := "gift"
+
+## 버프 트리거 줄: {"type": "buff", "percent", "duration_minutes", "is_debuff"}.
+## GIFT_TYPE과 같은 패턴(화면에 아무것도 안 띄우고 바로 다음 줄로) - 세이지
+## 운세 보기(NPCManager._build_fortune_offer_lines()) 전용. NPCManager는
+## player를 직접 모르므로(main.gd 소유) 여기서 신호만 쏘고 실제 적용은
+## main.gd가 한다.
+const BUFF_TYPE := "buff"
+signal buff_requested(percent: float, duration_minutes: int, is_debuff: bool)
 
 ## npc_id 없이 여는 혼잣말(open_special("", ...), 예: 물귀신 낚시 이벤트)은
 ## 초상화가 없는데 TextureRect 자리만 비어 보여서 어색하다는 지적(사용자
@@ -37,6 +54,7 @@ const GIFT_TYPE := "gift"
 const TEXT_AREA_OFFSET_LEFT_WITH_PORTRAIT := 30.0
 const TEXT_AREA_OFFSET_LEFT_NO_PORTRAIT := 6.0
 
+@onready var _background: Control = $Background
 @onready var _portrait: TextureRect = $Background/Portrait
 @onready var _text_area: Control = $Background/TextArea
 @onready var _name_label: Label = $Background/TextArea/VBox/NameLabel
@@ -50,6 +68,7 @@ var _line_index := 0
 var _pending_choice: Dictionary = {}
 var _choice_index := 0
 var _choice_labels: Array[Label] = []
+var _is_dynamic_choice := false
 
 ## 타자기 효과(사용자 지시, 2026-08-23) - 한 글자씩 visible_characters를 늘려가며
 ## 보여준다. _typewriter_token은 진행 중인 코루틴을 무효화하는 용도 -
@@ -58,6 +77,9 @@ var _choice_labels: Array[Label] = []
 const TYPEWRITER_CHAR_INTERVAL := 0.03
 ## 매 글자마다 소리를 내면 너무 시끄러워서, 이 글자 수마다 한 번만 재생한다.
 const TYPEWRITER_BLIP_SFX_STRIDE := 2
+## 타자 소리가 너무 크다는 지적(사용자 지시, 2026-08-25) - 원래 음량의 20%만큼
+## 줄인다. 20*log10(0.8) ≈ -1.94dB(선형 볼륨 기준 정확히 80%로 낮추는 값).
+const TYPEWRITER_BLIP_VOLUME_DB := -1.94
 var _typewriter_token := 0
 var _is_typing := false
 
@@ -91,7 +113,8 @@ func _handle_choice_input(keycode: int) -> void:
 		_move_choice(-1)
 	elif keycode == KEY_DOWN:
 		_move_choice(1)
-	elif keycode == KEY_E:
+	## 엔터로도 확정되면 좋겠다는 지적(사용자 지시, 2026-08-25) - E와 동일 취급.
+	elif keycode == KEY_E or keycode == KEY_ENTER or keycode == KEY_KP_ENTER:
 		_confirm_choice()
 	elif keycode == KEY_ESCAPE:
 		close()
@@ -110,8 +133,13 @@ func open_dialogue(npc_id: String) -> void:
 ## (NPCManager.get_daily_dialogue())을 거치지 않고 정해진 대사만 그대로
 ## 보여주고 싶을 때 쓴다. lines가 비어있으면(아직 대사 안 채워짐)
 ## open_dialogue()와 동일하게 PLACEHOLDER_LINES로 대체된다.
-func open_special(npc_id: String, lines: Array) -> void:
-	NPCManager.talk(npc_id)
+## mark_talked=false는 플레이어가 E로 직접 건 대화가 아니라 강제로 재생되는
+## 컷신 대사(heart_event_30 등)에 쓴다 - _talked_today를 건드리지 않아야
+## 컷신이 끝난 뒤에도 그날 남은 시간에 정상적으로 말을 걸 수 있다(사용자
+## 리포트, 2026-08-26 - "호감도 이벤트 끝나고 나서 그 날은 말걸기가 안 돼").
+func open_special(npc_id: String, lines: Array, mark_talked: bool = true) -> void:
+	if mark_talked:
+		NPCManager.talk(npc_id)
 	_open_with_lines(npc_id, lines)
 
 
@@ -126,14 +154,22 @@ func _open_with_lines(npc_id: String, lines: Array) -> void:
 	_set_open(true)
 
 
+## 호감도 80 이상 부끄러움 임계값 - 대화 끝날 때 웃음 대신 이 이상이면
+## 수줍음으로 바뀐다(사용자 지시, 2026-08-25).
+const CLOSE_EMOTE_SHY_AFFECTION_THRESHOLD := 80
+
+
 func close() -> void:
-	# 웃음: 대화 끝나고 헤어질 때(닫는 방식과 무관 - 마지막 줄 넘김/ESC 둘 다).
+	# 웃음(또는 호감도 80 이상이면 수줍음): 대화 끝나고 헤어질 때(닫는 방식과
+	# 무관 - 마지막 줄 넘김/ESC 둘 다).
 	if not _npc_id.is_empty():
-		NPCManager.request_emote(_npc_id, NPCManager.EMOTE_SMILE)
+		var emote := NPCManager.EMOTE_SHY if NPCManager.get_affection(_npc_id) >= CLOSE_EMOTE_SHY_AFFECTION_THRESHOLD else NPCManager.EMOTE_SMILE
+		NPCManager.request_emote(_npc_id, emote)
 	_typewriter_token += 1
 	_is_typing = false
 	_set_choice_mode(false)
 	_pending_choice = {}
+	_is_dynamic_choice = false
 	_set_open(false)
 	closed.emit()
 
@@ -152,8 +188,15 @@ func _show_current_line() -> void:
 	if line is Dictionary and String(line.get("type", "")) == CHOICE_TYPE:
 		_show_choice(line)
 		return
+	if line is Dictionary and String(line.get("type", "")) == DYNAMIC_CHOICE_TYPE:
+		_show_dynamic_choice(line)
+		return
 	if line is Dictionary and String(line.get("type", "")) == GIFT_TYPE:
 		NPCManager.grant_gift_item(_npc_id, String(line.get("item_id", "")))
+		_advance()
+		return
+	if line is Dictionary and String(line.get("type", "")) == BUFF_TYPE:
+		buff_requested.emit(float(line.get("percent", 0.0)), int(line.get("duration_minutes", 0)), bool(line.get("is_debuff", false)))
 		_advance()
 		return
 	var text := ""
@@ -168,7 +211,12 @@ func _show_current_line() -> void:
 	# 그대로 부를 때 쓴다({player_mail_content}는 NPCManager.get_daily_dialogue()가
 	# 뽑는 시점에 이미 치환해서 돌려주므로 여기서는 신경 쓸 필요 없음).
 	var victim_name := String(NPCManager.get_definition(NPCManager.get_most_recent_death_npc_id()).get("name", ""))
-	var resolved_text := text.replace("{player_name}", GameManager.player_name).replace("{victim_name}", victim_name)
+	## 이름에 받침이 없으면(로시, 벨제 등) "{victim_name}이"처럼 받침 있는
+	## 조사가 하드코딩된 데이터가 문법이 틀어진다(사용자 리포트, 2026-08-26) -
+	## NPCManager.apply_korean_particles()가 이/가·은/는·을/를을 이름에 맞게
+	## 골라준다.
+	var resolved_text := NPCManager.apply_korean_particles(text, "{player_name}", GameManager.player_name)
+	resolved_text = NPCManager.apply_korean_particles(resolved_text, "{victim_name}", victim_name)
 	_start_typewriter(resolved_text)
 	_update_portrait(emotion)
 
@@ -192,7 +240,7 @@ func _start_typewriter(text: String) -> void:
 			return
 		_text_label.visible_characters = i + 1
 		if i % TYPEWRITER_BLIP_SFX_STRIDE == 0:
-			AudioManager.play_sfx(AudioManager.SFX_DIALOGUE_TYPE)
+			AudioManager.play_sfx(AudioManager.SFX_DIALOGUE_TYPE, TYPEWRITER_BLIP_VOLUME_DB)
 	_is_typing = false
 
 
@@ -222,10 +270,40 @@ func _is_choice_active() -> bool:
 
 
 func _show_choice(choice: Dictionary) -> void:
+	_is_dynamic_choice = false
 	_pending_choice = choice
 	_choice_index = 0
 	_rebuild_choice_labels()
 	_set_choice_mode(true)
+
+
+func _show_dynamic_choice(choice: Dictionary) -> void:
+	_is_dynamic_choice = true
+	_pending_choice = choice
+	_choice_index = 0
+	_rebuild_choice_labels()
+	_set_choice_mode(true)
+
+
+## 대화창을 닫지 않은 채(입력 잠금/모달 상태 유지, closed 신호도 안 쏨) 대사
+## 상자 전체(초상화+텍스트박스)만 잠깐 숨긴다 - 제단 부활 컷신의 화면 깜빡임
+## 연출 중엔 대사창이 아예 안 보여야 한다는 지적(사용자 지시, 2026-08-26 -
+## "깜빡일 때는 아무런 대화창도 안보여야 맞지"). close()로 완전히 닫으면
+## 호출부의 "await dialogue_screen.closed"가 거기서 끝나버려서 이어지는
+## 나레이션을 못 보여주므로, 시각적으로만 숨기는 이 방법을 쓴다.
+func set_box_visible(box_visible: bool) -> void:
+	_background.visible = box_visible
+
+
+## DYNAMIC_CHOICE_TYPE 옵션의 callback 안에서 호출 - 지금 대화 흐름에 새 줄을
+## 이어붙이고 바로 다음 줄(방금 끼워넣은 첫 줄)로 넘어간다. 정적 choice의
+## response 삽입과 완전히 같은 방식(CHOICE_TYPE 처리부 참고)이라 대사/선택지가
+## 자연스럽게 이어진다 - 예: 부활 대상을 고른 뒤 "정말 되살리시겠습니까?"
+## 확인 선택지를 이어붙일 때.
+func push_lines(lines: Array) -> void:
+	for i in lines.size():
+		_lines.insert(_line_index + 1 + i, lines[i])
+	_advance()
 
 
 func _rebuild_choice_labels() -> void:
@@ -264,6 +342,16 @@ func _confirm_choice() -> void:
 	if _choice_index >= options.size():
 		return
 	var chosen: Dictionary = options[_choice_index]
+	if _is_dynamic_choice:
+		_is_dynamic_choice = false
+		_pending_choice = {}
+		_set_choice_mode(false)
+		var callback: Callable = chosen.get("callback", Callable())
+		if callback.is_valid():
+			callback.call()
+		else:
+			_advance()
+		return
 	NPCManager.apply_dialogue_choice(_npc_id, int(chosen.get("affection", 0)))
 	var response: Array = chosen.get("response", [])
 	_pending_choice = {}

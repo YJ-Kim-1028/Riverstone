@@ -28,6 +28,17 @@ const MODE_CONTINUE := "continue"
 ## _ready() -> _load_map()이 끝난 뒤에야(_fade_in()) 화면이 다시 밝아진다.
 const BOOT_FADE_DURATION := 1.0
 
+## 타이틀 인트로 연출(사용자 지시, 2026-08-25 - "화면만 띡 떠서 못만든 게임
+## 같다") - 로고가 아래에서 위로 슬며시 올라오며 나타나고, 버튼들이 순서대로
+## 하나씩 페이드인. 음악(bgm_main)도 이때 처음 재생을 건다(AudioManager.play_bgm()이
+## 알아서 페이드인 처리).
+const INTRO_LOGO_SLIDE_DISTANCE := 12.0
+const INTRO_LOGO_DURATION := 1.6
+const INTRO_BUTTON_START_DELAY := 1.0
+const INTRO_BUTTON_STAGGER_SECONDS := 0.22
+const INTRO_BUTTON_FADE_SECONDS := 0.4
+
+@onready var _logo: TextureRect = $Logo
 @onready var _start_button: Button = $ButtonColumn/StartButton
 @onready var _continue_button: Button = $ButtonColumn/ContinueButton
 @onready var _language_button: Button = $ButtonColumn/LanguageButton
@@ -49,6 +60,31 @@ func _ready() -> void:
 	_slot_picker.closed.connect(_refresh_continue_button)
 	_character_creation.confirmed.connect(_on_character_confirmed)
 	_refresh_continue_button()
+	AudioManager.play_bgm(AudioManager.BGM_MAIN)
+	_play_intro_animation()
+
+
+## 로고를 아래로 살짝 내리고 투명하게 시작해서 원래 자리까지 슬며시 올라오게
+## 하고, 그 뒤를 이어 버튼 4개가 하나씩 순서대로 페이드인한다.
+func _play_intro_animation() -> void:
+	var logo_target_y := _logo.position.y
+	_logo.position.y = logo_target_y + INTRO_LOGO_SLIDE_DISTANCE
+	_logo.modulate.a = 0.0
+	var logo_tween := create_tween()
+	logo_tween.set_parallel(true)
+	logo_tween.tween_property(_logo, "position:y", logo_target_y, INTRO_LOGO_DURATION) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	logo_tween.tween_property(_logo, "modulate:a", 1.0, INTRO_LOGO_DURATION)
+
+	var buttons := [_start_button, _continue_button, _language_button, _quit_button]
+	for button in buttons:
+		button.modulate.a = 0.0
+	var button_tween := create_tween()
+	button_tween.set_parallel(true)
+	for i in buttons.size():
+		var button: Button = buttons[i]
+		button_tween.tween_property(button, "modulate:a", 1.0, INTRO_BUTTON_FADE_SECONDS) \
+			.set_delay(INTRO_BUTTON_START_DELAY + i * INTRO_BUTTON_STAGGER_SECONDS)
 
 
 ## 세이브가 하나도 없으면 이어하기를 아예 못 누르게 - 빈 슬롯 3개짜리

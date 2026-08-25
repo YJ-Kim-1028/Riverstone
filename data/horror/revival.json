@@ -1,0 +1,15 @@
+{
+    "soul_crystal_explanation": [
+        "이건... 마을 사람들의 고귀한 영혼이야.",
+        "제단에서 사용할 수 있을 거 같아."
+    ],
+    "altar_prompt_narration": [
+        "이 영혼을 통해 그리운 사람을 한 명 되살릴 수 있습니다. 누구를 선택하시겠습니까?"
+    ],
+    "confirm_text": "정말 {npc_name}을(를) 되살리시겠습니까? 이 선택은 되돌릴 수 없습니다.",
+    "no_candidates_text": "되살릴 수 있는 대상이 없습니다.",
+    "revival_success_narration": [
+        "제단의 빛이 서서히 사그라들었다.",
+        "{npc_name}, 다시 이 마을로 돌아왔다."
+    ]
+}

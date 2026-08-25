@@ -92,6 +92,13 @@ theme_override_colors/font_color = Color(0.356863, 0.27451, 0.211765, 1)
 theme_override_font_sizes/font_size = 5
 text = "발신함"
 
+[node name="RequestButton" type="Button" parent="ScaledContent/Margin/HBox/Sidebar/NavVBox"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.356863, 0.27451, 0.211765, 1)
+theme_override_font_sizes/font_size = 5
+text = "요청함"
+
 [node name="InviteHistoryButton" type="Button" parent="ScaledContent/Margin/HBox/Sidebar/NavVBox"]
 custom_minimum_size = Vector2(0, 12)
 layout_mode = 2

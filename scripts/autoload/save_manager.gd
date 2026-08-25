@@ -129,6 +129,7 @@ func _gather_save_data() -> Dictionary:
 			"economy": EconomyManager.get_save_data(),
 			"cooking": CookingManager.get_save_data(),
 			"collection": CollectionManager.get_save_data(),
+			"revival": RevivalManager.get_save_data(),
 		},
 		"npc": NPCManager.get_save_data(),
 		"horror": _gather_horror_data(),
@@ -142,6 +143,7 @@ func _gather_save_data() -> Dictionary:
 		"kitchen": KitchenManager.get_save_data(),
 		"livestock": LivestockManager.get_save_data(),
 		"farming": FarmingManager.get_save_data(),
+		"berry_bushes": BerryBushManager.get_save_data(),
 		"storage_boxes": StorageBoxManager.get_save_data(),
 		"jukebox": JukeboxManager.get_save_data(),
 		"furniture": FurnitureManager.get_save_data(),
@@ -202,6 +204,7 @@ func _apply_save_data(data: Dictionary) -> void:
 	EconomyManager.load_save_data(progress.get("economy", {}))
 	CookingManager.load_save_data(progress.get("cooking", {}))
 	CollectionManager.load_save_data(progress.get("collection", {}))
+	RevivalManager.load_save_data(progress.get("revival", {}))
 	NPCManager.load_save_data(data.get("npc", {}))
 	var horror: Dictionary = data.get("horror", {})
 	MurderManager.load_save_data(horror.get("murder_manager", {}))
@@ -214,6 +217,7 @@ func _apply_save_data(data: Dictionary) -> void:
 	KitchenManager.load_save_data(data.get("kitchen", {}))
 	LivestockManager.load_save_data(data.get("livestock", {}))
 	FarmingManager.load_save_data(data.get("farming", {}))
+	BerryBushManager.load_save_data(data.get("berry_bushes", {}))
 	StorageBoxManager.load_save_data(data.get("storage_boxes", {}))
 	JukeboxManager.load_save_data(data.get("jukebox", {}))
 	FurnitureManager.load_save_data(data.get("furniture", {}))

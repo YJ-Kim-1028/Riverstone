@@ -21,6 +21,8 @@ signal computer_interacted
 signal accomplice_door_answered
 signal collection_interacted
 signal jukebox_interacted
+## 도감 완성 보상(제단 부활, 사용자 지시 2026-08-25) - soul_altar Interactable.
+signal soul_altar_interacted
 signal npc_talk_interacted(npc_id: String)
 ## StorageBoxManager - 근처에 이미 상자가 있을 때 E를 누르면(설치 아님, 열기).
 signal storage_box_interacted(cell: Vector2i)
@@ -31,6 +33,11 @@ const RESTAURANT_NOT_READY_MESSAGE := "먼저 레스토랑을 열자."
 const ALREADY_SERVED_MESSAGE := "이미 손님이 요리를 먹고 있다."
 const RESTAURANT_HOURS_MESSAGE := "오전 10시부터 오후 4시까지만 영업할 수 있다."
 const RESTAURANT_CANNOT_LEAVE_MESSAGE := "영업 중에는 레스토랑을 벗어날 수 없다."
+## 영업 종료 시간(CLOSE_HOUR)이 지나도 레스토랑은 자동으로 안 닫히고 플레이어가
+## 직접 팻말에서 닫아야 하는데(RestaurantManager.is_open이 하루가 바뀔 때만
+## 초기화됨), 그 사실을 알려주는 문구가 하나도 없어서 마감 시간이 지난 줄
+## 모르고 계속 안에 있을 수 있다는 지적(사용자 지시, 2026-08-25).
+const RESTAURANT_CLOSING_TIME_MESSAGE := "영업 종료 시간이다."
 ## horror_events.md "NPC 집 잠금" - "NPC맵=NPC가게"(사용자 확정 2026-08-16)라
 ## 상점 맵으로 해석해서 막는다.
 const SHOP_LOCKED_MESSAGE := "문이 굳게 잠겨 있다."
@@ -53,11 +60,12 @@ const FADE_DURATION := 0.2
 const UI_DIM_ALPHA := 0.5
 const DAY_LABEL_HOLD_DURATION := 1.2
 
-## data/npc/mocha.json의 buff_item(이동속도 +10%, 3분)에 명시된 수치 그대로 -
 ## items.json의 "americano" 설명("잠시 플레이어의 이속을 증가시킨다")과 같은
 ## 효과를 가리킨다. data/items/items.json의 "energy_tonic"은 설명에 "(디버프
-## 해제)"로 명시되어 있음.
-const AMERICANO_SPEED_BONUS := 0.10
+## 해제)"로 명시되어 있음. 10%는 체감이 안 된다는 지적(사용자 지시,
+## 2026-08-26)으로 30%로 상향 - data/npc/mocha.json의 buff_item 설명 텍스트도
+## 같이 맞춰둠.
+const AMERICANO_SPEED_BONUS := 0.30
 const AMERICANO_DURATION_MINUTES := 3
 
 ## time.md: "취침 시간이 될 때까지 야외에 있을 경우, 길바닥 기절 후 다음 날
@@ -70,6 +78,84 @@ const HOSPITAL_MAP_ID := "hospital_interior"
 const HOSPITAL_WAKE_SPAWN := "hospital_lying_player"
 
 const HEART_EVENT_AFFECTION_THRESHOLD := 30
+## 사용자 지시(2026-08-26) - 전역 FADE_DURATION(0.2, 모든 맵 전환 공용)보다
+## 길게 줘서 "이벤트 느낌"을 낸다. heart_event_30 전용 페이드에만 사용.
+const HEART_EVENT_FADE_DURATION := 0.6
+## 도착 직후 정면을 본 채로 잠깐 멈춰 "여기 도착했다"는 인지가 되게 한다
+## (사용자 지시, 2026-08-26 - "옆이나 뒤 보고 있으니까 이상해").
+const HEART_EVENT_ARRIVE_PAUSE_SECONDS := 1.0
+## heart_event_30 json의 "player_facing"으로 기본 동작(NPC 쪽을 바라봄)을
+## 덮어쓸 때 쓰는 방향 이름 (예: 플로라는 나란히 서서 보는 연출이라 뒷모습이
+## 맞다는 사용자 지시 - "player_facing": "up").
+const HEART_EVENT_FACING_DIRECTIONS := {
+	"up": Vector2i(0, -1), "down": Vector2i(0, 1),
+	"left": Vector2i(-1, 0), "right": Vector2i(1, 0),
+}
+
+## 호감도 100(추억의 물건) 컷신(사용자 지시, 2026-08-25) - 스폰 좌표 없이,
+## 플레이어가 NPC 근처에 있으면 NPC가 실시간으로 다가와서 자동 시작된다.
+const MEMENTO_EVENT_PROXIMITY_TILES := 3
+## NPC가 플레이어 바로 위에 겹치지 않고 한 칸 앞에서 멈추게 하는 접근 거리.
+const MEMENTO_EVENT_APPROACH_DISTANCE := 16.0
+## 평소 암전(순검정)과 구분되는 따뜻한 톤 - "특별한 순간"이라는 걸 색으로도
+## 표시한다(사용자 지시). 컷신 끝나면 다시 순검정으로 되돌린다(_set_fade_tint 참고).
+const MEMENTO_EVENT_FADE_TINT := Color(0.55, 0.35, 0.15)
+## 사용자 지시(2026-08-26) - "호감도 100때도 페이드 시간 너무 짧다". heart_event_30과
+## 같은 값으로 통일(HEART_EVENT_FADE_DURATION).
+const MEMENTO_EVENT_FADE_DURATION := 0.6
+## 물건을 건네는 대사 직후, 실제 지급 전에 한 박자 멈춰서 무게감을 준다.
+const MEMENTO_EVENT_GRANT_PAUSE_SECONDS := 0.6
+## 마린의 호감도 100 컷신 전용 - 다가오는 동안 축구공이 좌우로 튕기는 연출
+## (사용자 지시, 2026-08-26). memento_marin 아이템 아이콘(축구공)을 그대로
+## 재사용해서 별도 에셋 없이 만든다.
+const MARIN_NPC_ID := "marin"
+const MARIN_BALL_ITEM_ID := "memento_marin"
+const MARIN_BALL_BOUNCE_SECONDS := 0.3
+const MARIN_BALL_Z_INDEX := 50
+## 지급 직후 하트 이모지를 평소(1초)보다 오래 띄운다(사용자 지시 - "이모지
+## 오래 보여주기").
+const MEMENTO_EVENT_EMOTE_HOLD_SECONDS := 2.5
+
+## 도감 완성 보상(제단 부활, 사용자 지시 2026-08-25) - 제단 상호작용 화면
+## 깜빡임 전용 톤. 따뜻한 추억의 물건 톤(MEMENTO_EVENT_FADE_TINT)과 구분되게
+## 서늘한 청백색으로.
+const SOUL_ALTAR_FADE_TINT := Color(0.55, 0.6, 0.7)
+## 제단 상호작용 시 화면 깜빡임 횟수/밝기/한 번 깜빡이는 시간.
+const ALTAR_FLICKER_COUNT := 3
+const ALTAR_FLICKER_PEAK_ALPHA := 0.75
+const ALTAR_FLICKER_FLASH_SECONDS := 0.1
+
+## 영혼의 결정 지급 컷신(사용자 지시, 2026-08-25 재설계) - 신사 밖(plaza5)에서
+## 영혼이 하늘로 날아올랐다가, 잠든/기절한 플레이어가 있는 맵으로 돌아와
+## 가슴팍에 스며든다. 사용자가 assets/img/sage_altar.png로 직접 그려준
+## "영혼" 그림을 그대로 쓴다(제단 자체의 그림이 아니라 날아다니는 영혼
+## 그림이라고 확인받음, 2026-08-25).
+const SOUL_CRYSTAL_SPRITE_TEXTURE := preload("res://assets/img/sage_altar.png")
+## 집/캐릭터 뒤에 가려서 안 보인다는 지적(사용자 지시, 2026-08-25) - world_map은
+## Y-sort로 그리는데, 이 영혼 스프라이트는 항상 다른 모든 것 위에 떠 보여야
+## 하므로 Y-sort보다 z_index가 우선하도록 명시적으로 높은 값을 준다
+## (z_as_relative=false로 부모 z_index 영향도 안 받게 고정).
+const SOUL_CRYSTAL_SPRITE_Z_INDEX := 100
+## shrine_interior.tmx의 Warp("shrine_out")가 나가는 plaza5의 스폰 지점을
+## 그대로 재사용 - 신사 바로 앞에서 날아오르는 그림이 자연스러워서 새 스폰을
+## 따로 안 만듦.
+const SOUL_CRYSTAL_SHRINE_EXIT_SPAWN := "shrine_exit"
+const SOUL_CRYSTAL_FLYOUT_OFFSET := Vector2(0, -80)
+const SOUL_CRYSTAL_FLYOUT_SECONDS := 2.2
+const SOUL_CRYSTAL_MERGE_START_OFFSET := Vector2(0, -24)
+const SOUL_CRYSTAL_MERGE_END_OFFSET := Vector2(0, -10)
+const SOUL_CRYSTAL_MERGE_SECONDS := 1.6
+## 컷신이 너무 빨리 지나간다는 지적(사용자 지시, 2026-08-25) - 장면이 바뀐
+## 직후/애니메이션이 끝난 직후 화면을 잠깐 그대로 유지하는 여백 시간.
+const SOUL_CRYSTAL_BEAT_SECONDS := 0.5
+## 취침 중 지급 컷신이 끝난 뒤 되돌아올 자리 - 취침은 항상 home_interior의
+## 침대 타일에서만 시작되므로(sleep_confirm_popup 참고) 고정값으로 충분하다.
+## 침대 밖 임의 위치로 복원하면 "누워있는 플레이어"처럼 안 보인다는 지적
+## (사용자 지시, 2026-08-25)으로, 기획자가 home_interior.tmx의 Spawn
+## 레이어에 직접 찍어준 전용 스폰을 쓴다 - 정확히 침대 안, 정면(아래)을
+## 보는 자리로 찍혀 있어야 한다.
+const SOUL_CRYSTAL_HOME_RETURN_MAP_ID := "home_interior"
+const SOUL_CRYSTAL_HOME_RETURN_SPAWN := "soul_crystal_sleep_spot"
 
 ## restaurant_interior.tmx의 Wall_deco 레이어에 원래 그려져 있던 팻말 타일(OPEN,
 ## GID 312/313, 칸 좌표 col6~7/row14, 픽셀로는 (96,224)~(128,240))과 정확히
@@ -108,6 +194,7 @@ const RESTAURANT_SIGN_CLOSE_TEXTURE := preload("res://assets/ui/sign_close.png")
 @onready var book_screen: Control = get_node_or_null("UI/BookScreen") as Control
 @onready var storage_screen: Control = get_node_or_null("UI/StorageScreen") as Control
 @onready var jukebox_screen: Control = get_node_or_null("UI/JukeboxScreen") as Control
+@onready var memento_toast: Control = get_node_or_null("UI/MementoToast") as Control
 @onready var _restaurant_sign: Sprite2D = get_node_or_null("HomeMap/RestaurantSign") as Sprite2D
 ## horror_events.md "레스토랑 액자 이벤트" - Wall_deco 레이어의 액자 타일(15,2)
 ## 위에 겹쳐 놓은 오버레이. RestaurantSign과 같은 방식으로 world_map 하위에
@@ -188,6 +275,26 @@ var _accomplice_awaiting_door_open := false
 ## 컷신) 재생 중에만 참 - E 상호작용을 막는다(이동은 player.walk_to()가
 ## _scripted_move_direction으로 실제 입력을 덮어써서 별도로 안 막아도 된다).
 var _heart_event_active := false
+## _prepare_heart_event()가 암전 중에 미리 찾아 둔 비-이동형 heart_event_30 -
+## {npc_id, event, player_spawn_position, decoy}. 비어있으면 준비된 게 없다는
+## 뜻(_run_pending_heart_event() 참고).
+var _pending_heart_event: Dictionary = {}
+## 호감도 100(추억의 물건) 컷신 재생 중에만 참(사용자 지시, 2026-08-25) -
+## _should_pause_time()/_update_ui_blocking()의 이동 잠금에 직접 연결돼서
+## 시간 정지/이동 잠금은 따라오지만, 화면 디밍(_ui_dim)은 안 켜진다(사용자
+## 지시 - "디밍 거슬릴 것 같다", _is_any_modal_open()과는 별도로 취급).
+var _memento_event_active := false
+var _marin_ball_tween: Tween = null
+## 제단(soul_altar) 부활 컷신 재생 중에만 참(사용자 지시, 2026-08-25) -
+## _memento_event_active와 같은 방식으로 시간 정지/이동 잠금에 연결되고,
+## 화면 디밍은 안 켜짐(이 프로젝트의 기존 대형 서사 컷신들도 디밍 없이
+## 페이드/대사만으로 처리하는 관례를 따름).
+var _revival_event_active := false
+## RevivalManager.soul_crystal_granted가 다른 컷신 도중(엔딩/도감 화면 등)
+## 도착하면 즉시 재생하지 않고 이 플래그만 세워둔다 - _process()가 매
+## 프레임 안전한 타이밍을 엿보다가 소비한다(사용자 지시, 2026-08-25 - "지급
+## 순간에도 특별 연출").
+var _pending_soul_crystal_grant_cutscene := false
 ## 괭이/물뿌리개 포즈 재생 중(TOOL_USE_HOLD_SECONDS)에 E를 한 번 더 누르면
 ## _on_interact_pressed()가 재진입해서 perform_till()이 아직 커밋 안 된 같은
 ## 칸을 "till"로 다시 판정 - 첫 호출이 끝나기 전에 두 번째 코루틴이 같은
@@ -202,6 +309,14 @@ var _is_sleep_transition_playing := false
 ## 가까워질 때)만 "마주쳤다"는 이모지를 한 번 띄운다(_handle_npc_encounter
 ## 참고). 범위를 벗어나면 빈 문자열로 리셋되어 다음 접근에서 다시 트리거된다.
 var _last_nearby_npc_id := ""
+## npc_id -> 오늘 이미 마주침 이모지를 띄웠는지. 하루가 바뀌면
+## _on_day_changed_clear_greetings()가 비운다(사용자 지시, 2026-08-25 - "너무
+## 많이 떠서 하루에 처음 마주칠 때만"). 일시적 상태라 세이브 대상 아님
+## (_open_doors와 같은 이유).
+var _greeted_today: Dictionary = {}
+## 영업 종료 시간(CLOSE_HOUR) 지난 뒤 레스토랑 안에 있으면 안내 문구를 하루에
+## 한 번만 띄운다(사용자 지시, 2026-08-25) - 매 프레임 계속 뜨면 거슬리므로.
+var _closing_time_reminder_shown_today := false
 ## 외양간 문(door1_open~4) 이름 -> 지금 열려있는지. _load_map()마다 비운다
 ## (WorldMap.load_map()이 맵을 새로 그릴 때마다 문도 항상 닫힌 상태로
 ## 리셋되므로, 여기 기록도 그대로 맞춰야 한다 - "일시적으로"만 열려있는
@@ -236,6 +351,7 @@ func _ready() -> void:
 		collection_interacted.connect(collection_screen.open)
 	if dialogue_screen != null:
 		npc_talk_interacted.connect(dialogue_screen.open_dialogue)
+		dialogue_screen.buff_requested.connect(_on_dialogue_buff_requested)
 	if sleep_confirm_popup != null:
 		sleep_confirm_popup.slept.connect(_play_sleep_transition)
 	if restaurant_confirm_popup != null:
@@ -252,6 +368,7 @@ func _ready() -> void:
 	RestaurantManager.restaurant_closed.connect(_update_restaurant_sign)
 	InventoryManager.item_used.connect(_on_item_used)
 	CookingManager.recipe_learned.connect(_on_recipe_learned)
+	NPCManager.memento_received.connect(_on_memento_received)
 	TimeManager.player_collapsed.connect(_play_collapse_transition)
 	TimeManager.hour_changed.connect(_on_hour_changed)
 	FurnitureManager.furniture_changed.connect(_on_decor_changed)
@@ -261,10 +378,14 @@ func _ready() -> void:
 	FishingManager.fishing_ended.connect(_on_fishing_ended)
 	AudioManager.knock_sequence_finished.connect(_on_knock_sequence_finished)
 	TimeManager.day_changed.connect(_on_day_changed_clear_knock_check)
+	TimeManager.day_changed.connect(_on_day_changed_clear_greetings)
+	TimeManager.day_changed.connect(_on_day_changed_clear_closing_time_reminder)
 	MurderManager.murder_occurred.connect(_on_murder_occurred)
 	MurderManager.accomplice_ending_triggered.connect(_on_accomplice_ending_triggered)
 	MurderManager.truth_ending_triggered.connect(_on_truth_ending_triggered)
 	MurderManager.arrest_ending_triggered.connect(_on_arrest_ending_triggered)
+	soul_altar_interacted.connect(_on_soul_altar_interacted)
+	RevivalManager.soul_crystal_granted.connect(_on_soul_crystal_granted)
 	_build_box_preview()
 	_build_furniture_preview()
 	_build_floor_decor_preview()
@@ -295,6 +416,24 @@ func _on_recipe_learned(recipe_id: String, via_item: bool) -> void:
 		return
 	var recipe_name := String(CookingManager.get_recipe_definition(recipe_id).get("name", recipe_id))
 	_show_temporary_message("%s 레시피를 획득했다!" % recipe_name)
+
+
+## 인벤토리 화면을 안 열어도 어떤 추억의 물건을 받았는지 바로 보이도록 화면에
+## 작게 아이콘+이름을 띄운다(사용자 지시, 2026-08-25 - "인벤에만 보여주는 거
+## 말고"). NPCManager.get_daily_dialogue()가 인벤토리에 자리 있을 때만
+## 지급하도록 이미 걸러주므로(consume_pending_milestone() 직전 inventory_ok
+## 체크 참고) 이 신호가 오면 실제로 인벤토리에 들어간 뒤라고 봐도 된다.
+func _on_memento_received(npc_id: String) -> void:
+	if memento_toast != null:
+		memento_toast.show_memento(npc_id)
+
+
+## dialogue_screen.gd의 "buff" 타입 대사 줄(세이지 운세 보기 전용)을 실제
+## 이동속도 효과로 적용한다 - 모카 커피/기절 디버프와 완전히 같은
+## player.apply_speed_effect() 경로를 그대로 쓴다.
+func _on_dialogue_buff_requested(percent: float, duration_minutes: int, is_debuff: bool) -> void:
+	if player != null:
+		player.apply_speed_effect(percent, duration_minutes, is_debuff)
 
 
 ## 23시가 되면 취침(24시 강제취침)이 머지않았음을 미리 알린다(사용자 지시).
@@ -439,6 +578,10 @@ const GHOST_BITE_MONOLOGUE: Array[String] = [
 const KNOCK_PLAYER_MONOLOGUE: Array[String] = [
 	"방금 무슨 소리지?",
 	"나가서 확인해볼까...?",
+]
+## 영혼의 결정 지급 컷신이 있었던 날 아침(사용자 지시, 2026-08-25).
+const SOUL_CRYSTAL_WAKE_UP_MONOLOGUE: Array[String] = [
+	"...무슨 꿈이었지?",
 ]
 ## 노크 이후 실제로 문을 열고 나가봤을 때(home_interior -> Home) 아무도
 ## 없었다는 혼잣말(초안, 사용자 지시 2026-08-24 - "나가면 아무것도 없는거로").
@@ -813,13 +956,31 @@ func _play_npc_beat(npc_id: String, story_dialogue_key: String) -> void:
 
 
 ## heart_event_30(호감도 30 최초 이벤트, 사용자 지시 2026-08-24 - "스듀식"
-## 컷신) - 맵 진입 시점마다 조건을 만족하는 NPC가 있는지 검사해서 자동으로
-## 튼다. 한 번에 하나만 트리거하고, 나머지는 다음 맵 진입 때 다시 검사한다.
-## 다른 컷신(엔딩/공범 대기) 도중엔 끼어들지 않는다.
-func _maybe_trigger_heart_event(map_id: String) -> void:
+## 컷신) 조건을 만족하는 NPC 하나를 찾는다 - _prepare_heart_event()(암전
+## 상태에서, 비-이동형 전용)와 _maybe_trigger_heart_event()(화면 밝아진 뒤,
+## 이동형 폴백) 둘 다 이 판정을 공유한다. 다른 컷신(엔딩/공범 대기) 도중엔
+## 끼어들지 않는다.
+## 우디(화병)/모카(커피)/로시(오징어)/이샤(자양강장제)/마르(꽃다발)처럼
+## 대사 중에 {"type":"gift"} 줄로 아이템을 바로 지급하는 30 이벤트가 있다.
+## InventoryManager는 자리가 없으면 그냥 push_warning만 하고 아이템을 조용히
+## 버리는데, 30 이벤트는 한 번 보면 has_shown_heart_event()로 영원히 다시 안
+## 뜨니 그 순간 인벤토리가 꽉 차 있으면 그 선물은 영구히 못 받는다(호감도 100
+## 마일스톤과 같은 문제) - 발동 조건 자체에 인벤토리 여유를 포함시켜서 자리가
+## 날 때까지 미룬다(사용자 지시, 2026-08-26 - "30이벤트에 물건 주는 애들
+## 있어... 확인해야겠는데?").
+func _heart_event_inventory_ok(event: Dictionary) -> bool:
+	for line in event.get("lines", []) as Array:
+		if line is Dictionary and String(line.get("type", "")) == "gift":
+			var item_id := String(line.get("item_id", ""))
+			if not item_id.is_empty() and not InventoryManager.can_add_item(item_id, 1):
+				return false
+	return true
+
+
+func _find_matching_heart_event(map_id: String) -> Dictionary:
 	if _murder_scene_active or _heart_event_active \
 			or _accomplice_awaiting_mail_read or _accomplice_awaiting_door_open:
-		return
+		return {}
 	for npc_id in NPCManager.get_all_ids():
 		if not NPCManager.is_alive(npc_id):
 			continue
@@ -828,77 +989,205 @@ func _maybe_trigger_heart_event(map_id: String) -> void:
 			continue
 		if NPCManager.get_affection(npc_id) < HEART_EVENT_AFFECTION_THRESHOLD:
 			continue
+		if not _heart_event_inventory_ok(event):
+			continue
 		var anchor_state := String(event.get("anchor_state", ""))
 		# anchor_state가 "지금 이 시간대엔 이 NPC가 정말 활동 중"이라는 대용
-		# 조건 역할도 겸한다 - 로시(비 오는 날만)/마린(평일 저녁대만)처럼 항상
-		# 뜨진 않는 NPC도 자연스럽게 그 시간까지 기다리게 된다.
+		# 조건 역할도 겸한다 - 로시(비 오는 날만)처럼 항상 뜨지 않는 NPC도
+		# 자연스럽게 그 시간까지 기다리게 된다.
 		if anchor_state.is_empty() or NPCManager.get_current_schedule_state(npc_id) != anchor_state:
 			continue
 		var anchor_pos: Dictionary = NPCManager.resolve_state_position(anchor_state)
 		if String(anchor_pos.get("map_id", "")) != map_id:
 			continue
-		await _play_heart_event(npc_id, event)
+		return {"npc_id": npc_id, "event": event}
+	return {}
+
+
+## 장소 이동형(벨제/플로라의 "같이 나가자")만 처리하는 폴백 - _load_map()의
+## 화면이 이미 밝아진 뒤 호출된다(_prepare_heart_event()가 비-이동형을 전부
+## 가로채서 여기까지 오는 건 실질적으로 이동형뿐임). 한 번에 하나만
+## 트리거하고, 나머지는 다음 맵 진입 때 다시 검사한다.
+func _maybe_trigger_heart_event(map_id: String) -> void:
+	var match_result := _find_matching_heart_event(map_id)
+	if not match_result.is_empty():
+		await _play_heart_event(String(match_result["npc_id"]), match_result["event"])
+
+
+## _prepare_heart_event()는 맵을 "새로 들어오는" 순간에만 검사한다 - 이미 그
+## 맵 안에 서 있는 동안 호감도가 30을 넘으면(선물/디버그 단축키 등) 나갔다
+## 다시 들어오기 전까진 영영 검사되지 않는 사각지대가 있었다(사용자 리포트,
+## 2026-08-26 - "우디는 아예 호감도 이벤트가 발동이 안됐어"). 호감도 100
+## 이벤트(_maybe_trigger_memento_event())와 같은 방식으로 매 프레임 다시
+## 확인한다. 같은 자리(비-이동형)만 여기서 직접 처리 - 장소 이동형(벨제/
+## 플로라)은 원래도 작업 장소에 "들어오는" 순간 _maybe_trigger_heart_event()가
+## 잡아주므로 그대로 둔다(scene_map_id가 다르면 조용히 넘어간다).
+func _maybe_trigger_live_heart_event() -> void:
+	if _murder_scene_active or _heart_event_active or _memento_event_active or _revival_event_active \
+			or _accomplice_awaiting_mail_read or _accomplice_awaiting_door_open \
+			or _is_transitioning or _is_any_modal_open() or world_map == null or player == null:
 		return
+	var match_result := _find_matching_heart_event(GameManager.current_map_id)
+	if match_result.is_empty():
+		return
+	var npc_id: String = match_result["npc_id"]
+	var event: Dictionary = match_result["event"]
+	var scene_map_id := String(event.get("scene_map_id", ""))
+	if not scene_map_id.is_empty() and scene_map_id != GameManager.current_map_id:
+		return
+	var npc_spawn_position := world_map.get_spawn_position(String(event.get("npc_spawn", "")))
+	var player_spawn_position := world_map.get_spawn_position(String(event.get("player_spawn", "")))
+	if npc_spawn_position == Vector2.INF or player_spawn_position == Vector2.INF:
+		return
+	_heart_event_active = true
+	if npc_world_manager != null:
+		npc_world_manager.set_npc_sprite_hidden(npc_id, true)
+	await _fade_out(HEART_EVENT_FADE_DURATION)
+	var decoy: Node2D = _spawn_npc_decoy(npc_id, npc_spawn_position)
+	await _fade_in(HEART_EVENT_FADE_DURATION)
+	await player.walk_to(player_spawn_position, false)
+	await _settle_after_heart_event_arrival(event, decoy.position)
+	await _play_heart_event_dialogue(npc_id, event)
+	await _finish_heart_event(npc_id, decoy)
 
 
-## heart_event_30 재생 - npc_spawn/player_spawn은 사용자가 직접 tmx에 찍어둔
-## 스폰이라(2026-08-24 사용자 지시), 아직 안 찍혀있으면 아무 것도 안 하고
-## 조용히 넘어간다(다음에 다시 조건을 만족하면 재시도). scene_map_id가
-## anchor_state의 실제 위치와 다르면(벨제/플로라의 "같이 나가자" 연출)
-## lead_out_lines를 먼저 보여준 뒤 _load_map()으로 이동한다(페이드 아웃/인은
-## _load_map()이 대신 해준다). 시작/종료 페이드는 사용자 지시(2026-08-24).
-func _play_heart_event(npc_id: String, event: Dictionary) -> void:
+## _load_map()이 화면을 다시 밝히기(_fade_in()) 직전에 부른다 - 같은 맵 안에서
+## 끝나는 heart_event_30(대부분)은 NPC 숨김/분신 배치를 이 암전 상태에서 미리
+## 끝내둬서, 화면이 밝아지는 순간 이미 그 자리에 서있는 것처럼 보이게 한다
+## (사용자 지시, 2026-08-25 - "들어갈 때 페이드에서 이미 다 있어야지, 들어가고
+## 나서 또 페이드하는 게 아니라"). 장소 이동형(scene_map_id가 anchor_state
+## 위치와 다름)은 여기서 거른다 - 리드아웃 대사를 원래 근무지에서 먼저 보여줘야
+## 해서 애초에 이 암전 전에 끝낼 수 없고, _maybe_trigger_heart_event()(화면
+## 밝아진 뒤)가 그대로 처리한다. npc_spawn/player_spawn이 아직 tmx에
+## 안 찍혀있으면 아무것도 안 하고 조용히 넘어간다(다음 기회에 재시도).
+func _prepare_heart_event(map_id: String) -> void:
+	_pending_heart_event = {}
 	if world_map == null or player == null:
 		return
+	var match_result := _find_matching_heart_event(map_id)
+	if match_result.is_empty():
+		return
+	var npc_id: String = match_result["npc_id"]
+	var event: Dictionary = match_result["event"]
 	var anchor_state := String(event.get("anchor_state", ""))
-	var anchor_pos: Dictionary = NPCManager.resolve_state_position(anchor_state)
-	var anchor_map_id := String(anchor_pos.get("map_id", ""))
+	var anchor_map_id := String(NPCManager.resolve_state_position(anchor_state).get("map_id", ""))
 	var scene_map_id := String(event.get("scene_map_id", ""))
 	if scene_map_id.is_empty():
 		scene_map_id = anchor_map_id
-	var relocating := scene_map_id != anchor_map_id
-	var npc_spawn_name := String(event.get("npc_spawn", ""))
-	var player_spawn_name := String(event.get("player_spawn", ""))
-	var npc_spawn_position := Vector2.INF
-	if relocating:
-		var dest_path := WorldMap.get_map_path(scene_map_id)
-		if dest_path.is_empty():
-			return
-		var dest_spawns: Dictionary = WorldMap.parse_spawns(dest_path)
-		if not dest_spawns.has(npc_spawn_name) or not dest_spawns.has(player_spawn_name):
-			return
-	else:
-		npc_spawn_position = world_map.get_spawn_position(npc_spawn_name)
-		if npc_spawn_position == Vector2.INF or world_map.get_spawn_position(player_spawn_name) == Vector2.INF:
-			return
+	if scene_map_id != anchor_map_id:
+		return
+	var npc_spawn_position := world_map.get_spawn_position(String(event.get("npc_spawn", "")))
+	var player_spawn_position := world_map.get_spawn_position(String(event.get("player_spawn", "")))
+	if npc_spawn_position == Vector2.INF or player_spawn_position == Vector2.INF:
+		return
 	_heart_event_active = true
-	if relocating:
-		var lead_out_lines: Array = (event.get("lead_out_lines", []) as Array).duplicate(true)
-		if not lead_out_lines.is_empty() and dialogue_screen != null:
-			dialogue_screen.open_special(npc_id, lead_out_lines)
-			await dialogue_screen.closed
-		if npc_world_manager != null:
-			npc_world_manager.set_npc_sprite_hidden(npc_id, true)
-		await _fade_out()
-		await _load_map(scene_map_id, player_spawn_name, true)
-		npc_spawn_position = world_map.get_spawn_position(npc_spawn_name)
-	else:
-		await _fade_out()
-		player.position = world_map.get_spawn_position(player_spawn_name)
-		if npc_world_manager != null:
-			npc_world_manager.set_npc_sprite_hidden(npc_id, true)
-	var decoy: Node2D = null
-	if npc_spawn_position != Vector2.INF:
-		decoy = _spawn_npc_decoy(npc_id, npc_spawn_position)
-	await _fade_in()
+	if npc_world_manager != null:
+		npc_world_manager.set_npc_sprite_hidden(npc_id, true)
+	_pending_heart_event = {
+		"npc_id": npc_id,
+		"event": event,
+		"player_spawn_position": player_spawn_position,
+		"decoy": _spawn_npc_decoy(npc_id, npc_spawn_position),
+	}
+
+
+## _prepare_heart_event()가 암전 중에 미리 준비해둔 이벤트를 화면이 밝아진 뒤
+## 실행한다 - 문에서 그 자리까지 플레이어가 걸어가는 모습만 화면이 보이는
+## 채로 진행되고(사용자 지시, 2026-08-25), 나머지(대사/마무리 페이드)는 기존
+## 방식과 같다.
+func _run_pending_heart_event() -> void:
+	var pending := _pending_heart_event
+	_pending_heart_event = {}
+	var npc_id: String = pending["npc_id"]
+	var event: Dictionary = pending["event"]
+	var decoy: Node2D = pending["decoy"]
+	await player.walk_to(pending["player_spawn_position"], false)
+	if decoy != null:
+		await _settle_after_heart_event_arrival(event, decoy.position)
 	await _play_heart_event_dialogue(npc_id, event)
-	await _fade_out()
+	await _finish_heart_event(npc_id, decoy)
+
+
+## 걸어서 도착한 직후 공통 처리 - 기본은 NPC 쪽을 정면으로 보되,
+## event["player_facing"]("up"/"down"/"left"/"right")이 있으면 그 방향을
+## 그대로 따른다(사용자 지시, 2026-08-26). 이후 도착 인지가 될 만큼 짧게 멈춘다.
+func _settle_after_heart_event_arrival(event: Dictionary, npc_position: Vector2) -> void:
+	var facing_override := String(event.get("player_facing", ""))
+	if HEART_EVENT_FACING_DIRECTIONS.has(facing_override):
+		player.facing_direction = HEART_EVENT_FACING_DIRECTIONS[facing_override]
+	else:
+		player.face_toward(npc_position)
+	await get_tree().create_timer(HEART_EVENT_ARRIVE_PAUSE_SECONDS).timeout
+
+
+## 두 흐름(비-이동형/이동형) 공통 마무리 - 분신 제거, 실제 NPC 복원, 페이드인.
+## 완료 후 음표 이모지를 띄운다(사용자 지시, 2026-08-25 - "30 이벤트 끝날 때
+## 하트 다음에 있는 음표 그림" - EMOTE_EXCITED가 실제로는 음표 그림이다).
+## 페이드는 HEART_EVENT_FADE_DURATION(길게)을 써서 이벤트 느낌을 낸다
+## (사용자 지시, 2026-08-26).
+func _finish_heart_event(npc_id: String, decoy: Node2D) -> void:
+	await _fade_out(HEART_EVENT_FADE_DURATION)
 	if decoy != null:
 		decoy.queue_free()
 	if npc_world_manager != null:
 		npc_world_manager.set_npc_sprite_hidden(npc_id, false)
-	await _fade_in()
+	await _fade_in(HEART_EVENT_FADE_DURATION)
+	NPCManager.request_emote(npc_id, NPCManager.EMOTE_EXCITED)
 	_heart_event_active = false
+
+
+## heart_event_30 중 장소 이동형(벨제/플로라, scene_map_id가 anchor_state
+## 위치와 다른 경우) 전용 - 비-이동형(대부분)은 _prepare_heart_event()/
+## _run_pending_heart_event()가 담당한다(위 두 함수 주석 참고). lead_out_lines를
+## 원래 근무지에서 먼저 보여준 뒤 페이드 아웃 → _load_map()으로 이동(그 안에서
+## 분신을 미리 배치하고 페이드 인) → 대사 → 마무리 페이드.
+func _play_heart_event(npc_id: String, event: Dictionary) -> void:
+	if world_map == null or player == null:
+		return
+	var anchor_state := String(event.get("anchor_state", ""))
+	var anchor_map_id := String(NPCManager.resolve_state_position(anchor_state).get("map_id", ""))
+	var scene_map_id := String(event.get("scene_map_id", ""))
+	if scene_map_id.is_empty():
+		scene_map_id = anchor_map_id
+	if scene_map_id == anchor_map_id:
+		return
+	var npc_spawn_name := String(event.get("npc_spawn", ""))
+	var player_spawn_name := String(event.get("player_spawn", ""))
+	var dest_path := WorldMap.get_map_path(scene_map_id)
+	if dest_path.is_empty():
+		return
+	var dest_spawns: Dictionary = WorldMap.parse_spawns(dest_path)
+	if not dest_spawns.has(npc_spawn_name) or not dest_spawns.has(player_spawn_name):
+		return
+	# entry_spawn(예: 벨제=pasture_exit, 플로라=farm_exit - 원래 근무지에서
+	# 평소 걸어 나오던 plaza2 워프 자리)이 있으면 거기서부터 이벤트 자리까지
+	# 걸어가는 모습을 보여준다(사용자 지시, 2026-08-26 - "plaza2 out 워프자리에서부터
+	# 스폰 지점 찍은곳까지 걸어가는 이동 씬이 없어"). 없거나 tmx에 없으면
+	# 기존처럼 목적지에 바로 서있는 걸로 대체.
+	var entry_spawn_name := String(event.get("entry_spawn", ""))
+	var use_entry_walk := not entry_spawn_name.is_empty() and dest_spawns.has(entry_spawn_name)
+	_heart_event_active = true
+	var lead_out_lines: Array = (event.get("lead_out_lines", []) as Array).duplicate(true)
+	if not lead_out_lines.is_empty() and dialogue_screen != null:
+		dialogue_screen.open_special(npc_id, lead_out_lines, false)
+		await dialogue_screen.closed
+	if npc_world_manager != null:
+		npc_world_manager.set_npc_sprite_hidden(npc_id, true)
+	await _fade_out(HEART_EVENT_FADE_DURATION)
+	await _load_map(scene_map_id, entry_spawn_name if use_entry_walk else player_spawn_name, true)
+	var npc_spawn_position := world_map.get_spawn_position(npc_spawn_name)
+	var decoy: Node2D = null
+	if npc_spawn_position != Vector2.INF:
+		decoy = _spawn_npc_decoy(npc_id, npc_spawn_position)
+	await _fade_in(HEART_EVENT_FADE_DURATION)
+	if use_entry_walk:
+		var player_spawn_position := world_map.get_spawn_position(player_spawn_name)
+		if player_spawn_position != Vector2.INF:
+			await player.walk_to(player_spawn_position, false)
+	if decoy != null:
+		await _settle_after_heart_event_arrival(event, decoy.position)
+	await _play_heart_event_dialogue(npc_id, event)
+	await _finish_heart_event(npc_id, decoy)
 
 
 ## emote(세이지의 말풍선 등)가 있으면 대사창을 열기 전에 잠깐 먼저 보여준다.
@@ -909,9 +1198,305 @@ func _play_heart_event_dialogue(npc_id: String, event: Dictionary) -> void:
 		await get_tree().create_timer(0.6).timeout
 	var lines: Array = (event.get("lines", []) as Array).duplicate(true)
 	if dialogue_screen != null and not lines.is_empty():
-		dialogue_screen.open_special(npc_id, lines)
+		dialogue_screen.open_special(npc_id, lines, false)
 		await dialogue_screen.closed
 	NPCManager.mark_heart_event_shown(npc_id)
+
+
+## 호감도 100(추억의 물건) 컷신 트리거 - heart_event_30(맵 진입 시 1회 검사)과
+## 달리 매 프레임 근접 여부를 검사한다(사용자 지시, 2026-08-25). NPC가
+## 스폰 좌표 없이 그 자리에서 실시간으로 다가오는 연출이라 "이 NPC가 지금
+## 화면에 실제로 보이는가/얼마나 가까운가"를 프레임마다 알아야 하기 때문 -
+## 성능 부담은 무시할 수준(맵당 NPC 몇 명, 거리 계산 하나뿐이고 이미 완료된
+## NPC는 get_pending_memento_threshold()에서 바로 걸러짐 - _handle_npc_encounter()가
+## 이미 똑같은 패턴으로 매 프레임 근접 판정을 하고 있음).
+func _maybe_trigger_memento_event() -> void:
+	if _murder_scene_active or _heart_event_active or _memento_event_active \
+			or _accomplice_awaiting_mail_read or _accomplice_awaiting_door_open \
+			or _is_transitioning or _is_any_modal_open() or npc_world_manager == null:
+		return
+	for npc_id in NPCManager.get_all_ids():
+		if not NPCManager.is_alive(npc_id):
+			continue
+		var threshold := NPCManager.get_pending_memento_threshold(npc_id)
+		if threshold < 0:
+			continue
+		var owned_space_map := NPCManager.get_owned_space_map_id(npc_id)
+		if not owned_space_map.is_empty() and GameManager.current_map_id != owned_space_map:
+			continue
+		if not InventoryManager.can_add_item("memento_%s" % npc_id, 1):
+			continue
+		var npc_position: Vector2 = npc_world_manager.get_active_npc_position(npc_id)
+		if npc_position == Vector2.INF:
+			continue
+		if player.position.distance_to(npc_position) > MEMENTO_EVENT_PROXIMITY_TILES * WorldMap.TILE_SIZE:
+			continue
+		_play_memento_event(npc_id, threshold)
+		return
+
+
+## _fade의 색조를 바꾼다(알파는 그대로 유지) - 평소 페이드는 순검정이지만
+## 호감도 100 컷신만 따뜻한 톤을 쓴다(_play_memento_event 참고). 컷신이 끝나면
+## 반드시 다시 검정으로 되돌려야 다른 모든 전환(문/침대 등)이 정상으로 보인다.
+func _set_fade_tint(color: Color) -> void:
+	if _fade != null:
+		_fade.color = Color(color.r, color.g, color.b, _fade.color.a)
+
+
+## _maybe_trigger_memento_event()가 조건을 다 만족한 순간 자동 재생 - 스폰
+## 좌표가 필요 없다(heart_event_30과 대조적). NPC가 실시간 좌표 기준으로
+## 플레이어 한 칸 앞까지 걸어온 뒤(_memento_event_active가 켜져 있는 동안
+## _is_any_modal_open()에 걸려서 이동/E/시간이 전부 자동으로 잠김) 따뜻한
+## 톤의 짧은 페이드 → 기존 마일스톤 대사 → 건네는 순간 한 박자 정지 →
+## consume_pending_milestone()(지급 + 기존 하트 이모지) → 그 위에 오래 지속되는
+## 하트 이모지를 덧띄운다(사용자 지시: NPC가 다가옴/다른 톤 페이드/건넬 때
+## 정지/이모지 롱테이크).
+func _play_memento_event(npc_id: String, threshold: int) -> void:
+	if world_map == null or player == null or npc_world_manager == null:
+		return
+	_memento_event_active = true
+	var npc_position: Vector2 = npc_world_manager.get_active_npc_position(npc_id)
+	var approach_target := player.position
+	if npc_position != Vector2.INF and not npc_position.is_equal_approx(player.position):
+		approach_target = player.position + (npc_position - player.position).normalized() * MEMENTO_EVENT_APPROACH_DISTANCE
+	# 마린 전용 - 다가오는 동안 축구공(추억의 물건 아이콘 재사용)이 둘 사이를
+	# 좌우로 튕기며 왕복한다(사용자 지시, 2026-08-26 - "공 따라서 2명이
+	# 움직이는 거 그려줘도 돼", "정지 이미지로 좌우 튕기면 될 거 같아").
+	var marin_ball: Sprite2D = null
+	if npc_id == MARIN_NPC_ID and npc_position != Vector2.INF:
+		marin_ball = _spawn_marin_ball_bounce(player.position, npc_position)
+	await npc_world_manager.walk_npc_to_position(npc_id, approach_target)
+	_stop_marin_ball_bounce(marin_ball)
+	_set_fade_tint(MEMENTO_EVENT_FADE_TINT)
+	await _fade_out(MEMENTO_EVENT_FADE_DURATION)
+	await _fade_in(MEMENTO_EVENT_FADE_DURATION)
+	_set_fade_tint(Color.BLACK)
+	var milestone_lines: Array = NPCManager.get_milestone_dialogue(npc_id, threshold)
+	if dialogue_screen != null and not milestone_lines.is_empty():
+		dialogue_screen.open_special(npc_id, milestone_lines)
+		await dialogue_screen.closed
+	await get_tree().create_timer(MEMENTO_EVENT_GRANT_PAUSE_SECONDS).timeout
+	NPCManager.consume_pending_milestone(npc_id)
+	NPCManager.request_emote(npc_id, NPCManager.EMOTE_HEART, MEMENTO_EVENT_EMOTE_HOLD_SECONDS)
+	await get_tree().create_timer(MEMENTO_EVENT_EMOTE_HOLD_SECONDS).timeout
+	_memento_event_active = false
+
+
+## 플레이어와 마린 사이를 반복해서 왕복하는 정지 이미지(공) 하나를 만든다 -
+## 걷기 애니메이션 없이 위치만 튕기면 된다는 지시라 별도 스프라이트 시트 없이
+## Sprite2D 하나 + Tween 왕복으로 충분하다.
+func _spawn_marin_ball_bounce(from_position: Vector2, to_position: Vector2) -> Sprite2D:
+	if world_map == null:
+		return null
+	var texture := InventoryManager.get_item_icon_texture(MARIN_BALL_ITEM_ID)
+	if texture == null:
+		return null
+	var ball := Sprite2D.new()
+	ball.texture = texture
+	ball.z_index = MARIN_BALL_Z_INDEX
+	ball.z_as_relative = false
+	ball.position = from_position
+	world_map.add_child(ball)
+	_marin_ball_tween = create_tween()
+	_marin_ball_tween.set_loops()
+	_marin_ball_tween.tween_property(ball, "position", to_position, MARIN_BALL_BOUNCE_SECONDS)
+	_marin_ball_tween.tween_property(ball, "position", from_position, MARIN_BALL_BOUNCE_SECONDS)
+	return ball
+
+
+func _stop_marin_ball_bounce(ball: Sprite2D) -> void:
+	if _marin_ball_tween != null and _marin_ball_tween.is_valid():
+		_marin_ball_tween.kill()
+	_marin_ball_tween = null
+	if ball != null:
+		ball.queue_free()
+
+
+## RevivalManager.soul_crystal_granted가 오면(도감 완성 + 엔딩 달성이 어느
+## 순서로든 둘 다 채워진 순간) 호출된다(사용자 지시, 2026-08-25 - "지급
+## 순간에도 특별 연출"). 엔딩 컷신/도감 화면 등 다른 화면과 겹칠 수 있어서
+## 즉시 재생 가능한 상태가 아니면 대기 플래그만 세우고, _process()의
+## _maybe_play_pending_soul_crystal_grant()가 안전한 타이밍에 대신 재생한다.
+## RevivalManager.soul_crystal_granted가 오면(도감 완성 + 엔딩 달성이 어느
+## 순서로든 둘 다 채워진 순간) 즉시 컷신을 틀지 않고 플래그만 세워둔다 -
+## 사용자 지시(2026-08-25): "사용자가 잠에 들면 그 때 하고 싶은데. 잠에
+## 들거나 기절했을 때 페이드되잖아. 그럼 n일차 뜨기 전에 컷씬이 나오는거지."
+## 다음 취침/기절 전환(_play_sleep_transition/_play_collapse_transition)이
+## 화면이 까매진 직후, "N일차" 라벨이 뜨기 전에 소비한다.
+func _on_soul_crystal_granted() -> void:
+	_pending_soul_crystal_grant_cutscene = true
+
+
+## plaza5로 잠깐 넘어가서 신사에서 영혼이 날아올라 하늘로 사라지는 장면을
+## 보여준다(사용자 지시, 2026-08-25 - "누우면 페이드되고, plaza5 맵을 다시
+## 보여줘. 그리고 거기서 날아가는 장면"). 끝나면 다시 암전 상태로 남는다 -
+## 호출부가 원래 있던 맵으로 되돌리는 걸 책임진다.
+func _play_soul_crystal_flyout() -> void:
+	await _load_map("plaza5", SOUL_CRYSTAL_SHRINE_EXIT_SPAWN, true)
+	if world_map == null:
+		return
+	## plaza5는 영혼만 보이면 되는 장면이라 플레이어 캐릭터는 안 나와도 된다
+	## (사용자 지시, 2026-08-25 - "신사 앞에 서있어서 말해봤어" - 실제로는 잠들어
+	## 있으니 거기 서있는 게 어색함). 돌아가서 페이드인하기 직전에 다시 보이게
+	## 한다.
+	if player != null:
+		player.visible = false
+	## _load_map(..., skip_fade=true)는 화면을 안 밝혀준다 - 여기서 직접 밝히지
+	## 않으면 plaza5가 다 준비돼도 화면은 계속 까만 채로 남아있어서 아무것도
+	## 안 보이고 소리만 들린다(사용자 리포트, 2026-08-25 - "바다소리만 들리고
+	## 맵은 하나도 안보여"). 이게 진짜 원인이었음.
+	await _fade_in()
+	## 화면 전환 직후 바로 애니메이션이 시작되면 뭐가 보이기도 전에 지나가
+	## 버린다(사용자 지시, 2026-08-25 - "컷씬 너무 빨리 지나감") - plaza5가
+	## 눈에 들어올 시간을 잠깐 준다.
+	await get_tree().create_timer(SOUL_CRYSTAL_BEAT_SECONDS).timeout
+	var start_position := world_map.get_spawn_position(SOUL_CRYSTAL_SHRINE_EXIT_SPAWN)
+	if start_position == Vector2.INF:
+		start_position = player.position if player != null else Vector2.ZERO
+	var sprite := Sprite2D.new()
+	sprite.texture = SOUL_CRYSTAL_SPRITE_TEXTURE
+	sprite.z_index = SOUL_CRYSTAL_SPRITE_Z_INDEX
+	sprite.z_as_relative = false
+	world_map.add_child(sprite)
+	sprite.position = start_position
+	AudioManager.play_sfx(AudioManager.SFX_WIND)
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(sprite, "position", start_position + SOUL_CRYSTAL_FLYOUT_OFFSET, SOUL_CRYSTAL_FLYOUT_SECONDS)
+	tween.tween_property(sprite, "modulate:a", 0.0, SOUL_CRYSTAL_FLYOUT_SECONDS * 0.5).set_delay(SOUL_CRYSTAL_FLYOUT_SECONDS * 0.5)
+	await tween.finished
+	sprite.queue_free()
+	## 하늘로 사라진 뒤에도 한 박자 그대로 머문다 - 바로 암전하면 날아가는 걸
+	## 보다가 화면이 뚝 끊기는 느낌이라.
+	await get_tree().create_timer(SOUL_CRYSTAL_BEAT_SECONDS).timeout
+	await _fade_out()
+	if player != null:
+		player.visible = true
+
+
+## 플레이어가 있는 맵(집/병원)으로 돌아온 뒤, 잠든/기절한 플레이어 가슴팍으로
+## 영혼이 내려와 스며드는 장면(사용자 지시 - "누워있는 플레이어 가슴팍에
+## 스며드는거. 그리고 인벤에 들어와있고"). 화면이 이미 밝은 상태에서 호출한다 -
+## 끝나면 영혼의 결정을 실제로 지급한다(RevivalManager.complete_soul_crystal_grant).
+func _play_soul_crystal_merge() -> void:
+	if player == null or world_map == null:
+		return
+	## 집/병원 화면이 밝아지자마자 바로 스며들면 "누워있는 나"를 인지할 틈이
+	## 없다(사용자 지시, 2026-08-25 - "컷씬 너무 빨리 지나감") - 한 박자 쉰다.
+	await get_tree().create_timer(SOUL_CRYSTAL_BEAT_SECONDS).timeout
+	var sprite := Sprite2D.new()
+	sprite.texture = SOUL_CRYSTAL_SPRITE_TEXTURE
+	sprite.z_index = SOUL_CRYSTAL_SPRITE_Z_INDEX
+	sprite.z_as_relative = false
+	world_map.add_child(sprite)
+	sprite.position = player.position + SOUL_CRYSTAL_MERGE_START_OFFSET
+	AudioManager.play_sfx(AudioManager.SFX_WIND)
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(sprite, "position", player.position + SOUL_CRYSTAL_MERGE_END_OFFSET, SOUL_CRYSTAL_MERGE_SECONDS)
+	tween.tween_property(sprite, "scale", Vector2(0.2, 0.2), SOUL_CRYSTAL_MERGE_SECONDS)
+	tween.tween_property(sprite, "modulate:a", 0.0, SOUL_CRYSTAL_MERGE_SECONDS)
+	await tween.finished
+	sprite.queue_free()
+	RevivalManager.complete_soul_crystal_grant()
+	## 스며든 직후 바로 암전하지 않고 한 박자 머문다 - "됐다"는 여운.
+	await get_tree().create_timer(SOUL_CRYSTAL_BEAT_SECONDS).timeout
+
+
+## 화면을 몇 번 깜빡인다(사용자 지시 - "화면이 몇 번 깜빡이다가 밑에
+## 나레이션"). 완전한 암전(_fade_out)과 달리 알파를 끝까지 안 올리고
+## 몇 번 튕겨서 "번쩍"이는 느낌만 준다.
+func _play_altar_flicker() -> void:
+	if _fade == null:
+		return
+	for i in ALTAR_FLICKER_COUNT:
+		var tween := create_tween()
+		tween.tween_property(_fade, "color:a", ALTAR_FLICKER_PEAK_ALPHA, ALTAR_FLICKER_FLASH_SECONDS)
+		tween.tween_property(_fade, "color:a", 0.0, ALTAR_FLICKER_FLASH_SECONDS)
+		await tween.finished
+
+
+## 제단(soul_altar) 상호작용(사용자 지시, 2026-08-25 재설계) - 세이지는 더 이상
+## 등장하지 않는다. 효과음 + 화면 깜빡임 뒤, 대상 선택도 별도 UI 창이 아니라
+## NPC 대화와 똑같은 하단 대사창에서 진행한다(사용자 지시 - "npc와 대화할
+## 때처럼 하단에 고정된 부분에서... UI 창 같은 느낌이 아니라",
+## dialogue_screen.gd의 DYNAMIC_CHOICE_TYPE 참고). ESC로 언제든 그냥 닫을 수
+## 있다(대화창 기본 동작).
+func _on_soul_altar_interacted() -> void:
+	if world_map == null or player == null or not RevivalManager.can_use_altar() or dialogue_screen == null:
+		return
+	_revival_event_active = true
+	_close_all_screens()
+	AudioManager.play_sfx(AudioManager.SFX_MEMORY)
+	_set_fade_tint(SOUL_ALTAR_FADE_TINT)
+	await _play_altar_flicker()
+	_set_fade_tint(Color.BLACK)
+	var lines: Array = RevivalManager.get_narration("altar_prompt_narration").duplicate()
+	var candidates: Array[String] = RevivalManager.get_revivable_victim_ids()
+	if candidates.is_empty():
+		var empty_text := RevivalManager.get_text("no_candidates_text")
+		if not empty_text.is_empty():
+			lines.append(empty_text)
+	else:
+		var options: Array = []
+		for npc_id in candidates:
+			options.append({
+				"label": String(NPCManager.get_definition(npc_id).get("name", npc_id)),
+				"callback": func() -> void: _on_revival_candidate_chosen(npc_id),
+			})
+		lines.append({"type": "dynamic_choice", "options": options})
+	dialogue_screen.open_special("", lines)
+	await dialogue_screen.closed
+	_revival_event_active = false
+
+
+## 부활 대상을 고른 직후 - 되돌릴 수 없는 선택이라 확인 선택지를 하나 더
+## 이어붙인다(사용자 지시, 2026-08-25 - "확인 문구 있는 것도 좋네").
+func _on_revival_candidate_chosen(npc_id: String) -> void:
+	if dialogue_screen == null:
+		return
+	var npc_name := String(NPCManager.get_definition(npc_id).get("name", npc_id))
+	var confirm_text := RevivalManager.get_text("confirm_text")
+	confirm_text = (confirm_text if not confirm_text.is_empty() else "정말 {npc_name}을(를) 되살리시겠습니까?").replace("{npc_name}", npc_name)
+	dialogue_screen.push_lines([
+		confirm_text,
+		{
+			"type": "dynamic_choice",
+			"options": [
+				{"label": "되살리기", "callback": func() -> void: _on_revival_confirmed(npc_id)},
+				{"label": "취소", "callback": func() -> void: dialogue_screen.close()},
+			],
+		},
+	])
+
+
+## 되살린 직후 아무 반응이 없으면 "된 건지 만 건지" 알 수 없다는 지적(사용자
+## 지시, 2026-08-25) - 화면을 한 번 더 깜빡인 뒤(다 끝날 때까지 기다렸다가 -
+## fire-and-forget으로 던져두면 대화 선택 처리 흐름과 겹쳐 실제로 재생이
+## 안 되는 경우가 있었음, 2026-08-26 사용자 리포트) 결과를 알려주는 짧은
+## 나레이션을 이어 붙인다. 다 읽으면 평소처럼 마지막 줄에서 자동으로 닫힌다.
+func _on_revival_confirmed(npc_id: String) -> void:
+	InventoryManager.remove_item(RevivalManager.SOUL_CRYSTAL_ITEM_ID, 1)
+	NPCManager.revive_npc(npc_id)
+	RevivalManager.mark_revival_used(npc_id)
+	## 깜빡이는 동안 방금 눌렀던 "정말 되살리시겠습니까?" 대사창이 그대로
+	## 남아 보이면 안 된다는 지적(사용자 지시, 2026-08-26) - 대화창을 닫지는
+	## 않고(잠금 유지) 잠깐 시각적으로만 숨긴다.
+	if dialogue_screen != null:
+		dialogue_screen.set_box_visible(false)
+	await _play_altar_flicker()
+	if dialogue_screen == null:
+		return
+	dialogue_screen.set_box_visible(true)
+	var npc_name := String(NPCManager.get_definition(npc_id).get("name", npc_id))
+	var lines: Array = RevivalManager.get_narration("revival_success_narration")
+	if lines.is_empty():
+		lines = ["제단의 빛이 서서히 사그라들었다.", "%s, 다시 이 마을로 돌아왔다." % npc_name]
+	else:
+		lines = lines.duplicate()
+		for i in lines.size():
+			lines[i] = String(lines[i]).replace("{npc_name}", npc_name)
+	dialogue_screen.push_lines(lines)
 
 
 func _set_all_npc_sprites_hidden(hidden: bool) -> void:
@@ -986,6 +1571,14 @@ func _on_knock_sequence_finished() -> void:
 ## 한다.
 func _on_day_changed_clear_knock_check(_day: int, _weekday: String) -> void:
 	_knock_check_pending = false
+
+
+func _on_day_changed_clear_greetings(_day: int, _weekday: String) -> void:
+	_greeted_today.clear()
+
+
+func _on_day_changed_clear_closing_time_reminder(_day: int, _weekday: String) -> void:
+	_closing_time_reminder_shown_today = false
 
 
 ## UI 창이 하나라도 열려있는 동안의 마우스 클릭에 공통 클릭 효과음을 준다
@@ -1090,6 +1683,9 @@ func _process(delta: float) -> void:
 	_update_ui_blocking()
 	if world_map == null or player == null:
 		return
+	_maybe_trigger_memento_event()
+	_maybe_trigger_live_heart_event()
+	_maybe_show_closing_time_reminder()
 	if not _murder_scene_active and not _is_transitioning:
 		if GameManager.current_map_id == "Home" and MurderManager.is_second_murder_discovery_pending() \
 				and not _second_murder_sack_awaiting_interaction and _second_murder_sack_node == null:
@@ -1188,6 +1784,14 @@ func _process(delta: float) -> void:
 		if _message_timer <= 0.0:
 			player.show_interaction_prompt("E 사용")
 		return
+	if interactable_name == "soul_altar":
+		## 영혼의 결정이 없거나 이미 부활을 썼으면 프롬프트 자체를 안 띄워서
+		## 조용히 배경 오브젝트로 취급한다(사용자 지시, 2026-08-25).
+		if RevivalManager.can_use_altar() and _message_timer <= 0.0:
+			player.show_interaction_prompt("E 결정을 바친다")
+		else:
+			player.hide_interaction_prompt()
+		return
 	if interactable_name == "cash_register":
 		if ShopManager.is_staffed(String(interactable.get("shop_id", ""))):
 			if _message_timer <= 0.0:
@@ -1246,6 +1850,10 @@ func _process(delta: float) -> void:
 		if FishingManager.can_start_fishing() and _is_facing_water() and not InventoryManager.is_full():
 			if _message_timer <= 0.0:
 				player.show_interaction_prompt("E 낚시하기")
+			return
+		if not BerryBushManager.get_available_bush(player.position).is_empty():
+			if _message_timer <= 0.0:
+				player.show_interaction_prompt("E 채집")
 			return
 		# 농사는 낚시와 달리 바라보는 칸이 아니라 지금 서 있는 칸을 대상으로
 		# 한다(사용자 지시) - 물 위에서 낚시하는 것과 달리 경작지는 그 위에
@@ -1377,7 +1985,7 @@ func _should_pause_time() -> bool:
 	## 나가게 하는 게 좋을 거 같은데") - 메일 대기/문 앞 대기 구간 내내 시간을
 	## 멈춘다. 취침 강제(TimeManager.player_collapsed)가 이 구간에 끼어들
 	## 여지 자체를 없앤다.
-	if _accomplice_awaiting_mail_read or _accomplice_awaiting_door_open:
+	if _accomplice_awaiting_mail_read or _accomplice_awaiting_door_open or _memento_event_active or _revival_event_active:
 		return true
 	if kitchen_screen != null and kitchen_screen.visible:
 		return false
@@ -1397,8 +2005,10 @@ func _update_ui_blocking() -> void:
 	# 발생하지 않아서, 낚시 도중 맵이 바뀌는 경우를 따로 취소 처리할 필요가 없다.
 	if player != null:
 		# 노크 소리가 나는 동안 문 앞으로 뛰쳐나가 확인할 수 없게 이동도 같이
-		# 잠근다(사용자 지시, 2026-08-24).
-		player.set_movement_enabled(not any_open and not FishingManager.is_active() and not AudioManager.is_knock_playing())
+		# 잠근다(사용자 지시, 2026-08-24). 호감도 100 컷신(_memento_event_active)도
+		# 화면 디밍 없이 이동만 잠가야 해서 any_open과 별도로 확인한다(사용자
+		# 지시, 2026-08-25 - "디밍 거슬릴 것 같다").
+		player.set_movement_enabled(not any_open and not _memento_event_active and not _revival_event_active and not FishingManager.is_active() and not AudioManager.is_knock_playing())
 	if _ui_dim != null:
 		_ui_dim.color.a = UI_DIM_ALPHA if any_open else 0.0
 	if _should_pause_time():
@@ -1755,6 +2365,7 @@ func _load_map(map_id: String, spawn_name: String, skip_fade: bool = false) -> v
 			_maybe_play_restaurant_frame_blood_effect()
 		LivestockManager.set_world_map(world_map, map_id)
 		FarmingManager.set_world_map(world_map, map_id)
+		BerryBushManager.set_world_map(world_map, map_id)
 		StorageBoxManager.set_world_map(world_map, map_id)
 		FurnitureManager.set_world_map(world_map, map_id)
 		FloorDecorManager.set_world_map(world_map, map_id)
@@ -1762,6 +2373,11 @@ func _load_map(map_id: String, spawn_name: String, skip_fade: bool = false) -> v
 		if was_indoor != is_indoor:
 			AudioManager.play_sfx(AudioManager.SFX_DOOR)
 		_maybe_spawn_shadow_figure(map_id)
+	# 화면이 아직 검은 이 시점에 heart_event_30(비-이동형) NPC 숨김/분신
+	# 배치를 미리 끝내둔다 - 그래야 아래 _fade_in()으로 화면이 밝아지는 순간
+	# 이미 그 자리에 서있는 것처럼 보인다(사용자 지시, 2026-08-25 - "들어갈 때
+	# 페이드에서 이미 다 있어야지, 들어가고 나서 또 페이드하는 게 아니라").
+	_prepare_heart_event(map_id)
 	if not skip_fade:
 		await _fade_in()
 	if _knock_check_pending and was_home_interior and map_id == "Home":
@@ -1769,22 +2385,59 @@ func _load_map(map_id: String, spawn_name: String, skip_fade: bool = false) -> v
 		if dialogue_screen != null:
 			dialogue_screen.open_special("", KNOCK_CHECK_RESULT_MONOLOGUE.duplicate())
 	_is_transitioning = false
-	_maybe_trigger_heart_event(map_id)
+	if not _pending_heart_event.is_empty():
+		_run_pending_heart_event()
+	else:
+		_maybe_trigger_heart_event(map_id)
+	_maybe_show_mail_reminder(map_id)
 
 
-func _fade_out() -> void:
+## 튜토리얼이 없어서 컴퓨터/메일함 존재 자체를 못 찾을 수 있다는 우려(사용자
+## 지시, 2026-08-25) - 안 읽은 메일이 있는 채로 집 안(home_interior, 컴퓨터가
+## 있는 곳)에 들어올 때마다 머리 위에 짧게 알려준다. 마당(Home)에선 안 뜬다
+## (사용자 지시 - "home_interior 들어갈 때만"). 도감은 늦게 발견해도 상관없지만
+## 메일은 스토리 진행에 바로 필요해서 이것만 챙긴다. 다른 컷신이 막 시작됐으면
+## 겹쳐 보이지 않게 건너뛴다.
+func _maybe_show_mail_reminder(map_id: String) -> void:
+	if map_id != "home_interior" or not EmailManager.has_unread():
+		return
+	## _revival_event_active는 제단 컷신 전용 플래그라 취침 중 영혼의 결정
+	## 컷신(플레이어 가슴에 스며드는 연출)에는 안 걸렸었다 - 그 컷신은
+	## _play_sleep_transition() 안에서 _load_map()을 호출하는데, 그때 여전히
+	## "메일이 왔다"가 같이 떴다(사용자 리포트, 2026-08-26 - "불이 가슴 안으로
+	## 들어올 때 메일이 왔다 뜬다"). _is_sleep_transition_playing은 그 컷신
+	## 내내 켜져있으므로 이것도 같이 막는다 - 평소 취침은 애초에 _load_map을
+	## 안 부르니 이 가드가 영향 줄 일이 없다.
+	if _heart_event_active or _murder_scene_active or _memento_event_active or _revival_event_active or _is_sleep_transition_playing:
+		return
+	_show_temporary_message("메일이 왔다. 확인해보자.")
+
+
+## 영업 종료 시간(RestaurantManager.CLOSE_HOUR)이 지났는데 레스토랑 안에 있고
+## 아직 영업 중이면(직접 안 닫았으면 자동으로 안 닫힘) 하루에 한 번만 알려준다
+## (사용자 지시, 2026-08-25 - "소리소문없이 닫혀서 플레이어가 모를 거 같다").
+func _maybe_show_closing_time_reminder() -> void:
+	if _closing_time_reminder_shown_today or GameManager.current_map_id != RESTAURANT_SIGN_MAP_ID:
+		return
+	if not RestaurantManager.is_open or TimeManager.current_hour < RestaurantManager.CLOSE_HOUR:
+		return
+	_closing_time_reminder_shown_today = true
+	_show_temporary_message(RESTAURANT_CLOSING_TIME_MESSAGE)
+
+
+func _fade_out(duration: float = FADE_DURATION) -> void:
 	if _fade == null:
 		return
 	var tween := create_tween()
-	tween.tween_property(_fade, "color:a", 1.0, FADE_DURATION)
+	tween.tween_property(_fade, "color:a", 1.0, duration)
 	await tween.finished
 
 
-func _fade_in() -> void:
+func _fade_in(duration: float = FADE_DURATION) -> void:
 	if _fade == null:
 		return
 	var tween := create_tween()
-	tween.tween_property(_fade, "color:a", 0.0, FADE_DURATION)
+	tween.tween_property(_fade, "color:a", 0.0, duration)
 	await tween.finished
 
 
@@ -1795,6 +2448,24 @@ func _fade_in() -> void:
 func _play_sleep_transition() -> void:
 	_is_sleep_transition_playing = true
 	await _fade_out()
+	## 인벤토리가 꽉 차있으면 지급이 조용히 실패하고 이 기회를 영영 날린다
+	## (npc_manager.gd의 추억의 물건 inventory_ok 체크와 같은 이유 - 사용자
+	## 지시, 2026-08-25 - "인벤이 가득차면 이거 어떻게 받아?"). 자리가 없으면
+	## 플래그를 그대로 남겨둬서 다음 취침 때 다시 시도한다.
+	var played_soul_crystal_cutscene := false
+	if _pending_soul_crystal_grant_cutscene and InventoryManager.can_add_item(RevivalManager.SOUL_CRYSTAL_ITEM_ID, 1):
+		_pending_soul_crystal_grant_cutscene = false
+		played_soul_crystal_cutscene = true
+		await _play_soul_crystal_flyout()
+		## SOUL_CRYSTAL_HOME_RETURN_SPAWN 자리에 정확히 눕혀서 세운다(사용자
+		## 지시, 2026-08-25 - "정확히 침대 안이 아니다보니까 이상하게 보이네.
+		## 좌표 찍어서 정면을 보고 있게") - _load_map()이 스폰을 찾으면
+		## player.position/카메라를 알아서 맞춰주므로 따로 복원 안 해도 된다.
+		await _load_map(SOUL_CRYSTAL_HOME_RETURN_MAP_ID, SOUL_CRYSTAL_HOME_RETURN_SPAWN, true)
+		player.facing_direction = Vector2i(0, 1)
+		await _fade_in()
+		await _play_soul_crystal_merge()
+		await _fade_out()
 	TimeManager.sleep_now()
 	if _day_label != null:
 		_day_label.text = "%d일차" % TimeManager.current_day
@@ -1803,6 +2474,14 @@ func _play_sleep_transition() -> void:
 	if _day_label != null:
 		_day_label.modulate.a = 0.0
 	await _fade_in()
+	## 지급 컷신이 있었던 날 아침에만 짧은 여운을 남긴다(사용자 지시, 2026-08-25 -
+	## "...무슨 꿈이었지?"). 이 대사가 다 끝날 때까지 기다렸다가 메일 알림을
+	## 띄운다 - 안 그러면 컷신 도중 로드된 home_interior에서 "메일이 왔다"가
+	## 몰입 깨면서 겹쳐 떴다(사용자 지시, 2026-08-25 - "나레이션 끝나고 뜨게").
+	if played_soul_crystal_cutscene and dialogue_screen != null:
+		dialogue_screen.open_special("", SOUL_CRYSTAL_WAKE_UP_MONOLOGUE.duplicate())
+		await dialogue_screen.closed
+		_maybe_show_mail_reminder("home_interior")
 	_is_sleep_transition_playing = false
 
 
@@ -1812,8 +2491,17 @@ func _play_sleep_transition() -> void:
 func _play_collapse_transition() -> void:
 	_is_sleep_transition_playing = true
 	await _fade_out()
-	_load_map(HOSPITAL_MAP_ID, HOSPITAL_WAKE_SPAWN, true)
+	## 인벤토리 자리 없으면 다음 기회로 미룬다(_play_sleep_transition() 참고).
+	var granting_soul_crystal := _pending_soul_crystal_grant_cutscene and InventoryManager.can_add_item(RevivalManager.SOUL_CRYSTAL_ITEM_ID, 1)
+	if granting_soul_crystal:
+		_pending_soul_crystal_grant_cutscene = false
+		await _play_soul_crystal_flyout()
+	await _load_map(HOSPITAL_MAP_ID, HOSPITAL_WAKE_SPAWN, true)
 	player.apply_speed_effect(COLLAPSE_DEBUFF_PERCENT, COLLAPSE_DEBUFF_MINUTES, true)
+	if granting_soul_crystal:
+		await _fade_in()
+		await _play_soul_crystal_merge()
+		await _fade_out()
 	if _day_label != null:
 		_day_label.text = "%d일차" % TimeManager.current_day
 		_day_label.modulate.a = 1.0
@@ -1821,6 +2509,8 @@ func _play_collapse_transition() -> void:
 	if _day_label != null:
 		_day_label.modulate.a = 0.0
 	await _fade_in()
+	if granting_soul_crystal and dialogue_screen != null:
+		dialogue_screen.open_special("", SOUL_CRYSTAL_WAKE_UP_MONOLOGUE.duplicate())
 	_is_sleep_transition_playing = false
 
 
@@ -1831,7 +2521,7 @@ func _on_interact_pressed() -> void:
 	# 처리한다(대화 넘기기 등) - 여기서 또 월드 상호작용(계산대/조리대 등)까지
 	# 같이 처리하면, NPC가 자기 근무지 바로 옆에 서 있을 때 대화 넘기려고 누른
 	# E가 계산대까지 같이 눌러버리는 문제가 생긴다.
-	if _is_any_modal_open() or _murder_scene_active or _heart_event_active:
+	if _is_any_modal_open() or _murder_scene_active or _heart_event_active or _memento_event_active or _revival_event_active:
 		return
 	if _second_murder_sack_awaiting_interaction and _second_murder_sack_node != null \
 			and player.position.distance_to(_second_murder_sack_position) <= SECOND_MURDER_SACK_INTERACT_RADIUS:
@@ -1921,6 +2611,10 @@ func _on_interact_pressed() -> void:
 			AudioManager.play_sfx(AudioManager.SFX_BUBBLE)
 			player.tool_overlay.start("fishing_rod")
 		return
+	var available_bush := BerryBushManager.get_available_bush(player.position)
+	if not available_bush.is_empty():
+		_show_temporary_message(BerryBushManager.perform_harvest(available_bush))
+		return
 	# 농사는 낚시와 달리 바라보는 칸이 아니라 지금 서 있는 칸을 대상으로
 	# 한다(사용자 지시, _process()의 프롬프트 판정과 동일 기준이어야 함).
 	var farm_position := player.position
@@ -1990,8 +2684,10 @@ func _handle_npc_encounter(npc_id: String) -> void:
 	if npc_id == _last_nearby_npc_id:
 		return
 	_last_nearby_npc_id = npc_id
-	if npc_id.is_empty():
+	if npc_id.is_empty() or bool(_greeted_today.get(npc_id, false)):
 		return
+	_greeted_today[npc_id] = true
+	EmailManager.record_npc_greeted(npc_id)
 	NPCManager.request_emote(npc_id, NPCManager.EMOTE_SMILE)
 
 
@@ -2043,6 +2739,10 @@ func _handle_interaction(interactable: Dictionary) -> void:
 		return
 	if interactable_name == "jukebox":
 		jukebox_interacted.emit()
+		return
+	if interactable_name == "soul_altar":
+		if RevivalManager.can_use_altar():
+			soul_altar_interacted.emit()
 		return
 	if interactable_name.begins_with(SERVING_AREA_PREFIX):
 		var station_index := interactable_name.trim_prefix(SERVING_AREA_PREFIX).to_int() - 1

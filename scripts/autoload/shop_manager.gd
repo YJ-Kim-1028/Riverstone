@@ -53,6 +53,7 @@ func _ready() -> void:
 	_load_shops()
 	TimeManager.day_changed.connect(_on_day_changed)
 	NPCManager.npc_died.connect(_on_npc_died)
+	NPCManager.npc_revived.connect(_on_npc_revived)
 
 
 func get_shop_ids() -> Array:
@@ -347,6 +348,15 @@ func _on_day_changed(_day: int, _weekday: String) -> void:
 
 
 func _on_npc_died(npc_id: String) -> void:
+	for shop_id in _shops:
+		if (_shops[shop_id].get("owner_npc_ids", []) as Array).has(npc_id):
+			shop_mode_changed.emit(shop_id, get_shop_mode(shop_id))
+
+
+## 제단 부활(사용자 지시, 2026-08-25) - get_shop_mode()는 is_alive()로 매번
+## 실시간 계산되므로 여기서 별도 상태를 켤 필요는 없고, UI가 다시 그려지도록
+## _on_npc_died()와 대칭으로 신호만 재발신한다.
+func _on_npc_revived(npc_id: String) -> void:
 	for shop_id in _shops:
 		if (_shops[shop_id].get("owner_npc_ids", []) as Array).has(npc_id):
 			shop_mode_changed.emit(shop_id, get_shop_mode(shop_id))

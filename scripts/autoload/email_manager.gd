@@ -37,6 +37,103 @@ const GREETING_AFFECTION_THRESHOLD := 80
 const GREETING_COOLDOWN_DAYS := 7
 const MAX_GREETING_EMAILS_PER_DAY := 2
 
+## 요청함(사용자 지시, 2026-08-25 - "초반에 할 게 없다"는 문제를 온보딩성
+## 부탁으로 풀어보려는 시도) - 일반 수신함과 분리된 별도 목록. 목표(objective_type/
+## objective_target)를 실제로 달성했는지 매번 살아있는 상태로 확인하고
+## (is_request_objective_met), 달성했을 때만 완료 버튼이 눌리게 한다(사용자
+## 지시). 완료 처리는 한 번뿐이라 별도 "진행 중" 상태 저장 없이 claimed 여부만
+## 저장하면 충분하다.
+const REQUESTS_PATH := "res://data/requests/requests.json"
+var _request_definitions: Dictionary = {}
+var _claimed_requests: Dictionary = {}
+## 요청함도 수신함처럼 읽음/안읽음 아이콘이 있어야 한다는 지적(사용자 지시,
+## 2026-08-25) - 이건 "목표 달성 여부"(is_request_objective_met)와는 완전히
+## 별개 축이라 따로 저장한다.
+var _read_requests: Dictionary = {}
+## "감자 수확해보기" 같은 튜토리얼 요청용(사용자 지시, 2026-08-25) - 지금
+## 인벤토리에 몇 개 있는지가 아니라 "그동안 한 번이라도 얻어본 적 있는지"를
+## 물어보는 요청이라(바로 요리에 써버려도 조건은 유지돼야 함), 현재 재고가
+## 아니라 InventoryManager.item_added 신호로 누적 총량을 따로 센다.
+var _lifetime_item_counts: Dictionary = {}
+## "한 접시 대접해보기" 요청용 - RestaurantManager.dish_served 누적 횟수.
+var _lifetime_dishes_served := 0
+## "모든 NPC와 인사하기" 요청용(사용자 지시, 2026-08-25 - "제한기간 없이") -
+## main.gd._handle_npc_encounter()가 하루 첫 마주침마다 record_npc_greeted()로
+## 채운다. 날짜가 지나도 안 지워지는 누적 집합이라 _greeted_today(하루마다
+## 리셋)와는 완전히 다른 저장소.
+var _greeted_npc_ids: Dictionary = {}
+
+## 반복/희귀 요청(사용자 지시, 2026-08-25 - "초반에 할 게 없다" 문제 완화) -
+## requests.json의 고정 항목과 달리 실행 중에 생성/소멸한다. 스키마는
+## _request_definitions 항목과 동일하되 "expires_day"(TimeManager.current_day
+## 기준 만료일, -1이면 무제한)가 추가로 붙는다. is_request_objective_met/
+## claim_request은 _get_request_definition()으로 두 저장소를 함께 조회한다.
+const RECURRING_TEMPLATES_PATH := "res://data/requests/recurring_templates.json"
+const RECURRING_INTERVAL_MIN_DAYS := 2
+const RECURRING_INTERVAL_MAX_DAYS := 3
+const RECURRING_NPC_COUNT_PER_CYCLE := 2
+const RECURRING_REWARD_GOLD := 150
+## 선호 재료 한국어 이름 -> 실제 인벤토리 아이템 id. data/npc/*.json의
+## preferred_food는 요리 판정용 한국어 원재료 이름이고(base_material과 동일
+## 규칙 - npc_manager.gd get_food_preference_for_ingredients 참고), 배달 요청의
+## 목표 아이템 id로 쓰려면 이 변환이 필요하다. data/items/items.json의 원재료
+## (material) 9종 + 우유 전부.
+const FOOD_NAME_TO_ITEM_ID := {
+	"감자": "potato",
+	"옥수수": "corn",
+	"상추": "lettuce",
+	"돼지고기": "pork",
+	"소고기": "beef",
+	"연어": "salmon",
+	"고등어": "mackerel",
+	"오징어": "squid",
+	"베리": "berry",
+	"우유": "milk",
+}
+## "요청함에 도착하고 4일 이내"(사용자 지시) - 지나면 claim 불가하고 "만료"로
+## 표시된다. 만료된 채로 하루 더 남겨뒀다가(사용자가 놓쳤다는 걸 확인할 시간)
+## _sweep_expired_dynamic_requests()가 정리한다.
+const REQUEST_EXPIRE_GRACE_DAYS := 4
+const EXPIRED_CLEANUP_DELAY_DAYS := 1
+
+## 가구 배달 요청(사용자 지시, 2026-08-25 - "가구는 랜덤하게, rare 요청이어야
+## 됨") - 10일 이후부터 매일 낮은 확률로 하나 생성. 매번 나오는 게 아니라
+## 특정 NPC 목소리를 붙이기엔 아까워서, 아무 NPC한테나 자연스럽게 어울리는
+## 일반 문구 여러 개 중 무작위로 고른다.
+const FURNITURE_QUEST_START_DAY := 10
+const FURNITURE_QUEST_DAILY_CHANCE := 0.12
+const FURNITURE_QUEST_REWARD_MARGIN := 300
+const FURNITURE_SHOP_ID := "woody_shop"
+const FURNITURE_QUEST_TEMPLATES := [
+	{
+		"title": "부탁 하나만 해도 될까?",
+		"lines": [
+			"집 좀 꾸며보려고 하는데, 아무래도 혼자 고르긴 자신이 없어서.",
+			"가구점에서 {item_name} 하나만 구해다 줄 수 있어?",
+			"값은 넉넉하게 챙겨줄게, 부탁해."
+		]
+	},
+	{
+		"title": "이상하게 들릴 수도 있는데",
+		"lines": [
+			"요즘 집에 뭐가 하나 빠진 느낌이 들어서 고민하다가 부탁하는 거야.",
+			"가구점에 {item_name}가 있던데, 그거 하나만 사다 줄래?",
+			"귀찮은 부탁인 거 아는데, 갚을게."
+		]
+	},
+	{
+		"title": "심부름 좀 부탁해도 돼?",
+		"lines": [
+			"요즘 가게 일 때문에 가구점 들를 시간이 도저히 안 나.",
+			"{item_name} 하나 필요한데, 대신 좀 사다 줄 수 있어?",
+			"수고비는 확실히 챙겨줄게."
+		]
+	}
+]
+var _recurring_templates: Dictionary = {}
+var _dynamic_requests: Dictionary = {}
+var _next_recurring_day := 0
+
 var _inbox: Array = []
 var _sent: Array = []
 var _invite_history: Array = []
@@ -60,12 +157,17 @@ var _pending_mail_reaction: Dictionary = {}
 
 
 func _ready() -> void:
+	_load_requests()
+	_load_recurring_templates()
+	_next_recurring_day = TimeManager.current_day + randi_range(RECURRING_INTERVAL_MIN_DAYS, RECURRING_INTERVAL_MAX_DAYS)
 	NPCManager.gift_given.connect(_on_gift_given)
 	RestaurantManager.dish_served.connect(_on_dish_served)
+	InventoryManager.item_added.connect(_on_item_added)
 	TimeManager.day_changed.connect(_on_day_changed)
 	HorrorEventManager.impersonation_email_ready.connect(_on_impersonation_email_ready)
 	HorrorEventManager.stalker_email_ready.connect(_on_stalker_email_ready)
 	MurderManager.alibi_reminder_ready.connect(_on_alibi_reminder_ready)
+	NPCManager.memento_reminder_ready.connect(_on_memento_reminder_ready)
 
 
 ## 메일함 UI는 게임 내 "N일차"가 아니라 플레이어가 실제로 메일을 주고받은
@@ -109,6 +211,261 @@ func mark_invite_outcome(npc_id: String, visited: bool) -> void:
 
 func get_invite_history() -> Array:
 	return _invite_history.duplicate(true)
+
+
+## 아직 완료 보상을 안 받은 요청들 - mail_app.gd 요청함 목록용. 완료(claim)한
+## 요청은 여기서 아예 빠진다(별도 "완료함" 보관 없음). 고정 요청(_request_definitions)
+## 뒤에 반복/희귀 요청(_dynamic_requests)이 이어 붙는다 - 만료 여부는 저장된
+## 상태가 아니라 조회 시점에 TimeManager.current_day로 매번 새로 계산한다.
+func get_active_requests() -> Array:
+	var active: Array = []
+	for request_id in _request_definitions:
+		if _claimed_requests.has(request_id):
+			continue
+		var entry: Dictionary = (_request_definitions[request_id] as Dictionary).duplicate(true)
+		entry["id"] = request_id
+		entry["expired"] = false
+		active.append(entry)
+	for request_id in _dynamic_requests:
+		if _claimed_requests.has(request_id):
+			continue
+		var entry: Dictionary = (_dynamic_requests[request_id] as Dictionary).duplicate(true)
+		entry["id"] = request_id
+		entry["expired"] = _is_request_expired(entry)
+		active.append(entry)
+	return active
+
+
+func _is_request_expired(definition: Dictionary) -> bool:
+	var expires_day := int(definition.get("expires_day", -1))
+	return expires_day >= 0 and TimeManager.current_day > expires_day
+
+
+func _get_request_definition(request_id: String) -> Dictionary:
+	if _request_definitions.has(request_id):
+		return _request_definitions[request_id]
+	return _dynamic_requests.get(request_id, {})
+
+
+func is_request_read(request_id: String) -> bool:
+	return bool(_read_requests.get(request_id, false))
+
+
+func mark_request_read(request_id: String) -> void:
+	_read_requests[request_id] = true
+
+
+## 목표를 실제로 달성했는지 매번 새로 확인한다(저장된 "진행 상태" 없음) - 새
+## objective_type을 추가하려면 이 match에 분기만 늘리면 된다.
+func is_request_objective_met(request_id: String) -> bool:
+	var definition := _get_request_definition(request_id)
+	if definition.is_empty():
+		return false
+	var target := int(definition.get("objective_target", 0))
+	match String(definition.get("objective_type", "")):
+		"total_income":
+			return EconomyManager.total_income >= target
+		"lifetime_item_count":
+			var item_id := String(definition.get("objective_item_id", ""))
+			return int(_lifetime_item_counts.get(item_id, 0)) >= target
+		"lifetime_dishes_served":
+			return _lifetime_dishes_served >= target
+		"deliver_item":
+			var deliver_item_id := String(definition.get("objective_item_id", ""))
+			return InventoryManager.has_item(deliver_item_id, target)
+		"greet_all_npcs":
+			return _greeted_npc_ids.size() >= target
+		_:
+			return false
+
+
+## 요청함 상세 화면에 붙이는 진행 상황 문구(사용자 지시, 2026-08-25 - "인사한
+## npc 몇 명인지 요청함에서 볼 수 있게") - 이 문구가 필요한 objective_type만
+## 채워서 반환하고, 그 외는 빈 문자열(mail_detail_panel.gd가 비어있으면 안 붙임).
+func get_request_progress_text(request_id: String) -> String:
+	var definition := _get_request_definition(request_id)
+	match String(definition.get("objective_type", "")):
+		"greet_all_npcs":
+			return "%d / %d명과 인사함" % [_greeted_npc_ids.size(), int(definition.get("objective_target", 0))]
+		_:
+			return ""
+
+
+## main.gd._handle_npc_encounter()가 하루 첫 마주침마다 호출 - "모든 NPC와
+## 인사하기" 요청의 진행 상태를 쌓는다. 한 번 인사한 NPC는 영구히 카운트된다.
+func record_npc_greeted(npc_id: String) -> void:
+	_greeted_npc_ids[npc_id] = true
+
+
+## 완료 버튼이 눌렸을 때(mail_app.gd) - 목표를 아직 못 채웠거나 이미 받았거나
+## 만료된 요청이면 조용히 실패. deliver_item 타입은 보상 지급 전에 인벤토리에서
+## 실제로 재료를 차감한다(사용자 지시, 2026-08-25 - "인벤에 템이 있고 완료
+## 버튼 누르면 자동으로 -1"). 성공하면 요청함에서 사라진다.
+func claim_request(request_id: String) -> bool:
+	if _claimed_requests.has(request_id):
+		return false
+	var definition := _get_request_definition(request_id)
+	if definition.is_empty() or _is_request_expired(definition) or not is_request_objective_met(request_id):
+		return false
+	if String(definition.get("objective_type", "")) == "deliver_item":
+		var deliver_item_id := String(definition.get("objective_item_id", ""))
+		var deliver_count := int(definition.get("objective_target", 1))
+		if not InventoryManager.remove_item(deliver_item_id, deliver_count):
+			return false
+	var reward_gold := int(definition.get("reward_gold", 0))
+	if reward_gold > 0:
+		EconomyManager.add_income(reward_gold)
+	var reward_item_id := String(definition.get("reward_item_id", ""))
+	if not reward_item_id.is_empty():
+		InventoryManager.add_item(reward_item_id, int(definition.get("reward_item_count", 1)))
+	## 부탁을 들어준 셈이니 발신자 호감도도 오른다(사용자 지시, 2026-08-25).
+	NPCManager.add_request_completion_affection(String(definition.get("npc_id", "")))
+	_claimed_requests[request_id] = true
+	return true
+
+
+func _load_requests() -> void:
+	var file := FileAccess.open(REQUESTS_PATH, FileAccess.READ)
+	if file == null:
+		push_error("Request catalog could not be opened: %s" % REQUESTS_PATH)
+		return
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	if not (parsed is Dictionary):
+		push_error("Request catalog is not valid JSON: %s" % REQUESTS_PATH)
+		return
+	_request_definitions = parsed
+
+
+func _load_recurring_templates() -> void:
+	var file := FileAccess.open(RECURRING_TEMPLATES_PATH, FileAccess.READ)
+	if file == null:
+		push_error("Recurring request template catalog could not be opened: %s" % RECURRING_TEMPLATES_PATH)
+		return
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	if not (parsed is Dictionary):
+		push_error("Recurring request template catalog is not valid JSON: %s" % RECURRING_TEMPLATES_PATH)
+		return
+	_recurring_templates = parsed
+
+
+## 2~3일마다 살아있는 NPC 2명이 새로 선호 재료 배달을 요청한다(사용자 지시,
+## 2026-08-25). 이미 다른 반복/가구 요청이 걸려있는 NPC는 후보에서 빠진다 -
+## 한 명한테 동시에 요청이 여러 개 쌓이는 걸 막기 위함.
+func _maybe_generate_recurring_requests() -> void:
+	if TimeManager.current_day < _next_recurring_day:
+		return
+	_next_recurring_day = TimeManager.current_day + randi_range(RECURRING_INTERVAL_MIN_DAYS, RECURRING_INTERVAL_MAX_DAYS)
+	var pool := _eligible_dynamic_request_npc_ids()
+	pool.shuffle()
+	for npc_id in pool.slice(0, RECURRING_NPC_COUNT_PER_CYCLE):
+		_create_recurring_request(npc_id)
+
+
+func _eligible_dynamic_request_npc_ids() -> Array:
+	var result: Array = []
+	for npc_id in _recurring_templates.keys():
+		if not NPCManager.is_alive(npc_id):
+			continue
+		if _has_active_dynamic_request_from(npc_id):
+			continue
+		result.append(npc_id)
+	return result
+
+
+func _has_active_dynamic_request_from(npc_id: String) -> bool:
+	for request_id in _dynamic_requests:
+		if _claimed_requests.has(request_id):
+			continue
+		if String((_dynamic_requests[request_id] as Dictionary).get("npc_id", "")) == npc_id:
+			return true
+	return false
+
+
+func _create_recurring_request(npc_id: String) -> void:
+	var preferred: Array = NPCManager.get_definition(npc_id).get("preferred_food", [])
+	if preferred.is_empty():
+		return
+	var food_name := String(preferred.pick_random())
+	var item_id := String(FOOD_NAME_TO_ITEM_ID.get(food_name, ""))
+	if item_id.is_empty():
+		return
+	var template: Dictionary = _recurring_templates.get(npc_id, {})
+	if template.is_empty():
+		return
+	var lines: Array = (template.get("lines", []) as Array).duplicate()
+	for i in lines.size():
+		lines[i] = String(lines[i]).replace("{item_name}", food_name)
+	var request_id := "recurring_%s_%d" % [npc_id, TimeManager.current_day]
+	_dynamic_requests[request_id] = {
+		"npc_id": npc_id,
+		"title": String(template.get("title", "")).replace("{item_name}", food_name),
+		"lines": lines,
+		"objective_type": "deliver_item",
+		"objective_item_id": item_id,
+		"objective_target": 1,
+		"reward_gold": RECURRING_REWARD_GOLD,
+		"reward_item_id": "",
+		"reward_item_count": 0,
+		"expires_day": TimeManager.current_day + REQUEST_EXPIRE_GRACE_DAYS,
+	}
+
+
+## 10일차 이후부터 매일 낮은 확률로 가구 배달 요청 하나를 생성한다(사용자
+## 지시 - "가구는 랜덤하게, rare 요청이어야 됨"). ShopManager의 실제 가구점
+## 재고에서 고르므로 신규 가구가 추가돼도 코드 수정 없이 그대로 후보가 된다.
+func _maybe_generate_furniture_request() -> void:
+	if TimeManager.current_day < FURNITURE_QUEST_START_DAY or _has_active_furniture_request():
+		return
+	if randf() > FURNITURE_QUEST_DAILY_CHANCE:
+		return
+	var stock: Array = ShopManager.get_stock(FURNITURE_SHOP_ID).filter(func(listing: Dictionary) -> bool: return int(listing.get("price", 0)) > 0)
+	var sender_pool := _eligible_dynamic_request_npc_ids()
+	if stock.is_empty() or sender_pool.is_empty():
+		return
+	var listing: Dictionary = stock.pick_random()
+	var item_id := String(listing.get("item_id", ""))
+	var item_name := String(InventoryManager.get_item_definition(item_id).get("name", item_id))
+	var price := int(listing.get("price", 0))
+	var npc_id := String(sender_pool.pick_random())
+	var template: Dictionary = FURNITURE_QUEST_TEMPLATES.pick_random()
+	var lines: Array = (template.get("lines", []) as Array).duplicate()
+	for i in lines.size():
+		lines[i] = String(lines[i]).replace("{item_name}", item_name)
+	var request_id := "furniture_%s_%d" % [npc_id, TimeManager.current_day]
+	_dynamic_requests[request_id] = {
+		"npc_id": npc_id,
+		"title": String(template.get("title", "")),
+		"lines": lines,
+		"objective_type": "deliver_item",
+		"objective_item_id": item_id,
+		"objective_target": 1,
+		"reward_gold": price + FURNITURE_QUEST_REWARD_MARGIN,
+		"reward_item_id": "",
+		"reward_item_count": 0,
+		"expires_day": TimeManager.current_day + REQUEST_EXPIRE_GRACE_DAYS,
+	}
+
+
+func _has_active_furniture_request() -> bool:
+	for request_id in _dynamic_requests:
+		if String(request_id).begins_with("furniture_") and not _claimed_requests.has(request_id):
+			return true
+	return false
+
+
+## 만료된 지 EXPIRED_CLEANUP_DELAY_DAYS일이 지난 반복/가구 요청을 완전히
+## 정리한다 - 그 전까지는 "만료" 표시로 요청함에 남아있는다(사용자가 놓쳤다는
+## 걸 확인할 시간을 주기 위함, 사용자 지시).
+func _sweep_expired_dynamic_requests() -> void:
+	var to_remove: Array = []
+	for request_id in _dynamic_requests:
+		var expires_day := int((_dynamic_requests[request_id] as Dictionary).get("expires_day", -1))
+		if expires_day >= 0 and TimeManager.current_day > expires_day + EXPIRED_CLEANUP_DELAY_DAYS:
+			to_remove.append(request_id)
+	for request_id in to_remove:
+		_dynamic_requests.erase(request_id)
+		_claimed_requests.erase(request_id)
+		_read_requests.erase(request_id)
 
 
 func has_unread() -> bool:
@@ -183,6 +540,13 @@ func get_save_data() -> Dictionary:
 		"sent_story_triggers": _sent_story_triggers.duplicate(true),
 		"last_greeting_day": _last_greeting_day.duplicate(),
 		"pending_mail_reaction": _pending_mail_reaction.duplicate(),
+		"claimed_requests": _claimed_requests.duplicate(),
+		"read_requests": _read_requests.duplicate(),
+		"lifetime_item_counts": _lifetime_item_counts.duplicate(),
+		"lifetime_dishes_served": _lifetime_dishes_served,
+		"greeted_npc_ids": _greeted_npc_ids.duplicate(),
+		"dynamic_requests": _dynamic_requests.duplicate(true),
+		"next_recurring_day": _next_recurring_day,
 	}
 
 
@@ -192,6 +556,13 @@ func load_save_data(data: Dictionary) -> void:
 	_invite_history = (data.get("invite_history", []) as Array).duplicate(true)
 	_next_id = int(data.get("next_id", 1))
 	_player_email_used_today = bool(data.get("player_email_used_today", false))
+	_claimed_requests = (data.get("claimed_requests", {}) as Dictionary).duplicate()
+	_read_requests = (data.get("read_requests", {}) as Dictionary).duplicate()
+	_lifetime_item_counts = (data.get("lifetime_item_counts", {}) as Dictionary).duplicate()
+	_lifetime_dishes_served = int(data.get("lifetime_dishes_served", 0))
+	_greeted_npc_ids = (data.get("greeted_npc_ids", {}) as Dictionary).duplicate()
+	_dynamic_requests = (data.get("dynamic_requests", {}) as Dictionary).duplicate(true)
+	_next_recurring_day = int(data.get("next_recurring_day", _next_recurring_day))
 	_gifted_today = (data.get("gifted_today", {}) as Dictionary).duplicate()
 	_favorite_food_served_today = (data.get("favorite_food_served_today", {}) as Dictionary).duplicate()
 	_sent_story_triggers = (data.get("sent_story_triggers", {}) as Dictionary).duplicate(true)
@@ -204,13 +575,21 @@ func _on_gift_given(npc_id: String) -> void:
 
 
 func _on_dish_served(_station_index: int, npc_id: String, dish: Dictionary) -> void:
+	_lifetime_dishes_served += 1
 	if int(dish.get("preference", NPCManager.FoodPreference.NEUTRAL)) == NPCManager.FoodPreference.FAVORITE:
 		_favorite_food_served_today[npc_id] = true
+
+
+func _on_item_added(item_id: String, count: int) -> void:
+	_lifetime_item_counts[item_id] = int(_lifetime_item_counts.get(item_id, 0)) + count
 
 
 func _on_day_changed(_day: int, _weekday: String) -> void:
 	_player_email_used_today = false
 	_generate_daily_emails()
+	_maybe_generate_recurring_requests()
+	_maybe_generate_furniture_request()
+	_sweep_expired_dynamic_requests()
 
 
 func _generate_daily_emails() -> void:
@@ -334,6 +713,12 @@ func _on_stalker_email_ready(sender_id: String, title: String, lines: Array) -> 
 ## 넘게 대화를 못 나눈 NPC가 보내는 재촉 메일.
 func _on_alibi_reminder_ready(npc_id: String, title: String, lines: Array) -> void:
 	_add_mail(npc_id, "alibi_reminder", title, lines)
+
+
+## NPCManager.memento_reminder_ready 참고 - 추억의 물건 마일스톤이 며칠째
+## 대화로 소비되지 않은 NPC가 보내는 안전장치 메일. 딱 한 번만 온다.
+func _on_memento_reminder_ready(npc_id: String, title: String, lines: Array) -> void:
+	_add_mail(npc_id, "memento_reminder", title, lines)
 
 
 ## 반환값은 main.gd의 엔딩 컷신처럼 "이 메일이 실제로 읽힐 때까지 기다리기"가

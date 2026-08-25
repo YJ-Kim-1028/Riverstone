@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="13" height="13" tilewidth="16" tileheight="16" infinite="0" nextlayerid="13" nextobjectid="17">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="13" height="13" tilewidth="16" tileheight="16" infinite="0" nextlayerid="14" nextobjectid="20">
  <tileset firstgid="1" source="UI_Component.tsx"/>
  <tileset firstgid="257" source="shrine.tsx"/>
  <tileset firstgid="513" source="temper.tsx"/>
@@ -168,6 +168,11 @@
   <object id="2" name="shrine_enterance" x="96" y="192" width="16" height="16"/>
   <object id="3" name="shrine_sitting" x="80" y="144" width="16" height="16"/>
   <object id="4" name="shrine_standing" x="96" y="112" width="16" height="16"/>
+  <object id="17" name="sage_heart_player" x="112" y="144" width="16" height="16"/>
+  <object id="19" name="sage_altar_spot" x="80" y="112"/>
+ </objectgroup>
+ <objectgroup id="13" name="Interactable" visible="0" locked="1">
+  <object id="18" name="soul_altar" x="96" y="112" width="16" height="16"/>
  </objectgroup>
  <objectgroup id="12" name="YSortAnchor" visible="0" locked="1">
   <object id="5" name="wall" x="16" y="16" width="176" height="48"/>

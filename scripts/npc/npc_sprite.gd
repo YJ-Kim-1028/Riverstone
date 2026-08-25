@@ -67,6 +67,15 @@ var _walk_frame_timer := 0.0
 var _walk_frame_toggle := false
 var _emote_sprite: Sprite2D
 var _emote_timer: Timer
+## 호감도 100 컷신(main.gd)이 이 NPC를 플레이어 쪽으로 걸어오게 만드는 그
+## 한 번의 걸음만 예외적으로 시간 정지 중에도 진행되게 한다(NPCWorldManager.
+## walk_npc_to_position()이 걷는 동안만 true로 세팅) - 그 컷신 자체가
+## _memento_event_active로 TimeManager를 멈추는데, 아래 시간정지 체크에
+## 그대로 걸리면 정작 "다가오라"고 시킨 그 걸음 자체가 못 움직인 채 얼어붙어서,
+## 컷신이 끝나고 시간이 다시 흐르는 순간에야 갑자기 옆에 나타나는 것처럼 보였다
+## (사용자 리포트, 2026-08-26 - "working에 서있다가 플레이어 옆으로 오는게
+## 안 돼... 이벤트가 끝나고 나서야 내 옆으로 오네").
+var _ignore_time_pause := false
 
 
 func _ready() -> void:
@@ -106,11 +115,15 @@ func _process(delta: float) -> void:
 		for i in _scent_sprites.size():
 			var phase := _scent_time * SCENT_SPEED + i * (TAU / SCENT_COUNT)
 			_scent_sprites[i].position = SCENT_CENTER + Vector2(cos(phase) * SCENT_ORBIT.x, sin(phase) * SCENT_ORBIT.y)
-	if not TimeManager.is_running:
+	if not TimeManager.is_running and not _ignore_time_pause:
 		return
 	if _is_walking:
 		_advance_walk(delta)
 	_update_animation(delta)
+
+
+func set_ignore_time_pause(value: bool) -> void:
+	_ignore_time_pause = value
 
 
 func _build_scent_sprites() -> void:

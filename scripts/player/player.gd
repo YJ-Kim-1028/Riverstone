@@ -61,7 +61,7 @@ var _atlas: AtlasTexture
 var _walk_frame_timer := 0.0
 var _walk_frame_toggle := false
 
-## 이동속도 버프/디버프 - data/npc/mocha.json의 buff_item(이동속도 +10%,
+## 이동속도 버프/디버프 - data/npc/mocha.json의 buff_item(이동속도 +30%,
 ## 3분)처럼 아이템/이벤트가 부여하는 일시적 배율. 게임 시간(TimeManager) 기준
 ## 분 단위로 줄어든다 - 대화 등으로 시간이 멈추면 이 효과도 같이 멈춰야
 ## 자연스럽다(NPCSprite와 같은 이유).
@@ -142,9 +142,15 @@ func _physics_process(_delta: float) -> void:
 	_update_animation(_delta, is_moving)
 
 
-## percent: +0.1이면 이동속도 +10%(버프), -0.3이면 -30%(디버프). 새 효과가
-## 기존 효과를 덮어쓴다(현재 데이터상 버프/디버프가 동시에 겹칠 일이 없음).
+## percent: +0.1이면 이동속도 +10%(버프), -0.3이면 -30%(디버프). 디버프는
+## 항상 새로 덮어쓴다. 버프끼리는(예: 세이지 행운 버프 20% 중에 아메리카노
+## 10%를 마시는 경우) 더 약한 쪽이 더 강한 쪽을 깎아먹지 않도록, 이미 걸린
+## 버프보다 약하거나 같으면 무시한다(사용자 지시, 2026-08-26 - "세이지 버프가
+## 있을 때 커피 마셔도 이속 버프 안 생겨.. 여전히 10%야").
 func apply_speed_effect(percent: float, duration_minutes: int, is_debuff: bool) -> void:
+	if not is_debuff and not _speed_effect_is_debuff and _speed_effect_minutes_remaining > 0:
+		if percent <= _speed_modifier - 1.0:
+			return
 	_speed_modifier = 1.0 + percent
 	_speed_effect_minutes_remaining = duration_minutes
 	_speed_effect_is_debuff = is_debuff
@@ -299,10 +305,14 @@ const RUN_SPEED_MULTIPLIER := 1.3
 const SCRIPTED_WALK_ARRIVAL_DISTANCE := 3.0
 const SCRIPTED_WALK_TIMEOUT_SECONDS := 10.0
 
-func walk_to(target_position: Vector2) -> void:
+## run=false로 부르면 평소 걷는 속도 그대로 목적지까지 이동한다(사용자 지시,
+## 2026-08-26 - "호감도 이벤트때도 개빨라... 실제 걸음 속도랑 똑같이 해야할
+## 거 같아. 살인 일어났을 때 황급히 달려가고 그런 거 빼고"). 살인 발견/체포
+## 엔딩처럼 급박한 장면은 기본값(run=true)을 그대로 쓰면 된다.
+func walk_to(target_position: Vector2, run: bool = true) -> void:
 	set_movement_enabled(true)
 	var previous_speed_modifier := _speed_modifier
-	_speed_modifier = RUN_SPEED_MULTIPLIER
+	_speed_modifier = RUN_SPEED_MULTIPLIER if run else 1.0
 	var waypoints: PackedVector2Array = _world_map.find_path(position, target_position) if _world_map != null else PackedVector2Array()
 	if waypoints.is_empty():
 		waypoints = PackedVector2Array([target_position])
@@ -327,6 +337,12 @@ func _direction_from_vector(v: Vector2) -> Vector2i:
 ## 현재 바라보는 방향으로 한 칸 앞의 월드 좌표.
 func get_facing_tile_position() -> Vector2:
 	return position + Vector2(facing_direction) * WorldMap.TILE_SIZE
+
+
+## 걷지 않고 방향만 target_position 쪽으로 돌린다 - heart_event_30 도착
+## 연출에서 옆/뒤를 보고 있던 문제를 고치기 위해 추가(사용자 지시, 2026-08-26).
+func face_toward(target_position: Vector2) -> void:
+	facing_direction = _direction_from_vector(target_position - position)
 
 
 func set_camera_bounds(map_size: Vector2i) -> void:

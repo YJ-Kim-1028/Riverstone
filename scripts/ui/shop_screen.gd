@@ -13,6 +13,10 @@ const COIN_ICON := preload("res://assets/ui/icon_coin.png")
 const COIN_ICON_MAX_WIDTH := 6
 
 const BUTTON_TEXT_COLOR := Color(0.25, 0.15, 0.08)
+## 이미 동물이 있는 칸 버튼을 어둡게 처리하는 데 쓴다(title_screen.gd의
+## DISABLED_TINT와 같은 값) - 칸 고르기 버튼이 기본 엔진 버튼 그대로라 못생겼다는
+## 지적(사용자 지시, 2026-08-25)으로 다른 버튼들과 같은 button.png 스타일을 입힌다.
+const STALL_DISABLED_TINT := Color(0.55, 0.55, 0.55)
 
 const SCROLLBAR_WIDTH := 4
 ## 목장가게(belje_shop)의 소/돼지 판매 항목(ShopManager.LIVESTOCK_PREFIX와
@@ -343,13 +347,14 @@ func _build_row_style() -> StyleBoxFlat:
 	return style
 
 
-func _build_button_style(texture: Texture2D) -> StyleBoxTexture:
+func _build_button_style(texture: Texture2D, tint: Color = Color.WHITE) -> StyleBoxTexture:
 	var style := StyleBoxTexture.new()
 	style.texture = texture
 	style.texture_margin_left = 8
 	style.texture_margin_right = 8
 	style.texture_margin_top = 4
 	style.texture_margin_bottom = 4
+	style.modulate_color = tint
 	return style
 
 
@@ -524,6 +529,15 @@ func _open_stall_picker(item_id: String) -> void:
 		var button := Button.new()
 		button.custom_minimum_size = Vector2(24, 16)
 		button.add_theme_font_size_override("font_size", ROW_FONT_SIZE)
+		button.add_theme_stylebox_override("normal", _build_button_style(BUTTON_TEXTURE))
+		button.add_theme_stylebox_override("hover", _build_button_style(BUTTON_HOVER_TEXTURE))
+		button.add_theme_stylebox_override("pressed", _build_button_style(BUTTON_HOVER_TEXTURE))
+		button.add_theme_stylebox_override("disabled", _build_button_style(BUTTON_TEXTURE, STALL_DISABLED_TINT))
+		button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+		button.add_theme_color_override("font_color", BUTTON_TEXT_COLOR)
+		button.add_theme_color_override("font_hover_color", BUTTON_TEXT_COLOR)
+		button.add_theme_color_override("font_pressed_color", BUTTON_TEXT_COLOR)
+		button.add_theme_color_override("font_disabled_color", BUTTON_TEXT_COLOR.lerp(Color.BLACK, 0.3))
 		if LivestockManager.is_stall_empty(i):
 			button.text = str(i + 1)
 			button.pressed.connect(func() -> void: _on_stall_chosen(i))

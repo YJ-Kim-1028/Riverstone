@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="25" height="21" tilewidth="16" tileheight="16" infinite="0" nextlayerid="16" nextobjectid="25">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="25" height="21" tilewidth="16" tileheight="16" infinite="0" nextlayerid="16" nextobjectid="26">
  <tileset firstgid="1" source="UI_Component.tsx"/>
  <tileset firstgid="257" source="home.tsx"/>
  <tileset firstgid="513" source="restaurant.tsx"/>
@@ -221,6 +221,7 @@
   <object id="5" name="home_enterance" x="80.0455" y="319.591" width="31.9545" height="16"/>
   <object id="22" name="basement_exit" x="336" y="320" width="32" height="16"/>
   <object id="24" name="usher_home_standing" x="224" y="176"/>
+  <object id="25" name="soul_crystal_sleep_spot" x="48" y="184"/>
  </objectgroup>
  <objectgroup id="13" name="Interactable" visible="0" locked="1">
   <object id="6" name="collection" x="95.9091" y="176.546" width="48" height="16"/>

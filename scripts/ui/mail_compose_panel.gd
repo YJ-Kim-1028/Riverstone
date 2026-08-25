@@ -8,8 +8,9 @@ extends Control
 enum Mode { NONE, GREETING, INVITE }
 
 const CONTENT_CHAR_LIMIT := 100
-## 초대장 모드의 제목 - 내용과 마찬가지로 시스템이 고정한다(사용자 지시).
-const INVITE_TITLE_TEXT := "레스토랑 초대장"
+## 초대장 모드의 제목 - 내용과 마찬가지로 시스템이 고정한다(사용자 지시,
+## 2026-08-25 - "%s 레스토랑에 초대합니다!" 형식으로 레스토랑 이름을 넣도록 수정).
+const INVITE_TITLE_FORMAT := "%s 레스토랑에 초대합니다!"
 ## 모드를 아직 안 고른 초기 상태 - 내용 칸이 비활성화된 이유(그림 배경이
 ## 진해 보이는 게 아니라 아직 안부 메일/초대장을 안 골라서임)를 안내한다.
 const MODE_GUIDE_TEXT := "내용을 작성하려면 안부 메일을, 주민을 초대하려면 초대장을 클릭하세요."
@@ -125,7 +126,7 @@ func _set_mode(mode: Mode) -> void:
 			_content_edit.text = ""
 		Mode.INVITE:
 			_title_edit.editable = false
-			_title_edit.text = INVITE_TITLE_TEXT
+			_title_edit.text = INVITE_TITLE_FORMAT % GameManager.restaurant_name
 			_content_edit.editable = false
 			_content_edit.text = "당신을 %s에 초대합니다! 맛있는 만찬을 즐기고 가세요~" % GameManager.restaurant_name
 		_:

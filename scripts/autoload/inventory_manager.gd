@@ -535,6 +535,17 @@ func _remove_from_slot(slot_index: int, count: int) -> bool:
 	return true
 
 
+## assets/icon/memento.png는 16x16 칸 13개짜리 한 줄 시트(사용자가 직접
+## 그려준 순서, 2026-08-25) - get_item_icon_texture()의 icon_index 규칙(왼쪽부터
+## 0-based 열)을 그대로 따른다.
+const MEMENTO_SPRITE_SHEET := "res://assets/icon/memento.png"
+const MEMENTO_ICON_INDEX := {
+	"belje": 0, "flora": 1, "isha": 2, "lama": 3, "marin": 4, "marr": 5,
+	"mocha": 6, "poli": 7, "roshi": 8, "sage": 9, "shepherd": 10, "usher": 11,
+	"woody": 12,
+}
+
+
 func _register_memento_items() -> void:
 	for npc_id in NPCManager.get_all_ids():
 		var memento: Dictionary = NPCManager.get_definition(npc_id).get("memento_item", {})
@@ -542,14 +553,17 @@ func _register_memento_items() -> void:
 		if memento_name.is_empty():
 			continue
 		var item_id := "memento_%s" % npc_id
-		_item_catalog[item_id] = {
+		var entry := {
 			"id": item_id,
 			"name": memento_name,
 			"category": "memento",
 			"subtype": "",
 			"description": String(memento.get("description", "")),
-			"icon": "",
+			"icon": MEMENTO_SPRITE_SHEET,
 		}
+		if MEMENTO_ICON_INDEX.has(npc_id):
+			entry["icon_index"] = MEMENTO_ICON_INDEX[npc_id]
+		_item_catalog[item_id] = entry
 
 
 func _load_item_catalog() -> void:

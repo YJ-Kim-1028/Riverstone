@@ -135,8 +135,8 @@ const CHEEK_DEFAULT_COLOR := Color(0xF4 / 255.0, 0xA6 / 255.0, 0xB3 / 255.0)
 ## player_outfit.png를 사용자가 새로 그리면서 마커도 피부와 같은 명도 3단계
 ## 구조(D6D6D6/A8A8A8/727272)로 바뀜(사용자 지시, 2026-08-09). 옷은 유일하게
 ## 3색을 각각 독립적으로 고른다(자동 음영 계산 없음, 사용자 확정) - "상의"/
-## "하의"/"포인트"라는 이름표가 실제 그림 속 부위와 정확히 대응하는 건 아니고
-## 이 마커 3개에 붙인 이름표다.
+## "하의"/"신발"(2026-08-25 이전엔 "포인트"였음)이라는 이름표가 실제 그림 속
+## 부위와 정확히 대응하는 건 아니고 이 마커 3개에 붙인 이름표다.
 const OUTFIT_MARKER_COLORS: Array[Color] = [
 	Color(0xD6 / 255.0, 0xD6 / 255.0, 0xD6 / 255.0),
 	Color(0xA8 / 255.0, 0xA8 / 255.0, 0xA8 / 255.0),
@@ -197,7 +197,7 @@ var _skin_color := SKIN_DEFAULT_COLOR
 var _eye_color := EYE_DEFAULT_COLOR
 var _cheek_color := CHEEK_DEFAULT_COLOR
 ## 인덱스 0/1/2 = 색1(마커 D6D6D6)/색2(마커 A8A8A8)/색3(마커 727272) - 이름은
-## "상의"/"하의"/"포인트"지만 실제로는 그림 속 부위가 아니라 마커 3개에 붙인
+## "상의"/"하의"/"신발"이지만 실제로는 그림 속 부위가 아니라 마커 3개에 붙인
 ## 이름표일 뿐(사용자 확정, OUTFIT_MARKER_COLORS 주석 참고).
 var _outfit_colors: Array[Color] = OUTFIT_DEFAULT_COLORS.duplicate()
 var _accessory_color := ACCESSORY_DEFAULT_COLOR

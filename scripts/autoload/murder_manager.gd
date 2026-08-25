@@ -523,6 +523,68 @@ func _commit_murder(victim_id: String) -> void:
 	murder_occurred.emit(victim_id, _murder_count)
 
 
+## 디버그 전용(game_manager.gd) - 매번 스토리를 자연 진행 조건(비/22시/위치)까지
+## 끌고 가기 너무 힘들다는 지적(사용자 지시, 2026-08-26) - 즉시 스토커 살인을
+## 하나 커밋한다. 정식 _commit_murder()를 그대로 타므로 알리바이/사건 기록/
+## 그리프 대사 등 다운스트림 시스템이 실제 살인과 동일하게 반응한다(F7의
+## "생 죽이기"와 달리 이쪽은 진짜 살인 흐름). 두 번 누르면 1차/2차 순서대로.
+## npc_id 생략 시 스토리/스토커 제외 살아있는 NPC 중 자동으로 하나 고른다.
+func debug_force_commit_murder(npc_id: String = "") -> void:
+	if has_ending_achieved() or _stalker_killed or _murder_count >= MAX_STALKER_MURDERS:
+		return
+	var target_id := npc_id
+	if target_id.is_empty():
+		for candidate_id in NPCManager.get_all_ids():
+			if NPCManager.is_alive(candidate_id) and not NPCManager.is_story_npc(candidate_id) and not NPCManager.is_stalker(candidate_id) and not bool(_resolved_candidates.get(candidate_id, false)):
+				target_id = candidate_id
+				break
+	if target_id.is_empty():
+		return
+	if not _candidate_queue.has(target_id):
+		_candidate_queue.append(target_id)
+	_commit_murder(target_id)
+
+
+## 디버그 전용 - 진실 엔딩(플레이어가 스토커를 독살) 즉시 발동.
+func debug_force_truth_ending() -> void:
+	if has_ending_achieved():
+		return
+	_finalize_player_poison(NPCManager.get_stalker_id())
+
+
+## 디버그 전용 - 공범 엔딩(플레이어가 무고한 NPC를 독살) 즉시 발동. npc_id
+## 생략 시 스토리/스토커 제외 살아있는 NPC 중 하나를 자동으로 고른다.
+func debug_force_accomplice_ending(npc_id: String = "") -> void:
+	if has_ending_achieved():
+		return
+	var target_id := npc_id
+	if target_id.is_empty():
+		for candidate_id in NPCManager.get_all_ids():
+			if NPCManager.is_alive(candidate_id) and not NPCManager.is_story_npc(candidate_id) and not NPCManager.is_stalker(candidate_id):
+				target_id = candidate_id
+				break
+	if target_id.is_empty():
+		return
+	_finalize_player_poison(target_id)
+
+
+## 디버그 전용 - 체포 엔딩(3번째 살해 시도 중 경찰이 스토커를 사살, 대상은
+## 생존) 즉시 발동. spared_npc_id 생략 시 살아있는 NPC 중 하나를 자동으로
+## 고른다.
+func debug_force_arrest_ending(spared_npc_id: String = "") -> void:
+	if has_ending_achieved():
+		return
+	var target_id := spared_npc_id
+	if target_id.is_empty():
+		for candidate_id in NPCManager.get_all_ids():
+			if NPCManager.is_alive(candidate_id) and not NPCManager.is_story_npc(candidate_id) and not NPCManager.is_stalker(candidate_id):
+				target_id = candidate_id
+				break
+	if target_id.is_empty():
+		return
+	_trigger_arrest_ending(target_id)
+
+
 func is_second_murder_discovery_pending() -> bool:
 	return _second_murder_home_pending
 

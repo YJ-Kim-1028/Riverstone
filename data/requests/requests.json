@@ -1,0 +1,179 @@
+{
+    "greet_all_npcs": {
+        "npc_id": "poli",
+        "title": "마을 사람들과 인사는 나눴나",
+        "lines": [
+            "새로 온 사람이 마을 사람들 얼굴도 모르고 지내면, 나중에 무슨 일 생겼을 때 서로 도울 수가 없어.",
+            "작은 마을이야. 다들 얼굴 트고 지내는 게 여러모로 낫지.",
+            "시간 날 때마다 마을 사람들이랑 마주치면 인사라도 건네 봐. 다 만나면 나한테도 알려주고."
+        ],
+        "objective_type": "greet_all_npcs",
+        "objective_target": 13,
+        "reward_gold": 300,
+        "reward_item_id": "",
+        "reward_item_count": 0
+    },
+    "try_fishing_rod": {
+        "npc_id": "roshi",
+        "title": "낚싯대 하나 장만하지",
+        "lines": [
+            "이 마을에 왔으면 낚싯대 하나쯤은 있어야지 않겠나.",
+            "내 가게에서 파는 걸로 하나 사가게. 그리 비싸지도 않아.",
+            "바다든 강이든, 던져만 봐도 시간 가는 줄 모를 걸세."
+        ],
+        "objective_type": "lifetime_item_count",
+        "objective_item_id": "fishing_rod",
+        "objective_target": 1,
+        "reward_gold": 100,
+        "reward_item_id": "",
+        "reward_item_count": 0
+    },
+    "welcome_income_boost": {
+        "npc_id": "marr",
+        "title": "장사가 잘 되길 바라며",
+        "lines": [
+            "새로 레스토랑을 시작했다고 들었습니다.",
+            "저도 이 마을에서 가게를 처음 열었을 때가 기억나는군요. 손님이 아무도 없어서 하루 종일 먼지만 털었습니다.",
+            "누적 수입이 300원을 넘기면 다시 편지 주세요. 작게나마 도움이 될 걸 좀 챙겨드리겠습니다."
+        ],
+        "objective_type": "total_income",
+        "objective_target": 300,
+        "reward_gold": 500,
+        "reward_item_id": "",
+        "reward_item_count": 0
+    },
+    "try_harvest_potato": {
+        "npc_id": "flora",
+        "title": "감자 한번 캐볼래?",
+        "lines": [
+            "저기, 너 감자 씨앗은 사놓고 아직 한 번도 안 심어봤지? 다 보여, 그런 거.",
+            "나도 처음 가게 열었을 때 감자부터 심었었어. 제일 실패 없이 잘 자라거든.",
+            "심고 물만 잘 줘봐. 수확할 때 기분이 얼마나 좋은지 알면 놀랄걸?"
+        ],
+        "objective_type": "lifetime_item_count",
+        "objective_item_id": "potato",
+        "objective_target": 1,
+        "reward_gold": 100,
+        "reward_item_id": "",
+        "reward_item_count": 0
+    },
+    "try_harvest_corn": {
+        "npc_id": "flora",
+        "title": "옥수수도 키워봐",
+        "lines": [
+            "옥수수는 심어봤어? 이번에 들어온 씨앗이 유난히 실하더라.",
+            "손은 좀 가는데, 그만큼 다 자랐을 때 뿌듯함이 남달라.",
+            "한 번 키워보고 나한테 소감 좀 말해줘. 나 은근 궁금하거든."
+        ],
+        "objective_type": "lifetime_item_count",
+        "objective_item_id": "corn",
+        "objective_target": 1,
+        "reward_gold": 100,
+        "reward_item_id": "",
+        "reward_item_count": 0
+    },
+    "try_harvest_lettuce": {
+        "npc_id": "flora",
+        "title": "상추는 금방 자라",
+        "lines": [
+            "상추, 아직 안 키워봤지? 사실 우리 가게에서 제일 빨리 자라는 작물이야.",
+            "바쁘다는 핑계로 농사 미루는 거, 나도 잘 알아. 근데 상추는 진짜 금방이라니까.",
+            "한 번만 심어봐. 어렵지 않다는 거 딱 알게 될 거야."
+        ],
+        "objective_type": "lifetime_item_count",
+        "objective_item_id": "lettuce",
+        "objective_target": 1,
+        "reward_gold": 100,
+        "reward_item_id": "",
+        "reward_item_count": 0
+    },
+    "try_pork": {
+        "npc_id": "shepherd",
+        "title": "돼지고기 한번 다뤄볼래?",
+        "lines": [
+            "목장 일 도우면서 느낀 건데, 돼지고기만큼 요리하기 편한 재료도 없더라고.",
+            "레스토랑 메뉴에 하나쯤 있으면 손님들도 좋아할걸? 내가 장담해.",
+            "부담 갖지 말고 한 번 해봐. 벨제한테는... 뭐, 굳이 자세히 말 안 해도 되겠지?"
+        ],
+        "objective_type": "lifetime_item_count",
+        "objective_item_id": "pork",
+        "objective_target": 1,
+        "reward_gold": 100,
+        "reward_item_id": "",
+        "reward_item_count": 0
+    },
+    "try_beef": {
+        "npc_id": "shepherd",
+        "title": "소고기도 한번 다뤄봐",
+        "lines": [
+            "소고기도 한 번 다뤄봐. 손이 많이 가는 재료긴 한데 그만큼 요리했을 때 반응이 좋아.",
+            "나도 목장 일 하면서 이런 것들 자연스럽게 익혔어. 처음이 어렵지, 다음부턴 금방이야.",
+            "필요한 거 있으면 언제든 말해. 목장 쪽 일은 내가 제일 잘 아니까."
+        ],
+        "objective_type": "lifetime_item_count",
+        "objective_item_id": "beef",
+        "objective_target": 1,
+        "reward_gold": 100,
+        "reward_item_id": "",
+        "reward_item_count": 0
+    },
+    "try_mackerel": {
+        "npc_id": "roshi",
+        "title": "고등어 낚아본 적 있어?",
+        "lines": [
+            "고등어, 낚아본 적 있나 모르겠군. 낚싯대만 있으면 어렵지 않아.",
+            "이 마을 바닷가에 서서 던지기만 해도 곧잘 걸려. 초심자한테 딱 맞는 녀석이지.",
+            "한 번 잡아보게. 잡고 나면 그 손맛, 잊기 힘들 걸세."
+        ],
+        "objective_type": "lifetime_item_count",
+        "objective_item_id": "mackerel",
+        "objective_target": 1,
+        "reward_gold": 100,
+        "reward_item_id": "",
+        "reward_item_count": 0
+    },
+    "try_salmon": {
+        "npc_id": "roshi",
+        "title": "연어도 잡아볼래?",
+        "lines": [
+            "연어도 한 번 잡아보겠나. 고등어보단 손이 좀 더 가긴 하지.",
+            "마린도 요즘 곧잘 잡아 오더군. 자네도 못할 거 없어.",
+            "천천히, 조급해하지 말고 던져보게. 그러면 될 걸세."
+        ],
+        "objective_type": "lifetime_item_count",
+        "objective_item_id": "salmon",
+        "objective_target": 1,
+        "reward_gold": 100,
+        "reward_item_id": "",
+        "reward_item_count": 0
+    },
+    "try_squid": {
+        "npc_id": "roshi",
+        "title": "오징어는 좀 까다로워",
+        "lines": [
+            "오징어는 좀 까다로운 편이라, 다들 낚기 어려워하더군.",
+            "그래도 한 번 잡아보면 재미가 쏠쏠할 거야. 마린도 처음엔 애먹었지.",
+            "잡으면 나한테도 살짝 자랑해도 되네. 나쁘지 않은 기분일 테니."
+        ],
+        "objective_type": "lifetime_item_count",
+        "objective_item_id": "squid",
+        "objective_target": 1,
+        "reward_gold": 100,
+        "reward_item_id": "",
+        "reward_item_count": 0
+    },
+    "try_serve_dish": {
+        "npc_id": "mocha",
+        "title": "손님한테 한 접시 대접해봤어?",
+        "lines": [
+            "레스토랑 연 지는 좀 됐는데, 손님한테 요리 제대로 대접해본 적은 있어?",
+            "장사라는 게 그렇더라. 첫 손님 받을 때가 제일 떨리고, 그 다음부턴 또 하게 되고.",
+            "한 접시 내보내 봐. 그 뿌듯함, 나도 아직 기억나."
+        ],
+        "objective_type": "lifetime_dishes_served",
+        "objective_target": 1,
+        "reward_gold": 100,
+        "reward_item_id": "",
+        "reward_item_count": 0
+    }
+}

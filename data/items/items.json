@@ -649,6 +649,15 @@
         "icon": "res://assets/icon/Tools.png",
         "icon_index": 1
     },
+    "soul_crystal": {
+        "id": "soul_crystal",
+        "name": "영혼의 결정",
+        "category": "quest_item",
+        "subtype": "",
+        "description": "정체를 알 수 없는 결정. 은은한 온기가 느껴진다. 세이지에게 물어보면 뭔가 알 수 있을지도.",
+        "icon": "res://assets/img/sage_altar.png",
+        "icon_index": 0
+    },
     "recipe_grilled_fish": {
         "id": "recipe_grilled_fish",
         "name": "레시피: 생선 구이",

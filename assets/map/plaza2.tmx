@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="48" height="24" tilewidth="16" tileheight="16" infinite="0" nextlayerid="12" nextobjectid="64">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="48" height="24" tilewidth="16" tileheight="16" infinite="0" nextlayerid="12" nextobjectid="68">
  <tileset firstgid="1" source="gg.tsx"/>
  <tileset firstgid="257" source="tree.tsx"/>
  <tileset firstgid="513" source="deco_col.tsx"/>
@@ -270,6 +270,10 @@
   <object id="11" name="book_standing" x="368" y="84.3333"/>
   <object id="12" name="book_exit" x="312.5" y="88"/>
   <object id="63" name="pond_standing_plaza2" x="416" y="304"/>
+  <object id="64" name="belje_heart_npc" x="448" y="280"/>
+  <object id="65" name="belje_heart_player" x="464" y="280"/>
+  <object id="66" name="flora_heart_npc" x="160" y="208"/>
+  <object id="67" name="flora_heart_player" x="144" y="224"/>
  </objectgroup>
  <objectgroup id="11" name="YSortAnchor" visible="0" locked="1">
   <object id="13" name="Tree1" x="736" y="16" width="32" height="48"/>

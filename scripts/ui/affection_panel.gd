@@ -14,11 +14,14 @@ const PORTRAIT_ICON_ID_OVERRIDES := {
 	"lama": "rama",
 	"shepherd": "shep",
 }
-## 하트 5개 x 30점 = 호감도 최대 150 전부 표현(스타듀밸리 방식) - 사용자가
-## icon_heart_full/half/empty.png를 8x8로 그려서 assets/ui/에 넣어줬다.
+## 하트 15개 x 10점 = 호감도 최대 150 전부 표현(사용자 지시, 2026-08-25 -
+## 5개짜리보다 더 세밀하게). 한 줄에 다 못 들어가서 2줄로 나눠 보여준다
+## (HEART_ROW_COLUMNS 참고) - 이름 자리는 그 위에 따로 둔다(_build_row 참고).
 const HEART_SIZE := Vector2(8, 8)
-const HEART_COUNT := 5
-const POINTS_PER_HEART := 30
+const HEART_COUNT := 15
+const POINTS_PER_HEART := 10
+## 하트를 2줄로 나눌 때 한 줄에 몇 개씩 넣을지(15개 -> 8+7).
+const HEART_ROW_COLUMNS := 8
 const HEART_FULL := preload("res://assets/ui/icon_heart_full.png")
 const HEART_HALF := preload("res://assets/ui/icon_heart_half.png")
 const HEART_EMPTY := preload("res://assets/ui/icon_heart_empty.png")
@@ -57,10 +60,17 @@ func _style_scrollbar() -> void:
 	scrollbar.add_theme_stylebox_override("grabber_pressed", grabber)
 
 
+## 하트 15개가 한 줄에 다 안 들어가서(사용자 지시, 2026-08-25) 세로로 쌓는다 -
+## 윗줄은 초상화+이름, 아랫줄은 하트 2줄(GridContainer가 HEART_ROW_COLUMNS
+## 개마다 자동으로 다음 줄로 넘긴다).
 func _build_row(npc_id: String) -> Control:
 	var definition := NPCManager.get_definition(npc_id)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 4)
+	var row := VBoxContainer.new()
+	row.add_theme_constant_override("separation", 1)
+
+	var name_row := HBoxContainer.new()
+	name_row.add_theme_constant_override("separation", 4)
+	row.add_child(name_row)
 
 	var portrait := TextureRect.new()
 	portrait.custom_minimum_size = PORTRAIT_SIZE
@@ -74,19 +84,19 @@ func _build_row(npc_id: String) -> Control:
 		portrait.texture = load(icon_path)
 	if not NPCManager.is_alive(npc_id):
 		portrait.modulate = DEAD_TINT
-	row.add_child(portrait)
+	name_row.add_child(portrait)
 
 	var name_label := Label.new()
 	name_label.text = String(definition.get("name", npc_id))
 	name_label.add_theme_font_size_override("font_size", ROW_FONT_SIZE)
 	name_label.add_theme_color_override("font_color", Color.BLACK)
-	name_label.custom_minimum_size = Vector2(26, 0)
 	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	row.add_child(name_label)
+	name_row.add_child(name_label)
 
-	var hearts_row := HBoxContainer.new()
-	hearts_row.add_theme_constant_override("separation", 1)
-	hearts_row.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var hearts_grid := GridContainer.new()
+	hearts_grid.columns = HEART_ROW_COLUMNS
+	hearts_grid.add_theme_constant_override("h_separation", 1)
+	hearts_grid.add_theme_constant_override("v_separation", 1)
 	var affection := NPCManager.get_affection(npc_id)
 	for i in HEART_COUNT:
 		var heart := TextureRect.new()
@@ -94,8 +104,8 @@ func _build_row(npc_id: String) -> Control:
 		heart.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		heart.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		heart.texture = _heart_texture_for(affection, i)
-		hearts_row.add_child(heart)
-	row.add_child(hearts_row)
+		hearts_grid.add_child(heart)
+	row.add_child(hearts_grid)
 
 	return row
 

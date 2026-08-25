@@ -188,7 +188,7 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 5
 theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
 horizontal_alignment = 1
-text = "포인트"
+text = "신발"
 
 [node name="Outfit3Tab" type="Button" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow/Outfit3Col"]
 custom_minimum_size = Vector2(15, 8)

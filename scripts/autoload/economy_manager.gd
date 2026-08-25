@@ -8,8 +8,8 @@ extends Node
 signal gold_changed(gold: int)
 signal house_upgraded(level: int)
 
-## 테스트/구매를 바로 해볼 수 있도록 만원으로 시작(사용자 지시, 기존 0G에서 변경).
-const STARTING_GOLD := 10000
+## 시작 자금(사용자 지시, 2026-08-25 - 만원은 너무 많다고 판단해 500원으로 축소).
+const STARTING_GOLD := 500
 const MAX_HOUSE_LEVEL := 3
 
 ## economy.md "건물 확장 > 집": cost to reach this level.

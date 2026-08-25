@@ -64,7 +64,7 @@
     "heart_event_30": {
         "threshold": 30,
         "anchor_state": "shrine_sitting",
-        "npc_spawn": "sage_heart_npc",
+        "npc_spawn": "shrine_sitting",
         "player_spawn": "sage_heart_player",
         "emote": "excited",
         "lines": [
@@ -89,9 +89,9 @@
     "story_dialogue": {
         "post_first_murder_soul_sight": [
             "그 사건 이후로 네 옆에 어떤 영혼이 보여.",
-            "누구냐고?... 나도 여러번 물어봤지만 돌아오는 대답이 없어.",
-            "아마 너와 깊은 연관이 있는 거 같은데.",
-            "이런 일이 일어날 줄 알았더라면... 마을 사람들에게도 경고해줄 걸 그랬어."
+            {"text": "누구냐고?... 나도 여러번 물어봤지만 돌아오는 대답이 없어.", "emotion": "sad"},
+            {"text": "아마 너와 깊은 연관이 있는 거 같은데.", "emotion": "sad"},
+            {"text": "이런 일이 일어날 줄 알았더라면... 마을 사람들에게도 경고해줄 걸 그랬어.", "emotion": "sad"}
         ],
         "murder_warning_examples": [
             ["오늘은 일찍 집에 들어가.", "괜히 밖을 돌아다니지 말고.", "기운이 좋지 않아."],
@@ -109,8 +109,22 @@
         "murder_grief_2": [
             "...두 번째야.",
             {"text": "경고했는데도 이렇게 됐네.", "emotion": "sad"},
-            "내가 더 힘이 있었더라면, 이런 식으로 무력하게 지켜보지만은 않았을 텐데.",
+            {"text": "내가 더 힘이 있었더라면, 이런 식으로 무력하게 지켜보지만은 않았을 텐데.", "emotion": "sad"},
             "미안해."
+        ]
+    },
+    "fortune": {
+        "offer_line": "오늘 운세나 봐줄까?",
+        "accept_label": "봐줘",
+        "decline_label": "괜찮아",
+        "decline_response": ["그래, 마음 내키면 말해."],
+        "good_lines": [
+            "음... 오늘은 기운이 나쁘지 않네. 발걸음이 가벼울 거야.",
+            "괜찮은 하루야. 하는 일마다 수월하게 풀리겠어."
+        ],
+        "bad_lines": [
+            "음... 오늘은 좀 무거운 기운이 도네. 조심해서 다녀.",
+            "썩 좋은 날은 아니야. 몸이 평소보다 무겁게 느껴질 수도 있어."
         ]
     },
     "dialogue": {
@@ -225,6 +239,7 @@
             {"title": "우유 들어간 요리, 나쁘지 않았어", "requires_favorite_food": true, "lines": ["어제 우유 들어간 요리 나왔을 때 정말 좋았어.", "입에 맞더라. 또 해줘."]}
         ],
         "gift_thanks": [],
+        "memento_reminder": {"title": "줄 것이 있다.", "lines": ["요즘 신사에 발길이 뜸하군.", "줄 것이 있으니, 시간 될 때 오도록."]},
         "story_progress": {
             "player_arrival": {"title": "마을에 왔다며", "lines": ["새로 왔다는 얘기 들었어.", "신사는 언제든 열려있어. 필요하면 와.", "운세 정도는 공짜로 봐줄게."]}
         },

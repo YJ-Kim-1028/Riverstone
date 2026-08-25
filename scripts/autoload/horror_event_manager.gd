@@ -207,7 +207,7 @@ func _on_day_changed(_day: int, _weekday: String) -> void:
 		# 조회 없이 이 npc_id 자신의 이름으로 바로 채운다("나야, {victim_name}"
 		# 처럼 죽은 사람이 자기 이름을 대는 용도).
 		var self_name := String(NPCManager.get_definition(npc_id).get("name", ""))
-		impersonation_email_ready.emit(npc_id, String(email.get("title", "")).replace("{victim_name}", self_name), _substitute_victim_name((email.get("lines", []) as Array), self_name))
+		impersonation_email_ready.emit(npc_id, NPCManager.apply_korean_particles(String(email.get("title", "")), "{victim_name}", self_name), _substitute_victim_name((email.get("lines", []) as Array), self_name))
 	_maybe_send_stalker_email()
 
 
@@ -233,15 +233,17 @@ func _maybe_send_stalker_email() -> void:
 	## dialogue_screen.gd가 표시 시점에 치환하지만 이메일은 발송 시점에
 	## 확정해서 보내는 게 자연스러워 여기서 바로 치환한다).
 	var victim_name := String(NPCManager.get_definition(NPCManager.get_most_recent_death_npc_id()).get("name", ""))
-	var title := String(email.get("title", "")).replace("{victim_name}", victim_name)
+	var title := NPCManager.apply_korean_particles(String(email.get("title", "")), "{victim_name}", victim_name)
 	var lines := _substitute_victim_name((email.get("lines", []) as Array), victim_name)
 	stalker_email_ready.emit(STALKER_SENDER_ID, title, lines)
 
 
 ## "{victim_name}" 자리표시자를 lines 배열 안의 각 문자열에 치환한다 -
 ## _on_day_changed()의 사칭 메일 경로와 _maybe_send_stalker_email() 둘 다 쓴다.
+## 이름에 받침이 없으면 이/은/을이 붙은 조사도 알맞게 가/는/를로 바뀐다
+## (사용자 리포트, 2026-08-26 - NPCManager.apply_korean_particles() 참고).
 func _substitute_victim_name(lines: Array, victim_name: String) -> Array:
-	return lines.map(func(line: String) -> String: return line.replace("{victim_name}", victim_name))
+	return lines.map(func(line: String) -> String: return NPCManager.apply_korean_particles(line, "{victim_name}", victim_name))
 
 
 func _load_json(path: String) -> Dictionary:
