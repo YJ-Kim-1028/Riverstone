@@ -25,10 +25,22 @@ extends Control
 signal book_open_requested(item_id: String)
 
 var _panels: Array = []
+var _is_open := false
+## main.gd가 _ready()에서 채워준다(main.gd만 UI 트리 전체를 알아서 다른 화면이
+## 열려있는지 판단할 수 있음 - equipment_panel.gd의 book_open_requested와 같은
+## 중계 패턴). TAB 키는 이 화면이 직접 듣는 전역 단축키라, 컴퓨터(메일) 등
+## 다른 화면이 이미 열려있어도 그 위에 그대로 열려버리는 문제가 있었다(사용자
+## 리포트, 2026-08-27 - "메일 열어서 메일을 클릭했는데 마치 장비창이 열린
+## 거처럼 갑자기 감자씨앗의 설명이 떠").
+var _open_blocked_check: Callable = Callable()
+
+
+func set_open_blocked_check(check: Callable) -> void:
+	_open_blocked_check = check
 
 
 func _ready() -> void:
-	visible = false
+	_set_open(false)
 	_panels = [_equipment_panel, _affection_panel, _settings_panel]
 	_equipment_tab_button.pressed.connect(_show_tab.bind(0))
 	_affection_tab_button.pressed.connect(_show_tab.bind(1))
@@ -40,30 +52,79 @@ func _ready() -> void:
 	_equipment_panel.book_open_requested.connect(func(item_id: String) -> void: book_open_requested.emit(item_id))
 
 
+## TAB만 여기서 따로 처리한다(_unhandled_input이 아니라 _input) - 이 창 안의
+## 버튼(탭 전환 버튼 등)을 한 번 클릭하면 그 버튼이 키보드 포커스를 갖게
+## 되는데, Godot은 포커스 있는 컨트롤이 있으면 Tab 키를 "다음 포커스로 이동"
+## 용으로 먼저 소비해버려서 _unhandled_input까지 아예 안 내려온다 - 그래서
+## "열 때는 되는데 닫으려고 다시 누르면 가끔 안 먹힌다"는 증상이 났다(사용자
+## 리포트, 2026-08-27). _input은 포커스 처리보다 먼저 불려서 항상 확실히
+## 받고, set_input_as_handled()로 그 뒤 포커스 이동에 안 넘어가게 막는다.
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_TAB:
+		AudioManager.play_sfx(AudioManager.SFX_UI_TAB)
+		toggle()
+		get_viewport().set_input_as_handled()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey) or not event.pressed or event.echo:
 		return
-	if event.keycode == KEY_TAB:
-		AudioManager.play_sfx(AudioManager.SFX_UI_TAB)
-		toggle()
-	elif event.keycode == KEY_ESCAPE and visible:
+	if event.keycode == KEY_ESCAPE and _is_open:
 		close()
 
 
 func toggle() -> void:
-	if visible:
+	if _is_open:
 		close()
+	elif _open_blocked_check.is_valid() and _open_blocked_check.call():
+		return
 	else:
 		open()
 
 
 func open() -> void:
-	visible = true
+	## 주의: 이 화면은 원래 전체화면이 아니라 가운데 고정 크기 박스로 설계된
+	## 창이다 - slot_picker_screen.gd처럼 set_anchors_and_offsets_preset(PRESET_FULL_RECT)를
+	## 넣었더니 오히려 화면 전체를 덮어버리는 새 버그가 생겼다(사용자 리포트,
+	## 2026-08-26 - "tab 누르면 나오는 창이 전체 화면을 다 덮어버렸는데") -
+	## 그 호출은 여기 넣으면 안 됨.
+	_set_open(true)
 	_show_tab(0)
 
 
 func close() -> void:
-	visible = false
+	_set_open(false)
+
+
+## computer_screen.gd/shop_screen.gd와 동일한 이유/동일한 수정(사용자 리포트,
+## 2026-08-27) - 자기 값을 자기에게 재대입하는 방식은 값이 이미 같으면
+## 엔진이 재계산을 안 해서 효과가 없었다. 이 화면의 루트는 가운데 고정 크기
+## 박스(anchor 0.5/0.5/0.5/0.5)라 PRESET_FULL_RECT는 못 쓰고(그 실수는 이미
+## 한 번 겪음 - 위 open() 주석 참고), 크기는 유지한 채 진짜로 다시 가운데
+## 정렬시키는 PRESET_CENTER + KEEP_SIZE를 쓴다.
+func _set_open(is_open: bool) -> void:
+	if is_open:
+		set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_KEEP_SIZE)
+	_is_open = is_open
+	modulate.a = 1.0 if is_open else 0.0
+	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
+
+
+## QuitConfirmPopup은 자기 열고 닫기를 스스로 관리한다(자기 자신의 _set_open()
+## - 종료 아이콘을 눌러야만 연다). 그런데 이 팝업이 status_screen의 자식이라
+## 여기서 재귀로 내려가면 매번 그 안의 Dim(화면 전체를 덮는 반투명 배경)까지
+## STOP으로 덮어써버린다 - Dim은 modulate.a로만 숨겨질 뿐 visible은 항상
+## true라 계속 화면을 덮고 있고, mouse_filter가 STOP이 되는 순간 그 위에 있는
+## 다른 버튼(탭 전환, 장비 슬롯 등)의 클릭을 다 가로채버린다(사용자 리포트,
+## 2026-08-27 - "탭 열고 닫았다가 하면 탭에 있는 다른 버튼들이 안눌리잖아").
+## 이 팝업 하위는 건드리지 않고 자기 자신에게 맡긴다.
+func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
+	if node == _quit_confirm_popup:
+		return
+	if node is Control:
+		(node as Control).mouse_filter = filter
+	for child in node.get_children():
+		_apply_mouse_filter_recursive(child, filter)
 
 
 func _show_tab(index: int) -> void:

@@ -62,7 +62,20 @@ func _refresh_display() -> void:
 	_icon.texture = JukeboxManager.get_song_icon_texture(String(_song_ids[_index]))
 
 
+func _refresh_layout() -> void:
+	anchor_left = anchor_left
+	anchor_top = anchor_top
+	anchor_right = anchor_right
+	anchor_bottom = anchor_bottom
+	offset_left = offset_left
+	offset_top = offset_top
+	offset_right = offset_right
+	offset_bottom = offset_bottom
+
+
 func _set_open(is_open: bool) -> void:
+	if is_open:
+		_refresh_layout()
 	_is_open = is_open
 	modulate.a = 1.0 if is_open else 0.0
 	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)

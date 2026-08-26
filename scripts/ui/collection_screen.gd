@@ -142,7 +142,23 @@ func close() -> void:
 		child.queue_free()
 
 
+## 익스포트 빌드에서 앵커 기반 크기/위치가 창이 완전히 자리잡기 전 값으로
+## 굳어버리는 문제 회피(사용자 리포트, 2026-08-26) - 값은 그대로 자신에게
+## 다시 대입해서 Godot이 현재 부모 크기 기준으로 강제로 다시 계산하게 만든다.
+func _refresh_layout() -> void:
+	anchor_left = anchor_left
+	anchor_top = anchor_top
+	anchor_right = anchor_right
+	anchor_bottom = anchor_bottom
+	offset_left = offset_left
+	offset_top = offset_top
+	offset_right = offset_right
+	offset_bottom = offset_bottom
+
+
 func _set_open(is_open: bool) -> void:
+	if is_open:
+		_refresh_layout()
 	_is_open = is_open
 	modulate.a = 1.0 if is_open else 0.0
 	# 자식을 하나하나 나열해서 끄면 Background/라벨처럼 목록에서 빠뜨린

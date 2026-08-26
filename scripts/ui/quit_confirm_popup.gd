@@ -46,7 +46,20 @@ func _build_button_style(texture: Texture2D) -> StyleBoxTexture:
 	return style
 
 
+## 이 화면은 원래부터 modulate 방식을 썼는데도 익스포트 빌드에서 좌측
+## 상단에 눌려 뜨는 문제가 있었다(사용자 리포트, 2026-08-26 - "종료하기
+## 버튼 누르면 나오는 팝업은 이번에도 좌측 상단에 고정되어있단다") - 즉
+## visible/modulate 방식 자체가 원인이 아니라, 익스포트 빌드에서 앵커 기반
+## 크기/위치가 창이 완전히 자리잡기 전 값으로 굳어버리는 게 진짜 원인이다.
+## 자기 자신에게 값을 재대입하는 방식은 값이 이미 같으면 엔진이 다시 계산을
+## 안 하는 것으로 보여 재발했다(slot_picker_screen.gd에서 같은 문제로 확인,
+## 2026-08-26) - PRESET_FULL_RECT 재적용이라야 실제로 고쳐진다. 이 팝업의
+## 루트(자신)는 Dim 배경을 깔기 위해 원래도 전체화면 앵커(0/0/1/1)라 이
+## preset을 self에 적용해도 안전하다(안쪽 작은 박스는 Panel이라는 별도
+## 자식이라 영향 없음).
 func _set_open(is_open: bool) -> void:
+	if is_open:
+		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	modulate.a = 1.0 if is_open else 0.0
 	var filter := Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE
 	_apply_mouse_filter_recursive(self, filter)

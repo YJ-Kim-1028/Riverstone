@@ -142,11 +142,19 @@ func _ready() -> void:
 	# 줄어들어 그림이 아예 안 보이는 버그가 있었다(모든 가구에서 재현,
 	# 사용자 리포트) - 기본값이어야 텍스처 크기만큼 자동으로 폭을 잡는다.
 	_color_preview_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	for button in [_color_buy_button, _color_cancel_button]:
+	for button in [_stall_cancel_button, _color_buy_button, _color_cancel_button]:
 		button.add_theme_stylebox_override("normal", _build_button_style(BUTTON_TEXTURE))
 		button.add_theme_stylebox_override("hover", _build_button_style(BUTTON_HOVER_TEXTURE))
 		button.add_theme_stylebox_override("pressed", _build_button_style(BUTTON_HOVER_TEXTURE))
 		button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+		## StallPicker의 취소 버튼은 .tscn에 font_color가 아예 안 박혀있어서
+		## Godot 기본(밝은) 글자색 그대로 나와 배경 위에서 안 보였다(사용자
+		## 리포트, 2026-08-27 - "글자 색이 검정색이 아니라 잘 안보여"). 여기서
+		## 세 버튼 다 동일하게 맞춰준다(ColorPicker 둘은 .tscn에 이미 같은 색이
+		## 박혀있어 사실상 값은 같지만, 한 곳에서 일괄 관리하는 게 더 안전하다).
+		button.add_theme_color_override("font_color", BUTTON_TEXT_COLOR)
+		button.add_theme_color_override("font_hover_color", BUTTON_TEXT_COLOR)
+		button.add_theme_color_override("font_pressed_color", BUTTON_TEXT_COLOR)
 	_style_scrollbar(_rows_scroll)
 	_style_scrollbar(_color_slots_scroll)
 
@@ -170,7 +178,14 @@ func close() -> void:
 	_refresh_rows()
 
 
+## 이 화면의 루트는 전체화면이 아니라 가운데 고정 크기 박스라
+## computer_screen.gd와 동일한 이유/동일한 수정(사용자 리포트, 2026-08-27 -
+## "스크롤도 잘 안먹어.. 상점에서도 그랬고") - 자기 값을 자기에게 재대입하는
+## 방식은 효과가 없어서, 크기는 유지한 채 진짜로 다시 가운데 정렬시키는
+## PRESET_CENTER + KEEP_SIZE로 교체한다.
 func _set_open(is_open: bool) -> void:
+	if is_open:
+		set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_KEEP_SIZE)
 	_is_open = is_open
 	modulate.a = 1.0 if is_open else 0.0
 	var filter := Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE

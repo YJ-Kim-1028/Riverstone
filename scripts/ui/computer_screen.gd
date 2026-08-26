@@ -8,6 +8,11 @@ extends Control
 ## ancestor.visible=false였던 적 있는 컨트롤의 폰트/테마를 잘못 그리는 문제
 ## 회피용 - shop_screen.gd 주석 참고).
 
+## 공범 엔딩(사용자 지시, 2026-08-26 - "닫기나 뒤로가기 눌렀을 때 다음
+## 노크소리 들리게 하는 게 맞으려나") - 메일 창을 X버튼으로 닫든 ESC로
+## 나가든 결국 _show_desktop()을 거치므로 거기서 한 번만 신호를 쏜다.
+signal mail_dismissed
+
 enum Screen { DESKTOP, MAIL, SHOP }
 
 @onready var _desktop: Control = $Desktop
@@ -91,13 +96,27 @@ func _open_shop() -> void:
 
 
 func _show_desktop() -> void:
+	if _current_screen == Screen.MAIL:
+		mail_dismissed.emit()
 	_current_screen = Screen.DESKTOP
 	_set_active(_desktop, true)
 	_set_active(_mail_window, false)
 	_set_active(_shop_window, false)
 
 
+## 이 화면의 루트는 전체화면이 아니라 가운데 고정 크기 박스(anchor 0.5/0.5/
+## 0.5/0.5)라 slot_picker_screen.gd 같은 PRESET_FULL_RECT는 못 쓴다 - 그렇다고
+## 자기 값을 자기에게 재대입하는 _refresh_layout() 방식은 값이 이미 같으면
+## 엔진이 재계산을 안 해서 효과가 없다(같은 문제로 재발한 slot_picker_screen.gd
+## 참고). PRESET_CENTER + KEEP_SIZE는 실제로 앵커/오프셋을 다시 계산하는 진짜
+## 함수 호출이라, 크기(offset 폭)는 그대로 유지하면서 지금 부모 크기 기준으로
+## 새로 가운데 정렬시킨다 - 클릭 판정 위치가 화면에 보이는 위치와 어긋나던
+## 문제(사용자 리포트, 2026-08-27 - "메일함에서 클릭했는데 인식이 안될 때가
+## 많아... 요청함 글씨 가운데를 클릭해야 하고... 종료 버튼도... 아무튼 안 돼")
+## 를 고친다.
 func _set_open(is_open: bool) -> void:
+	if is_open:
+		set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_KEEP_SIZE)
 	_is_open = is_open
 	modulate.a = 1.0 if is_open else 0.0
 	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)

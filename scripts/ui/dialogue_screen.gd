@@ -65,6 +65,13 @@ const TEXT_AREA_OFFSET_LEFT_NO_PORTRAIT := 6.0
 var _npc_id := ""
 var _lines: Array = []
 var _line_index := 0
+## 줄마다 "emotion"을 안 적으면 DEFAULT_EMOTION(평소 표정)으로 매번 리셋되던
+## 문제(사용자 리포트, 2026-08-26 - "알리바이 말할 때 갑자기 웃는 얼굴이
+## 나와서 이상해") - 애도 대사(emotion:"sad") 뒤에 조사만 치환해서 그대로
+## 붙이는 알리바이 문장(순수 문자열이라 emotion 필드가 없음)이 이어지면
+## 표정이 뜬금없이 평소 얼굴로 튀었다. 이제 emotion 명시 없는 줄은 직전 줄의
+## 표정을 그대로 이어간다.
+var _current_emotion := DEFAULT_EMOTION
 var _pending_choice: Dictionary = {}
 var _choice_index := 0
 var _choice_labels: Array[Label] = []
@@ -74,7 +81,8 @@ var _is_dynamic_choice := false
 ## 보여준다. _typewriter_token은 진행 중인 코루틴을 무효화하는 용도 -
 ## _start_typewriter()가 호출될 때마다 증가시켜서, 이전 줄의 루프가 도중에
 ## 자기 token이 최신이 아님을 발견하면 스스로 멈춘다(새 줄이 이미 시작됐다는 뜻).
-const TYPEWRITER_CHAR_INTERVAL := 0.03
+## 0.03 → 0.04로 살짝 늦춤(사용자 지시, 2026-08-26 - "지금 좀 빠른 거 같아서").
+const TYPEWRITER_CHAR_INTERVAL := 0.04
 ## 매 글자마다 소리를 내면 너무 시끄러워서, 이 글자 수마다 한 번만 재생한다.
 const TYPEWRITER_BLIP_SFX_STRIDE := 2
 ## 타자 소리가 너무 크다는 지적(사용자 지시, 2026-08-25) - 원래 음량의 20%만큼
@@ -149,6 +157,7 @@ func _open_with_lines(npc_id: String, lines: Array) -> void:
 	if _lines.is_empty():
 		_lines = PLACEHOLDER_LINES.duplicate()
 	_line_index = 0
+	_current_emotion = DEFAULT_EMOTION
 	_name_label.text = String(NPCManager.get_definition(npc_id).get("name", ""))
 	_show_current_line()
 	_set_open(true)
@@ -161,10 +170,16 @@ const CLOSE_EMOTE_SHY_AFFECTION_THRESHOLD := 80
 
 func close() -> void:
 	# 웃음(또는 호감도 80 이상이면 수줍음): 대화 끝나고 헤어질 때(닫는 방식과
-	# 무관 - 마지막 줄 넘김/ESC 둘 다).
+	# 무관 - 마지막 줄 넘김/ESC 둘 다). 단, 오늘 이 NPC가 살인 관련 스토리
+	# 대사(애도/알리바이/목격 진술 또는 불륜 상대 사망 반응)를 한 참이면 웃음도
+	# 수줍음도 안 어울린다 - 눈물을 유지한다(사용자 지시, 2026-08-26 - "그런
+	# 대사를 하는 날엔 샤이도 안뜨는게 맞아").
 	if not _npc_id.is_empty():
-		var emote := NPCManager.EMOTE_SHY if NPCManager.get_affection(_npc_id) >= CLOSE_EMOTE_SHY_AFFECTION_THRESHOLD else NPCManager.EMOTE_SMILE
-		NPCManager.request_emote(_npc_id, emote)
+		if MurderManager.was_alibi_shown_today(_npc_id) or NPCManager.was_partner_death_reaction_shown_today(_npc_id):
+			NPCManager.request_emote(_npc_id, NPCManager.EMOTE_DEJECTED)
+		else:
+			var emote := NPCManager.EMOTE_SHY if NPCManager.get_affection(_npc_id) >= CLOSE_EMOTE_SHY_AFFECTION_THRESHOLD else NPCManager.EMOTE_SMILE
+			NPCManager.request_emote(_npc_id, emote)
 	_typewriter_token += 1
 	_is_typing = false
 	_set_choice_mode(false)
@@ -200,12 +215,13 @@ func _show_current_line() -> void:
 		_advance()
 		return
 	var text := ""
-	var emotion := DEFAULT_EMOTION
+	var emotion := _current_emotion
 	if line is Dictionary:
 		text = String(line.get("text", ""))
-		emotion = String(line.get("emotion", DEFAULT_EMOTION))
+		emotion = String(line.get("emotion", _current_emotion))
 	else:
 		text = String(line)
+	_current_emotion = emotion
 	# {player_name} 자리표시자 - 대사에서 플레이어를 이름으로 직접 부를 수 있게 한다.
 	# {victim_name} - 살인사건 발견 씬(main.gd) 등에서 가장 최근 피해자 이름을
 	# 그대로 부를 때 쓴다({player_mail_content}는 NPCManager.get_daily_dialogue()가
@@ -217,6 +233,9 @@ func _show_current_line() -> void:
 	## 골라준다.
 	var resolved_text := NPCManager.apply_korean_particles(text, "{player_name}", GameManager.player_name)
 	resolved_text = NPCManager.apply_korean_particles(resolved_text, "{victim_name}", victim_name)
+	# {days_since_arrival} - 플레이어가 마을에 온 지 며칠째인지(TimeManager.current_day,
+	# 첫날=1). 숫자 그대로 넣는 자리라 조사 처리가 필요 없다(사용자 지시, 2026-08-26).
+	resolved_text = resolved_text.replace("{days_since_arrival}", str(TimeManager.current_day))
 	_start_typewriter(resolved_text)
 	_update_portrait(emotion)
 
@@ -371,6 +390,22 @@ func _is_open() -> bool:
 	return modulate.a > 0.0
 
 
+## 익스포트 빌드에서 앵커 기반 크기/위치가 창이 완전히 자리잡기 전 값으로
+## 굳어버리는 문제 회피(사용자 리포트, 2026-08-26) - 값은 그대로 자신에게
+## 다시 대입해서 Godot이 현재 부모 크기 기준으로 강제로 다시 계산하게 만든다.
+func _refresh_layout() -> void:
+	anchor_left = anchor_left
+	anchor_top = anchor_top
+	anchor_right = anchor_right
+	anchor_bottom = anchor_bottom
+	offset_left = offset_left
+	offset_top = offset_top
+	offset_right = offset_right
+	offset_bottom = offset_bottom
+
+
 func _set_open(is_open: bool) -> void:
+	if is_open:
+		_refresh_layout()
 	modulate.a = 1.0 if is_open else 0.0
 	mouse_filter = Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE

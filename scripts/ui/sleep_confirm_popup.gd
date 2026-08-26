@@ -48,7 +48,20 @@ func _build_button_style(texture: Texture2D) -> StyleBoxTexture:
 	return style
 
 
+func _refresh_layout() -> void:
+	anchor_left = anchor_left
+	anchor_top = anchor_top
+	anchor_right = anchor_right
+	anchor_bottom = anchor_bottom
+	offset_left = offset_left
+	offset_top = offset_top
+	offset_right = offset_right
+	offset_bottom = offset_bottom
+
+
 func _set_open(is_open: bool) -> void:
+	if is_open:
+		_refresh_layout()
 	modulate.a = 1.0 if is_open else 0.0
 	var filter := Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE
 	_apply_mouse_filter_recursive(self, filter)

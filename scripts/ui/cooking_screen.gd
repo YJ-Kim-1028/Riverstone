@@ -98,7 +98,23 @@ func _is_open() -> bool:
 const _ALWAYS_IGNORE_MOUSE_GROUP := &"_always_ignore_mouse"
 
 
+## 익스포트 빌드에서 앵커 기반 크기/위치가 창이 완전히 자리잡기 전 값으로
+## 굳어버리는 문제 회피(사용자 리포트, 2026-08-26) - 값은 그대로 자신에게
+## 다시 대입해서 Godot이 현재 부모 크기 기준으로 강제로 다시 계산하게 만든다.
+func _refresh_layout() -> void:
+	anchor_left = anchor_left
+	anchor_top = anchor_top
+	anchor_right = anchor_right
+	anchor_bottom = anchor_bottom
+	offset_left = offset_left
+	offset_top = offset_top
+	offset_right = offset_right
+	offset_bottom = offset_bottom
+
+
 func _set_open(is_open: bool) -> void:
+	if is_open:
+		_refresh_layout()
 	modulate.a = 1.0 if is_open else 0.0
 	var filter := Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE
 	mouse_filter = filter
@@ -158,7 +174,11 @@ func _refresh_ingredient_grid() -> void:
 			continue
 		seen_ids[item_id] = true
 		_ingredient_grid.add_child(_build_ingredient_button(item_id))
-	_rat_poison_toggle.visible = InventoryManager.has_item("rat_poison", 1)
+	# 폴리/세이지/라마(can_die:false)한테는 독살이 애초에 안 먹히니(MurderManager.
+	# _on_npc_poisoned() 참고) 서빙 대상이 그 셋 중 하나면 토글 자체를 숨긴다
+	# (사용자 지시, 2026-08-26 - serving_screen.gd와 동일한 이유).
+	var current_npc_id := RestaurantManager.get_station_npc(_station_index)
+	_rat_poison_toggle.visible = InventoryManager.has_item("rat_poison", 1) and NPCManager.can_die(current_npc_id)
 
 
 func _build_ingredient_button(item_id: String) -> TextureButton:

@@ -47,10 +47,11 @@ const DISABLED_TINT := Color(0.55, 0.55, 0.55)
 
 var _mode := MODE_NEW_GAME
 var _pending_delete_slot := -1
+var _is_open := false
 
 
 func _ready() -> void:
-	visible = false
+	_set_open(false)
 	_back_button.pressed.connect(close)
 	_style_button(_back_button)
 	for i in _slot_buttons.size():
@@ -86,7 +87,7 @@ func _build_button_style(texture: Texture2D, tint: Color = Color.WHITE) -> Style
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if visible and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+	if _is_open and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		close()
 
 
@@ -94,12 +95,37 @@ func open(mode: String) -> void:
 	_mode = mode
 	_title_label.text = "이어하기" if mode == MODE_CONTINUE else "새로 시작하기"
 	_refresh()
-	visible = true
+	_set_open(true)
 
 
 func close() -> void:
-	visible = false
+	_set_open(false)
 	closed.emit()
+
+
+## 익스포트 빌드에서 이 화면(과 새 게임의 character_creation_screen.gd)이
+## 좌측 상단에 눌려서 뜨는 문제가 있었다(사용자 리포트, 2026-08-26 - "이어하기
+## 했을 때 좌측 상단에 떠서 ui 창이 다 안보이고 뭔가 할 수 없게 돼") - 이 화면의
+## 루트는 원래도 전체화면(anchor 0/0/1/1)이라, 열릴 때마다
+## set_anchors_and_offsets_preset(PRESET_FULL_RECT)로 강제 재적용하는 걸로
+## 실제로 고쳐졌다(자기 자신에게 값을 재대입하는 _refresh_layout() 방식은
+## 이 화면에서 재발했다 - 값이 이미 같으면 엔진이 다시 계산을 안 하는 것으로
+## 보임). status_screen.gd 등 화면 크기가 작게 고정된 곳에는 이 preset을 쓰면
+## 안 된다(전체화면으로 덮어버림) - 이 화면처럼 루트가 원래 전체화면인
+## 경우에만 안전하다.
+func _set_open(is_open: bool) -> void:
+	if is_open:
+		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_is_open = is_open
+	modulate.a = 1.0 if is_open else 0.0
+	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
+
+
+func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
+	if node is Control:
+		(node as Control).mouse_filter = filter
+	for child in node.get_children():
+		_apply_mouse_filter_recursive(child, filter)
 
 
 func _refresh() -> void:

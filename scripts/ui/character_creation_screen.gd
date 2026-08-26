@@ -220,8 +220,11 @@ var _accessory_sheet_image: Image = null
 var _accessory_row_count := 0
 
 
+var _is_open := false
+
+
 func _ready() -> void:
-	visible = false
+	_set_open(false)
 	_load_body_sheet()
 	_load_outfit_sheet()
 	_load_hair_sheet()
@@ -243,8 +246,26 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if visible and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+	if _is_open and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		_on_back_pressed()
+
+
+## slot_picker_screen.gd와 동일한 이유/동일한 수정(사용자 리포트, 2026-08-26) -
+## 이 화면의 루트도 원래 전체화면(anchor 0/0/1/1)이라 PRESET_FULL_RECT 재적용이
+## 안전하고, 실제로 이 방식이어야 익스포트 빌드에서 고쳐졌다.
+func _set_open(is_open: bool) -> void:
+	if is_open:
+		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_is_open = is_open
+	modulate.a = 1.0 if is_open else 0.0
+	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
+
+
+func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
+	if node is Control:
+		(node as Control).mouse_filter = filter
+	for child in node.get_children():
+		_apply_mouse_filter_recursive(child, filter)
 
 
 func open(slot: int) -> void:
@@ -271,11 +292,11 @@ func open(slot: int) -> void:
 	_active_palette_target = "skin"
 	_update_palette_tab_styles()
 	_refresh_pickers()
-	visible = true
+	_set_open(true)
 
 
 func _on_back_pressed() -> void:
-	visible = false
+	_set_open(false)
 
 
 func _on_confirm_pressed() -> void:
@@ -306,7 +327,7 @@ func _on_confirm_pressed() -> void:
 	GameManager.accessory_id = str(_accessory_index)
 	SaveManager.set_current_slot(_slot)
 	SaveManager.save_game(_slot)
-	visible = false
+	_set_open(false)
 	confirmed.emit()
 
 

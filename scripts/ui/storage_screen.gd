@@ -1,10 +1,14 @@
 extends Control
 
-## StorageBoxManager가 관리하는 상자 하나를 여닫는 화면. kitchen_screen.gd와
-## 동일하게 plain visible로 열고 닫는다 - 동적으로 슬롯을 채우는 그리드
-## 화면은 visible=true를 먼저 하고 그 다음에 채워야(open_kitchen()과 동일한
-## 순서) shop_screen.gd가 문서화한 "ancestor.visible이 한 번이라도 false였던
-## 컨트롤은 폰트/모듈레이트가 깨지는" 버그를 피할 수 있다.
+## StorageBoxManager가 관리하는 상자 하나를 여닫는 화면. 예전엔 kitchen_screen.gd처럼
+## plain visible을 쓰면서 "visible=true를 먼저, 그 다음에 슬롯을 채우면
+## 된다"고 봤었는데, 그걸로도 익스포트 빌드에서 이 화면(과 kitchen/fishing/
+## status)이 좌측 상단에 눌려 뜨는 문제가 있었다(사용자 리포트, 2026-08-26 -
+## "이어하기 눌렀을 때 뜨는 창이 화면 밖으로 나가있는데"). 순서 문제가 아니라
+## "생성된 뒤 한 번도 화면 크기가 자리잡기 전에 visible=false로 시작한 Control은
+## 앵커가 잘못 굳는다"는 쪽이 진짜 원인으로 보여, shop_screen.gd/computer_screen.gd와
+## 동일하게 항상 visible=true로 두고 modulate.a + mouse_filter로 여닫는 방식으로
+## 바꿨다.
 ## 왼쪽 = 플레이어 인벤토리, 오른쪽 = 상자 내용물. 둘 다 inventory_slot.tscn을
 ## 재사용하고, 드래그 또는 클릭으로 서로 아이템을 옮긴다(inventory_slot.gd의
 ## accepts_drops/source_tag 확장 참고). 클릭 한 번으로도 반대쪽으로 즉시
@@ -43,7 +47,7 @@ var _opening := false
 
 
 func _ready() -> void:
-	visible = false
+	_set_open(false)
 	_close_button.pressed.connect(close)
 	_pickup_button.pressed.connect(_on_pickup_pressed)
 	_sort_button.pressed.connect(_on_sort_pressed)
@@ -54,12 +58,12 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if visible and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+	if _is_open() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		close()
 
 
 func open_box(cell: Vector2i) -> void:
-	if visible or _opening:
+	if _is_open() or _opening:
 		return
 	_opening = true
 	_map_id = GameManager.current_map_id
@@ -69,18 +73,46 @@ func open_box(cell: Vector2i) -> void:
 	AudioManager.play_sfx(AudioManager.SFX_DOOR)
 	await get_tree().create_timer(OPEN_DELAY_SECONDS).timeout
 	_opening = false
-	visible = true
+	_set_open(true)
 	_refresh()
 
 
 func close() -> void:
-	if visible:
+	if _is_open():
 		StorageBoxManager.set_box_open_visual(_cell, false)
-	visible = false
+	_set_open(false)
 
 
 func _is_open() -> bool:
-	return visible
+	return modulate.a > 0.0
+
+
+## 익스포트 빌드에서 앵커 기반 크기/위치가 창이 완전히 자리잡기 전 값으로
+## 굳어버리는 문제 회피(사용자 리포트, 2026-08-26) - 값은 그대로 자신에게
+## 다시 대입해서 Godot이 현재 부모 크기 기준으로 강제로 다시 계산하게 만든다.
+func _refresh_layout() -> void:
+	anchor_left = anchor_left
+	anchor_top = anchor_top
+	anchor_right = anchor_right
+	anchor_bottom = anchor_bottom
+	offset_left = offset_left
+	offset_top = offset_top
+	offset_right = offset_right
+	offset_bottom = offset_bottom
+
+
+func _set_open(is_open: bool) -> void:
+	if is_open:
+		_refresh_layout()
+	modulate.a = 1.0 if is_open else 0.0
+	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
+
+
+func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
+	if node is Control:
+		(node as Control).mouse_filter = filter
+	for child in node.get_children():
+		_apply_mouse_filter_recursive(child, filter)
 
 
 func current_cell() -> Vector2i:
@@ -88,7 +120,7 @@ func current_cell() -> Vector2i:
 
 
 func _refresh() -> void:
-	if not visible:
+	if not _is_open():
 		return
 	_rebuild_grid(_bag_grid, InventoryManager.get_slots(), BAG_SOURCE)
 	_rebuild_grid(_box_grid, StorageBoxManager.get_box_slots(_map_id, _cell), BOX_SOURCE)

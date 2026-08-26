@@ -75,7 +75,20 @@ func _refresh_spread() -> void:
 	_next_button.visible = _spread_index < _last_spread_index()
 
 
+func _refresh_layout() -> void:
+	anchor_left = anchor_left
+	anchor_top = anchor_top
+	anchor_right = anchor_right
+	anchor_bottom = anchor_bottom
+	offset_left = offset_left
+	offset_top = offset_top
+	offset_right = offset_right
+	offset_bottom = offset_bottom
+
+
 func _set_open(is_open: bool) -> void:
+	if is_open:
+		_refresh_layout()
 	_is_open = is_open
 	modulate.a = 1.0 if is_open else 0.0
 	# collection_screen.gd와 동일한 이유 - 배경/라벨처럼 목록에서 빠뜨린 컨트롤이
