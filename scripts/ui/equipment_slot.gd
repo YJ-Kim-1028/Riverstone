@@ -12,6 +12,13 @@ class_name EquipmentSlot
 ## false를 반환하는 것만으로는 화면에 아무 안내도 안 뜨므로, 별도로 감지해서
 ## 상위(EquipmentPanel)에 안내 문구를 띄우게 한다.
 signal invalid_drop_attempted
+## 종류는 맞는데(_can_drop_data 통과) equip_item()이 실패한 경우(사용자
+## 리포트, 2026-08-27 - "대화하고 난 뒤에 선물 장비에 장착하고 다시
+## 다가갔는데 선물하기가 아예 안뜸") - 이미 이 슬롯에 다른 게 장착돼 있는데
+## 그걸 인벤토리로 돌려줄 자리가 없으면(인벤토리 꽉 참) equip_item()이 조용히
+## 실패한다(equipment_manager.gd 참고). 소리/안내 없이 아무 일도 안 일어난
+## 것처럼 보이던 걸 고치기 위해 별도로 신호를 쏜다.
+signal equip_failed
 
 @export var slot_name := ""
 
@@ -45,6 +52,17 @@ func refresh() -> void:
 	## 인벤토리 그리드 슬롯(equipment_panel.gd의 _tooltip_for())과 동일한
 	## 형식의 마우스 오버 툴팁 - 사용자 지시, 2026-08-24.
 	tooltip_text = _tooltip_for(item_id)
+	## status_screen.gd(TAB 창 본체)가 열릴 때마다 자기 서브트리 전체의
+	## mouse_filter를 STOP으로 재귀 강제하는데, 그 안에 이 슬롯도 포함돼서
+	## Icon/CountLabel에 .tscn에서 지정해둔 IGNORE(클릭이 밑의 EquipmentSlot
+	## 버튼까지 통과하게 하는 용도)가 매번 STOP으로 덮어써진다 - 그러면 착용된
+	## 아이템 그림(정확히 사용자가 드래그를 시작하려고 누르는 자리)이 클릭을
+	## 먼저 먹어버려서 드래그가 아예 시작되지 않는다(사용자 리포트, 2026-08-27:
+	## "장비창에 장비 넣으니까 잘 안빠지는데"). refresh()는 TAB이 열릴 때마다
+	## equipment_panel.gd를 거쳐 항상 다시 호출되므로, 여기서 매번 IGNORE로
+	## 되돌려 자가치유한다(fishing_screen.gd의 Fish/Icon과 동일한 문제/해법).
+	_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_count_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
 func _tooltip_for(item_id: String) -> String:
@@ -71,6 +89,8 @@ func _can_drop_data(_at_position: Vector2, data) -> bool:
 func _drop_data(_at_position: Vector2, data) -> void:
 	if EquipmentManager.equip_item(String(data.get("item_id", ""))):
 		AudioManager.play_sfx(AudioManager.SFX_UI_SLOT_IN)
+	else:
+		equip_failed.emit()
 
 
 ## inventory_slot.gd의 _get_drag_data()와 같은 방식(아이콘 미리보기, 커서

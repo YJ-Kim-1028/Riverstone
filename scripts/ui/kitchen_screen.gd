@@ -57,7 +57,7 @@ var _was_ready := false
 
 
 func _ready() -> void:
-	visible = false
+	_set_open(false)
 	_close_button.pressed.connect(close)
 	_status_icon.pressed.connect(_on_status_icon_pressed)
 	_start_button.pressed.connect(_on_start_pressed)
@@ -67,13 +67,13 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	if not visible or _station_id.is_empty():
+	if not _is_open() or _station_id.is_empty():
 		return
 	_update_status()
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if visible and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+	if _is_open() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		close()
 
 
@@ -90,12 +90,16 @@ func open_kitchen(station_id: String) -> void:
 	_set_ready_glow(false)
 	_was_busy = false
 	_was_ready = false
-	visible = true
+	## 주의: 이 화면은 원래 전체화면이 아니라 가운데 고정 크기 박스로 설계된
+	## 창이다 - set_anchors_and_offsets_preset(PRESET_FULL_RECT)를 넣었더니
+	## 화면 전체를 덮어버리는 새 버그가 생겼다(사용자 리포트, 2026-08-26 -
+	## "요리창도 화면에 꽉 차") - 그 호출은 여기 넣으면 안 됨.
+	_set_open(true)
 	_refresh()
 
 
 func close() -> void:
-	visible = false
+	_set_open(false)
 	_set_shaking(false)
 	_set_ready_glow(false)
 	_was_busy = false
@@ -103,7 +107,42 @@ func close() -> void:
 
 
 func _is_open() -> bool:
-	return visible
+	return modulate.a > 0.0
+
+
+## 익스포트 빌드에서 앵커 기반 크기/위치가 창이 완전히 자리잡기 전 값으로
+## 굳어버리는 문제 회피(사용자 리포트, 2026-08-26) - 값은 그대로 자신에게
+## 다시 대입해서 Godot이 현재 부모 크기 기준으로 강제로 다시 계산하게 만든다.
+func _refresh_layout() -> void:
+	anchor_left = anchor_left
+	anchor_top = anchor_top
+	anchor_right = anchor_right
+	anchor_bottom = anchor_bottom
+	offset_left = offset_left
+	offset_top = offset_top
+	offset_right = offset_right
+	offset_bottom = offset_bottom
+
+
+func _set_open(is_open: bool) -> void:
+	if is_open:
+		_refresh_layout()
+	modulate.a = 1.0 if is_open else 0.0
+	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
+	# StatusIcon/Icon은 상태 아이콘 버튼 전체를 덮는 순전히 그림용 오버레이라
+	# 항상 클릭을 통과시켜야 한다(.tscn에 mouse_filter=IGNORE로 지정해둠) -
+	# 위 재귀 호출이 이걸 STOP으로 덮어써버리면 Icon이 클릭을 먼저 먹어서
+	# 정작 StatusIcon 버튼의 pressed가 한 번도 안 터진다(사용자 리포트,
+	# 2026-08-27: "조리 다 된 거 클릭해도 안꺼내져") - fishing_screen.gd의
+	# Fish/Icon과 동일한 문제/해법. 재귀 적용 후 다시 IGNORE로 되돌린다.
+	_status_icon_texture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
+	if node is Control:
+		(node as Control).mouse_filter = filter
+	for child in node.get_children():
+		_apply_mouse_filter_recursive(child, filter)
 
 
 func current_station_id() -> String:

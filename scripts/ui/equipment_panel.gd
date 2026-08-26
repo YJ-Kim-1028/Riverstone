@@ -21,6 +21,9 @@ signal book_open_requested(item_id: String)
 
 const SlotScene := preload("res://scenes/ui/inventory_slot.tscn")
 const INVALID_DROP_MESSAGE := "이 곳에는 착용할 수 없다."
+## equipment_slot.gd의 equip_failed 참고 - 이미 장착된 아이템을 인벤토리로
+## 돌려줄 자리가 없을 때 조용히 실패하던 걸 알려준다(사용자 리포트, 2026-08-27).
+const EQUIP_FAILED_MESSAGE := "인벤토리에 자리가 없어 교체할 수 없다."
 const MESSAGE_DURATION := 2.0
 const SELECTED_TINT := Color(1.3, 1.15, 0.7)
 const TOOLTIP_FONT_SIZE := 5
@@ -43,10 +46,20 @@ var _selected_index := -1
 
 func _ready() -> void:
 	theme = _build_tooltip_theme()
+	## 모자/신발 관련 아이템이 아직 하나도 없어서(items.json에 subtype
+	## "hat"/"shoes" 항목 자체가 없음) 지금 상태로 내보내면 아무것도 착용 못 할
+	## 빈 슬롯만 보인다(사용자 지시, 2026-08-26 - "현재 개발한 게 없어서 지금은
+	## 이거 안보이게 해줄 수 있어?"). 손 슬롯은 도구/보관함 등 실제로 쓰이므로
+	## 그대로 둔다. 콘텐츠 생기면 이 두 줄만 지우면 된다.
+	_hat_slot.visible = false
+	_shoes_slot.visible = false
 	InventoryManager.inventory_changed.connect(_refresh_inventory)
 	_hat_slot.invalid_drop_attempted.connect(_show_invalid_drop_message)
 	_hand_slot.invalid_drop_attempted.connect(_show_invalid_drop_message)
 	_shoes_slot.invalid_drop_attempted.connect(_show_invalid_drop_message)
+	_hat_slot.equip_failed.connect(_show_equip_failed_message)
+	_hand_slot.equip_failed.connect(_show_equip_failed_message)
+	_shoes_slot.equip_failed.connect(_show_equip_failed_message)
 	_sort_button.pressed.connect(_on_sort_pressed)
 	_discard_button.pressed.connect(_on_discard_pressed)
 	_style_scrollbar()
@@ -104,7 +117,20 @@ func _show_invalid_drop_message() -> void:
 	_message_timer = MESSAGE_DURATION
 
 
+func _show_equip_failed_message() -> void:
+	_message_label.text = EQUIP_FAILED_MESSAGE
+	_message_label.visible = true
+	_message_timer = MESSAGE_DURATION
+
+
 func refresh() -> void:
+	## status_screen.gd가 TAB을 열 때마다 이걸 호출한다 - 인벤토리 그리드뿐
+	## 아니라 장비 슬롯 3개도 같이 refresh()해야 equipment_slot.gd의 자가치유
+	## (Icon/CountLabel mouse_filter 복구)가 매번 실제로 돌아간다(2026-08-27
+	## 드래그 안 빠지는 버그 수정 참고).
+	_hat_slot.refresh()
+	_hand_slot.refresh()
+	_shoes_slot.refresh()
 	_refresh_inventory()
 
 
