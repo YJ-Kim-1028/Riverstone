@@ -144,13 +144,24 @@ func _on_map_changed(_map_id: String) -> void:
 ## 주는 이유는, TALK_RADIUS를 넓힌 뒤로 계산대처럼 가까이 붙어있는 정적
 ## Interactable과 판정 범위가 겹치는 경우가 생겨서 - 호출하는 쪽(main.gd)이
 ## "둘 다 범위 안이면 더 가까운 쪽 우선"으로 판단할 수 있어야 한다.
-func get_nearest_talkable_npc(position: Vector2) -> Dictionary:
+## 레스토랑 안에서는 대화 자체를 막는다(사용자 지시, 2026-08-26 - "예전에
+## 대화 했었는데.. 레스토랑 안에서 대화 안되게 해줘") - 손님 응대/서빙에
+## 집중하는 공간이라 잡담이 끼어들면 안 된다는 취지.
+## ignore_talked_today: main.gd가 손에 선물을 들고 있을 때 넘긴다 - 선물하기도
+## 이 함수로 대상 NPC를 찾는데, "오늘 대화함" 필터를 그대로 적용하면 한 번
+## 대화한 NPC에게는 그 날 선물을 아예 줄 수 없게 막혀버린다(사용자 리포트,
+## 2026-08-27 - "대화 하고 나면 선물하는 게 안 돼... 하루에 한번 대화할 수
+## 있는게 선물하기도 막고 있는게 아닌가"). 선물 여부와 무관하게 하루 한 번
+## 제한이 필요한 건 대화 자체지 선물이 아니므로, 선물 중일 땐 이 필터를 끈다.
+func get_nearest_talkable_npc(position: Vector2, ignore_talked_today: bool = false) -> Dictionary:
+	if GameManager.current_map_id == RESTAURANT_MAP_ID:
+		return {}
 	var best_id := ""
 	var best_distance := INF
 	for npc_id in _active_sprites:
 		if not NPCManager.is_alive(npc_id):
 			continue
-		if NPCManager.has_talked_today(npc_id):
+		if not ignore_talked_today and NPCManager.has_talked_today(npc_id):
 			continue
 		var sprite: Node2D = _active_sprites[npc_id]
 		var distance := sprite.position.distance_to(position)

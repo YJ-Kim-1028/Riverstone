@@ -23,6 +23,19 @@ extends Node
 const BGM_MAIN := "res://assets/audio/bgm/bgm_main.mp3"
 const BGM_NIGHT := "res://assets/audio/bgm/bgm_night.mp3"
 const BGM_RESTAURANT := "res://assets/audio/bgm/bgm_restaurant.mp3"
+## 살인 발견 씬 전용(사용자 지시, 2026-08-26) - duck_bgm_for_scene() 참고.
+## 파일 없으면 다른 브금과 같은 관례대로 조용히 무음 처리로 대체된다.
+const BGM_HORROR := "res://assets/audio/bgm/bgm_horror.mp3"
+## 체포 엔딩 전용(사용자 지시, 2026-08-26) - main.gd._play_arrest_ending_sequence()가
+## 경고 사격과 동시에 duck_bgm_for_scene(BGM_ARREST_ENDING)으로 넘겨서 튼다.
+## 파일 없으면 BGM_HORROR와 동일한 관례로 조용히 무음 처리로 대체된다.
+const BGM_ARREST_ENDING := "res://assets/audio/bgm/bgm_arrest_ending.mp3"
+## 두 번째(치명상) 총소리 이후 여운 구간 전용(사용자 지시, 2026-08-26 -
+## "두번째로 총 쏜다음엔 약간 서글픈 노래 깔고 싶은데"). main.gd가 암전
+## 직전에 AudioManager.play_bgm(BGM_ARREST_AFTERMATH)로 직접 바꿔 튼다 -
+## 파일 없으면 play_bgm()이 조용히 아무 것도 안 해서(기존 곡 유지) BGM_HORROR
+## 관례랑 다르지만, 이미 BGM_ARREST_ENDING이 깔려있는 채로 이어지므로 문제없다.
+const BGM_ARREST_AFTERMATH := "res://assets/audio/bgm/bgm_arrest_aftermath.mp3"
 const BGM_FADE_SECONDS := 1.0
 ## 이전엔 "실제 플레이 중 설정 슬라이더를 늘 40%까지 내려 듣는다"는 피드백을
 ## 반영해 기본값 자체를 -14.1dB(원본 대비 약 20%)까지 낮춰뒀었는데, 그 뒤
@@ -138,13 +151,17 @@ const SFX_GUNSHOT_VOLUME_DB := -3.1
 ## 체포 엔딩 마무리 나레이션 직후(어셔가 쥐고 있던 나이프가 바닥에 떨어지는
 ## 소리, 사용자 지시 2026-08-24). 파일 없으면 play_sfx()가 조용히 무시.
 const SFX_KNIFE_DROP := "res://assets/audio/sfx/sfx_knife_drop.mp3"
-## 조리 중(냄비/프라이팬/믹서기) 소리 - play_cooking_sfx()가 duration_seconds가
+## 조리 중(냄비/프라이팬/믹서기/도마) 소리 - play_cooking_sfx()가 duration_seconds가
 ## 지나면 재생 중이어도 강제로 멈춘다(사용자 지시: "프로그레스바 100% 차기
 ## 전까지"만). data/cooking/cooking_stations.json의 tool_name("냄비"/
-## "프라이팬"/"믹서기")으로 고른다.
+## "프라이팬"/"믹서기"/"도마")으로 고른다.
 const SFX_POT := "res://assets/audio/sfx/sfx_pot.mp3"
 const SFX_PAN := "res://assets/audio/sfx/sfx_pan.mp3"
 const SFX_MIXER := "res://assets/audio/sfx/sfx_mixer.mp3"
+## 도마(cooking_stations.json tool_name)만 play_cooking_sfx()의 매칭 목록에서
+## 빠져있었다(사용자 리포트, 2026-08-26 - "혹시 도마에는 연결된 소리
+## 없어?"). 파일 아직 없으면 다른 조리 효과음과 동일하게 조용히 무시된다.
+const SFX_CUTTING_BOARD := "res://assets/audio/sfx/sfx_cutting_board.mp3"
 ## 완성대(serving_screen) 상호작용 시. 사용자가 파일을 wav에서 mp3로
 ## 교체했다(구 sfx_dish.wav는 삭제됨) - 경로도 같이 갱신.
 const SFX_DISH := "res://assets/audio/sfx/sfx_dish.mp3"
@@ -211,6 +228,10 @@ var _sfx_volume := 1.0
 
 var _bgm_player: AudioStreamPlayer
 var _current_bgm_path := ""
+## 살인 발견 씬 등에서 켜둔다 - 이 동안은 _on_map_changed()/_on_hour_changed()가
+## 평소처럼 브금을 다시 틀지 않는다(사용자 지시, 2026-08-26 - "살인씬 그게
+## 진행될때는 브금이 안나와야할거같아 브금이 너무 평화로워").
+var _bgm_muted_for_scene := false
 
 var _rain_player: AudioStreamPlayer
 var _rain_active := false
@@ -320,7 +341,8 @@ func _get_target_bgm() -> String:
 
 func _on_map_changed(map_id: String) -> void:
 	_is_indoor = map_id.ends_with("_interior")
-	play_bgm(_get_target_bgm())
+	if not _bgm_muted_for_scene:
+		play_bgm(_get_target_bgm())
 	_update_rain_sfx()
 	_update_wave_sfx()
 	_update_interior_rain_sfx()
@@ -331,7 +353,47 @@ func _on_map_changed(map_id: String) -> void:
 
 
 func _on_hour_changed(_hour: int) -> void:
+	if not _bgm_muted_for_scene:
+		play_bgm(_get_target_bgm())
+
+
+## 살인 발견 씬 시작 시 부른다 - 맵을 몇 번 거쳐 뛰어가도(1차 발견 씬의
+## MURDER_RUN_CHAIN) _on_map_changed()가 다시 브금을 켜지 않도록 막아둔 채
+## 페이드아웃만 한다.
+## bgm_path 생략 시 기존처럼 BGM_HORROR - 체포 엔딩처럼 전용 트랙을 쓰고
+## 싶으면 넘겨서 덮어쓴다(사용자 지시, 2026-08-26). BGM_HORROR로 조용히
+## 폴백하던 걸 없앴다(사용자 지시, 2026-08-26 - "브금 호러 말고 저거로
+## 나오게 그냥 바꿔줘 안나오면 이거 재생이라는 코드 지우고") - 폴백이 있으면
+## 지정한 파일을 못 찾아도 그럴듯하게 다른 브금이 나와서 문제를 못 알아챈다.
+func duck_bgm_for_scene(bgm_path: String = BGM_HORROR) -> void:
+	if _bgm_muted_for_scene:
+		return
+	_bgm_muted_for_scene = true
+	if ResourceLoader.exists(bgm_path):
+		play_bgm(bgm_path)
+		return
+	var tween := create_tween()
+	tween.tween_property(_bgm_player, "volume_db", -40.0, BGM_FADE_SECONDS)
+
+
+## 살인 발견 씬이 끝나면 부른다 - 음소거를 풀고, 씬 도중 시간/맵이 바뀌어
+## 원래 틀어야 할 트랙이 달라졌을 수 있으니 다시 계산해서 재생한다.
+func restore_bgm_after_scene() -> void:
+	_bgm_muted_for_scene = false
+	var tween := create_tween()
+	tween.tween_property(_bgm_player, "volume_db", BGM_TARGET_VOLUME_DB, BGM_FADE_SECONDS)
 	play_bgm(_get_target_bgm())
+
+
+## 노크/그림자 인영처럼 순간적인 공포 연출용 - duck_bgm_for_scene()으로
+## 호러 브금(또는 파일 없으면 무음)으로 바꾼 채 정해진 시간만 유지하다가
+## 자동으로 되돌린다(사용자 지시, 2026-08-26 - "노크 이후 한 10초간 들려주다
+## 페이드아웃되면 좋겠네"). 살인 발견 씬처럼 명시적으로 restore를 불러줘야
+## 하는 긴 컷신과 달리 이건 완결된 한 덩어리라 여기서 알아서 끝맺는다.
+func play_horror_sting(seconds: float) -> void:
+	duck_bgm_for_scene()
+	await get_tree().create_timer(seconds).timeout
+	restore_bgm_after_scene()
 
 
 func _on_weather_changed(_weather: WeatherManager.Weather) -> void:
@@ -580,7 +642,14 @@ func _on_memento_received(_npc_id: String) -> void:
 	play_sfx(SFX_MEMORY)
 
 
+## 노크 소리와 별개로 진행되는 10초짜리 호러 브금 스팅(사용자 지시,
+## 2026-08-26) - 노크 소리 자체(_play_knock_sequence)를 기다리게 만들면 안
+## 되므로 await 없이 그냥 실행시켜 둔다.
+const KNOCK_HORROR_STING_SECONDS := 10.0
+
+
 func _on_knock_event_triggered() -> void:
+	play_horror_sting(KNOCK_HORROR_STING_SECONDS)
 	_play_knock_sequence()
 
 
@@ -660,8 +729,8 @@ func play_sfx(path: String, volume_db: float = 0.0) -> void:
 	player.play()
 
 
-## 조리 중(냄비/프라이팬) 효과음 - duration초가 지나면 재생 중이어도 강제로
-## 멈춘다(사용자 지시). tool_name이 냄비/프라이팬이 아니면 조용히 무시한다.
+## 조리 중(냄비/프라이팬/믹서기/도마) 효과음 - duration초가 지나면 재생 중이어도
+## 강제로 멈춘다(사용자 지시). tool_name이 매칭 목록에 없으면 조용히 무시한다.
 func play_cooking_sfx(tool_name: String, duration: float) -> void:
 	var path := ""
 	match tool_name:
@@ -671,6 +740,8 @@ func play_cooking_sfx(tool_name: String, duration: float) -> void:
 			path = SFX_PAN
 		"믹서기":
 			path = SFX_MIXER
+		"도마":
+			path = SFX_CUTTING_BOARD
 	if path.is_empty() or not ResourceLoader.exists(path):
 		return
 	var player := AudioStreamPlayer.new()

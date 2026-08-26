@@ -93,24 +93,18 @@ func _unhandled_input(event: InputEvent) -> void:
 		_debug_reset_restaurant_frame_blood()
 	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F10:
 		HorrorEventManager.debug_trigger_knock_event()
-	## F1은 30(heart_event_30만), Shift+F1은 100(추억의 물건 마일스톤도 같이
-	## 큐잉)로 나눴다(사용자 지시, 2026-08-26 - "30이랑 100이랑 겹칠거같은데") -
-	## 100으로 바로 올리면 30 조건도 같이 만족돼버려서 heart_event_30이 원치
-	## 않을 때 같이 뜰 수 있다는 지적. 두 이벤트를 각각 격리해서 테스트하고
-	## 싶으면 F1로 30 이벤트부터 보고, 다 보고 나면(그 NPC는 _shown_heart_events가
-	## 켜져서 다시 안 뜸) Shift+F1로 100을 올려서 추억의 물건만 테스트하면 된다.
-	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F1:
-		if event.shift_pressed:
-			_debug_set_all_affection(100)
-		else:
-			_debug_set_all_affection(30)
 	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F2:
 		MurderManager.debug_force_commit_murder()
 	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F3:
 		MurderManager.debug_force_truth_ending()
 	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F5:
 		MurderManager.debug_force_accomplice_ending()
-	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F8:
+	## 원래 F8이었으나 Godot 에디터 기본 단축키(정지)와 겹쳐 게임까지 입력이
+	## 안 왔다(사용자 리포트, 2026-08-26 - "F8 체포엔딩이랫는데 이거 종료라서
+	## 종료만 되는데?"). Ctrl+F8로 한 번 옮겼는데도 여전히 잘 안 된다는
+	## 후속 리포트로, F1(예전 호감도 디버그 키 - 다 체크했다고 삭제된 자리)로
+	## 옮긴다.
+	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F1:
 		MurderManager.debug_force_arrest_ending()
 
 
@@ -147,20 +141,6 @@ func _debug_kill_random_npc() -> void:
 	if candidates.is_empty():
 		return
 	NPCManager.kill_npc(String(candidates.pick_random()))
-
-
-## Debug-only (F1/Shift+F1, editor/debug builds only): 호감도 30 이벤트
-## (heart_event_30)/100 이벤트(추억의 물건) 테스트용(사용자 지시, 2026-08-26 -
-## "매번 그 시기까지 스토리를 진행시키려면 너무 힘들거같아"). F4(살해 대상
-## 대기열 등록)와 달리 이건 살인 후보 자격이랑 무관한 순수 이벤트 테스트용
-## 이라, 라마/세이지 같은 스토리 NPC도 제외할 이유가 없다(사용자 지시,
-## 2026-08-26 - "스토리 npc도 올려줘 호감도") - 살아있는 NPC 전원(스토커
-## 포함) 대상으로 바꿨다.
-func _debug_set_all_affection(value: int) -> void:
-	for npc_id in NPCManager.get_all_ids():
-		if not NPCManager.is_alive(npc_id):
-			continue
-		NPCManager.debug_set_affection(npc_id, value)
 
 
 ## Debug-only (F4, editor/debug builds only): murder_system.md 테스트용 -
