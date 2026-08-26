@@ -14,7 +14,6 @@ const SELECTABLE_CATEGORY := "cooked_ingredient"
 
 const READY_TINT_DIM := Color(0.95, 0.92, 0.75, 1.0)
 const READY_TINT_BRIGHT := Color(1.3, 1.25, 1.0, 1.0)
-const DIM_TINT := Color(0.55, 0.55, 0.55, 1.0)
 const FAIL_TINT := Color(1.6, 0.5, 0.5, 1.0)
 const RAT_POISON_ARMED_TINT := Color(1.0, 0.4, 0.4, 1.0)
 const RAT_POISON_INACTIVE_TINT := Color(0.45, 0.45, 0.45, 1.0)
@@ -23,6 +22,11 @@ const PULSE_DURATION := 0.8
 const BUTTON_TEXTURE := preload("res://assets/ui/button.png")
 const BUTTON_HOVER_TEXTURE := preload("res://assets/ui/button_hover.png")
 const BUTTON_TEXT_COLOR := Color(0.25, 0.15, 0.08)
+## title_screen.gd/slot_picker_screen.gd와 동일한 이유 - "disabled" 스타일박스를
+## 안 채워두면(완성 버튼은 재료를 다 채우기 전까지 기본이 비활성 상태) Godot
+## 기본 테마의 밋밋한 사각형으로 보인다(사용자 리포트, 2026-08-27: "완성
+## 버튼이 개 밤티라서 디자인 입혀야할거같아").
+const DISABLED_TINT := Color(0.55, 0.55, 0.55)
 
 @onready var _complete_button: Button = $Background/Margin/VBox/PlateRow/CompleteButton
 @onready var _slot_a: TextureButton = $Background/Margin/VBox/PlateRow/SlotA
@@ -115,7 +119,23 @@ func current_station_index() -> int:
 const _ALWAYS_IGNORE_MOUSE_GROUP := &"_always_ignore_mouse"
 
 
+## 익스포트 빌드에서 앵커 기반 크기/위치가 창이 완전히 자리잡기 전 값으로
+## 굳어버리는 문제 회피(사용자 리포트, 2026-08-26) - 값은 그대로 자신에게
+## 다시 대입해서 Godot이 현재 부모 크기 기준으로 강제로 다시 계산하게 만든다.
+func _refresh_layout() -> void:
+	anchor_left = anchor_left
+	anchor_top = anchor_top
+	anchor_right = anchor_right
+	anchor_bottom = anchor_bottom
+	offset_left = offset_left
+	offset_top = offset_top
+	offset_right = offset_right
+	offset_bottom = offset_bottom
+
+
 func _set_open(is_open: bool) -> void:
+	if is_open:
+		_refresh_layout()
 	modulate.a = 1.0 if is_open else 0.0
 	var filter := Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE
 	mouse_filter = filter
@@ -180,7 +200,14 @@ func _refresh_grid() -> void:
 		slot_instance.connect("slot_pressed", _on_slot_pressed)
 	# cooking_screen.gd(_refresh_ingredient_grid)와 같은 처리 - 여기선 빠져있어서
 	# 쥐약을 산 적이 없어도 토글 아이콘이 계속 보이는 버그가 있었다(사용자 리포트).
-	_rat_poison_toggle.visible = InventoryManager.has_item("rat_poison", 1)
+	# 폴리/세이지/라마(can_die:false)는 애초에 독살 대상이 될 수 없는데, 서빙
+	# 화면에서 토글 자체가 보이면 "될 것처럼" 오해할 수 있다(사용자 지시,
+	# 2026-08-26 - "스토리 npc한테 접시 줄 때는 독약이 아예 안떠야 할 거
+	# 같아 타지도못하게"). MurderManager._on_npc_poisoned()의 can_die 체크로
+	# 이미 실제 효과는 막혀 있지만, 여기서도 아예 못 타게 가려서 헷갈릴 일을
+	# 없앤다.
+	var current_npc_id := RestaurantManager.get_station_npc(_station_index)
+	_rat_poison_toggle.visible = InventoryManager.has_item("rat_poison", 1) and NPCManager.can_die(current_npc_id)
 
 
 func _on_slot_pressed(index: int) -> void:
@@ -222,15 +249,18 @@ func _style_confirm_button(button: Button) -> void:
 	button.add_theme_stylebox_override("normal", _build_button_style(BUTTON_TEXTURE))
 	button.add_theme_stylebox_override("hover", _build_button_style(BUTTON_HOVER_TEXTURE))
 	button.add_theme_stylebox_override("pressed", _build_button_style(BUTTON_HOVER_TEXTURE))
+	button.add_theme_stylebox_override("disabled", _build_button_style(BUTTON_TEXTURE, DISABLED_TINT))
 	button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	button.add_theme_color_override("font_color", BUTTON_TEXT_COLOR)
 	button.add_theme_color_override("font_hover_color", BUTTON_TEXT_COLOR)
 	button.add_theme_color_override("font_pressed_color", BUTTON_TEXT_COLOR)
+	button.add_theme_color_override("font_disabled_color", BUTTON_TEXT_COLOR.lerp(Color.BLACK, 0.3))
 
 
-func _build_button_style(texture: Texture2D) -> StyleBoxTexture:
+func _build_button_style(texture: Texture2D, tint: Color = Color.WHITE) -> StyleBoxTexture:
 	var style := StyleBoxTexture.new()
 	style.texture = texture
+	style.modulate_color = tint
 	style.texture_margin_left = 8
 	style.texture_margin_right = 8
 	style.texture_margin_top = 4
@@ -277,7 +307,10 @@ func _refresh_plate_state() -> void:
 		_pulse_tween.tween_property(_complete_button, "modulate", READY_TINT_BRIGHT, PULSE_DURATION).set_ease(Tween.EASE_IN_OUT)
 		_pulse_tween.tween_property(_complete_button, "modulate", READY_TINT_DIM, PULSE_DURATION).set_ease(Tween.EASE_IN_OUT)
 	else:
-		_complete_button.modulate = DIM_TINT
+		## disabled 스타일박스 자체가 DISABLED_TINT로 어둡게 그려주므로, 여기서
+		## modulate까지 같이 어둡게 하면 두 배로 어두워진다 - 기본값(흰색)으로
+		## 되돌려서 다른 화면의 비활성 버튼들과 밝기를 맞춘다.
+		_complete_button.modulate = Color.WHITE
 
 
 func _on_complete_pressed() -> void:

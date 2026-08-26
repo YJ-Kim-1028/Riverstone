@@ -38,7 +38,7 @@ func _refresh_rows() -> void:
 	var online_shop_ids := _get_online_shop_ids()
 	if online_shop_ids.is_empty():
 		var empty_label := Label.new()
-		empty_label.text = "온라인으로 전환된 상점이 없습니다."
+		empty_label.text = "온라인 상점이 없습니다."
 		empty_label.add_theme_font_size_override("font_size", ROW_FONT_SIZE)
 		empty_label.add_theme_color_override("font_color", Color.BLACK)
 		_rows.add_child(empty_label)
