@@ -22,5 +22,37 @@
         "icon": "res://assets/icon/Records.png",
         "icon_index": 2,
         "item_id": "record_city_pop"
+    },
+    "song_lofi": {
+        "id": "song_lofi",
+        "name": "Lo-fi",
+        "bgm_path": "res://assets/audio/bgm/bgm_chill_lofi.mp3",
+        "icon": "res://assets/icon/Records.png",
+        "icon_index": 3,
+        "item_id": "record_lofi"
+    },
+    "song_bossa_nova": {
+        "id": "song_bossa_nova",
+        "name": "Bossa Nova",
+        "bgm_path": "res://assets/audio/bgm/bgm_bosanova.mp3",
+        "icon": "res://assets/icon/Records.png",
+        "icon_index": 4,
+        "item_id": "record_bossa_nova"
+    },
+    "song_acoustic_folk": {
+        "id": "song_acoustic_folk",
+        "name": "Acoustic Folk",
+        "bgm_path": "res://assets/audio/bgm/bgm_acoustic_folk.mp3",
+        "icon": "res://assets/icon/Records.png",
+        "icon_index": 5,
+        "item_id": "record_acoustic_folk"
+    },
+    "song_acoustic_pop": {
+        "id": "song_acoustic_pop",
+        "name": "Acoustic Pop",
+        "bgm_path": "res://assets/audio/bgm/bgm_acoustic_pop.mp3",
+        "icon": "res://assets/icon/Records.png",
+        "icon_index": 0,
+        "item_id": "record_acoustic_pop"
     }
 }

@@ -68,6 +68,12 @@ func _ready() -> void:
 	# 보관 상자도 하나는 기본 지급(사용자 지시) - 위 도구들과 동일한 이유로
 	# 여기서 줘도 세이브 로드 시에는 저장된 상태로 덮어써진다.
 	add_item("storage_box", 1)
+	# 초반 자금 소프트락 대응(day17 백로그, 사용자 지시 2026-08-26) - 시작
+	# 자금(500원)으로 씨앗을 못 사면 농사 자체를 못 시작할 수 있어서, 재배
+	# 가능한 세 작물 씨앗을 하나씩 기본 지급한다.
+	add_item("potato_seed", 1)
+	add_item("corn_seed", 1)
+	add_item("lettuce_seed", 1)
 	NPCManager.memento_received.connect(_on_memento_received)
 	NPCManager.npc_gift_item_triggered.connect(_on_npc_gift_item_triggered)
 	TimeManager.day_changed.connect(_on_day_changed)

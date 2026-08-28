@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="28" height="24" tilewidth="16" tileheight="16" infinite="0" nextlayerid="12" nextobjectid="39">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="28" height="24" tilewidth="16" tileheight="16" infinite="0" nextlayerid="12" nextobjectid="40">
  <tileset firstgid="1" source="gg.tsx"/>
  <tileset firstgid="257" source="buildings.tsx"/>
  <tileset firstgid="1281" source="tree.tsx"/>
@@ -260,6 +260,7 @@
   <object id="36" name="roshi_heart_player" x="368" y="176"/>
   <object id="37" name="marin_heart_npc" x="176" y="176"/>
   <object id="38" name="marin_heart_player" x="240" y="176"/>
+  <object id="39" name="player_murder_scene" x="240" y="288"/>
  </objectgroup>
  <objectgroup id="11" name="YSortAnchor" visible="0" locked="1">
   <object id="10" name="tree1" x="48" y="0" width="32" height="32"/>

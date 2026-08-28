@@ -20,6 +20,13 @@ const BOX_SLOT_COUNT := 24            ## 6열 x 4줄
 ## home_interior/basement_interior는 사용자 지시로 추가됨.
 const HOME_MAP_ID := "Home"
 const ALLOWED_MAP_IDS := {"Home": true, "home_interior": true, "basement_interior": true}
+## 레스토랑은 자유 배치 허용 대상에서 뺐다(사용자 지시, 2026-08-26) - 손님
+## 좌석/동선을 상자가 막아버릴 수 있다는 우려. 대신 restaurant_interior.tmx의
+## Spawn 레이어에 있는 이 지점 하나에만, 맵이 처음 로드될 때 상자를 자동으로
+## 만들어준다(_ensure_fixed_restaurant_box 참고) - 플레이어가 직접 설치하거나
+## 회수할 수 없는 고정 상자.
+const FIXED_BOX_MAP_ID := "restaurant_interior"
+const FIXED_BOX_SPAWN_NAME := "restaurant_storage_box"
 
 
 func is_placement_allowed(map_id: String) -> bool:
@@ -131,6 +138,9 @@ func place_box(world_position: Vector2) -> String:
 func remove_box(map_id: String, cell: Vector2i) -> String:
 	if not has_box_at(map_id, cell):
 		return ""
+	if map_id == FIXED_BOX_MAP_ID:
+		AudioManager.play_sfx(AudioManager.SFX_BEEP)
+		return "이 상자는 회수할 수 없다."
 	var items: Array = get_box(map_id, cell).get("items", [])
 	for slot in items:
 		if slot != null:
@@ -250,8 +260,29 @@ func set_world_map(world_map: WorldMap, map_id: String) -> void:
 		_despawn_sprite(cell)
 	_world_map = world_map
 	_current_map_id = map_id
+	_ensure_fixed_restaurant_box(map_id)
 	for cell in (_boxes.get(map_id, {}) as Dictionary):
 		_spawn_sprite(cell)
+
+
+## 레스토랑에 처음 들어올 때(또는 그 지점이 아직 비어있을 때) 고정 상자를
+## 한 번 만들어준다 - 이미 있으면 아무 것도 안 하므로 맵을 드나들 때마다
+## 불려도 안전하다. 스폰 지점이 아직 안 찍혀있으면(사용자 작업 전) 조용히
+## 건너뛴다(다른 사용자 배치 예정 지점들과 동일한 관례).
+func _ensure_fixed_restaurant_box(map_id: String) -> void:
+	if map_id != FIXED_BOX_MAP_ID or _world_map == null:
+		return
+	var spawn_position: Vector2 = _world_map.get_spawn_position(FIXED_BOX_SPAWN_NAME)
+	if spawn_position == Vector2.INF:
+		return
+	var cell := _world_to_cell(spawn_position)
+	if has_box_at(map_id, cell):
+		return
+	if not _boxes.has(map_id):
+		_boxes[map_id] = {}
+	var items: Array = []
+	items.resize(BOX_SLOT_COUNT)
+	(_boxes[map_id] as Dictionary)[cell] = {"items": items}
 
 
 ## EconomyManager.upgrade_house()가 지도 좌표계가 바뀌었을 때 호출한다

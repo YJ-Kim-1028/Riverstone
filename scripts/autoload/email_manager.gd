@@ -201,12 +201,28 @@ func log_invite(npc_id: String) -> void:
 ## _visited_today가 지워지기 전)에 실제 방문 여부를 확인해서 호출한다 - 해당
 ## npc_id의 가장 최근 "pending" 항목을 찾아 결과를 채운다(같은 NPC를 여러 번
 ## 초대했을 수 있으니 가장 최근 것부터 역순으로 찾음).
+##
+## 실제로 방문했다면(visited) _event_invite_target_npc_id에 남겨서, 이번
+## day_changed 신호의 뒷부분에서 도는 _generate_daily_emails()가 오늘(=방문한
+## 다음날) event_invite 메일을 보내게 한다. RestaurantManager가 이 함수보다
+## 먼저 autoload되어 있어 항상 먼저 불린다(project.godot 순서 - RestaurantManager
+## 33번째 줄, EmailManager 38번째 줄) - 즉 방문 여부가 확정된 뒤에야
+## _generate_daily_emails()가 돈다. 예전엔 RestaurantManager.get_todays_invited_npc_id()
+## ("오늘 방문 예정"인 NPC)로 판정해서, 초대한 다음날 - 즉 아직 방문하기도 전에
+## "어제 즐거웠어" 메일이 먼저 도착하는 버그가 있었다(사용자 리포트, 2026-08-26 -
+## "플로라가 레스토랑에 초대메일을 받으면 그 다음날 오는데 그 다음날에 오기도
+## 전에 초대해줘서 고맙다는 메일 써놨음").
+var _event_invite_target_npc_id := ""
+
+
 func mark_invite_outcome(npc_id: String, visited: bool) -> void:
 	for i in range(_invite_history.size() - 1, -1, -1):
 		var entry: Dictionary = _invite_history[i]
 		if String(entry.get("npc_id", "")) == npc_id and String(entry.get("outcome", "")) == "pending":
 			entry["outcome"] = "visited" if visited else "missed"
-			return
+			break
+	if visited:
+		_event_invite_target_npc_id = npc_id
 
 
 func get_invite_history() -> Array:
@@ -597,6 +613,11 @@ func _generate_daily_emails() -> void:
 	_gifted_today.clear()
 	var favorite_food_served_yesterday := _favorite_food_served_today.duplicate()
 	_favorite_food_served_today.clear()
+	## RestaurantManager._on_day_changed()가 이 신호 안에서 이미 먼저 돌아
+	## mark_invite_outcome()으로 채워둔 값 - 방문이 확정된 그 하루치만 쓰고
+	## 바로 비운다(_event_invite_target_npc_id 주석 참고).
+	var event_invite_target := _event_invite_target_npc_id
+	_event_invite_target_npc_id = ""
 	## 오늘 이미 gift_thanks/event_invite를 보낸 NPC는 안부 후보에서 제외(하루 1통
 	## 원칙) - 그 외 호감도 80+ & 쿨다운 지난 NPC만 후보로 모았다가 섞어서 최대
 	## MAX_GREETING_EMAILS_PER_DAY명만 실제로 보낸다.
@@ -607,7 +628,7 @@ func _generate_daily_emails() -> void:
 		_maybe_send_story_progress(npc_id)
 		if gifted_yesterday.has(npc_id):
 			_maybe_send_category(npc_id, "gift_thanks", 1.0)
-		elif npc_id == RestaurantManager.get_todays_invited_npc_id():
+		elif npc_id == event_invite_target:
 			_maybe_send_category(npc_id, "event_invite", EVENT_INVITE_CHANCE_PER_DAY, favorite_food_served_yesterday.has(npc_id))
 		elif NPCManager.get_affection(npc_id) >= GREETING_AFFECTION_THRESHOLD and _is_greeting_off_cooldown(npc_id):
 			greeting_candidates.append(npc_id)
@@ -633,6 +654,10 @@ func _maybe_send_category(npc_id: String, category: String, chance: float, favor
 	var pool: Array = emails.get(category, [])
 	if category == "event_invite":
 		pool = pool.filter(func(entry): return not bool(entry.get("requires_favorite_food", false)) or favorite_food_served)
+	# 다른 NPC를 현재형으로 언급하는 메일(예: 셰퍼드의 "오늘 마린이 왔다
+	# 갔어")이 그 NPC 사망 후에도 계속 발송되는 문제(사용자 지시, 2026-08-26) -
+	# dialogue.daily와 같은 requires_alive 필드를 이메일 풀에도 재사용한다.
+	pool = pool.filter(func(entry): return NPCManager.requires_alive_met(entry.get("requires_alive", "")))
 	if pool.is_empty() or randf() > chance:
 		return false
 	var picked: Dictionary = pool.pick_random()
@@ -705,8 +730,8 @@ func _on_impersonation_email_ready(npc_id: String, title: String, lines: Array) 
 ## 꽂는다 - 발신인을 알 수 없는 메일이라는 게 스펙(email.md "공포 메일")이라
 ## 일부러 실제 NPC id를 안 쓴다. 제목도 비어있으면 그대로 빈 제목으로 둔다
 ## (정체불명 발신인이 제목도 없이 보낸 메일이 오히려 더 자연스러움).
-func _on_stalker_email_ready(sender_id: String, title: String, lines: Array) -> void:
-	_add_mail(sender_id, "stalker", title, lines)
+func _on_stalker_email_ready(sender_id: String, title: String, lines: Array, quiet: bool) -> void:
+	_add_mail(sender_id, "stalker", title, lines, quiet)
 
 
 ## MurderManager._on_day_changed() - 2차 살인 알리바이 창이 열려 있는데 3일
@@ -723,7 +748,12 @@ func _on_memento_reminder_ready(npc_id: String, title: String, lines: Array) -> 
 
 ## 반환값은 main.gd의 엔딩 컷신처럼 "이 메일이 실제로 읽힐 때까지 기다리기"가
 ## 필요한 호출부를 위한 것 - 대부분의 기존 호출부는 그냥 무시한다.
-func _add_mail(npc_id: String, category: String, title: String, lines: Array) -> Dictionary:
+## quiet=true는 스토커 메일 중 아직 무서운 효과음을 쓰면 안 되는 초반 몇 통용
+## (HorrorEventManager.QUIET_STALKER_EMAIL_COUNT 참고) - mail_detail_panel.gd가
+## 이 값을 보고 SFX_STALKER_MAIL 대신 평범한 메일 효과음을 쓴다. 다른 카테고리
+## 메일들은 그냥 기본값(false)을 쓰면 되므로 새 인자 하나 늘었다고 기존 호출부를
+## 다 고칠 필요는 없다.
+func _add_mail(npc_id: String, category: String, title: String, lines: Array, quiet: bool = false) -> Dictionary:
 	var entry := {
 		"id": _next_id,
 		"npc_id": npc_id,
@@ -732,6 +762,7 @@ func _add_mail(npc_id: String, category: String, title: String, lines: Array) ->
 		"date": get_current_real_date_string(),
 		"read": false,
 		"lines": lines,
+		"quiet": quiet,
 	}
 	_next_id += 1
 	_inbox.append(entry)

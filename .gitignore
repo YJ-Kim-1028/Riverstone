@@ -7,3 +7,9 @@ export_templates/
 
 # Stray duplicate folder with no unique content (project.godot + cache copy only)
 Game/
+
+# Export build outputs (not source, regenerated via Godot export)
+/RiverstoneSimulator.exe
+/RiverstoneSimulator.console.exe
+/RiverstoneSimulator.pck
+/RiverstoneSimulator.zip

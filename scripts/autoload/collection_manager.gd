@@ -24,10 +24,28 @@ var _full_collection_announced := false
 func _ready() -> void:
 	CookingManager.dish_cooked.connect(_on_dish_cooked)
 	CookingManager.recipe_learned.connect(_on_recipe_learned)
+	# 예전엔 "책장에서 등록"(register_memento())해야 도감에 떴는데, 실제로
+	# 그걸 부르는 곳이 없어서 인벤토리에 들고 있어도 "?"로만 남는 버그였다.
+	# 그걸 고치려다 사용자 지시로 아예 방식을 바꿈(2026-08-26 - "들고 있지
+	# 않아도 얻기만 해도 도감에 보여야돼") - 소지 여부와 무관하게 받는 순간
+	# 바로 등록한다.
+	NPCManager.memento_received.connect(_on_memento_received)
+	SaveManager.game_loaded.connect(_on_game_loaded)
 
 
 func is_memento_acquired(npc_id: String) -> bool:
 	return _memento_entries.has(npc_id)
+
+
+## 위 방식(받는 순간 자동 등록)이 생기기 "전" 세이브는 인벤토리에 추억의
+## 물건을 이미 들고 있으면서도 한 번도 등록된 적 없을 수 있다(사용자 리포트,
+## 2026-08-26 - "그 전에 만든 세이브파일로 하다보니 계속 안뜨는거만 보여서").
+## 불러올 때마다 한 번 훑어서 들고 있는데 미등록인 것만 등록해준다 - 이미
+## 등록된 건 is_memento_acquired()에서 걸러져 중복 걱정 없음.
+func _on_game_loaded(_slot: int) -> void:
+	for npc_id in NPCManager.get_all_ids():
+		if not is_memento_acquired(npc_id) and InventoryManager.has_item("memento_%s" % npc_id):
+			_on_memento_received(npc_id)
 
 
 ## true once the NPC has died without ever handing over the memento - the
@@ -36,22 +54,14 @@ func is_memento_locked(npc_id: String) -> bool:
 	return not is_memento_acquired(npc_id) and not NPCManager.is_alive(npc_id)
 
 
-## inventory.md: 추억의 물건은 책장에서 도감에 등록하는 순간 인벤토리에서
-## 자동 삭제된다. 그래서 등록은 "받는 순간"이 아니라 이걸 호출하는 순간
-## (미래의 책장 상호작용)에 일어나고, 실제로 아이템을 들고 있어야 성공한다.
-func register_memento(npc_id: String) -> bool:
+func _on_memento_received(npc_id: String) -> void:
 	if is_memento_acquired(npc_id):
-		return false
-	var item_id := "memento_%s" % npc_id
-	if not InventoryManager.has_item(item_id):
-		return false
-	InventoryManager.remove_memento(npc_id)
+		return
 	_memento_entries[npc_id] = {"acquired_day": TimeManager.current_day}
 	memento_registered.emit(npc_id)
 	if not _full_collection_announced and is_full_memento_collection():
 		_full_collection_announced = true
 		full_memento_collection_achieved.emit()
-	return true
 
 
 func get_memento_entry(npc_id: String) -> Dictionary:

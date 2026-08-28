@@ -126,8 +126,8 @@
   <object id="4" name="general_looking" x="48" y="176"/>
   <object id="5" name="general_room_enterance" x="144" y="80"/>
   <object id="7" name="general_enterance" x="104" y="197.5"/>
-  <object id="16" name="marr_heart_npc" x="96" y="150"/>
-  <object id="17" name="marr_heart_player" x="80" y="150"/>
+  <object id="16" name="marr_heart_npc" x="101" y="150"/>
+  <object id="17" name="marr_heart_player" x="74" y="150"/>
  </objectgroup>
  <objectgroup id="9" name="Interactable" visible="0" locked="1">
   <object id="8" name="cash_register" x="24" y="89.75" width="16" height="16">

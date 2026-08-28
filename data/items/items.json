@@ -893,7 +893,7 @@
         "name": "문 너머에는",
         "category": "book",
         "subtype": "",
-        "description": "작가: 어셔",
+        "description": "작가: 어셔 (인벤토리에서 우클릭하면 읽을 수 있다)",
         "icon": "res://assets/icon/Tools.png",
         "icon_index": 6
     },
@@ -902,7 +902,7 @@
         "name": "완벽한 알리바이",
         "category": "book",
         "subtype": "",
-        "description": "작가: 어셔",
+        "description": "작가: 어셔 (인벤토리에서 우클릭하면 읽을 수 있다)",
         "icon": "res://assets/icon/Tools.png",
         "icon_index": 6
     },
@@ -911,7 +911,7 @@
         "name": "고양이로 사는 법",
         "category": "book",
         "subtype": "",
-        "description": "작가: 어셔",
+        "description": "작가: 어셔 (인벤토리에서 우클릭하면 읽을 수 있다)",
         "icon": "res://assets/icon/Tools.png",
         "icon_index": 6
     },
@@ -920,7 +920,7 @@
         "name": "범인은 이 안에 있어",
         "category": "book",
         "subtype": "",
-        "description": "작가: 어셔",
+        "description": "작가: 어셔 (인벤토리에서 우클릭하면 읽을 수 있다)",
         "icon": "res://assets/icon/Tools.png",
         "icon_index": 6
     },
@@ -929,7 +929,7 @@
         "name": "사랑에 빠지는 건 오직 3초",
         "category": "book",
         "subtype": "",
-        "description": "작가: 어셔",
+        "description": "작가: 어셔 (인벤토리에서 우클릭하면 읽을 수 있다)",
         "icon": "res://assets/icon/Tools.png",
         "icon_index": 6
     },
@@ -938,7 +938,7 @@
         "name": "죽음 앞에서의 결심",
         "category": "book",
         "subtype": "",
-        "description": "작가: 어셔",
+        "description": "작가: 어셔 (인벤토리에서 우클릭하면 읽을 수 있다)",
         "icon": "res://assets/icon/Tools.png",
         "icon_index": 6
     },
@@ -947,7 +947,7 @@
         "name": "나는 지난 여름에 네가 한 짓을 알고 있다",
         "category": "book",
         "subtype": "",
-        "description": "작가: 어셔",
+        "description": "작가: 어셔 (인벤토리에서 우클릭하면 읽을 수 있다)",
         "icon": "res://assets/icon/Tools.png",
         "icon_index": 6
     },
@@ -956,7 +956,7 @@
         "name": "탐정의 마지막 발자취",
         "category": "book",
         "subtype": "",
-        "description": "작가: 어셔",
+        "description": "작가: 어셔 (인벤토리에서 우클릭하면 읽을 수 있다)",
         "icon": "res://assets/icon/Tools.png",
         "icon_index": 6
     },
@@ -965,7 +965,7 @@
         "name": "부치지 못한 편지",
         "category": "book",
         "subtype": "",
-        "description": "작가: 어셔",
+        "description": "작가: 어셔 (인벤토리에서 우클릭하면 읽을 수 있다)",
         "icon": "res://assets/icon/Tools.png",
         "icon_index": 6
     },
@@ -974,7 +974,7 @@
         "name": "항상 그 골목에 서있던 그녀는",
         "category": "book",
         "subtype": "",
-        "description": "작가: 어셔",
+        "description": "작가: 어셔 (인벤토리에서 우클릭하면 읽을 수 있다)",
         "icon": "res://assets/icon/Tools.png",
         "icon_index": 6
     },
@@ -995,6 +995,42 @@
         "description": "주크박스에서 재생할 수 있는 음반이다.",
         "icon": "res://assets/icon/Records.png",
         "icon_index": 2
+    },
+    "record_lofi": {
+        "id": "record_lofi",
+        "name": "Lo-fi",
+        "category": "record",
+        "subtype": "",
+        "description": "주크박스에서 재생할 수 있는 음반이다.",
+        "icon": "res://assets/icon/Records.png",
+        "icon_index": 3
+    },
+    "record_bossa_nova": {
+        "id": "record_bossa_nova",
+        "name": "Bossa Nova",
+        "category": "record",
+        "subtype": "",
+        "description": "주크박스에서 재생할 수 있는 음반이다.",
+        "icon": "res://assets/icon/Records.png",
+        "icon_index": 4
+    },
+    "record_acoustic_folk": {
+        "id": "record_acoustic_folk",
+        "name": "Acoustic Folk",
+        "category": "record",
+        "subtype": "",
+        "description": "주크박스에서 재생할 수 있는 음반이다.",
+        "icon": "res://assets/icon/Records.png",
+        "icon_index": 5
+    },
+    "record_acoustic_pop": {
+        "id": "record_acoustic_pop",
+        "name": "Acoustic Pop",
+        "category": "record",
+        "subtype": "",
+        "description": "주크박스에서 재생할 수 있는 음반이다.",
+        "icon": "res://assets/icon/Records.png",
+        "icon_index": 0
     },
     "storage_box": {
         "id": "storage_box",

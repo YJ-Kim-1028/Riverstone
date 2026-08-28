@@ -105,8 +105,12 @@
             {"item_id": "book_detectives_last_trace", "price": 1800, "purchase_limit": 1, "unlocks_after": "book_last_summer", "unlock_delay_days": 2},
             {"item_id": "book_unsent_letter", "price": 1800, "purchase_limit": 1, "unlocks_after": "book_detectives_last_trace", "unlock_delay_days": 2},
             {"item_id": "book_girl_in_the_alley", "price": 1800, "purchase_limit": 1, "unlocks_after": "book_unsent_letter", "unlock_delay_days": 2},
-            {"item_id": "record_chiptune", "price": 5000, "purchase_limit": 1},
-            {"item_id": "record_city_pop", "price": 5000, "purchase_limit": 1}
+            {"item_id": "record_chiptune", "price": 1500, "purchase_limit": 1},
+            {"item_id": "record_city_pop", "price": 1500, "purchase_limit": 1},
+            {"item_id": "record_lofi", "price": 1500, "purchase_limit": 1},
+            {"item_id": "record_bossa_nova", "price": 1500, "purchase_limit": 1},
+            {"item_id": "record_acoustic_folk", "price": 1500, "purchase_limit": 1},
+            {"item_id": "record_acoustic_pop", "price": 1500, "purchase_limit": 1}
         ],
         "planned_stock": []
     },

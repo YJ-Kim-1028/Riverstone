@@ -74,7 +74,9 @@ func show_request(entry: Dictionary, objective_met: bool) -> void:
 	_current_request_id = String(entry.get("id", ""))
 	_title_label.text = String(entry.get("title", "")).replace("{player_name}", GameManager.player_name)
 	var npc_id := String(entry.get("npc_id", ""))
-	_person_label.text = "보낸 사람 : %s" % String(NPCManager.get_definition(npc_id).get("name", npc_id))
+	# "보낸 사람 :" 라벨 없이 이름만 - 옆에 이미 초상화가 있고 요청함은 항상
+	# 수신함(=보낸 사람)뿐이라 방향 표기가 필요 없다(사용자 지시, 2026-08-26).
+	_person_label.text = String(NPCManager.get_definition(npc_id).get("name", npc_id))
 	var lines: Array = entry.get("lines", [])
 	var body := "\n".join(lines).replace("{player_name}", GameManager.player_name)
 	var reward_line := _build_reward_line(entry)
@@ -117,17 +119,23 @@ func show_email(entry: Dictionary, is_sent: bool) -> void:
 	## 스토커 이메일 전용 효과음(사용자 지시, 2026-08-24) - EmailManager._add_mail()이
 	## 저장한 category로 구분한다.
 	## 사칭 메일(impersonation)도 스토커 메일과 같은 소름끼치는 소리로 취급한다
-	## (사용자 지시, 2026-08-24).
+	## (사용자 지시, 2026-08-24). 단, quiet==true인 초반 스토커 메일(사용자
+	## 지시, 2026-08-26 - "처음부터 공포라는걸 너무 알려주고 싶진 않단말이야...
+	## 7번째 메일부터 호러 효과음이 들리면 돼")은 평범한 메일 효과음을 쓴다.
 	var category := String(entry.get("category", ""))
-	if category == "stalker" or category == "impersonation":
+	var is_scary := (category == "stalker" or category == "impersonation") and not bool(entry.get("quiet", false))
+	if is_scary:
 		AudioManager.play_sfx(AudioManager.SFX_STALKER_MAIL)
 	else:
 		AudioManager.play_sfx(AudioManager.SFX_MAIL_OPEN)
 	# {player_name} 자리표시자 - mail_list_panel.gd와 동일하게 제목도 치환.
 	_title_label.text = String(entry.get("title", "")).replace("{player_name}", GameManager.player_name)
 	var npc_id := String(entry.get("npc_id", ""))
+	# "보낸 사람 :"/"수신인 :" 라벨 없이 이름만 - 옆 초상화도 있고, 애초에
+	# 수신함/발신함 탭이 나뉘어 있어서 방향은 이미 알고 여는 상태라 라벨이
+	# 중복이었다(사용자 지시, 2026-08-26 - "발신함인데 내가 다 보낸거지").
 	var npc_name := String(NPCManager.get_definition(npc_id).get("name", npc_id))
-	_person_label.text = ("수신인 : %s" if is_sent else "보낸 사람 : %s") % npc_name
+	_person_label.text = npc_name
 	var lines: Array = entry.get("lines", [])
 	# {player_name} 자리표시자 - dialogue_screen.gd와 동일한 규칙(README 참고).
 	_content_label.text = "\n".join(lines).replace("{player_name}", GameManager.player_name)

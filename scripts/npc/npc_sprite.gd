@@ -216,6 +216,12 @@ func face_down() -> void:
 	_facing = Direction.DOWN
 
 
+## 공범 엔딩 경찰서 씬(main.gd) - 어셔가 도착 지점(usher_ending)에서 좌측을
+## 보고 서게 하는 용도(사용자 지시, 2026-08-26).
+func face_left() -> void:
+	_facing = Direction.LEFT
+
+
 ## delta가 waypoint 사이 거리(보통 타일 한 칸, 16~22.6px)보다 큰 경우(프레임
 ## 드랍/랙 스파이크, 혹은 --fixed-fps로 가속한 헤드리스 테스트 등) 남는 이동
 ## 예산을 다음 waypoint로 이어서 계속 소모해야 한다 - 안 그러면 한 프레임에

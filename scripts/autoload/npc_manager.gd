@@ -118,6 +118,10 @@ var _memento_reminder_sent: Dictionary = {}
 var _murder_candidate_flagged: Dictionary = {}
 ## npc_id -> bool - PARTNER_DEATH_PAIRS 참고, get_daily_dialogue()가 채운다.
 var _partner_death_reaction_shown: Dictionary = {}
+## npc_id -> 실제로 보여준 날짜 - was_partner_death_reaction_shown_today()가
+## "오늘" 여부만 가려낼 때 쓴다(위 플래그는 한 번 켜지면 영구 true라 날짜
+## 구분이 안 됨). 세이브에 안 남아도 된다 - 당일에만 의미 있는 상태.
+var _partner_death_reaction_shown_day: Dictionary = {}
 var _dead_npc_ids: Array[String] = []
 var _death_days: Dictionary = {}
 var _last_daily_dialogue_index: Dictionary = {}
@@ -459,40 +463,136 @@ const PARTNER_DEATH_PAIRS := {
 	"mocha": "shepherd",
 }
 
-## 상점이 없는 스토리 NPC(폴리/세이지/라마)의 "자기 공간"(사용자 리포트,
-## 2026-08-17: "폴리 세이지도 자기 경찰서랑 신사 있는데?") - ShopManager엔
-## 물건 파는 상업 시설만 등록돼 있어서 이 셋은 안 잡힌다. 살해 대상 제외
-## NPC 3명뿐이라 앞으로 늘어날 일이 거의 없어 하드코딩으로 둔다.
-const STORY_NPC_HOME_MAP := {
-	"poli": "police_interior",
-	"sage": "shrine_interior",
-	"lama": "temple_interior",
-}
+
+## get_daily_dialogue()의 partner_death_reaction 분기와 같은 조건을 소비 없이
+## 미리 확인한다 - MurderManager.has_pending_alibi_line()과 같은 이유(마주침
+## 이모지가 오늘 눈물을 띄울지 미리 알아야 함).
+func has_pending_partner_death_reaction(npc_id: String) -> bool:
+	if not PARTNER_DEATH_PAIRS.has(npc_id):
+		return false
+	var partner_id: String = PARTNER_DEATH_PAIRS[npc_id]
+	if is_alive(partner_id) or bool(_partner_death_reaction_shown.get(npc_id, false)):
+		return false
+	return not (get_definition(npc_id).get("story_dialogue", {}).get("partner_death_reaction", []) as Array).is_empty()
 
 
-## 추억의 물건 컷신 위치 조건용 - 상점 소유 NPC는 ShopManager 데이터를 그대로
-## 쓰고, 상점이 없는 스토리 NPC는 STORY_NPC_HOME_MAP으로 보완한다. 둘 다
-## 없으면 "" - 호출부가 위치 조건 자체를 안 거는 걸로 해석한다.
-func get_owned_space_map_id(npc_id: String) -> String:
-	var shop_map := ShopManager.get_owned_shop_map_id(npc_id)
-	if not shop_map.is_empty():
-		return shop_map
-	return String(STORY_NPC_HOME_MAP.get(npc_id, ""))
+## has_pending_partner_death_reaction()이 "아직 소비 전"만 잡아내는 것과 달리,
+## 대화가 끝나 소비된 뒤(dialogue_screen.gd의 close())에도 "오늘 그 대사를
+## 했었다"는 걸 알아야 웃음/수줍음으로 안 바뀐다(MurderManager.was_alibi_shown_today()와
+## 같은 이유).
+func was_partner_death_reaction_shown_today(npc_id: String) -> bool:
+	return int(_partner_death_reaction_shown_day.get(npc_id, -1)) == TimeManager.current_day
+
+
+## requires_alive 필드는 문자열 하나("npc_id") 또는 배열(["a", "b"]) 둘 다
+## 받는다 - 대사 한 줄이 다른 NPC를 두 명 이상 언급하는 경우도 있어서(사용자
+## 지시, 2026-08-26 - "requires_alive 이거 두명은 체크 못해?"). 배열이면
+## 적힌 전원이 다 살아있어야 조건 충족. 빈 문자열/빈 배열이면 조건 없음.
+## 언더스코어 없이 공개해둔다 - email_manager.gd(emails.greeting 등)도 같은
+## 필드를 재사용한다(사용자 지시, 2026-08-26 - 마린 죽었을 때도 셰퍼드가
+## "오늘 마린이 왔다 갔어" 메일을 보내는 문제).
+func requires_alive_met(value: Variant) -> bool:
+	if value is Array:
+		for npc_id in value:
+			if not is_alive(String(npc_id)):
+				return false
+		return true
+	var npc_id := String(value)
+	return npc_id.is_empty() or is_alive(npc_id)
+
+
+## 일상 대사 풀(dialogue.daily.요일.tier) 항목은 기존처럼 순수 배열
+## (["줄1", "줄2"])이거나, 다른 NPC 생존 여부에 따라 내용이 갈리는
+## {"lines": [...], "requires_alive": "npc_id", "fallback_lines": [...]}
+## 형태일 수 있다(사용자 지시, 2026-08-26 - 셰퍼드가 죽은 벨제를 현재형으로
+## 언급하는 잡담을 그대로 하는 문제 대응). requires_alive 대상이 죽었으면
+## fallback_lines를(없으면 아무것도) 대신 쓴다 - 그냥 건너뛰기만 하면 그
+## NPC가 죽을 때마다 잡담 풀이 계속 좁아지기 때문(사용자 지시 - "그러면 대사
+## 풀이 좁아지잖아").
+func _resolve_daily_pool_entry(entry: Variant) -> Array:
+	if entry is Array:
+		return entry
+	if entry is Dictionary:
+		if requires_alive_met(entry.get("requires_alive", "")):
+			return entry.get("lines", [])
+		return entry.get("fallback_lines", [])
+	return []
+
 
 func get_daily_dialogue(npc_id: String) -> Array:
-	## 호감도 마일스톤(추억의 물건 등) 대기 중이면 다른 무엇보다 최우선으로
+	## murder_system.md 경찰 조사 - 살인 후 5일 이내 이 NPC와 처음 나누는
+	## 대화는 그 자체로 애도+알리바이 대화여야 한다(사용자 지시, 2026-08-23 -
+	## "살인 일어난 후 바로 다음 대화는 알리바이와 애도여야 할 거 같아"). 다른
+	## 어떤 대기 중인 이벤트(호감도 마일스톤 등)보다도 먼저 확인한다 - 원래는
+	## 마일스톤 우선순위 체크 "다음"에 있었는데, 그러다 보니 밀린 마일스톤
+	## 대사가 있으면 애도 대신 그게 먼저 나와버렸다(사용자 리포트, 2026-08-26 -
+	## "이샤 이벤트 안보고 살인 일어났더니 애도는 안하고 플로라 욕이나 하고
+	## 있네"). 그래서 맨 위로 옮김. 순서: (있으면) 애도 대사
+	## (story_dialogue.murder_grief) → 알리바이 한 줄(MurderManager.consume_alibi_line(),
+	## 한 번 나오면 다시 안 나옴) → (스토커의 거짓 알리바이인 경우만)
+	## corroboration_line → 목격 진술(consume_witness_line()). 목격 진술/뒷받침도
+	## 선택 없이 곧바로 이어서 보여준다 - 플레이어가 놓칠 수 있는 선택지로
+	## 만들지 않는다(사용자 지시, 2026-08-17: "무조건 보게 만들거라").
+	var alibi_line := MurderManager.consume_alibi_line(npc_id)
+	if not alibi_line.is_empty():
+		# 눈물: 살인 사건 스토리 대화(애도/알리바이/목격 진술)일 때(사용자 지시,
+		# 2026-08-25) - 아래 두 분기(폴리 고백/일반 애도) 둘 다 해당.
+		request_emote(npc_id, EMOTE_DEJECTED)
+		## 폴리는 이 "살인 후 첫 재회" 순간, 첫 번째 살인에 한해 일반 알리바이
+		## 대신 "그날 밤 기억이 없다" 고백(poli.json story_dialogue.
+		## first_murder_occurred)으로 완전히 대체한다(사용자 지시, 2026-08-17 -
+		## 새 트리거 안 만들고 이미 있는 alibi_pending 재사용). 두 번째 살인
+		## 이후엔(이미 한 번 고백했으므로) 폴리도 다른 NPC들처럼 평소 알리바이를
+		## 댄다.
+		if npc_id == POLI_NPC_ID and MurderManager.get_murder_count() == 1:
+			var confession: Array = get_definition(npc_id).get("story_dialogue", {}).get("first_murder_occurred", {}).get("lines", [])
+			if not confession.is_empty():
+				return confession.duplicate()
+		var lines: Array = []
+		## 2차 이후 살인은 애도 대사가 1차랑 겹치면 안 되니(사용자 지시,
+		## 2026-08-23) "murder_grief_<N>"이 있으면 그걸 우선 쓰고, 없으면
+		## murder_grief로 폴백한다 - 지금까지처럼 murder_grief만 있는 NPC도
+		## 그대로 동작.
+		var story_dialogue: Dictionary = get_definition(npc_id).get("story_dialogue", {})
+		var numbered_key := "murder_grief_%d" % MurderManager.get_murder_count()
+		var grief_lines: Array = story_dialogue.get(numbered_key, story_dialogue.get("murder_grief", []))
+		if not grief_lines.is_empty():
+			var grief_victim_name: String = String(get_definition(get_most_recent_death_npc_id()).get("name", "그 사람"))
+			lines.append_array(_substitute_victim_name(grief_lines, grief_victim_name))
+		lines.append(alibi_line)
+		var corroboration_line := MurderManager.consume_stalker_corroboration_line(npc_id)
+		if not corroboration_line.is_empty():
+			lines.append(corroboration_line)
+		var witness_line := MurderManager.consume_witness_line(npc_id)
+		if not witness_line.is_empty():
+			lines.append(witness_line)
+		return lines
+	## 2차 살인 이후 용의자 지목 소문(story_dialogue.suspicion_talk_2) - 위
+	## 애도/알리바이 대화와 같은 날 한 번에 몰아서 나오면 어색하다는 지적
+	## (사용자 지시, 2026-08-26 - "1차때처럼 동일하게 다들 자기 알리바이만
+	## 얘기했다가, 그 다음에 말 걸때 일상대사 대신에 나와야 하는 거야") - 그래서
+	## 완전히 분리된 별도 대기열(MurderManager._suspicion_talk_2_pending)로 뺐다.
+	## 알리바이 대화가 이미 끝난(그 NPC의 alibi_line이 더는 안 뜨는) 다음 재회
+	## 때만 걸린다 - 위 알리바이 분기가 매번 먼저 확인되고 non-empty면 그 즉시
+	## return하기 때문에, 이 아래 코드는 그 NPC의 알리바이가 이미 소비된
+	## 이후로만 자연스럽게 도달한다.
+	if MurderManager.has_pending_suspicion_talk(npc_id):
+		var suspicion: Dictionary = get_definition(npc_id).get("story_dialogue", {}).get("suspicion_talk_2", {})
+		var suspicion_lines: Array = suspicion.get("lines", [])
+		MurderManager.consume_suspicion_talk(npc_id)
+		if not suspicion_lines.is_empty() and requires_alive_met(suspicion.get("requires_alive", "")):
+			return suspicion_lines.duplicate()
+	## 호감도 마일스톤(추억의 물건 등) 대기 중이면 애도/알리바이 다음으로
 	## 보여준다 - 여기서 뽑히는 순간 consume_pending_milestone()이 신호를
-	## 내보내고(추억의 물건이면 이때 지급) 다시는 안 나온다. 다만 추억의 물건
-	## (is_memento)은 "그 NPC의 공간 안"일 때만 터지게 한다(사용자 지시,
-	## 2026-08-17 - 아무 데서나 뜨는 대신, 그 사람 공간에서 받는 장면으로).
-	## get_owned_space_map_id() 참고 - 상점(ShopManager) + 상점 없는 스토리
-	## NPC(STORY_NPC_HOME_MAP) 둘 다 커버. 그래도 못 찾으면(향후 추가 NPC
-	## 누락 등) 위치 조건 자체를 안 걸고 예전처럼 바로 터진다 - 영원히 못
-	## 받는 상태를 막기 위한 안전장치. 인벤토리 자리(inventory_ok)도 같은
-	## 이유로 확인한다(사용자 리포트, 2026-08-25) - 자리가 없는데 그냥
+	## 내보내고(추억의 물건이면 이때 지급) 다시는 안 나온다. 추억의 물건
+	## (is_memento)의 "그 NPC의 공간 안"에서만 터지는 위치 제한은 사용자 지시로
+	## 없앴다(2026-08-26 - "광장에서도 마주쳤을 때 뛰어오고 그런 게 필요하다") -
+	## heart_event_30(30 이벤트)의 위치 조건은 그대로 두고 100만 어디서든
+	## 근접만으로 터진다. 인벤토리 자리(inventory_ok)는 그대로 확인한다
+	## (사용자 리포트, 2026-08-25) - 자리가 없는데 그냥
 	## 터뜨리면 InventoryManager.add_item()이 조용히 실패하고 이 마일스톤은
 	## 이미 "봤음" 처리라 다시는 못 받아 도감 100% 수집이 영구히 막힘.
-	## requires_alive(다른 NPC를 현재형으로 언급하는 대사)는 앞의 둘과 달리
+	## requires_alive(다른 NPC를 현재형으로 언급하는 대사)는 inventory_ok와 달리
 	## "영원히 못 풀리는" 조건이라(죽은 NPC는 되살아나지 않음) 막고 대기시키면
 	## 뒤에 대기 중인 다른 마일스톤(추억의 물건 포함)까지 영영 막힌다 - 그래서
 	## while로 돌면서 조용히 건너뛴다(대사 없이 consume만, 화면엔 아무 것도 안
@@ -500,17 +600,14 @@ func get_daily_dialogue(npc_id: String) -> Array:
 	var pending_queue: Array = _pending_milestone.get(npc_id, [])
 	while not pending_queue.is_empty():
 		var pending: Dictionary = pending_queue[0]
-		var requires_alive_npc := String(pending.get("requires_alive", ""))
-		if not requires_alive_npc.is_empty() and not is_alive(requires_alive_npc):
+		if not requires_alive_met(pending.get("requires_alive", "")):
 			consume_pending_milestone(npc_id)
 			pending_queue = _pending_milestone.get(npc_id, [])
 			continue
 		var threshold := int(pending.get("threshold", -1))
 		var is_memento := bool(pending.get("is_memento", false))
-		var owned_space_map := get_owned_space_map_id(npc_id)
-		var location_ok := not is_memento or owned_space_map.is_empty() or GameManager.current_map_id == owned_space_map
 		var inventory_ok := not is_memento or InventoryManager.can_add_item("memento_%s" % npc_id, 1)
-		if location_ok and inventory_ok:
+		if inventory_ok:
 			var milestone_lines: Array = get_milestone_dialogue(npc_id, threshold)
 			consume_pending_milestone(npc_id)
 			if not milestone_lines.is_empty():
@@ -545,7 +642,11 @@ func get_daily_dialogue(npc_id: String) -> Array:
 	var dialogue: Dictionary = get_definition(npc_id).get("dialogue", {})
 	var daily: Dictionary = dialogue.get("daily", {})
 	var day: Dictionary = daily.get(TimeManager.get_weekday(), {})
-	var pool: Array = (day.get(get_affection_tier(npc_id), []) as Array).duplicate()
+	var pool: Array = []
+	for entry in (day.get(get_affection_tier(npc_id), []) as Array):
+		var resolved := _resolve_daily_pool_entry(entry)
+		if not resolved.is_empty():
+			pool.append(resolved)
 	if WeatherManager.is_raining():
 		pool.append_array(dialogue.get("rain_conversation", []))
 	if has_horror_mode_started():
@@ -575,59 +676,6 @@ func get_daily_dialogue(npc_id: String) -> Array:
 	if index == mail_reaction_index:
 		EmailManager.clear_pending_mail_reaction(npc_id)
 	var picked: Array = pool[index]
-	## murder_system.md 경찰 조사 - 살인 후 5일 이내 이 NPC와 처음 나누는
-	## 대화는 그 자체로 애도+알리바이 대화여야 한다(사용자 지시, 2026-08-23 -
-	## "살인 일어난 후 바로 다음 대화는 알리바이와 애도여야 할 거 같아").
-	## 그래서 오늘의 평소 잡담(picked)은 아예 안 섞고 이 대화를 통째로
-	## 대체한다. 순서: (있으면) 애도 대사(story_dialogue.murder_grief) →
-	## 알리바이 한 줄(MurderManager.consume_alibi_line(), 한 번 나오면 다시 안
-	## 나옴) → (스토커의 거짓 알리바이인 경우만) corroboration_line → 목격
-	## 진술(consume_witness_line()). 목격 진술/뒷받침도 선택 없이 곧바로 이어서
-	## 보여준다 - 플레이어가 놓칠 수 있는 선택지로 만들지 않는다(사용자 지시,
-	## 2026-08-17: "무조건 보게 만들거라").
-	var alibi_line := MurderManager.consume_alibi_line(npc_id)
-	if not alibi_line.is_empty():
-		# 눈물: 살인 사건 스토리 대화(애도/알리바이/목격 진술)일 때(사용자 지시,
-		# 2026-08-25) - 아래 두 분기(폴리 고백/일반 애도) 둘 다 해당.
-		request_emote(npc_id, EMOTE_DEJECTED)
-		## 폴리는 이 "살인 후 첫 재회" 순간, 첫 번째 살인에 한해 일반 알리바이
-		## 대신 "그날 밤 기억이 없다" 고백(poli.json story_dialogue.
-		## first_murder_occurred)으로 완전히 대체한다(사용자 지시, 2026-08-17 -
-		## 새 트리거 안 만들고 이미 있는 alibi_pending 재사용). 두 번째 살인
-		## 이후엔(이미 한 번 고백했으므로) 폴리도 다른 NPC들처럼 평소 알리바이를
-		## 댄다.
-		if npc_id == POLI_NPC_ID and MurderManager.get_murder_count() == 1:
-			var confession: Array = get_definition(npc_id).get("story_dialogue", {}).get("first_murder_occurred", {}).get("lines", [])
-			if not confession.is_empty():
-				return confession.duplicate()
-		var lines: Array = []
-		## 2차 이후 살인은 애도 대사가 1차랑 겹치면 안 되니(사용자 지시,
-		## 2026-08-23) "murder_grief_<N>"이 있으면 그걸 우선 쓰고, 없으면
-		## murder_grief로 폴백한다 - 지금까지처럼 murder_grief만 있는 NPC도
-		## 그대로 동작.
-		var story_dialogue: Dictionary = get_definition(npc_id).get("story_dialogue", {})
-		var numbered_key := "murder_grief_%d" % MurderManager.get_murder_count()
-		var grief_lines: Array = story_dialogue.get(numbered_key, story_dialogue.get("murder_grief", []))
-		if not grief_lines.is_empty():
-			var grief_victim_name: String = String(get_definition(get_most_recent_death_npc_id()).get("name", "그 사람"))
-			lines.append_array(_substitute_victim_name(grief_lines, grief_victim_name))
-		lines.append(alibi_line)
-		var corroboration_line := MurderManager.consume_stalker_corroboration_line(npc_id)
-		if not corroboration_line.is_empty():
-			lines.append(corroboration_line)
-		var witness_line := MurderManager.consume_witness_line(npc_id)
-		if not witness_line.is_empty():
-			lines.append(witness_line)
-		## 2차 살인 이후에만 마을 사람들이 서로 용의자를 지목하는 소문 대사를
-		## 덧붙인다(사용자 지시, 2026-08-24). requires_alive에 적힌 NPC가 이미
-		## 죽었으면(그 자신이 피해자가 됐거나 먼저 살해당했으면) 조용히 건너뛴다.
-		if MurderManager.get_murder_count() == 2:
-			var suspicion: Dictionary = story_dialogue.get("suspicion_talk_2", {})
-			var suspicion_lines: Array = suspicion.get("lines", [])
-			var requires_alive: String = String(suspicion.get("requires_alive", ""))
-			if not suspicion_lines.is_empty() and (requires_alive.is_empty() or is_alive(requires_alive)):
-				lines.append_array(suspicion_lines)
-		return lines
 	## 셰퍼드/모카는 서로 불륜 상대다(shepherd.json/mocha.json special_notes) -
 	## 둘 중 한쪽이 살해당하면, 남은 쪽에게는 위 애도+알리바이 대화 다음번
 	## 재회 때 한정으로 한 번 더 특별한 반응을 보여준다(사용자 지시,
@@ -639,6 +687,7 @@ func get_daily_dialogue(npc_id: String) -> Array:
 			var reaction: Array = get_definition(npc_id).get("story_dialogue", {}).get("partner_death_reaction", [])
 			if not reaction.is_empty():
 				_partner_death_reaction_shown[npc_id] = true
+				_partner_death_reaction_shown_day[npc_id] = TimeManager.current_day
 				return reaction.duplicate()
 	if npc_id == SAGE_NPC_ID:
 		var fortune_lines := _build_fortune_offer_lines()
@@ -718,36 +767,15 @@ func _substitute_victim_name(template: Array, victim_name: String) -> Array:
 
 
 ## 데이터(horror_conversation, endings.json, stalker_emails.json 등)에는
-## 항상 받침 있는 조사("{victim_name}이", "{victim_name}은", "{victim_name}을")로
-## 적혀있는데, 실제 피해자 이름에 받침이 없으면("로시", "벨제" 등) 문법이
-## 틀어진다(사용자 리포트, 2026-08-26 - "셰퍼드 뒤지니까 셰퍼드이 라고
-## 뜨네"). 이름의 마지막 글자 받침 유무를 직접 계산해서 이/가, 은/는, 을/를을
-## 알맞게 바꿔친다 - dialogue_screen.gd/horror_event_manager.gd도 같은
-## 함수를 재사용한다(전부 이 오토로드를 통해 호출 가능).
-const KOREAN_PARTICLE_PAIRS := {
-	"이": "가",
-	"은": "는",
-	"을": "를",
-}
-
-
+## 예전엔 받침 유무를 계산해서 이/가·은/는·을/를·이랑/랑을 자동으로 바꿔치기
+## 했는데, "이다"/"이었" 같은 조사가 아닌 표현(예: marin.json "{player_name}이다")
+## 까지 조사로 오인해서 "가다"처럼 완전히 엉뚱한 말을 만드는 등 계속 새로운
+## 예외가 나왔다(사용자 지시, 2026-08-26 - "개같은 이름끝처리좀지워"). 이제
+## 자동 변환 없이 이름만 그대로 채워 넣는다 - 조사는 데이터 쪽에서 항상
+## "{player_name}(이)가"처럼 괄호로 직접 표기하는 걸로 완전히 넘어감(사용자
+## 확정: "보통 그렇게 다 괄호표시로 보여줘").
 func apply_korean_particles(text: String, placeholder: String, name: String) -> String:
-	if not name.is_empty():
-		var has_batchim := _has_korean_batchim(name)
-		for with_batchim in KOREAN_PARTICLE_PAIRS:
-			var without_batchim: String = KOREAN_PARTICLE_PAIRS[with_batchim]
-			var particle: String = with_batchim if has_batchim else without_batchim
-			text = text.replace(placeholder + with_batchim, name + particle)
 	return text.replace(placeholder, name)
-
-
-func _has_korean_batchim(text: String) -> bool:
-	if text.is_empty():
-		return false
-	var last_char := text.unicode_at(text.length() - 1)
-	if last_char < 0xAC00 or last_char > 0xD7A3:
-		return false
-	return (last_char - 0xAC00) % 28 != 0
 
 
 func get_weekday_group(weekday: String) -> String:
@@ -1244,8 +1272,7 @@ func get_pending_memento_threshold(npc_id: String) -> int:
 	var pending: Dictionary = queue[0]
 	if not bool(pending.get("is_memento", false)):
 		return -1
-	var requires_alive_npc := String(pending.get("requires_alive", ""))
-	if not requires_alive_npc.is_empty() and not is_alive(requires_alive_npc):
+	if not requires_alive_met(pending.get("requires_alive", "")):
 		return -1
 	return int(pending.get("threshold", -1))
 

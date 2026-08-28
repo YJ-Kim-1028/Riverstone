@@ -37,6 +37,11 @@ const WALK_FRAMES := {
 ## npc_sprite.gd의 값(0.35) 그대로 썼다가, 다리가 너무 빨리 번갈아져서
 ## "진동하는 것처럼 보인다"는 피드백으로 늘림(SPEED도 같이 낮춤, 위 참고).
 const WALK_FRAME_INTERVAL := 0.5
+## 머리 위 이모지(npc_sprite.gd의 EMOTE_OFFSET/EMOTE_DISPLAY_DURATION과 동일한
+## 값) - 첫 번째 살인 비명 반응("!" 뒤 나레이션, main.gd) 등 플레이어 쪽에서도
+## 이모지가 필요해져서 추가(사용자 지시, 2026-08-26).
+const EMOTE_OFFSET := Vector2(0, -FRAME_HEIGHT - 6)
+const EMOTE_DISPLAY_DURATION := 1.0
 
 @onready var _interaction_prompt: Label = $InteractionPrompt
 @onready var _sprite: Sprite2D = $Sprite2D
@@ -79,10 +84,14 @@ var _is_moving := false
 ## _physics_process()의 나머지 로직은 평소 이동과 완전히 동일하게 재사용된다.
 var _scripted_move_direction := Vector2.ZERO
 
+var _emote_sprite: Sprite2D
+var _emote_timer: Timer
+
 
 func _ready() -> void:
 	_sprite.centered = true
 	_sprite.offset = Vector2(0, -FRAME_HEIGHT / 2.0)
+	_build_emote_sprite()
 	_atlas = AtlasTexture.new()
 	_atlas.atlas = _build_appearance_texture()
 	_atlas.region = Rect2(IDLE_FRAME[facing_direction] * FRAME_WIDTH, 0, FRAME_WIDTH, FRAME_HEIGHT)
@@ -131,13 +140,15 @@ func is_moving() -> bool:
 func _physics_process(_delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
+	# _get_move_direction()이 이미 _movement_enabled를 반영한다(스크립트 이동은
+	# 예외) - 여기서 다시 _movement_enabled로 게이트하면 컷신 중 스크립트
+	# 이동까지 같이 막혀버린다.
 	var move_direction := _get_move_direction()
-	var is_moving := _movement_enabled and move_direction != Vector2.ZERO
+	var is_moving := move_direction != Vector2.ZERO
 	_is_moving = is_moving
-	if _movement_enabled:
+	if is_moving:
 		_move_with_collision(move_direction * SPEED * _speed_modifier * _delta)
-		if is_moving:
-			facing_direction = _direction_from_vector(move_direction)
+		facing_direction = _direction_from_vector(move_direction)
 	_clamp_to_map_bounds()
 	_update_animation(_delta, is_moving)
 
@@ -281,9 +292,18 @@ func _set_frame(frame_index: int) -> void:
 	_atlas.region = Rect2(frame_index * FRAME_WIDTH, 0, FRAME_WIDTH, FRAME_HEIGHT)
 
 
+## 스크립트 이동(_scripted_move_direction, walk_to() 참고)은 _movement_enabled와
+## 무관하게 항상 우선한다 - 컷신 도중(main.gd가 _movement_enabled를 계속
+## false로 눌러두는 동안)에도 walk_to()로 걷는 연출은 끊기면 안 되기 때문
+## (사용자 지시, 2026-08-26 - "2차 살인 컷씬이 진행되는 동안 플레이어가
+## 움직이면 안될 거 같아"로 main.gd가 _murder_scene_active/_heart_event_active도
+## 잠그게 되면서, 그 두 상태 안에서 실행되는 기존 walk_to() 연출까지 같이
+## 얼어붙지 않게 여기서 분리함). 키보드 입력만 _movement_enabled로 막는다.
 func _get_move_direction() -> Vector2:
 	if _scripted_move_direction != Vector2.ZERO:
 		return _scripted_move_direction
+	if not _movement_enabled:
+		return Vector2.ZERO
 	var horizontal := float(Input.is_key_pressed(KEY_D)) - float(Input.is_key_pressed(KEY_A))
 	var vertical := float(Input.is_key_pressed(KEY_S)) - float(Input.is_key_pressed(KEY_W))
 	return Vector2(horizontal, vertical).normalized()
@@ -343,6 +363,33 @@ func get_facing_tile_position() -> Vector2:
 ## 연출에서 옆/뒤를 보고 있던 문제를 고치기 위해 추가(사용자 지시, 2026-08-26).
 func face_toward(target_position: Vector2) -> void:
 	facing_direction = _direction_from_vector(target_position - position)
+
+
+## npc_sprite.gd의 _build_emote_sprite()와 동일한 패턴.
+func _build_emote_sprite() -> void:
+	_emote_sprite = Sprite2D.new()
+	_emote_sprite.visible = false
+	_emote_sprite.centered = true
+	_emote_sprite.position = EMOTE_OFFSET
+	_emote_sprite.z_index = 100
+	add_child(_emote_sprite)
+	_emote_timer = Timer.new()
+	_emote_timer.one_shot = true
+	_emote_timer.wait_time = EMOTE_DISPLAY_DURATION
+	_emote_timer.timeout.connect(func() -> void: _emote_sprite.visible = false)
+	add_child(_emote_timer)
+
+
+## npc_sprite.gd의 show_emote()와 동일 - NPCManager.get_emote_icon_texture()를
+## 그대로 재사용해서 새 에셋 없이 플레이어 머리 위에도 이모지를 띄운다.
+func show_emote(emote_id: String, duration: float = EMOTE_DISPLAY_DURATION) -> void:
+	var texture := NPCManager.get_emote_icon_texture(emote_id)
+	if texture == null or _emote_sprite == null:
+		return
+	_emote_sprite.texture = texture
+	_emote_sprite.visible = true
+	_emote_timer.wait_time = duration
+	_emote_timer.start()
 
 
 func set_camera_bounds(map_size: Vector2i) -> void:

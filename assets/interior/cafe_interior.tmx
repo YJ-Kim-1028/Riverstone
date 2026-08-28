@@ -151,8 +151,8 @@
   <object id="4" name="cafe_standing" x="192" y="176"/>
   <object id="5" name="cafe_working" x="240" y="112"/>
   <object id="6" name="cafe_looking" x="192" y="128"/>
-  <object id="29" name="mocha_heart_npc" x="80" y="90"/>
-  <object id="30" name="mocha_heart_player" x="64" y="90"/>
+  <object id="29" name="mocha_heart_npc" x="81" y="90"/>
+  <object id="30" name="mocha_heart_player" x="112" y="95"/>
  </objectgroup>
  <objectgroup id="9" name="Interactable" visible="0" locked="1">
   <object id="7" name="cash_register" x="239.5" y="136">
