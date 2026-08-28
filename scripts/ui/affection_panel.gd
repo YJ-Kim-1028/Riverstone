@@ -80,7 +80,10 @@ func _build_row(npc_id: String) -> Control:
 	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	var icon_id := String(PORTRAIT_ICON_ID_OVERRIDES.get(npc_id, npc_id))
 	var icon_path := PORTRAIT_ICON_DIR % icon_id
-	if FileAccess.file_exists(icon_path):
+	# .png는 import를 거치는 리소스라 내보낸 빌드에서 원본 파일이 pck에 없다 -
+	# FileAccess.file_exists()로 확인하면 빌드에서만 항상 false가 되어 아이콘이
+	# 조용히 안 나온다(home_map.gd _find_tileset_image()와 같은 원인).
+	if ResourceLoader.exists(icon_path):
 		portrait.texture = load(icon_path)
 	if not NPCManager.is_alive(npc_id):
 		portrait.modulate = DEAD_TINT

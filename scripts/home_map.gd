@@ -999,10 +999,21 @@ func _find_tileset_image(tileset_parser: XMLParser, tileset_path: String) -> Str
 	while tileset_parser.read() == OK:
 		if tileset_parser.get_node_type() == XMLParser.NODE_ELEMENT and tileset_parser.get_node_name() == "image":
 			var declared_path := tileset_path.get_base_dir().path_join(tileset_parser.get_named_attribute_value_safe("source"))
-			if FileAccess.file_exists(declared_path):
+			# 존재 확인에 ResourceLoader.exists()를 쓴다(FileAccess.file_exists()가
+			# 아니라) - 여기서 찾는 건 .tmx/.tsx 같은 원시 파일이 아니라 Godot이
+			# import를 거치는 .png다. 내보낸 빌드에서 .png 원본은 pck에 들어가지
+			# 않고 .godot/imported/*.ctex + .import 리맵으로만 존재하므로
+			# FileAccess.file_exists()는 항상 false가 되고(에디터에서는 true라
+			# 재현이 안 됨), 그 결과 이 함수가 ""를 반환 -> _add_tileset()의
+			# load("")가 실패 -> _tilesets가 비어서 맵 타일이 하나도 안 그려졌다
+			# (사용자 리포트: "export 하면 맵이 아예 안 뜬다", 2026-08-28).
+			# load()는 리맵을 따라가므로 두 환경 모두에서 정상 동작한다.
+			# 위 get_map_path()/load_map()의 .tmx 확인이 반대로
+			# FileAccess.file_exists()를 써야 하는 것과 짝을 이루는 규칙이다.
+			if ResourceLoader.exists(declared_path):
 				return declared_path
 			var fallback_path := tileset_path.get_basename() + ".png"
-			if FileAccess.file_exists(fallback_path):
+			if ResourceLoader.exists(fallback_path):
 				push_warning("Using tileset image fallback: %s" % fallback_path)
 				return fallback_path
 			push_error("Tileset image could not be found: %s" % declared_path)

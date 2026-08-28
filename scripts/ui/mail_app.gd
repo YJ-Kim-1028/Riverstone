@@ -91,6 +91,19 @@ func _build_button_style() -> StyleBoxTexture:
 
 
 func open() -> void:
+	# 이 창의 자식 중 CloseButton만 오른쪽 기준(anchor_left/right = 1.0)이라,
+	# 부모 크기가 아직 0인 상태에서 앵커가 굳으면 x = 1.0 * 0 + offset이 되어
+	# 혼자 왼쪽 위로 튀어나온다(BackButton은 anchor 0이라 부모 크기와 무관해서
+	# 멀쩡하다). 내보낸 빌드에서만 창이 자리잡기 전에 굳어서 재현되고 에디터
+	# Play에서는 안 나타나는, day18에서 여러 화면을 고쳤던 것과 같은 문제다
+	# (사용자 리포트: "메일함에서 닫기 버튼이 왼쪽으로 치우쳐져 있어",
+	# 2026-08-28). 값 재대입은 값이 같으면 엔진이 재계산을 건너뛰므로
+	# set_anchors_and_offsets_preset()을 실제로 호출해야 한다 - 이 루트는
+	# 부모를 꽉 채우는 0/0/1/1이라 PRESET_FULL_RECT다. 버튼에 직접 프리셋을
+	# 걸지 않는 이유: PRESET_TOP_RIGHT는 오른쪽 모서리에 딱 붙여버려서 원래
+	# 의도된 5px 여백(offset_right = -5)이 사라진다. 루트 크기만 제대로
+	# 다시 잡히면 자식들의 앵커 위치는 Godot이 알아서 재계산한다.
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_show_list(View.INBOX_LIST)
 
 
