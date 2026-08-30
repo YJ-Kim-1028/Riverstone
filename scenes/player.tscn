@@ -30,6 +30,7 @@ limit_bottom = 512
 visible = false
 position = Vector2(-50, -50)
 size = Vector2(100, 20)
+z_index = 2
 mouse_filter = 2
 theme_override_font_sizes/font_size = 7
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
@@ -38,3 +39,13 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
 text = "E 이동"
+
+[node name="InteractionIcon" type="TextureRect" parent="."]
+visible = false
+texture_filter = 1
+position = Vector2(-8, -50)
+size = Vector2(16, 16)
+z_index = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5

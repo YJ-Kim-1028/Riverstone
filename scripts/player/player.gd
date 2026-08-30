@@ -15,6 +15,11 @@ const SPEED := 50.0
 const PROMPT_DEFAULT_OFFSET_Y := -46.0
 const PROMPT_SCREEN_MARGIN := 2.0
 const COLLISION_HALF_WIDTH := 7.0
+## 위쪽(북쪽)으로 이동해 오브젝트에 접근할 때만 추가로 두는 여백 - 가구가
+## 플레이어보다 북쪽에 있을 때 타일 경계에 딱 붙어 양감이 없어 보인다는
+## 지적(사용자 지시, 2026-08-29). 아래/옆으로 이동할 땐 기존과 동일하게
+## 타일 경계까지 딱 붙어도 문제 없다고 확인되어 그대로 둔다.
+const NORTH_APPROACH_COLLISION_MARGIN := 3.0
 ## 16x32 캐릭터 프레임 크기에 맞춘 값(NPCSprite와 동일).
 const SPRITE_HALF_WIDTH := 8.0
 const SPRITE_HEIGHT := 32.0
@@ -44,6 +49,7 @@ const EMOTE_OFFSET := Vector2(0, -FRAME_HEIGHT - 6)
 const EMOTE_DISPLAY_DURATION := 1.0
 
 @onready var _interaction_prompt: Label = $InteractionPrompt
+@onready var _interaction_icon: TextureRect = $InteractionIcon
 @onready var _sprite: Sprite2D = $Sprite2D
 ## 도구 사용 포즈 + 손 위치 아이콘 담당(scripts/player/player_tool_overlay.gd) -
 ## main.gd가 밭갈기/낚시 등 액션 지점에서 이 노드를 직접 start()/stop()한다.
@@ -98,6 +104,7 @@ func _ready() -> void:
 	_sprite.texture = _atlas
 	if not Engine.is_editor_hint():
 		TimeManager.minute_passed.connect(_on_minute_passed)
+		GameManager.appearance_changed.connect(refresh_appearance)
 
 
 ## 캐릭터 생성 화면에서 고른 외형(GameManager에 저장된 색/스타일)을 CharacterAppearance로
@@ -109,6 +116,13 @@ func _build_appearance_texture() -> Texture2D:
 	if composite == null:
 		return TEMP_NPC_SPRITE
 	return ImageTexture.create_from_image(composite)
+
+
+## 옷장(wardrobe_screen.gd)에서 외형을 바꿨을 때 GameManager.appearance_changed로
+## 호출된다 - 시트를 다시 합성해서 이미 만들어둔 AtlasTexture의 atlas만 바꿔
+## 끼운다(region은 그대로라 방향/포즈 프레임 좌표는 안 건드림).
+func refresh_appearance() -> void:
+	_atlas.atlas = _build_appearance_texture()
 
 
 ## 요리창/상점창 등 모달 UI가 열려있는 동안 main.gd가 호출해서 이동을 잠근다.
@@ -125,10 +139,25 @@ func set_world_map(world_map: WorldMap) -> void:
 func show_interaction_prompt(text: String) -> void:
 	_interaction_prompt.text = text
 	_interaction_prompt.visible = true
+	_interaction_icon.visible = false
+
+
+## icon_path에 실제 그림이 있으면(16x16, ResourceLoader.exists()) 그 아이콘을,
+## 없으면 fallback_text(임시 이모지 등)를 대신 보여준다 - 그림이 나중에
+## 채워져도 이 함수를 부르는 쪽(main.gd)은 그대로 둬도 된다(사용자 지시,
+## 2026-08-29 - 가구 나레이션 프롬프트를 "E 확인" 대신 말풍선 아이콘으로).
+func show_interaction_icon(icon_path: String, fallback_text: String) -> void:
+	if ResourceLoader.exists(icon_path):
+		_interaction_icon.texture = load(icon_path)
+		_interaction_icon.visible = true
+		_interaction_prompt.visible = false
+	else:
+		show_interaction_prompt(fallback_text)
 
 
 func hide_interaction_prompt() -> void:
 	_interaction_prompt.visible = false
+	_interaction_icon.visible = false
 
 
 ## AudioManager가 발소리 재생 여부를 판단하는 데 쓴다 - 실제로 입력을 받아
@@ -208,7 +237,8 @@ func _move_with_collision(delta_movement: Vector2) -> void:
 	if not _is_blocked_at(next_position):
 		position.x = next_position.x
 	next_position = Vector2(position.x, position.y + delta_movement.y)
-	if not _is_blocked_at(next_position):
+	var north_margin := NORTH_APPROACH_COLLISION_MARGIN if delta_movement.y < 0.0 else 0.0
+	if not _is_blocked_at(next_position, north_margin):
 		position.y = next_position.y
 
 
@@ -216,16 +246,20 @@ func _move_with_collision(delta_movement: Vector2) -> void:
 ## 안 막힌 칸에 있는데 몸통 옆면은 이미 막힌 타일 그림 위로 겹쳐 보이는
 ## 문제가 있었다(나무/화단 같은 세로로 긴 오브젝트 옆면에서 특히 눈에 띔).
 ## 발밑 좌우 가장자리도 같이 검사해서 몸통 폭만큼은 막힌 칸에 못 들어가게 한다.
-func _is_blocked_at(check_position: Vector2) -> bool:
-	if _world_map.is_cell_blocked(Vector2(check_position.x - COLLISION_HALF_WIDTH, check_position.y)):
+## extra_north_margin은 위로 이동할 때만 호출부(_move_with_collision)가
+## NORTH_APPROACH_COLLISION_MARGIN을 넘겨준다 - 실제 검사 지점을 그만큼
+## 앞당겨서(더 북쪽으로) 확인하면, 그 여백만큼 남쪽에서 미리 멈추게 된다.
+func _is_blocked_at(check_position: Vector2, extra_north_margin: float = 0.0) -> bool:
+	var probe_position := Vector2(check_position.x, check_position.y - extra_north_margin)
+	if _world_map.is_cell_blocked(Vector2(probe_position.x - COLLISION_HALF_WIDTH, probe_position.y)):
 		return true
-	if _world_map.is_cell_blocked(Vector2(check_position.x + COLLISION_HALF_WIDTH, check_position.y)):
+	if _world_map.is_cell_blocked(Vector2(probe_position.x + COLLISION_HALF_WIDTH, probe_position.y)):
 		return true
-	return _world_map.is_cell_blocked(check_position)
+	return _world_map.is_cell_blocked(probe_position)
 
 
 func _process(_delta: float) -> void:
-	if Engine.is_editor_hint() or not _interaction_prompt.visible:
+	if Engine.is_editor_hint() or not (_interaction_prompt.visible or _interaction_icon.visible):
 		return
 	_keep_prompt_on_screen()
 
@@ -233,7 +267,8 @@ func _process(_delta: float) -> void:
 ## The prompt normally floats above the player's head. Near a map edge the
 ## camera can't scroll any further (see set_camera_bounds), so "above head"
 ## may fall outside the visible view - pull it back down into frame instead
-## of letting it render off-screen.
+## of letting it render off-screen. 텍스트/아이콘 중 지금 보이는 쪽만 옮긴다
+## (show_interaction_icon() 참고 - 둘은 항상 배타적으로 하나만 보임).
 func _keep_prompt_on_screen() -> void:
 	var camera := get_node_or_null("Camera2D") as Camera2D
 	if camera == null:
@@ -241,7 +276,10 @@ func _keep_prompt_on_screen() -> void:
 	var half_view_height: float = (get_viewport_rect().size.y / 2.0) / camera.zoom.y
 	var view_top_world_y: float = camera.get_screen_center_position().y - half_view_height
 	var min_offset_y: float = view_top_world_y - position.y + PROMPT_SCREEN_MARGIN
-	_interaction_prompt.position.y = max(PROMPT_DEFAULT_OFFSET_Y, min_offset_y)
+	if _interaction_prompt.visible:
+		_interaction_prompt.position.y = max(PROMPT_DEFAULT_OFFSET_Y, min_offset_y)
+	else:
+		_interaction_icon.position.y = max(PROMPT_DEFAULT_OFFSET_Y, min_offset_y)
 
 
 ## 실내 맵은 Wall 레이어 충돌이 맵 가장자리보다 몇 칸 안쪽에서 미리 막아주는데,

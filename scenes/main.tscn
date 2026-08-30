@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/home_map.tscn" id="1_home_map"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
@@ -26,6 +26,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/storage_screen.tscn" id="25_storage_screen"]
 [ext_resource type="PackedScene" path="res://scenes/ui/jukebox_screen.tscn" id="26_jukebox_screen"]
 [ext_resource type="PackedScene" path="res://scenes/ui/memento_toast.tscn" id="27_memento_toast"]
+[ext_resource type="PackedScene" path="res://scenes/ui/wardrobe_screen.tscn" id="28_wardrobe_screen"]
+[ext_resource type="PackedScene" path="res://scenes/ui/minimap_screen.tscn" id="29_minimap_screen"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("3_main")
@@ -128,6 +130,10 @@ color = Color(0, 0, 0, 0)
 [node name="StorageScreen" parent="UI" instance=ExtResource("25_storage_screen")]
 
 [node name="JukeboxScreen" parent="UI" instance=ExtResource("26_jukebox_screen")]
+
+[node name="WardrobeScreen" parent="UI" instance=ExtResource("28_wardrobe_screen")]
+
+[node name="MinimapScreen" parent="UI" instance=ExtResource("29_minimap_screen")]
 
 [node name="MementoToast" parent="UI" instance=ExtResource("27_memento_toast")]
 
