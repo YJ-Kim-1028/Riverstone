@@ -842,7 +842,7 @@
         ],
         "memento_reminder": {"title": "요즘 안 보이네", "lines": ["요즘 통 안 보이길래 목장 앞에서 괜히 서성였어.", "사실 너한테 줄 게 있는데... 시간 날 때 꼭 들러줄래?"]},
         "story_progress": {
-            "player_arrival": {
+            "player_arrival_day_2": {
                 "title": "안녕, 난 벨제야.",
                 "lines": [
                     "새로 이사왔다고 들어서 몇 자 적어. 목장 하는 벨제야.",

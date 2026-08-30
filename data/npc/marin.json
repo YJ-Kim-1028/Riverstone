@@ -333,7 +333,7 @@
         ],
         "memento_reminder": {"title": "야! 요즘 왜 안 와?!", "lines": ["야, {player_name}! 요즘 왜 이렇게 안 와?", "너 줄 거 있는데 빨리 좀 와봐!"]},
         "story_progress": {
-            "player_arrival": {"title": "야! 새로 왔다며?", "lines": ["마을에 새로 왔다는 얘기 들었어!", "나 마린이야, 낚시 가게 아들.", "심심하면 부둣가로 놀러 와!"]}
+            "player_arrival_day_4": {"title": "야! 새로 왔다며?", "lines": ["마을에 새로 왔다는 얘기 들었어!", "나 마린이야, 낚시 가게 아들.", "심심하면 부둣가로 놀러 와!"]}
         },
         "special_day": {}
     }

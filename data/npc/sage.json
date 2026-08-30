@@ -245,7 +245,7 @@
         "gift_thanks": [],
         "memento_reminder": {"title": "줄 것이 있다.", "lines": ["요즘 신사에 발길이 뜸하군.", "줄 것이 있으니, 시간 될 때 오도록."]},
         "story_progress": {
-            "player_arrival": {"title": "마을에 왔다며", "lines": ["새로 왔다는 얘기 들었어.", "신사는 언제든 열려있어. 필요하면 와.", "운세 정도는 공짜로 봐줄게."]}
+            "player_arrival_day_1": {"title": "마을에 왔다며", "lines": ["새로 왔다는 얘기 들었어.", "신사는 언제든 열려있어. 필요하면 와.", "운세 정도는 공짜로 봐줄게."]}
         },
         "special_day": {}
     }

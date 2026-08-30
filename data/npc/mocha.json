@@ -345,7 +345,7 @@
         ],
         "memento_reminder": {"title": "요즘 뜸하네", "lines": ["요즘 통 얼굴을 못 봤네.", "너 주려고 챙겨둔 게 있는데, 시간 날 때 카페 좀 들러줘."]},
         "story_progress": {
-            "player_arrival": {"title": "새로 왔다며?", "lines": ["마을에 새로 왔다는 얘기 들었어.", "심심하면 카페 들러. 커피값은 정직하게 받을게.", "잘 왔어, {player_name}."]}
+            "player_arrival_day_3": {"title": "새로 왔다며?", "lines": ["마을에 새로 왔다는 얘기 들었어.", "심심하면 카페 들러. 커피값은 정직하게 받을게.", "잘 왔어, {player_name}."]}
         },
         "special_day": {}
     }
