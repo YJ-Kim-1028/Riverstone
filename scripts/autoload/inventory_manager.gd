@@ -308,6 +308,22 @@ func discard_item(slot_index: int, count: int) -> bool:
 	return _remove_from_slot(slot_index, count)
 
 
+## 인벤토리 내 드래그앤드롭 재정렬(사용자 지시, 2026-08-30) - 두 슬롯 내용을
+## 그대로 맞바꾼다. 세이브에는 슬롯 위치가 없고(get_save_data()가 빈 슬롯을
+## 건너뛰어 순서만 저장하고, load_save_data()가 add_item()으로 다시 채워
+## 넣으면서 앞에서부터 재배치함) 이 순서는 세션 중에만 유지된다.
+func swap_slots(index_a: int, index_b: int) -> bool:
+	if index_a < 0 or index_a >= _slots.size() or index_b < 0 or index_b >= _slots.size():
+		return false
+	if index_a == index_b:
+		return true
+	var temp = _slots[index_a]
+	_slots[index_a] = _slots[index_b]
+	_slots[index_b] = temp
+	inventory_changed.emit()
+	return true
+
+
 func sort_by_name() -> void:
 	var items: Array = []
 	for slot in _slots:
@@ -438,9 +454,10 @@ func remove_memento(npc_id: String) -> bool:
 
 func get_save_data() -> Dictionary:
 	var items: Array = []
-	for slot in _slots:
+	for i in _slots.size():
+		var slot = _slots[i]
 		if slot != null:
-			items.append({"item_id": slot["item_id"], "count": slot["count"]})
+			items.append({"item_id": slot["item_id"], "count": slot["count"], "slot_index": i})
 	return {
 		"inventory": items,
 		"slot_count": slot_count,
@@ -449,17 +466,30 @@ func get_save_data() -> Dictionary:
 	}
 
 
+## slot_index가 있으면(사용자 지시, 2026-08-30 - 드래그로 바꾼 인벤 정렬이
+## 재시작 후에도 유지되게) 그 자리에 그대로 되돌려 넣는다. slot_index가 없는
+## 예전 세이브(이 필드가 생기기 전 저장분)는 그대로 add_item()으로 앞에서부터
+## 채워 넣는 예전 방식으로 자연히 폴백한다 - 필드 없음/자리 충돌/알 수 없는
+## 아이템 등 뭐든 직접 배치가 안 되면 항상 이 경로로 떨어진다.
 func load_save_data(data: Dictionary) -> void:
 	slot_count = clampi(int(data.get("slot_count", DEFAULT_SLOT_COUNT)), DEFAULT_SLOT_COUNT, MAX_SLOT_COUNT)
 	_slots = []
 	_slots.resize(slot_count)
 	for item in (data.get("inventory", []) as Array):
-		add_item(String(item.get("item_id", "")), int(item.get("count", 0)))
+		var item_id := String(item.get("item_id", ""))
+		var count := int(item.get("count", 0))
+		if item.has("slot_index"):
+			var index := int(item["slot_index"])
+			if index >= 0 and index < slot_count and _slots[index] == null and not get_item_definition(item_id).is_empty():
+				_slots[index] = {"item_id": item_id, "count": count}
+				continue
+		add_item(item_id, count)
 	var loaded_quick: Array = data.get("quick_slots", [])
 	_quick_slots = []
 	for i in QUICK_SLOT_COUNT:
 		_quick_slots.append(String(loaded_quick[i]) if i < loaded_quick.size() else "")
 	_gifted_today = (data.get("gifted_today", {}) as Dictionary).duplicate()
+	inventory_changed.emit()
 
 
 func _on_memento_received(npc_id: String) -> void:
