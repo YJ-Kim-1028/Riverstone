@@ -239,6 +239,11 @@ func get_active_requests() -> Array:
 		if _claimed_requests.has(request_id):
 			continue
 		var entry: Dictionary = (_request_definitions[request_id] as Dictionary).duplicate(true)
+		## 요청 12개가 첫날부터 한꺼번에 다 뜨면 정신없다는 지적(사용자 지시,
+		## 2026-08-30) - "available_from_day"(선택 필드, 기본 1 = 기존 동작
+		## 그대로 첫날부터)가 지금 날짜보다 크면 아직 안 보여준다.
+		if TimeManager.current_day < int(entry.get("available_from_day", 1)):
+			continue
 		entry["id"] = request_id
 		entry["expired"] = false
 		active.append(entry)
@@ -692,6 +697,15 @@ func _is_story_trigger_active(trigger_name: String, npc_id: String) -> bool:
 	if trigger_name.begins_with("affection_") and trigger_name.ends_with("_reached"):
 		var threshold_str := trigger_name.trim_prefix("affection_").trim_suffix("_reached")
 		return threshold_str.is_valid_int() and NPCManager.has_completed_event(npc_id, int(threshold_str))
+	## "player_arrival_day_N" - NPC 13명의 환영 메일이 첫날 한꺼번에 다 오면
+	## 정신없다는 지적(사용자 지시, 2026-08-30 - 요청함 12개 동시 공개랑 같은
+	## 문제) - affection_N_reached와 같은 이름 규칙으로, data/npc/<id>.json의
+	## emails.story_progress 키를 "player_arrival"에서 "player_arrival_day_N"
+	## (예: player_arrival_day_3)으로 바꾸면 그 날짜부터 발송된다. 접미사
+	## 없는 기존 "player_arrival"은 하위 호환으로 계속 즉시 발송(항상 true).
+	if trigger_name.begins_with("player_arrival_day_"):
+		var day_str := trigger_name.trim_prefix("player_arrival_day_")
+		return day_str.is_valid_int() and TimeManager.current_day >= int(day_str)
 	match trigger_name:
 		"first_murder_occurred":
 			return MurderManager.get_murder_count() >= 1

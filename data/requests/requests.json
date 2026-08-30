@@ -9,6 +9,7 @@
         ],
         "objective_type": "greet_all_npcs",
         "objective_target": 13,
+        "available_from_day": 1,
         "reward_gold": 300,
         "reward_item_id": "",
         "reward_item_count": 0
@@ -18,12 +19,13 @@
         "title": "낚싯대 하나 장만하지",
         "lines": [
             "이 마을에 왔으면 낚싯대 하나쯤은 있어야지 않겠나.",
-            "내 가게에서 파는 걸로 하나 사가게. 그리 비싸지도 않아.",
+            "내 가게에서 파는 걸로 하나 사가게. 500원이라네. 그리 비싸지도 않아.",
             "바다든 강이든, 던져만 봐도 시간 가는 줄 모를 걸세."
         ],
         "objective_type": "lifetime_item_count",
         "objective_item_id": "fishing_rod",
         "objective_target": 1,
+        "available_from_day": 4,
         "reward_gold": 100,
         "reward_item_id": "",
         "reward_item_count": 0
@@ -38,6 +40,7 @@
         ],
         "objective_type": "total_income",
         "objective_target": 300,
+        "available_from_day": 3,
         "reward_gold": 500,
         "reward_item_id": "",
         "reward_item_count": 0
@@ -53,6 +56,7 @@
         "objective_type": "lifetime_item_count",
         "objective_item_id": "potato",
         "objective_target": 1,
+        "available_from_day": 2,
         "reward_gold": 100,
         "reward_item_id": "",
         "reward_item_count": 0
@@ -68,6 +72,7 @@
         "objective_type": "lifetime_item_count",
         "objective_item_id": "corn",
         "objective_target": 1,
+        "available_from_day": 2,
         "reward_gold": 100,
         "reward_item_id": "",
         "reward_item_count": 0
@@ -83,6 +88,7 @@
         "objective_type": "lifetime_item_count",
         "objective_item_id": "lettuce",
         "objective_target": 1,
+        "available_from_day": 2,
         "reward_gold": 100,
         "reward_item_id": "",
         "reward_item_count": 0
@@ -98,6 +104,7 @@
         "objective_type": "lifetime_item_count",
         "objective_item_id": "pork",
         "objective_target": 1,
+        "available_from_day": 4,
         "reward_gold": 100,
         "reward_item_id": "",
         "reward_item_count": 0
@@ -113,6 +120,7 @@
         "objective_type": "lifetime_item_count",
         "objective_item_id": "beef",
         "objective_target": 1,
+        "available_from_day": 4,
         "reward_gold": 100,
         "reward_item_id": "",
         "reward_item_count": 0
@@ -128,6 +136,7 @@
         "objective_type": "lifetime_item_count",
         "objective_item_id": "mackerel",
         "objective_target": 1,
+        "available_from_day": 4,
         "reward_gold": 100,
         "reward_item_id": "",
         "reward_item_count": 0
@@ -143,6 +152,7 @@
         "objective_type": "lifetime_item_count",
         "objective_item_id": "salmon",
         "objective_target": 1,
+        "available_from_day": 4,
         "reward_gold": 100,
         "reward_item_id": "",
         "reward_item_count": 0
@@ -158,6 +168,7 @@
         "objective_type": "lifetime_item_count",
         "objective_item_id": "squid",
         "objective_target": 1,
+        "available_from_day": 4,
         "reward_gold": 100,
         "reward_item_id": "",
         "reward_item_count": 0
@@ -172,6 +183,23 @@
         ],
         "objective_type": "lifetime_dishes_served",
         "objective_target": 1,
+        "available_from_day": 3,
+        "reward_gold": 100,
+        "reward_item_id": "",
+        "reward_item_count": 0
+    },
+    "try_harvest_berry": {
+        "npc_id": "flora",
+        "title": "베리도 한번 따볼래?",
+        "lines": [
+            "너 밭농사만 하느라 베리는 한 번도 안 따봤지? 심는 게 아니라 그냥 열려있는 걸 따오면 되는 거라 훨씬 쉬워.",
+            "레스토랑 맞은편 연못 밑쪽에 가보면 덤불이 있어. 나도 지나다니다 종종 몇 개씩 따 먹어.",
+            "밭에서 키우는 거랑은 또 다른 손맛이 있을 거야. 한 번 가서 따봐."
+        ],
+        "objective_type": "lifetime_item_count",
+        "objective_item_id": "berry",
+        "objective_target": 1,
+        "available_from_day": 2,
         "reward_gold": 100,
         "reward_item_id": "",
         "reward_item_count": 0
