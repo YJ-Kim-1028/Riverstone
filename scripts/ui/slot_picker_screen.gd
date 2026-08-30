@@ -121,7 +121,18 @@ func _set_open(is_open: bool) -> void:
 	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
 
 
+## _confirm_popup(SlotDeleteConfirmPopup)은 자기 열고 닫힘을 따로 관리한다
+## (자기 자신의 _set_open() - "삭제" 버튼을 눌러야만 연다). 그런데 이 팝업이
+## 이 화면의 자식으로 같이 들어있어서, 여기서 재귀로 내려가면 매번 그 안의
+## 전체화면 Dim까지 STOP으로 덮어써버린다 - Dim은 modulate.a로만 숨겨질 뿐
+## mouse_filter는 STOP이 되어, 안 보이는 채로 슬롯 버튼들 위에서 클릭을 전부
+## 가로챈다(사용자 리포트, 2026-08-29 - "시작하기/이어하기 둘 다 슬롯 선택
+## 화면 안의 버튼이 하나도 안 눌림"). status_screen.gd가 quit_confirm_popup을
+## 제외하는 것과 동일한 이유 - 이 팝업 하위는 건드리지 않고 자기 자신에게
+## 맡긴다.
 func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
+	if node == _confirm_popup:
+		return
 	if node is Control:
 		(node as Control).mouse_filter = filter
 	for child in node.get_children():

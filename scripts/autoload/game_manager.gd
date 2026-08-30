@@ -7,6 +7,10 @@ extends Node
 ## every map load/warp.
 
 signal map_changed(map_id: String)
+## 캐릭터 생성 화면이 아니라 인게임 옷장(wardrobe_screen.gd)에서 외형을 다시
+## 바꿀 때 쏜다 - player.gd(월드 스프라이트)와 player_preview.gd(TAB 장비
+## 탭 미리보기)가 각자 캐싱해둔 합성 텍스처를 다시 만들어야 한다는 신호.
+signal appearance_changed
 
 const DEFAULT_PLAYER_NAME := "Player"
 ## title_screen.md 캐릭터 생성 화면이 생기기 전까지 mail_compose_panel.gd가
@@ -106,6 +110,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	## 옮긴다.
 	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F1:
 		MurderManager.debug_force_arrest_ending()
+	## 우디 호감도 50 옷장 이벤트 테스트용(사용자 지시, 2026-08-30) - F키가
+	## 전부 차서 숫자키로 뺌. debug_set_affection()은 F8 자리에 있던 그
+	## 기존 함수를 그대로 재사용.
+	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_1:
+		NPCManager.debug_set_affection("woody", NPCManager.get_affection("woody") + 10)
+	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_2:
+		EconomyManager.add_income(10000)
 
 
 func _toggle_fullscreen() -> void:

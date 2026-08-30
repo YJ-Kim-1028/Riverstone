@@ -177,6 +177,40 @@ static func _load_image(path: String) -> Image:
 	return texture.get_image()
 
 
+## character_creation_screen.gd/wardrobe_screen.gd가 미리보기 한 프레임만 필요할
+## 때 쓰는 공개 버전(_load_image와 동일 - 그 둘은 시트를 한 번 읽어 두고두고
+## 재사용하므로 직접 호출해야 함).
+static func load_sheet_image(path: String) -> Image:
+	return _load_image(path)
+
+
+## sheet에서 row_index번째 "줄"(192x32 시트를 세로로 쌓은 스타일 하나, FRAME_HEIGHT
+## 단위)의 "앞"(0번, x=0) 프레임만 잘라 돌려준다. 범위 밖이면 null.
+static func extract_frame(sheet: Image, row_index: int) -> Image:
+	if sheet == null:
+		return null
+	var region := Rect2i(0, row_index * FRAME_HEIGHT, FRAME_WIDTH, FRAME_HEIGHT)
+	if region.position.y + region.size.y > sheet.get_height():
+		return null
+	return sheet.get_region(region)
+
+
+## 시트 세로 길이를 스타일 줄 수로 - null이면 0(스타일 없음).
+static func sheet_row_count(sheet: Image) -> int:
+	return maxi(sheet.get_height() / FRAME_HEIGHT, 1) if sheet != null else 0
+
+
+## extract_frame + recolor_image + 텍스처화를 한 번에 - 마커/팔레트 한 쌍만
+## 리컬러하면 되는 단순한 경우(옷/머리/장신구 미리보기)용. 몸(피부+눈+뺨 3쌍)은
+## 호출부가 직접 조합한다.
+static func build_preview_texture(sheet: Image, row_index: int, markers: Array[Color], palette: Array[Color]) -> Texture2D:
+	var frame_image := extract_frame(sheet, row_index)
+	if frame_image == null:
+		return null
+	recolor_image(frame_image, markers, palette)
+	return ImageTexture.create_from_image(frame_image)
+
+
 ## 표준 "src over dst" 알파 합성 - src의 완전 투명 픽셀은 dst를 그대로 둔다. src가
 ## null이면(해당 레이어 없음, 예: 대머리) 아무것도 하지 않는다.
 static func _blend_layer(dst: Image, src: Image) -> void:

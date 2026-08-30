@@ -8,10 +8,16 @@ extends Control
 const FRAME_WIDTH := 16
 const FRAME_HEIGHT := 32
 const FEET_MARGIN := 8.0
-## 미리보기를 실제 게임 크기보다 크게 보여준다(사용자가 잘 보이게). 원래
-## 3.0이었는데, 발밑 공간에 피부/눈동자 색 팔레트를 두기로 하면서(사용자
-## 확정) 캐릭터를 더 작게 줄여 그 공간을 확보함.
-const PREVIEW_SCALE := 1.8
+## 미리보기를 실제 게임 크기보다 크게 보여준다(사용자가 잘 보이게). 캐릭터
+## 생성 화면은 발밑에 피부/눈동자 색 팔레트를 두느라 1.8로 줄여 썼지만
+## (원래 3.0), 옷장 화면은 캐릭터가 오른쪽에 단독으로 배치돼 그 제약이 없어
+## export로 인스턴스마다 다르게 줄 수 있게 뺐다(사용자 지시, 2026-08-30).
+@export var preview_scale := 1.8
+## 캐릭터 생성 화면은 발밑 기준(false, 기본값) - 밑에 팔레트가 있어서
+## 그림이 바닥에 서 있는 느낌이어야 자연스럽다. 옷장은 거울 정중앙에 서 있는
+## 느낌을 원해서(사용자 지시, 2026-08-30 - "가로 세로 기준으로 가운데에
+## 있지 않아") 세로도 중앙 정렬하는 옵션을 인스턴스별로 켤 수 있게 뺐다.
+@export var vertical_center := false
 
 var _body_texture: Texture2D = null
 var _outfit_texture: Texture2D = null
@@ -32,8 +38,9 @@ func set_layers(body: Texture2D, outfit: Texture2D, hair: Texture2D, accessory: 
 
 
 func _draw() -> void:
-	var draw_size := Vector2(FRAME_WIDTH, FRAME_HEIGHT) * PREVIEW_SCALE
-	var feet := Vector2(size.x / 2.0, size.y - FEET_MARGIN)
+	var draw_size := Vector2(FRAME_WIDTH, FRAME_HEIGHT) * preview_scale
+	var anchor_y := size.y / 2.0 + draw_size.y / 2.0 if vertical_center else size.y - FEET_MARGIN
+	var feet := Vector2(size.x / 2.0, anchor_y)
 	var dest := Rect2(feet + Vector2(-draw_size.x / 2.0, -draw_size.y), draw_size)
 	var region := Rect2(0, 0, FRAME_WIDTH, FRAME_HEIGHT)
 	# 순서 중요: 몸(맨살) -> 옷(신발까지 포함해서 다리를 덮음) -> 머리 -> 장신구,

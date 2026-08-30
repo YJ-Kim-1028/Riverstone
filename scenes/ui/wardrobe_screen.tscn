@@ -1,0 +1,308 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/wardrobe_screen.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/frame_9slice.png" id="2_frame"]
+[ext_resource type="Script" path="res://scripts/ui/character_preview.gd" id="3_preview_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_book_prev.png" id="4_prev"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_book_next.png" id="5_next"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_close.png" id="6_close"]
+[ext_resource type="Texture2D" path="res://assets/ui/wardrobe_mirror.png" id="7_mirror"]
+
+[node name="WardrobeScreen" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_script")
+
+[node name="Dim" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.7)
+
+[node name="Panel" type="NinePatchRect" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -88.0
+offset_right = 120.0
+offset_bottom = 88.0
+texture = ExtResource("2_frame")
+patch_margin_left = 16
+patch_margin_top = 16
+patch_margin_right = 16
+patch_margin_bottom = 16
+
+[node name="CloseButton" type="TextureButton" parent="Panel"]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -14.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = 14.0
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("6_close")
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="HBox" type="HBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="LeftColumn" type="VBoxContainer" parent="Panel/Margin/VBox/HBox"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 3
+alignment = 1
+theme_override_constants/separation = 6
+
+[node name="HairRow" type="HBoxContainer" parent="Panel/Margin/VBox/HBox/LeftColumn"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 4
+
+[node name="PrevButton" type="TextureButton" parent="Panel/Margin/VBox/HBox/LeftColumn/HairRow"]
+custom_minimum_size = Vector2(10, 11)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("4_prev")
+
+[node name="HairLabel" type="Label" parent="Panel/Margin/VBox/HBox/LeftColumn/HairRow"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 5
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+horizontal_alignment = 1
+text = "머리: 없음"
+
+[node name="NextButton" type="TextureButton" parent="Panel/Margin/VBox/HBox/LeftColumn/HairRow"]
+custom_minimum_size = Vector2(10, 11)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("5_next")
+
+[node name="OutfitRow" type="HBoxContainer" parent="Panel/Margin/VBox/HBox/LeftColumn"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 4
+
+[node name="PrevButton" type="TextureButton" parent="Panel/Margin/VBox/HBox/LeftColumn/OutfitRow"]
+custom_minimum_size = Vector2(10, 11)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("4_prev")
+
+[node name="OutfitLabel" type="Label" parent="Panel/Margin/VBox/HBox/LeftColumn/OutfitRow"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 5
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+horizontal_alignment = 1
+text = "옷: 없음"
+
+[node name="NextButton" type="TextureButton" parent="Panel/Margin/VBox/HBox/LeftColumn/OutfitRow"]
+custom_minimum_size = Vector2(10, 11)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("5_next")
+
+[node name="AccessoryRow" type="HBoxContainer" parent="Panel/Margin/VBox/HBox/LeftColumn"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 4
+
+[node name="PrevButton" type="TextureButton" parent="Panel/Margin/VBox/HBox/LeftColumn/AccessoryRow"]
+custom_minimum_size = Vector2(10, 11)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("4_prev")
+
+[node name="AccessoryLabel" type="Label" parent="Panel/Margin/VBox/HBox/LeftColumn/AccessoryRow"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 5
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+horizontal_alignment = 1
+text = "장신구: 없음"
+
+[node name="NextButton" type="TextureButton" parent="Panel/Margin/VBox/HBox/LeftColumn/AccessoryRow"]
+custom_minimum_size = Vector2(10, 11)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+texture_normal = ExtResource("5_next")
+
+[node name="TabRow" type="GridContainer" parent="Panel/Margin/VBox/HBox/LeftColumn"]
+layout_mode = 2
+size_flags_horizontal = 4
+columns = 4
+theme_override_constants/h_separation = 1
+theme_override_constants/v_separation = 1
+
+[node name="SkinCol" type="VBoxContainer" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Label" type="Label" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow/SkinCol"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 5
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+horizontal_alignment = 1
+text = "피부"
+
+[node name="SkinTab" type="Button" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow/SkinCol"]
+custom_minimum_size = Vector2(15, 8)
+layout_mode = 2
+
+[node name="EyeCol" type="VBoxContainer" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Label" type="Label" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow/EyeCol"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 5
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+horizontal_alignment = 1
+text = "눈동자"
+
+[node name="EyeTab" type="Button" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow/EyeCol"]
+custom_minimum_size = Vector2(15, 8)
+layout_mode = 2
+
+[node name="HairCol" type="VBoxContainer" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Label" type="Label" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow/HairCol"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 5
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+horizontal_alignment = 1
+text = "머리"
+
+[node name="HairTab" type="Button" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow/HairCol"]
+custom_minimum_size = Vector2(15, 8)
+layout_mode = 2
+
+[node name="CheekCol" type="VBoxContainer" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Label" type="Label" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow/CheekCol"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 5
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+horizontal_alignment = 1
+text = "뺨"
+
+[node name="CheekTab" type="Button" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow/CheekCol"]
+custom_minimum_size = Vector2(15, 8)
+layout_mode = 2
+
+[node name="Outfit1Col" type="VBoxContainer" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Label" type="Label" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow/Outfit1Col"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 5
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+horizontal_alignment = 1
+text = "상의"
+
+[node name="Outfit1Tab" type="Button" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow/Outfit1Col"]
+custom_minimum_size = Vector2(15, 8)
+layout_mode = 2
+
+[node name="Outfit2Col" type="VBoxContainer" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Label" type="Label" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow/Outfit2Col"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 5
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+horizontal_alignment = 1
+text = "하의"
+
+[node name="Outfit2Tab" type="Button" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow/Outfit2Col"]
+custom_minimum_size = Vector2(15, 8)
+layout_mode = 2
+
+[node name="Outfit3Col" type="VBoxContainer" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Label" type="Label" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow/Outfit3Col"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 5
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+horizontal_alignment = 1
+text = "신발"
+
+[node name="Outfit3Tab" type="Button" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow/Outfit3Col"]
+custom_minimum_size = Vector2(15, 8)
+layout_mode = 2
+
+[node name="AccessoryCol" type="VBoxContainer" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Label" type="Label" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow/AccessoryCol"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 5
+theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
+horizontal_alignment = 1
+text = "악세서리"
+
+[node name="AccessoryTab" type="Button" parent="Panel/Margin/VBox/HBox/LeftColumn/TabRow/AccessoryCol"]
+custom_minimum_size = Vector2(15, 8)
+layout_mode = 2
+
+[node name="ColorPicker" type="ColorPicker" parent="Panel/Margin/VBox/HBox/LeftColumn"]
+custom_minimum_size = Vector2(76, 44)
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/margin = 2
+theme_override_constants/sv_width = 60
+theme_override_constants/sv_height = 40
+theme_override_constants/h_width = 8
+theme_override_constants/label_width = 0
+
+[node name="RightColumn" type="Control" parent="Panel/Margin/VBox/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Mirror" type="TextureRect" parent="Panel/Margin/VBox/HBox/RightColumn"]
+texture_filter = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+texture = ExtResource("7_mirror")
+
+[node name="Preview" type="Control" parent="Panel/Margin/VBox/HBox/RightColumn"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("3_preview_script")
+preview_scale = 3.2
+vertical_center = true
