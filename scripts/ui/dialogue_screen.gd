@@ -47,12 +47,44 @@ const GIFT_TYPE := "gift"
 const BUFF_TYPE := "buff"
 signal buff_requested(percent: float, duration_minutes: int, is_debuff: bool)
 
+## 효과음 트리거 줄: {"type": "sfx"}. GIFT_TYPE/BUFF_TYPE과 같은 패턴(화면에
+## 아무것도 안 띄우고 바로 다음 줄로) - 마지막 줄로 넣어두면 "그 대사가 실제로
+## 끝나는 순간" 소리가 난다. 호감도 이벤트 발생 시점(대사 뜨기 전)에 바로
+## 트는 것보다 자연스럽다는 사용자 지시(2026-08-30 - 우디 옷장 이벤트, 지금은
+## 대사 시작하자마자 나온다는 리포트) - AudioManager.SFX_MEMORY만 재사용,
+## 필요해지면 그때 종류를 늘린다.
+const SFX_TYPE := "sfx"
+
 ## npc_id 없이 여는 혼잣말(open_special("", ...), 예: 물귀신 낚시 이벤트)은
 ## 초상화가 없는데 TextureRect 자리만 비어 보여서 어색하다는 지적(사용자
 ## 리포트, 2026-08-24) - 초상화를 아예 숨기고, 텍스트 영역을 그 자리까지
 ## 왼쪽으로 당겨서 채운다.
 const TEXT_AREA_OFFSET_LEFT_WITH_PORTRAIT := 30.0
 const TEXT_AREA_OFFSET_LEFT_NO_PORTRAIT := 6.0
+
+## 대화창 세로 크기/위치(루트 Control의 offset_top/offset_bottom - .tscn
+## 원래 값과 동일).
+const DEFAULT_BOX_OFFSET_TOP := -40.0
+const DEFAULT_BOX_OFFSET_BOTTOM := -8.0
+## furniture_desc(짧은 배경 가구 설명) 전용. offset_bottom은 화면 맨 아래에서
+## 띄우는 여백 - 원래 -24였는데 "전체 화면과의 마진을 절반으로" 지적(사용자
+## 지시, 2026-08-29)으로 -12로 줄임. offset_top으로 높이를 조절한다 - 높이
+## 20(기존 8의 2.5배)이 확정값(사용자 확인, 2026-08-29).
+const DESCRIPTION_BOX_OFFSET_BOTTOM := -12.0
+const DESCRIPTION_BOX_HEIGHT := 20.0
+const DESCRIPTION_BOX_OFFSET_TOP := DESCRIPTION_BOX_OFFSET_BOTTOM - DESCRIPTION_BOX_HEIGHT
+const DEFAULT_BOX_HEIGHT := DEFAULT_BOX_OFFSET_BOTTOM - DEFAULT_BOX_OFFSET_TOP
+## TextArea/AdvanceHintArea의 .tscn 원래(기본 높이 32 기준) 오프셋 - 박스
+## 높이가 바뀔 때 _sync_pivot_to_height()가 이 값들에 비율을 곱해 같이
+## 줄인다.
+const TEXT_AREA_DEFAULT_OFFSET_TOP := 6.0
+const TEXT_AREA_DEFAULT_OFFSET_BOTTOM := 56.0
+const ADVANCE_HINT_DEFAULT_OFFSET_TOP := 24.0
+const ADVANCE_HINT_DEFAULT_OFFSET_BOTTOM := 39.0
+## Background(NinePatchRect)의 .tscn 원래 patch_margin_top/bottom 값.
+const BACKGROUND_DEFAULT_PATCH_MARGIN_V := 16.0
+## 설명창일 때 글씨/E▶에 추가로 주는 최소 여백(사용자 지시, 2026-08-29).
+const DESCRIPTION_EXTRA_PADDING := 3.0
 
 @onready var _background: Control = $Background
 @onready var _portrait: TextureRect = $Background/Portrait
@@ -61,9 +93,13 @@ const TEXT_AREA_OFFSET_LEFT_NO_PORTRAIT := 6.0
 @onready var _text_label: Label = $Background/TextArea/VBox/TextLabel
 @onready var _choice_box: VBoxContainer = $Background/TextArea/VBox/ChoiceBox
 @onready var _advance_hint: Label = $Background/AdvanceHintArea/AdvanceHint
+@onready var _advance_hint_area: Control = $Background/AdvanceHintArea
 
 var _npc_id := ""
 var _lines: Array = []
+## open_description()으로 열렸는지 - main.gd가 이 경우만 화면 전체 디밍을
+## 끄는 데 쓴다(is_description_mode() 참고).
+var _is_description := false
 var _line_index := 0
 ## 줄마다 "emotion"을 안 적으면 DEFAULT_EMOTION(평소 표정)으로 매번 리셋되던
 ## 문제(사용자 리포트, 2026-08-26 - "알리바이 말할 때 갑자기 웃는 얼굴이
@@ -129,11 +165,21 @@ func _handle_choice_input(keycode: int) -> void:
 
 
 func open_dialogue(npc_id: String) -> void:
+	_is_description = false
 	NPCManager.talk(npc_id)
 	# duplicate(true): NPCManager가 돌려주는 배열은 JSON에서 로드된 원본 대사
 	# 풀을 그대로 참조한다 - 선택지 응답을 _lines에 끼워 넣을 때 원본 데이터를
 	# 건드리지 않도록 깊은 복사본을 쓴다.
 	_open_with_lines(npc_id, (NPCManager.get_daily_dialogue(npc_id) as Array).duplicate(true))
+	# _open_with_lines() -> _set_open()이 _refresh_layout()에서 앵커/오프셋을
+	# 자기 자신에게 재대입하는데(export 앵커 버그 대응, day18), 그 과정에서
+	# Godot이 "현재 실제 rect 기준으로 offset을 다시 계산"해버려 그 전에
+	# 세팅한 값을 덮어쓴다(사용자 리포트, 2026-08-29 - 설명창 높이가 안
+	# 줄어듦). 그래서 offset_top/offset_bottom은 반드시 _open_with_lines()
+	# 호출 뒤에 마지막으로 세팅해야 확실히 남는다.
+	offset_top = DEFAULT_BOX_OFFSET_TOP
+	offset_bottom = DEFAULT_BOX_OFFSET_BOTTOM
+	_sync_pivot_to_height()
 
 
 ## npc_talk_interacted 없이(플레이어가 직접 말 건 게 아니라) 코드에서 강제로
@@ -146,9 +192,67 @@ func open_dialogue(npc_id: String) -> void:
 ## 컷신이 끝난 뒤에도 그날 남은 시간에 정상적으로 말을 걸 수 있다(사용자
 ## 리포트, 2026-08-26 - "호감도 이벤트 끝나고 나서 그 날은 말걸기가 안 돼").
 func open_special(npc_id: String, lines: Array, mark_talked: bool = true) -> void:
+	_is_description = false
 	if mark_talked:
 		NPCManager.talk(npc_id)
 	_open_with_lines(npc_id, lines)
+	# open_dialogue()와 동일한 이유 - _refresh_layout()이 offset_top/bottom을
+	# 덮어쓰므로 _open_with_lines() 다음에 마지막으로 세팅한다.
+	offset_top = DEFAULT_BOX_OFFSET_TOP
+	offset_bottom = DEFAULT_BOX_OFFSET_BOTTOM
+	_sync_pivot_to_height()
+
+
+## furniture_desc(맵에 미리 배치된 배경 가구 조사) 전용 - main.gd가 부른다.
+## 대화창/나레이션창(open_special)과 스타일은 완전히 같고 높이만 짧게
+## 줄인 채로 연다(사용자 지시, 2026-08-29 - "화면에 너무 가득 차서", 짧은
+## 설명 몇 줄엔 기본 높이가 과하다는 지적). lines를 순서대로 전부 보여준다 -
+## 무작위로 하나만 고르지 않는다("B안", 이전엔 랜덤 하나만 고르는 방식이었으나
+## 사용자가 "한 번 조사하면 쓴 문장이 전부 순서대로 나오는" 쪽을 원함).
+func open_description(lines: Array) -> void:
+	_is_description = true
+	_open_with_lines("", lines)
+	# open_dialogue()와 동일한 이유 - _refresh_layout()이 offset_top/bottom을
+	# 덮어쓰므로 _open_with_lines() 다음에 마지막으로 세팅한다.
+	offset_top = DESCRIPTION_BOX_OFFSET_TOP
+	offset_bottom = DESCRIPTION_BOX_OFFSET_BOTTOM
+	_sync_pivot_to_height()
+
+
+## TextArea/AdvanceHintArea는 전부 .tscn에서 기본 높이(32) 박스 하나에 맞춰
+## 손으로 잡아둔 고정 오프셋이다(TextArea 6~56, AdvanceHintArea 24~39). 루트
+## 높이만 바꾸고 이 자식들은 그대로 두면 서로 따로 놀 수밖에 없다(사용자
+## 리포트, 2026-08-29 - "패딩도 없고 E도 따로 논다") - 전부 "기본 높이 대비
+## 지금 높이 비율"로 같이 스케일한다. 이 화면은 scale=2.5를 pivot_offset
+## 기준으로 적용하는데(.tscn 원래 값 (60,32) - 기본 높이 32의 딱 바닥 중앙),
+## pivot_offset도 안 맞으면 스케일이 엉뚱한 점을 기준으로 걸려서 박스가
+## 화면 밖으로 처박혀 보인다 - 그래서 이것도 매번 지금 높이로 다시 맞춘다.
+func _sync_pivot_to_height() -> void:
+	var current_height := offset_bottom - offset_top
+	var ratio := current_height / DEFAULT_BOX_HEIGHT
+	pivot_offset.y = current_height
+	## 비율로만 줄이면 글씨/E▶가 테두리에 바싹 붙어 보인다는 지적(사용자 지시,
+	## 2026-08-29) - 설명창일 때만 최소 여백을 추가로 더한다(기본 대화창은
+	## 원래 크기라 이 문제가 없어서 그대로 둠).
+	var extra_padding := DESCRIPTION_EXTRA_PADDING if _is_description else 0.0
+	_text_area.offset_top = TEXT_AREA_DEFAULT_OFFSET_TOP * ratio + extra_padding
+	_text_area.offset_bottom = TEXT_AREA_DEFAULT_OFFSET_BOTTOM * ratio
+	_advance_hint_area.offset_top = ADVANCE_HINT_DEFAULT_OFFSET_TOP * ratio - extra_padding
+	_advance_hint_area.offset_bottom = ADVANCE_HINT_DEFAULT_OFFSET_BOTTOM * ratio - extra_padding
+	## Background(NinePatchRect) 테두리 그림의 patch_margin(.tscn 원래 16, 상하좌우
+	## 전부)은 "기본 높이 32짜리 박스"용 픽셀 두께로 고정되어 있다 - 세로만
+	## 8까지 줄어드는데 위/아래 여백은 그대로 16이면 도합 32(margin_top+bottom)가
+	## 박스 자체 높이(8)보다 커져서, 모서리 그림이 다 못 들어가고 원래 크기로
+	## 삐져나온다(사용자 리포트, 2026-08-29 - "패널이 밑에 고정돼서 나온다").
+	## 가로(폭)는 안 바뀌므로 좌우 margin은 그대로 두고, 세로만 같은 비율로
+	## 줄인다.
+	var patch_margin_v := roundi(BACKGROUND_DEFAULT_PATCH_MARGIN_V * ratio)
+	(_background as NinePatchRect).patch_margin_top = patch_margin_v
+	(_background as NinePatchRect).patch_margin_bottom = patch_margin_v
+
+
+func is_description_mode() -> bool:
+	return _is_description
 
 
 func _open_with_lines(npc_id: String, lines: Array) -> void:
@@ -159,6 +263,11 @@ func _open_with_lines(npc_id: String, lines: Array) -> void:
 	_line_index = 0
 	_current_emotion = DEFAULT_EMOTION
 	_name_label.text = String(NPCManager.get_definition(npc_id).get("name", ""))
+	## 설명창은 이름표 자체가 없는데도 빈 Label이 VBoxContainer separation과
+	## 같이 줄 하나만큼 공간을 그냥 차지하고 있었다 - 안 그래도 좁힌 높이에서
+	## 그 낭비가 두드러져서(사용자 리포트, 2026-08-29 - 스크린샷으로 확인,
+	## 줄여도 여전히 크게 보임) 아예 감춘다.
+	_name_label.visible = not _is_description
 	_show_current_line()
 	_set_open(true)
 
@@ -212,6 +321,10 @@ func _show_current_line() -> void:
 		return
 	if line is Dictionary and String(line.get("type", "")) == BUFF_TYPE:
 		buff_requested.emit(float(line.get("percent", 0.0)), int(line.get("duration_minutes", 0)), bool(line.get("is_debuff", false)))
+		_advance()
+		return
+	if line is Dictionary and String(line.get("type", "")) == SFX_TYPE:
+		AudioManager.play_sfx(AudioManager.SFX_MEMORY)
 		_advance()
 		return
 	var text := ""
@@ -408,4 +521,18 @@ func _set_open(is_open: bool) -> void:
 	if is_open:
 		_refresh_layout()
 	modulate.a = 1.0 if is_open else 0.0
-	mouse_filter = Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE
+	## 다른 17개 화면과 달리 이 화면만 루트 자신의 mouse_filter만 바꾸고
+	## 자식들은 그대로 뒀었다 - 정적 배치된 자식들은 .tscn에 전부
+	## mouse_filter=2(IGNORE)가 미리 박혀있어서 평소엔 안 드러났지만,
+	## _rebuild_choice_labels()가 동적으로 만드는 선택지 Label은 이 설정이
+	## 없어서 기본값(STOP)인 채로 다음 선택지 대화 전까지 남아있을 수 있다
+	## (사용자 리포트, 2026-08-29 - 대화 이후 다른 화면 버튼이 안 눌림 조사).
+	## 다른 화면들과 동일하게 재귀로 통일한다.
+	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
+
+
+func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
+	if node is Control:
+		(node as Control).mouse_filter = filter
+	for child in node.get_children():
+		_apply_mouse_filter_recursive(child, filter)

@@ -61,3 +61,25 @@
 1. `data/items/items.json`에 `category: "furniture"`/`"floor_decor"`/`"wall_decor"` 아이템 추가(위 스키마 그대로)
 2. `data/shop/shops.json`의 `woody_shop.stock`에 `{"item_id": "...", "price": ...}` 추가
 3. 그림 준비되면 `world_sprite`/`icon` 경로에 파일 채우기 - 코드 변경 불필요
+
+## 맵에 미리 배치된 가구 설명(`descriptions.json`)
+
+위 스키마와는 별개 - 플레이어가 상점에서 사서 배치하는 가구가 아니라, **맵에 처음부터 그려져 있는 배경 가구**(길가의 벤치, 화분 등)와 상호작용했을 때 뜨는 짧은 설명문. 플레이테스트 피드백(#5, 2026-08-29) - 아무 가구나 상호작용하려는 사용자 행동을 막지 않고, 오히려 살릴 수 있는 부분은 살리자는 방향으로 추가.
+
+- `data/furniture/descriptions.json` - **맵 id → {id → 설명 텍스트}** 2단계 구조. 1단계 키는 `WorldMap.MAP_PATHS`(home_map.gd)에 등록된 맵 id 그대로(예: `restaurant_interior`, `home_interior`) - 인테리어 맵 15개 전부 빈 `{}`로 미리 만들어져 있으니 그 안에 채우기만 하면 된다. 2단계 키(`id`)는 그 맵 안에서만 안 겹치면 되므로 `bookshelf`처럼 짧게 써도 된다.
+- 맵 쪽(Tiled)에는 `Interactable` 오브젝트 레이어에 이름을 **항상 `furniture_desc`로 고정**해서 찍고, 커스텀 프로퍼티 `id`에 위 JSON의 2단계 키를 적는다(`cash_register`가 이름 고정 + `shop_id` 프로퍼티로 상점을 구분하는 것과 동일한 패턴).
+- 실제 표시는 `main.gd`가 `GameManager.current_map_id` → `id` 순서로 이 JSON을 찾아 머리 위 임시 문구로 띄운다(`_show_temporary_message()`와 동일한 방식, 코드 수정 불필요 - 이 파일에 키/문구만 추가하면 바로 반영됨).
+
+- 값은 문자열 하나 또는 **문자열 배열**도 된다 - 배열이면 조사할 때마다 그중 하나를 무작위로 골라서 보여준다(매번 같은 문구만 나오지 않게). 배열 안의 빈 문자열(`""`)은 "아직 안 쓴 자리"로 취급되어 후보에서 자동으로 빠지므로, 문구를 나중에 하나씩 채워 넣어도 안전하다.
+- 긴 문구를 줄바꿈하고 싶으면 문자열 안에 `\n`을 넣으면 된다(`InteractionPrompt` Label이 `\n`과 자동 줄바꿈 둘 다 지원).
+
+예시:
+```json
+{
+	"restaurant_interior": {
+		"bookshelf": "낡은 책장이다. 손때 묻은 요리책 몇 권이 꽂혀 있다.",
+		"clock": ["똑딱거리는 소리가 난다.", "시간이 조금 늦게 가는 것 같다.", ""]
+	},
+	"home_interior": {}
+}
+```
