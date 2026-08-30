@@ -32,6 +32,16 @@ const STATION_BACKDROP_TEXTURES := {
 	"cooking_area3": preload("res://assets/img/restaurant/img_knife.png"),
 	"cooking_area4": preload("res://assets/img/restaurant/img_mixer.png"),
 }
+## 요리창 UI에도 불 이펙트가 있으면 좋겠다는 지적(사용자 지시, 2026-08-29 -
+## 플레이테스트 피드백 #41) - 월드맵 버전(kitchen_progress_layer.gd)과 달리
+## 여기는 그림을 번갈아 보여주는 대신, 그림 1장(기구별로 각각)을 ToolVessel의
+## 기존 흔들림 트윈에 자연스럽게 얹는 방식으로 간다(_set_shaking() 참고).
+## 냄비/프라이팬 그림 자체가 서로 달라서 불 그림도 기구별로 따로 그린다
+## (사용자 지시). 도마/믹서기는 불을 안 써서 제외.
+const FIRE_ICON_TEXTURES := {
+	"cooking_area1": preload("res://assets/img/restaurant/fire_pot_ui.png"),
+	"cooking_area2": preload("res://assets/img/restaurant/fire_pan_ui.png"),
+}
 ## 조리 중일 때 냄비/프라이팬 등이 살짝 흔들리는 각도(라디안) - deg_to_rad(3).
 const SHAKE_ANGLE := 0.0524
 const SHAKE_DURATION := 0.12
@@ -41,6 +51,7 @@ const SHAKE_DURATION := 0.12
 @onready var _tool_label: Label = $Background/Margin/VBox/StatusRow/ToolLabel
 @onready var _tool_vessel: Control = $Background/Margin/VBox/StatusRow/ToolVessel
 @onready var _tool_image: TextureRect = $Background/Margin/VBox/StatusRow/ToolVessel/ToolImage
+@onready var _fire_icon: TextureRect = $Background/Margin/VBox/StatusRow/ToolVessel/FireIcon
 @onready var _status_icon: TextureButton = $Background/Margin/VBox/StatusRow/ToolVessel/StatusIcon
 @onready var _status_icon_texture: TextureRect = $Background/Margin/VBox/StatusRow/ToolVessel/StatusIcon/Icon
 @onready var _start_button: Button = $Background/Margin/VBox/StatusRow/StartButton
@@ -82,6 +93,7 @@ func open_kitchen(station_id: String) -> void:
 	_selected_item_id = ""
 	_tool_label.text = KitchenManager.get_tool_name(station_id)
 	_tool_image.texture = STATION_BACKDROP_TEXTURES.get(station_id)
+	_fire_icon.texture = FIRE_ICON_TEXTURES.get(station_id)
 	# close()가 아닌 다른 경로로 이전에 숨겨졌을 가능성까지 대비해서, 새로
 	# 열 때도 항상 흔들림/글로우를 확실히 꺼둔 상태에서 시작한다 - 안 그러면
 	# 이전 기구에서 켜져 있던 트윈이 이 ToolVessel(공용 노드)에 남아있는 동안
@@ -161,6 +173,13 @@ func _refresh() -> void:
 	for i in _slots.size():
 		var slot_instance := SlotScene.instantiate() as TextureButton
 		_grid.add_child(slot_instance)
+		# equipment_panel.gd와 같은 원인 - close()가 _station_id를 안 비워서,
+		# 창이 닫힌 뒤에도 InventoryManager.inventory_changed가 쏘면 이
+		# _refresh()가 그대로 다시 돈다. 새로 생기는 슬롯이 TextureButton
+		# 기본값(STOP)이면 안 보이는 채로 클릭을 가로챈다 - 이 화면 자신의
+		# mouse_filter는 _set_open()이 열고 닫을 때마다 갱신되므로 그 값을
+		# 그대로 물려준다.
+		slot_instance.mouse_filter = mouse_filter
 		slot_instance.call("setup", i, _slots[i])
 		var item_id := ""
 		if _slots[i] != null:
@@ -270,6 +289,9 @@ func _set_shaking(shaking: bool) -> void:
 		_shake_tween.kill()
 		_shake_tween = null
 	_tool_vessel.rotation = 0.0
+	## FireIcon이 ToolVessel의 자식이라, 이 회전 트윈을 그대로 같이 타면서
+	## 불도 냄비/프라이팬이랑 같이 흔들린다 - 따로 애니메이션을 안 만들어도 됨.
+	_fire_icon.visible = shaking and FIRE_ICON_TEXTURES.has(_station_id)
 	if not shaking:
 		return
 	_shake_tween = create_tween()
