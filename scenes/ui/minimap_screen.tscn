@@ -1,0 +1,29 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/minimap_screen.gd" id="2_script"]
+[ext_resource type="Script" path="res://scripts/ui/minimap_map_view.gd" id="4_map_view"]
+
+[node name="MinimapScreen" type="Control"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -80.0
+offset_right = 150.0
+offset_bottom = 80.0
+clip_contents = true
+script = ExtResource("2_script")
+
+[node name="Background" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Margin" type="MarginContainer" parent="Background"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="MapView" type="Control" parent="Background/Margin"]
+layout_mode = 2
+clip_contents = true
+script = ExtResource("4_map_view")

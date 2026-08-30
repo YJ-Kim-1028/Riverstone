@@ -116,7 +116,12 @@ func _ready() -> void:
 	NPCManager.npc_emote_requested.connect(_on_npc_emote_requested)
 	RestaurantManager.npc_seated.connect(_on_restaurant_seating_changed)
 	RestaurantManager.npc_departed.connect(_on_restaurant_seating_changed)
-	_populate_initial()
+	## _world_map은 이 노드의 부모(get_parent())라, _ready() 시점엔 부모가 아직
+	## 자기 자식들(이 노드 포함)을 추가하는 중이라 "Parent node is busy setting
+	## up children" 에러로 add_child()가 막힌다(_ensure_sprite()의
+	## _world_map.add_child(sprite) - 사용자 리포트, 2026-08-30). 한 프레임
+	## 미뤄서 부모가 완전히 세팅된 뒤에 NPC 스프라이트를 붙인다.
+	_populate_initial.call_deferred()
 
 
 ## 이 NPC가 지금 화면(현재 맵)에 없으면 조용히 무시한다 - 안 보이는 반응은
