@@ -29,14 +29,25 @@ const ICON_OFFSET := {
 	Vector2i(1, 0): Vector2(11, -16),
 }
 
+## 정면(아래쪽)을 볼 때만 도구별로 위치를 따로 올릴 수 있게 하는 예외표 -
+## 사용자 지시, 2026-08-31 - "괭이나 물뿌리개등 다른 도구는 지금 위치
+## 고정하고, 총만 정면 보고 있을 때 착용되는 위치 더 올릴 수 있어?": 다른
+## 방향/다른 도구는 위 ICON_OFFSET을 그대로 쓰고, 여기 등록된 도구만 정면
+## 볼 때 이 값으로 덮어쓴다.
+const FRONT_FACING_OFFSET_OVERRIDES := {
+	"hunting_rifle": Vector2(0, -16),
+}
+
 ## 인벤토리 아이콘(Tools.png 등)은 옆에서 본 사선 모양으로 그려져 있어서
 ## 좌/우를 볼 때는 자연스럽지만, 아래(정면)를 볼 때는 "1자로 곧게" 나와야
 ## 해서 회전/반전으로 흉내가 안 된다(2026-08-12 사용자 리포트). 물뿌리개/
-## 낚싯대/괭이는 Tools.png의 같은 열, 바로 아래 줄(2행, 0-index로 1행)에
-## 정면용 그림을 새로 그려 넣었다 - InventoryManager.get_item_icon_texture()의
-## row_override로 그 줄을 그대로 가져다 쓴다. 위(후면)를 볼 때는 도구를 아예
-## 숨기는 쪽이 더 자연스럽다는 사용자 판단으로 아이콘을 표시하지 않는다.
-const FRONT_ICON_ROW := 1
+## 낚싯대/괭이/사냥총 전부 Tools.png의 같은 열, 바로 아래 줄에 정면용 그림을
+## 따로 그려 넣는 규칙이다(도구마다 기준 줄 자체는 다를 수 있음 - 예: 물뿌리개/
+## 낚싯대/괭이는 1행(0-index 0)+정면 2행(0-index 1), 사냥총은 3행(0-index 2)+
+## 정면 4행(0-index 3), 2026-08-30 사용자 지시) - 그래서 고정 상수가 아니라
+## "그 도구의 기준 줄(icon_row, 기본 0) + 1"을 매번 계산해서 쓴다
+## (_resolve_texture() 참고). 위(후면)를 볼 때는 도구를 아예 숨기는 쪽이 더
+## 자연스럽다는 사용자 판단으로 아이콘을 표시하지 않는다.
 
 ## 좌/우 반전 기준: 괭이/낚싯대는 "몸통(손잡이)이 오른쪽, 날/끝이 왼쪽 아래로
 ## 뻗은" 방향으로 그려져 있어 오른쪽을 볼 때 그대로, 왼쪽을 볼 때만 반전하면
@@ -99,7 +110,10 @@ func get_frame(facing_direction: Vector2i) -> int:
 func update_position(facing_direction: Vector2i) -> void:
 	if not _active:
 		return
-	_icon_sprite.position = ICON_OFFSET.get(facing_direction, Vector2.ZERO)
+	if facing_direction == Vector2i(0, 1) and FRONT_FACING_OFFSET_OVERRIDES.has(_tool_id):
+		_icon_sprite.position = FRONT_FACING_OFFSET_OVERRIDES[_tool_id]
+	else:
+		_icon_sprite.position = ICON_OFFSET.get(facing_direction, Vector2.ZERO)
 	var facing_left := facing_direction == Vector2i(-1, 0)
 	_icon_sprite.flip_h = facing_left != MIRRORED_ICON_TOOLS.has(_tool_id)
 	var texture := _resolve_texture(facing_direction)
@@ -111,5 +125,6 @@ func _resolve_texture(facing_direction: Vector2i) -> Texture2D:
 	if facing_direction == Vector2i(0, -1):
 		return null
 	if facing_direction == Vector2i(0, 1):
-		return InventoryManager.get_item_icon_texture(_tool_id, FRONT_ICON_ROW)
+		var base_row := int(InventoryManager.get_item_definition(_tool_id).get("icon_row", 0))
+		return InventoryManager.get_item_icon_texture(_tool_id, base_row + 1)
 	return InventoryManager.get_item_icon_texture(_tool_id)

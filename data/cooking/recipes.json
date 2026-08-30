@@ -124,5 +124,32 @@
         "icon": "res://assets/icon/Food.png",
         "icon_index": 0,
         "icon_row": 2
+    },
+    "hunter_stew": {
+        "name": "사냥꾼 스튜",
+        "ingredient_pairs": [["cooked_rabbit_meat", "cooked_potato"], ["cooked_rabbit_meat", "cooked_corn"]],
+        "price": 120,
+        "description": "사냥으로 잡은 토끼고기를 냄비에 채소와 함께 끓인 스튜.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 8,
+        "icon_row": 2
+    },
+    "roast_bird": {
+        "name": "치킨",
+        "ingredient_pairs": [["cooked_bird_meat", "cooked_bird_meat"]],
+        "price": 140,
+        "description": "사냥으로 잡은 새고기를 구운 요리.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 7,
+        "icon_row": 2
+    },
+    "chicken_salad": {
+        "name": "치킨 샐러드",
+        "ingredient_pairs": [["cooked_bird_meat", "salad_greens"]],
+        "price": 100,
+        "description": "치킨과 상추로 만든 샐러드.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 6,
+        "icon_row": 2
     }
 }

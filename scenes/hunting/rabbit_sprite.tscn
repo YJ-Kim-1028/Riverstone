@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/hunting/rabbit_sprite.gd" id="1_script"]
+
+[node name="RabbitSprite" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+centered = true
+offset = Vector2(0, -16)

@@ -144,6 +144,7 @@ func _gather_save_data() -> Dictionary:
 		"livestock": LivestockManager.get_save_data(),
 		"farming": FarmingManager.get_save_data(),
 		"berry_bushes": BerryBushManager.get_save_data(),
+		"hunting": HuntingManager.get_save_data(),
 		"storage_boxes": StorageBoxManager.get_save_data(),
 		"jukebox": JukeboxManager.get_save_data(),
 		"furniture": FurnitureManager.get_save_data(),
@@ -218,6 +219,7 @@ func _apply_save_data(data: Dictionary) -> void:
 	LivestockManager.load_save_data(data.get("livestock", {}))
 	FarmingManager.load_save_data(data.get("farming", {}))
 	BerryBushManager.load_save_data(data.get("berry_bushes", {}))
+	HuntingManager.load_save_data(data.get("hunting", {}))
 	StorageBoxManager.load_save_data(data.get("storage_boxes", {}))
 	JukeboxManager.load_save_data(data.get("jukebox", {}))
 	FurnitureManager.load_save_data(data.get("furniture", {}))

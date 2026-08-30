@@ -36,6 +36,11 @@ const WARP_OVERRIDES := {
 const FLAT_LAYERS := {
 	"Carpet": true, "Tile": true, "Deco_under": true, "Ground": true,
 	"Path": true, "Farmable": true, "Water": true, "Pond": true,
+	## basement_interior.tmx의 "Stair" - 바닥에 그려진 계단 그림이라 다른
+	## 바닥 타일 레이어처럼 항상 플레이어 발밑에 있어야 하는데, 목록에 없어서
+	## 기본 Y-sort 그룹으로 빠져 플레이어랑 앞뒤가 뒤바뀌어 보였다(사용자
+	## 리포트, 2026-08-30 - "계단은 항상 플레이어 발밑에 있어야 하는데").
+	"Stair": true,
 }
 ## 2) ALWAYS_FRONT: 순수 연출용 오버레이(캐릭터 앞뒤 개념이 없는 그림)만
 ##    여기 넣는다 - Y-sort 대상이 아니고 항상 맨 위, 고정 z. 원래 "Light"를
@@ -78,6 +83,7 @@ const MAP_PATHS := {
 	"plaza3": "res://assets/map/plaza3.tmx",
 	"plaza4": "res://assets/map/plaza4.tmx",
 	"plaza5": "res://assets/map/plaza5.tmx",
+	"plaza6": "res://assets/map/plaza6.tmx",
 	"basement_interior": "res://assets/interior/basement_interior.tmx",
 	"book_interior": "res://assets/interior/book_interior.tmx",
 	"cafe_interior": "res://assets/interior/cafe_interior.tmx",
@@ -154,6 +160,9 @@ var _spawns: Dictionary = {}
 var _effect_areas: Dictionary = {}
 var _warps: Array[Dictionary] = []
 var _interactables: Array[Dictionary] = []
+## "HuntZone" 오브젝트 레이어(사용자 지시, 2026-08-30, 사냥 시스템) - 사각형
+## 영역 안에서 HuntingManager가 동물을 랜덤 스폰한다. get_hunt_zones() 참고.
+var _hunt_zones: Array[Dictionary] = []
 var _ysort_anchors: Array[Dictionary] = []
 var _blocked_cells: Dictionary = {}
 ## "Door" 레이어(cowshed_interior.tmx 등)의 칸별 타일 노드 - cell(Vector2i) ->
@@ -257,6 +266,7 @@ func load_map(next_map_path: String, render: bool = true) -> void:
 	_effect_areas.clear()
 	_warps.clear()
 	_interactables.clear()
+	_hunt_zones.clear()
 	_ysort_anchors.clear()
 	_blocked_cells.clear()
 	_door_tiles.clear()
@@ -513,6 +523,12 @@ func get_warp_at(world_position: Vector2) -> Dictionary:
 ## Rectangle objects (width/height 있는 경우 - 예: 침대를 실제 크기로 늘린
 ## sleep) 대신 그 사각형 범위 안에 있는지로 판정해서, 넓게 그려진 오브젝트의
 ## 가장자리에서도 정상적으로 인식되게 한다.
+## HuntingManager가 set_world_map()에서 부른다 - 각 항목은
+## {"rect": Rect2, "animal_type": String("rabbit"/"bird"/"")}.
+func get_hunt_zones() -> Array[Dictionary]:
+	return _hunt_zones
+
+
 func get_interactable_at(world_position: Vector2) -> Dictionary:
 	for interactable in _interactables:
 		var size: Vector2 = interactable.get("size", Vector2.ZERO)
@@ -917,7 +933,7 @@ func _match_element(parser: XMLParser, _visible: bool, _reading: bool, object_gr
 		"tileset":
 			_add_tileset(parser)
 		"property":
-			if not current_object.is_empty() and (object_group == "Warp" or object_group == "Interactable" or object_group == "YSortAnchor"):
+			if not current_object.is_empty() and (object_group == "Warp" or object_group == "Interactable" or object_group == "YSortAnchor" or object_group == "HuntZone"):
 				current_object[parser.get_named_attribute_value_safe("name")] = parser.get_named_attribute_value_safe("value")
 
 
@@ -1070,6 +1086,13 @@ func _store_object(object_group: String, object: Dictionary) -> void:
 			})
 	elif object_group == "Interactable":
 		_interactables.append(object)
+	elif object_group == "HuntZone":
+		var size: Vector2 = object.get("size", Vector2.ZERO)
+		if size.x > 0.0 and size.y > 0.0:
+			_hunt_zones.append({
+				"rect": Rect2((object["position"] as Vector2) - size / 2.0, size),
+				"animal_type": String(object.get("animal_type", "")),
+			})
 	elif object_group == "YSortAnchor":
 		_ysort_anchors.append(object)
 

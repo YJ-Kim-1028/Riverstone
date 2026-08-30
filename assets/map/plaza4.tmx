@@ -329,10 +329,10 @@
 </data>
  </layer>
  <objectgroup id="11" name="Warp" visible="0" locked="1">
-  <object id="1" name="home_in_plaza4" x="368" y="192" width="16" height="64">
+  <object id="1" name="plaza6_in_plaza4" x="368" y="192" width="16" height="64">
    <properties>
-    <property name="target_map" value="Home"/>
-    <property name="target_spawn" value="home_enterance_plaza4"/>
+    <property name="target_map" value="plaza6"/>
+    <property name="target_spawn" value="plaza6_enterance_plaza4"/>
    </properties>
   </object>
   <object id="2" name="temple_in" x="48" y="64" width="32" height="16">
@@ -361,7 +361,7 @@
   </object>
  </objectgroup>
  <objectgroup id="12" name="Spawn" visible="0" locked="1">
-  <object id="6" name="plaza4_enterance_home" x="352.042" y="223.875"/>
+  <object id="6" name="plaza4_enterance_plaza6" x="352.042" y="223.875"/>
   <object id="7" name="general_exit" x="318.667" y="488.667"/>
   <object id="8" name="plaza4_enterance_plaza2" x="239.697" y="481.394"/>
   <object id="9" name="temple_exit" x="62" y="70"/>

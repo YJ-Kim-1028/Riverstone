@@ -21,6 +21,8 @@ signal computer_interacted
 signal accomplice_door_answered
 signal collection_interacted
 signal jukebox_interacted
+## "closet" Interactable(집) - 인게임 옷장 재커스터마이즈 화면(피드백 #11).
+signal wardrobe_interacted
 ## 도감 완성 보상(제단 부활, 사용자 지시 2026-08-25) - soul_altar Interactable.
 signal soul_altar_interacted
 signal npc_talk_interacted(npc_id: String)
@@ -47,6 +49,13 @@ const RESTAURANT_AUTO_CLOSED_MESSAGE := "4시가 지나 영업이 종료되었�
 ## horror_events.md "NPC 집 잠금" - "NPC맵=NPC가게"(사용자 확정 2026-08-16)라
 ## 상점 맵으로 해석해서 막는다.
 const SHOP_LOCKED_MESSAGE := "문이 굳게 잠겨 있다."
+## 옷장(closet)은 처음엔 낡아서 고장난 상태 - 우디 호감도 50 이벤트
+## (woody.json affection_events, "낡은 옷장을 발견하고 고쳐주겠다고 한다")를
+## 본 뒤에야 실제로 열린다. has_shown_event()가 곧 "고쳐짐" 상태라 별도
+## 플래그가 필요 없다(사용자 지시, 2026-08-30).
+const WARDROBE_BROKEN_MESSAGE := "낡아서 문이 열리지 않는다."
+const WARDROBE_UNLOCK_NPC_ID := "woody"
+const WARDROBE_UNLOCK_THRESHOLD := 50
 ## 공범 엔딩(사용자 지시, 2026-08-24) - 스토커 메일을 확인하기 전엔 집 밖으로
 ## 못 나간다.
 const ACCOMPLICE_CANNOT_LEAVE_MESSAGE := "왠지 지금은 밖에 나가면 안 될 것 같다."
@@ -55,6 +64,10 @@ const ACCOMPLICE_CANNOT_LEAVE_MESSAGE := "왠지 지금은 밖에 나가면 안 
 ## 평범한 "잠이 안 온다" 톤으로 잡았다. 문구는 임시 - 기획 확정 시 교체 가능.
 const SLEEPLESS_NIGHT_MESSAGE := "잠이 오지 않아."
 const MESSAGE_DURATION := 2.0
+const FURNITURE_DESCRIPTIONS_PATH := "res://data/furniture/descriptions.json"
+## 16x16 그림 - 준비되면 이 경로에 파일만 넣으면 코드 수정 없이 자동으로
+## 아이콘으로 바뀐다(player.gd의 show_interaction_icon() 참고).
+const FURNITURE_DESC_ICON_PATH := "res://assets/ui/icon_talk_bubble.png"
 ## 밭갈기/물주기처럼 한 프레임에 즉시 끝나는 액션은 자체 지속시간이 없어서,
 ## player.tool_overlay 사용 포즈가 최소 이만큼은 눈에 보이도록 붙잡아둔다
 ## (낚시는 자체 대기시간이 있어 이 상수를 안 쓴다. 망치 회수는 사용자 지시로
@@ -218,6 +231,8 @@ const RESTAURANT_SIGN_CLOSE_TEXTURE := preload("res://assets/ui/sign_close.png")
 @onready var book_screen: Control = get_node_or_null("UI/BookScreen") as Control
 @onready var storage_screen: Control = get_node_or_null("UI/StorageScreen") as Control
 @onready var jukebox_screen: Control = get_node_or_null("UI/JukeboxScreen") as Control
+@onready var wardrobe_screen: Control = get_node_or_null("UI/WardrobeScreen") as Control
+@onready var minimap_screen: Control = get_node_or_null("UI/MinimapScreen") as Control
 @onready var memento_toast: Control = get_node_or_null("UI/MementoToast") as Control
 @onready var _restaurant_sign: Sprite2D = get_node_or_null("HomeMap/RestaurantSign") as Sprite2D
 ## horror_events.md "레스토랑 액자 이벤트" - Wall_deco 레이어의 액자 타일(15,2)
@@ -327,6 +342,12 @@ var _pending_soul_crystal_grant_cutscene := false
 ## 액션을 아예 안 받는다.
 var _farm_action_active := false
 var _message_timer := 0.0
+## 방금 메시지 대상이었던 Interactable 이름 - 다른 오브젝트로 옮겨가면 그
+## 오브젝트 얘기가 아니게 되므로 _message_timer를 강제로 끝내서, 새 프롬프트가
+## 최대 MESSAGE_DURATION(2초)까지 늦게 뜨던 문제를 막는다(사용자 리포트,
+## 2026-08-30 - "조리대에서 다른 조리대랑 상호작용 하면 다음 조리기구 범위에
+## 들어가도 바로 안 뜨는 거 같다").
+var _last_prompt_interactable_name := ""
 var _sleep_prompt_shown := false
 var _is_sleep_transition_playing := false
 ## "지금 대화 가능 범위 안에 있는 NPC" - 이 값이 바뀌는 순간(멀어졌다 다시
@@ -346,6 +367,9 @@ var _closing_time_reminder_shown_today := false
 ## 리셋되므로, 여기 기록도 그대로 맞춰야 한다 - "일시적으로"만 열려있는
 ## 상호작용이라 세이브 대상도 아니다).
 var _open_doors: Dictionary = {}
+## furniture_desc Interactable의 "id" 프로퍼티 → 설명 문구. _ready()에서 한 번만
+## 채운다(FURNITURE_DESCRIPTIONS_PATH 참고).
+var _furniture_descriptions: Dictionary = {}
 ## LivestockConfirmPopup이 확인을 받는 동안 어느 칸을 도살할지 기억해둔다
 ## (restaurant_confirm_popup과 같은 "펜딩 액션 1개" 패턴).
 var _pending_slaughter_stall := -1
@@ -358,6 +382,7 @@ func _ready() -> void:
 		return
 	player.interact_pressed.connect(_on_interact_pressed)
 	player.set_world_map(world_map)
+	_load_furniture_descriptions()
 	if hud != null:
 		hud.set_player(player)
 	AudioManager.set_player(player)
@@ -394,6 +419,14 @@ func _ready() -> void:
 		storage_box_interacted.connect(storage_screen.open_box)
 	if jukebox_screen != null:
 		jukebox_interacted.connect(jukebox_screen.open)
+	if wardrobe_screen != null:
+		wardrobe_interacted.connect(wardrobe_screen.open)
+	if minimap_screen != null:
+		minimap_screen.setup(player)
+		## status_screen과 동일 이유(위 417번 줄 참고) - M도 이 화면이 직접 듣는
+		## 전역 단축키라 다른 모달 위에 겹쳐 열리지 않게 막는다.
+		minimap_screen.set_open_blocked_check(func() -> bool: return _is_any_modal_open())
+	HuntingManager.player = player
 	RestaurantManager.restaurant_opened.connect(_update_restaurant_sign)
 	RestaurantManager.restaurant_closed.connect(_update_restaurant_sign)
 	TimeManager.restaurant_closed.connect(_on_restaurant_auto_closed)
@@ -407,6 +440,11 @@ func _ready() -> void:
 	WallDecorManager.wall_decor_changed.connect(_on_decor_changed)
 	ShopManager.furniture_hammer_granted.connect(_on_furniture_hammer_granted)
 	FishingManager.fishing_ended.connect(_on_fishing_ended)
+	## 조준 바가 뜨는 동안 사냥총을 든 포즈를 보여준다(낚싯대와 동일한 패턴) -
+	## HuntingManager.player는 Node2D로만 타입을 잡아서(오토로드 컴파일 순서
+	## 문제 회피용 규칙) 여기 main.gd의 정식 타입 player로 직접 처리한다.
+	HuntingManager.hunt_started.connect(func() -> void: player.tool_overlay.start("hunting_rifle"))
+	HuntingManager.hunt_ended.connect(func(_result: Dictionary) -> void: player.tool_overlay.stop())
 	AudioManager.knock_sequence_finished.connect(_on_knock_sequence_finished)
 	TimeManager.day_changed.connect(_on_day_changed_clear_knock_check)
 	TimeManager.day_changed.connect(_on_day_changed_clear_greetings)
@@ -677,7 +715,9 @@ const SHADOW_FIGURE_SPAWN_NAMES := {
 	"plaza4": "shadow_figure_plaza4",
 	"plaza5": "shadow_figure_plaza5",
 }
-const SHADOW_FIGURE_APPEAR_CHANCE := 0.2
+## 원래 0.2였는데 맵을 자주 오가다 보니 너무 자주 나온다는 피드백으로 0.05로
+## 낮춤(사용자 지시, 2026-08-30).
+const SHADOW_FIGURE_APPEAR_CHANCE := 0.05
 const SHADOW_FIGURE_VANISH_DISTANCE := 64.0
 ## 등장 순간 호러 브금 스팅(사용자 지시, 2026-08-26 - "스토커 볼 때는 한
 ## 7초정도?"). AudioManager.play_horror_sting() 참고.
@@ -1795,7 +1835,7 @@ func _cleanup_murder_discovery_scene_props(nodes: Array[Node2D]) -> void:
 ## 열려있을 수 있는 화면들을 방어적으로 닫는다 - close() 메서드가 있는
 ## 화면만 골라 부른다(이 프로젝트 화면들은 전부 이 컨벤션을 따름).
 func _close_all_screens() -> void:
-	for screen in [shop_screen, cooking_screen, computer_screen, collection_screen, dialogue_screen, status_screen, kitchen_screen, serving_screen, fishing_screen, book_screen, storage_screen, jukebox_screen]:
+	for screen in [shop_screen, cooking_screen, computer_screen, collection_screen, dialogue_screen, status_screen, kitchen_screen, serving_screen, fishing_screen, book_screen, storage_screen, jukebox_screen, wardrobe_screen, minimap_screen]:
 		if screen != null and screen.has_method("close"):
 			screen.close()
 
@@ -1901,6 +1941,47 @@ func _update_restaurant_sign() -> void:
 	_restaurant_sign.texture = RESTAURANT_SIGN_OPEN_TEXTURE if RestaurantManager.is_open else RESTAURANT_SIGN_CLOSE_TEXTURE
 
 
+## 실제 로드된 WorldMap(HomeMap)의 자식으로 붙여 Y-sort 그룹에 참여시킨다
+## (restaurant_dish_layer.gd와 같은 이유). 옷장은 책상들과 달리 YSortAnchor로
+## 묶여있지 않아서 get_tile_sort_y()의 칸-반올림이 오히려 정렬 기준을 실제
+## 밑변보다 아래로 밀어 항상 플레이어보다 앞에 그려지는 문제가 있었다(사용자
+## 리포트, 2026-08-30) - player.gd/npc_sprite.gd와 같은 방식으로 밑변 Y좌표를
+## 그대로 정렬 기준(position.y)으로 쓰도록 단순화.
+## 우디 호감도 50 이벤트(옷장 고쳐주겠다는 약속)를 아직 못 봤으면 낡은 옷장
+## 그림으로 새 옷장 타일을 덮고, 이벤트를 본 뒤엔 다시 지운다. EffectArea
+## "closet"(Interactable의 "closet"과 이름은 같지만 다른 레이어라 충돌 없음)는
+## 사용자가 Tiled에 직접 찍는다(집 레벨이 여러 개면 각 레벨마다 필요).
+const CLOSET_OLD_EFFECT_AREA := "closet"
+const CLOSET_OLD_TEXTURE := preload("res://assets/img/home/old_closet.png")
+const CLOSET_OLD_Z_INDEX := 0
+
+var _closet_old_sprite: Sprite2D = null
+
+
+## 맵이 바뀌어도(WorldMap/HomeMap은 새로 만들지 않고 내용만 갈아끼우므로)
+## 예전 맵에서 만든 스프라이트가 자식으로 그대로 남아있어서 엉뚱한 맵에서도
+## 보이는 버그가 있었다(사용자 리포트, 2026-08-30 - "전맵에 다 나오고
+## 있잖아") - 맵 로드마다 항상 지우고, 필요하면(이 맵에 closet EffectArea가
+## 실제로 있을 때만) 새로 만든다.
+func _update_closet_old_overlay() -> void:
+	if _closet_old_sprite != null:
+		_closet_old_sprite.queue_free()
+		_closet_old_sprite = null
+	if world_map == null or NPCManager.has_shown_event(WARDROBE_UNLOCK_NPC_ID, WARDROBE_UNLOCK_THRESHOLD):
+		return
+	var area := world_map.get_effect_area(CLOSET_OLD_EFFECT_AREA)
+	if area.position == Vector2.INF:
+		return
+	var base := Vector2(area.position.x + area.size.x / 2.0, area.position.y + area.size.y)
+	var sprite := Sprite2D.new()
+	sprite.texture = CLOSET_OLD_TEXTURE
+	sprite.z_index = CLOSET_OLD_Z_INDEX
+	sprite.position = base
+	sprite.offset = Vector2(0, -CLOSET_OLD_TEXTURE.get_height() / 2.0)
+	world_map.add_child(sprite)
+	_closet_old_sprite = sprite
+
+
 ## RestaurantSign과 달리 이 오버레이는 벽에 평평하게 붙은 장식이라(플레이어
 ## 앞뒤로 가려질 일이 없음) Y-sort 앵커가 필요 없다 - RESTAURANT_FRAME_SPAWN
 ## 지점을 그대로 위치로 쓴다. HorrorEventManager.consume_restaurant_frame_blood_trigger()가
@@ -2002,6 +2083,9 @@ func _process(delta: float) -> void:
 		_load_map(warp["target_map"], warp["target_spawn"])
 		return
 	var interactable_name := String(interactable.get("name", ""))
+	if interactable_name != _last_prompt_interactable_name:
+		_message_timer = 0.0
+		_last_prompt_interactable_name = interactable_name
 	# 침대는 E가 아니라 타일에 닿기만 하면 바로 확인창이 뜬다 - 한 번 닿아
 	# 물어본 뒤(아니오를 골랐어도) 그 자리에 계속 서 있는 동안 또 안 뜨게
 	# _sleep_prompt_shown으로 막고, 타일을 벗어나면 다시 물을 수 있게 푼다.
@@ -2023,9 +2107,20 @@ func _process(delta: float) -> void:
 		return
 	_sleep_prompt_shown = false
 	if interactable_name.begins_with(KITCHEN_STATION_PREFIX):
+		## 레스토랑이 닫혀있으면 요리창 자체를 안 띄운다(재료를 넣어둔 채 닫으면
+		## 영구히 못 꺼내던 문제, 사용자 지시 2026-08-29 - 플레이테스트 피드백
+		## #43) - 다 익은 게 있으면 그 자리에서 바로 꺼낼 수 있게, 없으면(비어
+		## 있거나 아직 조리 중) 프롬프트 자체를 안 띄워 상호작용이 안 된다는
+		## 걸 알린다.
+		if not RestaurantManager.is_open and not KitchenManager.is_ready(interactable_name):
+			player.hide_interaction_prompt()
+			return
 		if _message_timer <= 0.0:
 			var tool_name := KitchenManager.get_tool_name(interactable_name)
-			player.show_interaction_prompt("E %s 사용" % tool_name if not tool_name.is_empty() else "E 조리하기")
+			if not RestaurantManager.is_open:
+				player.show_interaction_prompt("E %s에서 꺼내기" % tool_name if not tool_name.is_empty() else "E 꺼내기")
+			else:
+				player.show_interaction_prompt("E %s 사용" % tool_name if not tool_name.is_empty() else "E 조리하기")
 		return
 	if interactable_name.begins_with(SERVING_AREA_PREFIX):
 		var serving_index := interactable_name.trim_prefix(SERVING_AREA_PREFIX).to_int() - 1
@@ -2041,6 +2136,17 @@ func _process(delta: float) -> void:
 	if interactable_name == "computer" or interactable_name == "collection" or interactable_name == "jukebox":
 		if _message_timer <= 0.0:
 			player.show_interaction_prompt("E 사용")
+		return
+	if interactable_name == "closet":
+		if _message_timer <= 0.0:
+			player.show_interaction_prompt("E 옷장 열기")
+		return
+	if interactable_name == "furniture_desc":
+		if _message_timer <= 0.0:
+			## FURNITURE_DESC_ICON_PATH 자리에 16x16 그림이 채워지면 자동으로
+			## 그 아이콘으로 바뀐다 - 그림이 없는 동안은 임시로 말풍선 이모지를
+			## 대신 보여준다(show_interaction_icon() 참고).
+			player.show_interaction_icon(FURNITURE_DESC_ICON_PATH, "💬")
 		return
 	if interactable_name == "soul_altar":
 		## 영혼의 결정이 없거나 이미 부활을 썼으면 프롬프트 자체를 안 띄워서
@@ -2108,6 +2214,11 @@ func _process(delta: float) -> void:
 		if FishingManager.can_start_fishing() and _is_facing_water() and not InventoryManager.is_full():
 			if _message_timer <= 0.0:
 				player.show_interaction_prompt("E 낚시하기")
+			return
+		var hunting_prompt := HuntingManager.get_interact_prompt(GameManager.current_map_id)
+		if not hunting_prompt.is_empty():
+			if _message_timer <= 0.0:
+				player.show_interaction_prompt(hunting_prompt)
 			return
 		if not BerryBushManager.get_available_bush(player.position).is_empty():
 			if _message_timer <= 0.0:
@@ -2218,6 +2329,32 @@ func _show_temporary_message(text: String) -> void:
 	player.show_interaction_prompt(text)
 
 
+## descriptions.json의 값은 문자열 하나 또는 문자열 배열 둘 다 지원한다(사용자
+## 지시, 2026-08-29) - 배열이면 그 순서 그대로 전부 대화창의 여러 줄로
+## 보여준다(E로 한 줄씩 넘김, dialogue_screen.open_description() 참고). 빈
+## 문자열은 "아직 안 쓴 자리"로 보고 목록에서 제외한다(작업 중인 배열에 빈
+## 칸이 섞여 있어도 안전하게 동작).
+func _furniture_description_lines(entry: Variant) -> Array:
+	if entry is Array:
+		return (entry as Array).filter(func(line) -> bool: return String(line) != "")
+	var text := String(entry)
+	return [text] if not text.is_empty() else []
+
+
+## .json은 원시 파일이라 FileAccess.file_exists() 규칙(day20 export 검증 참고,
+## .png 등 import 리소스의 ResourceLoader.exists()와 반대)을 따른다.
+func _load_furniture_descriptions() -> void:
+	if not FileAccess.file_exists(FURNITURE_DESCRIPTIONS_PATH):
+		return
+	var file := FileAccess.open(FURNITURE_DESCRIPTIONS_PATH, FileAccess.READ)
+	if file == null:
+		push_error("Furniture descriptions could not be opened: %s" % FURNITURE_DESCRIPTIONS_PATH)
+		return
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	if parsed is Dictionary:
+		_furniture_descriptions = parsed
+
+
 func _is_any_modal_open() -> bool:
 	return (shop_screen != null and shop_screen.modulate.a > 0.0) \
 		or (cooking_screen != null and cooking_screen.modulate.a > 0.0) \
@@ -2234,6 +2371,8 @@ func _is_any_modal_open() -> bool:
 		or (book_screen != null and book_screen.modulate.a > 0.0) \
 		or (storage_screen != null and storage_screen.modulate.a > 0.0) \
 		or (jukebox_screen != null and jukebox_screen.modulate.a > 0.0) \
+		or (wardrobe_screen != null and wardrobe_screen.modulate.a > 0.0) \
+		or (minimap_screen != null and minimap_screen.modulate.a > 0.0) \
 		or _is_sleep_transition_playing
 
 
@@ -2256,8 +2395,30 @@ func _should_pause_time() -> bool:
 ## 기준으로 돌아가는데(new_cooking_system.md 3.3), 화면을 열어둔 동안 게임
 ## 시간까지 멈추면 레스토랑 영업시간/NPC 스케줄이 그만큼 밀리는 게 사용자
 ## 피드백으로 어색하다고 확인됨 - 조리기구 화면만 열려있을 땐 시간이 계속 간다.
+var _debug_last_open_screens := ""
+
 func _update_ui_blocking() -> void:
 	var any_open := _is_any_modal_open()
+	## 상시 유지하는 디버그 로그(사용자 지시, 2026-08-30 - "지우지말고 두고두고
+	## 쓰자") - 조리대 클릭 씹힘처럼 "어떤 화면이 열려있다고 잡히는지" 자체가
+	## 의심스러운 UI 버그를 추적할 때 계속 도움이 됨. 어떤 화면들이 "열림"으로
+	## 잡히는지 바뀔 때만 한 번 출력한다(매 프레임 스팸 방지).
+	var open_names := []
+	for entry in [
+		["shop", shop_screen], ["cooking", cooking_screen], ["computer", computer_screen],
+		["collection", collection_screen], ["dialogue", dialogue_screen], ["status", status_screen],
+		["restaurant_confirm", restaurant_confirm_popup], ["kitchen", kitchen_screen],
+		["serving", serving_screen], ["fishing", fishing_screen], ["livestock_confirm", livestock_confirm_popup],
+		["book", book_screen], ["storage", storage_screen], ["jukebox", jukebox_screen],
+		["wardrobe", wardrobe_screen], ["minimap", minimap_screen],
+	]:
+		var node: Control = entry[1]
+		if node != null and node.modulate.a > 0.0:
+			open_names.append(String(entry[0]))
+	var joined := ",".join(open_names)
+	if joined != _debug_last_open_screens:
+		print("[DEBUG] open screens changed -> [", joined, "]")
+		_debug_last_open_screens = joined
 	# 낚싯줄이 나가 있는 동안(입질 대기 + 미니게임)은 모달 창이 없어도 이동을
 	# 막는다 - 그래야 웜프 타일을 밟거나 맵을 벗어나는 상황 자체가 물리적으로
 	# 발생하지 않아서, 낚시 도중 맵이 바뀌는 경우를 따로 취소 처리할 필요가 없다.
@@ -2273,9 +2434,14 @@ func _update_ui_blocking() -> void:
 		# 안될 거 같아").
 		player.set_movement_enabled(not any_open and not _memento_event_active and not _revival_event_active \
 			and not _murder_scene_active and not _heart_event_active \
-			and not FishingManager.is_active() and not AudioManager.is_knock_playing())
+			and not FishingManager.is_active() and not HuntingManager.is_active() and not AudioManager.is_knock_playing())
 	if _ui_dim != null:
-		_ui_dim.color.a = UI_DIM_ALPHA if any_open else 0.0
+		# furniture_desc(배경 가구 설명)는 박스 높이도 짧게 줄였는데, 화면
+		# 전체를 덮는 디밍까지 그대로면 여전히 화면을 다 차지하는 느낌이라는
+		# 지적(사용자 지시, 2026-08-29) - 위 memento_event_active와 같은
+		# 이유로 이 경우만 디밍을 끈다.
+		var showing_furniture_desc: bool = dialogue_screen != null and dialogue_screen.is_description_mode()
+		_ui_dim.color.a = UI_DIM_ALPHA if (any_open and not showing_furniture_desc) else 0.0
 	if _should_pause_time():
 		TimeManager.pause()
 	else:
@@ -2551,6 +2717,21 @@ func _is_locked_shop_map(map_id: String) -> bool:
 	return not shop_id.is_empty() and ShopManager.get_shop_mode(shop_id) == "online"
 
 
+## 오후 9시 이후엔 NPC 상점에 못 들어간다(사용자 지시, 2026-08-30) -
+## ShopManager.get_shop_id_for_map()이 이미 "NPC맵=NPC가게" 등록 목록이라,
+## 플레이어의 레스토랑/집은 애초에 그 목록에 없어서 자동으로 제외된다. 목장
+## (belje_shop, pasture_interior)도 벨제/셰퍼드의 상점이라 예외 없이 똑같이
+## 잠긴다 - 플레이어 자신의 가축 우리(LivestockManager 마구간)는 이 맵 워프
+## 시스템과 무관한 별도 상호작용이라 애초에 이 잠금의 영향을 안 받는다
+## (사용자 확인, 2026-08-30 - "자기 우리만 들어갈 수 있으면 돼").
+const SHOP_TIME_LOCK_HOUR := 21
+const SHOP_TIME_LOCK_MESSAGE := "시간이 너무 늦었다. 내일 오자."
+
+func _is_shop_closed_for_night(map_id: String) -> bool:
+	return not ShopManager.get_shop_id_for_map(map_id).is_empty() \
+		and TimeManager.current_hour >= SHOP_TIME_LOCK_HOUR
+
+
 ## SHADOW_FIGURE_SPAWN_NAMES에 등록된 맵이고, 1차 살인 이후 스토커가 아직
 ## 살아있으면(스토커 사망 시 이 이벤트는 저절로 끝남) 낮은 확률로 스폰
 ## 지점에 그림자 인영을 세운다. 다른 NPC 캐릭터의 몸/머리 실루엣을 재사용하지
@@ -2627,11 +2808,13 @@ func _load_map(map_id: String, spawn_name: String, skip_fade: bool = false) -> v
 		player.hide_interaction_prompt()
 		GameManager.set_current_map(map_id)
 		_update_restaurant_sign()
+		_update_closet_old_overlay()
 		if map_id == RESTAURANT_SIGN_MAP_ID:
 			_maybe_play_restaurant_frame_blood_effect()
 		LivestockManager.set_world_map(world_map, map_id)
 		FarmingManager.set_world_map(world_map, map_id)
 		BerryBushManager.set_world_map(world_map, map_id)
+		HuntingManager.set_world_map(world_map, map_id)
 		StorageBoxManager.set_world_map(world_map, map_id)
 		FurnitureManager.set_world_map(world_map, map_id)
 		FloorDecorManager.set_world_map(world_map, map_id)
@@ -2800,6 +2983,12 @@ func _on_interact_pressed() -> void:
 	# E가 계산대까지 같이 눌러버리는 문제가 생긴다.
 	if _is_any_modal_open() or _murder_scene_active or _heart_event_active or _memento_event_active or _revival_event_active:
 		return
+	# 조준 바가 떠 있는 동안 E는 다른 무엇보다 먼저 포획 시도 판정으로
+	# 간다(낚시의 is_waiting_for_bite() 우선 처리와 동일한 이유 - 안 그러면
+	# 동물 위에 겹친 다른 상호작용이 먼저 먹어버릴 수 있음).
+	if HuntingManager.is_aiming():
+		HuntingManager.attempt_catch()
+		return
 	if _second_murder_sack_awaiting_interaction and _second_murder_sack_node != null \
 			and player.position.distance_to(_second_murder_sack_position) <= SECOND_MURDER_SACK_INTERACT_RADIUS:
 		_continue_second_murder_discovery()
@@ -2838,6 +3027,9 @@ func _on_interact_pressed() -> void:
 			return
 		if _is_locked_shop_map(String(warp["target_map"])):
 			_show_temporary_message(SHOP_LOCKED_MESSAGE)
+			return
+		if _is_shop_closed_for_night(String(warp["target_map"])) and dialogue_screen != null:
+			dialogue_screen.open_description([SHOP_TIME_LOCK_MESSAGE])
 			return
 		_load_map(warp["target_map"], warp["target_spawn"])
 		return
@@ -2887,6 +3079,8 @@ func _on_interact_pressed() -> void:
 		if FishingManager.start_fishing():
 			AudioManager.play_sfx(AudioManager.SFX_BUBBLE)
 			player.tool_overlay.start("fishing_rod")
+		return
+	if not InventoryManager.is_full() and HuntingManager.try_catch(GameManager.current_map_id):
 		return
 	var available_bush := BerryBushManager.get_available_bush(player.position)
 	if not available_bush.is_empty():
@@ -3033,6 +3227,24 @@ func _handle_interaction(interactable: Dictionary) -> void:
 	if interactable_name == "jukebox":
 		jukebox_interacted.emit()
 		return
+	if interactable_name == "closet":
+		if NPCManager.has_shown_event(WARDROBE_UNLOCK_NPC_ID, WARDROBE_UNLOCK_THRESHOLD):
+			wardrobe_interacted.emit()
+		elif dialogue_screen != null:
+			## 머리 위 임시 문구 대신 설명창으로(사용자 지시, 2026-08-30) -
+			## furniture_desc와 같은 방식.
+			dialogue_screen.open_description([WARDROBE_BROKEN_MESSAGE])
+		return
+	if interactable_name == "furniture_desc":
+		var desc_id := String(interactable.get("id", ""))
+		var map_descriptions: Dictionary = _furniture_descriptions.get(GameManager.current_map_id, {})
+		var lines := _furniture_description_lines(map_descriptions.get(desc_id, ""))
+		## 머리 위 임시 문구 대신 대화창으로 띄우되, 높이는 짧은 설명창 전용으로
+		## 줄인다(사용자 지시, 2026-08-29 - dialogue_screen.open_description()
+		## 참고). 배열로 쓴 문장은 전부 순서대로(E로 한 줄씩) 보여준다.
+		if not lines.is_empty() and dialogue_screen != null:
+			dialogue_screen.open_description(lines)
+		return
 	if interactable_name == "soul_altar":
 		if RevivalManager.can_use_altar():
 			soul_altar_interacted.emit()
@@ -3048,7 +3260,19 @@ func _handle_interaction(interactable: Dictionary) -> void:
 			serving_area_interacted.emit(station_index)
 		return
 	if interactable_name.begins_with(KITCHEN_STATION_PREFIX):
+		## 레스토랑이 닫혀있으면 요리창을 열지 않고, 다 익은 게 있으면 그
+		## 자리에서 바로 꺼낸다(사용자 지시 2026-08-29 - 피드백 #43, 재료를
+		## 넣어둔 채 닫으면 영구히 못 꺼내던 문제). 프롬프트 표시 로직에서
+		## 이미 닫혀있고 다 안 익었으면 상호작용 자체가 안 뜨게 막아뒀으니,
+		## 여기 도달했다면 사실상 항상 collect()가 성공해야 하지만 인벤토리가
+		## 꽉 찬 경우를 대비해 실패 메시지도 처리한다.
 		if not RestaurantManager.is_open:
-			_show_temporary_message(RESTAURANT_NOT_READY_MESSAGE)
+			if KitchenManager.is_ready(interactable_name):
+				var cooked_id := KitchenManager.get_cooking_result(interactable_name)
+				if KitchenManager.collect(interactable_name):
+					var cooked_name: String = String(InventoryManager.get_item_definition(cooked_id).get("name", cooked_id))
+					_show_temporary_message("%s을(를) 꺼냈다." % cooked_name)
+				else:
+					_show_temporary_message("인벤토리가 가득 찼다.")
 		else:
 			kitchen_station_interacted.emit(interactable_name)

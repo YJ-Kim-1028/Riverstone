@@ -531,10 +531,10 @@
     <property name="target_spawn" value="cowshed_enterance"/>
    </properties>
   </object>
-  <object id="6" name="plaza4_in_home" x="0" y="208" width="16" height="32">
+  <object id="6" name="plaza6_in_home" x="0" y="208" width="16" height="32">
    <properties>
-    <property name="target_map" value="plaza4"/>
-    <property name="target_spawn" value="plaza4_enterance"/>
+    <property name="target_map" value="plaza6"/>
+    <property name="target_spawn" value="plaza6_enterance_home"/>
    </properties>
   </object>
   <object id="8" name="plaza1_in_home" x="240" y="496" width="48" height="16.021">
@@ -556,7 +556,7 @@
   <object id="9" name="home_pond_standing" x="55.3333" y="279.667"/>
   <object id="10" name="restaurant_exit" x="131" y="213.333"/>
   <object id="11" name="backyard_enterance" x="112" y="96" width="32" height="16"/>
-  <object id="13" name="home_enterance_plaza4" x="33.8333" y="223.5"/>
+  <object id="13" name="home_enterance_plaza6" x="33.8333" y="223.5"/>
   <object id="14" name="home_exit" x="359.5" y="197"/>
   <object id="15" name="cowshed_exit" x="472" y="150"/>
   <object id="16" name="home_backyard_standing" x="103.5" y="87"/>

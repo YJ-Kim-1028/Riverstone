@@ -86,8 +86,10 @@ const POND_MAP_IDS: Array[String] = ["plaza1", "plaza2"]
 ## 멀리서도 들린다는 피드백으로 200px로 재조정(사용자 확정).
 const POND_FADE_DISTANCE := 200.0
 const SFX_POND := "res://assets/audio/sfx/sfx_pond.mp3"
-## 감쇠 없이 원본 그대로.
-const POND_SFX_TARGET_VOLUME_DB := 0.0
+## 원래 감쇠 없이 원본 그대로(0dB)였는데, 강 소리가 작다는 피드백(#18)으로
+## 벨소리와 같은 기준(20*log10(1.2) ≈ +1.6dB, 선형 20% 증가)으로 키움
+## (2026-08-30) - 여전히 작으면 이 값만 더 올리면 됨.
+const POND_SFX_TARGET_VOLUME_DB := 1.6
 const POND_SFX_SILENT_DB := -40.0
 
 ## 실내에서 비가 올 때 브금 위에 얹히는 빗소리(사용자 요청) - 바깥의
@@ -210,6 +212,21 @@ const SFX_BEEP := "res://assets/audio/sfx/sfx_beep.mp3"
 ## 조리/구매 등 "성공" 피드백 전용(사용자 지시 - 예전 play_beep(660.0, 0.1)
 ## 합성음 대신 이 파일).
 const SFX_POSITIVE_BEEP := "res://assets/audio/sfx/sfx_positive_beep.mp3"
+
+## 사냥 시스템(hunting_manager.gd, rabbit_sprite.gd, bird_sprite.gd) 전용.
+## 총소리는 살인 사건용 SFX_GUNSHOT(리얼한 톤)과 구분되는 귀여운 톤으로
+## 사용자가 따로 골랐다(2026-08-30) - 재사용하지 말고 이 상수를 쓸 것.
+const SFX_RABBIT_FLEE := "res://assets/audio/sfx/sfx_rabbit_flee.mp3"
+## 토끼는 스폰 소리 없이 배회하며 움직일 때마다(풀숲 부스럭) 재생, 새는
+## 반대로 움직이지 않는 대신 스폰 시점에 한 번 지저귄다(사용자 지시,
+## 2026-08-30).
+const SFX_RABBIT_WANDER := "res://assets/audio/sfx/sfx_rabbit_wander.mp3"
+const SFX_BIRD_SPAWN := "res://assets/audio/sfx/sfx_bird_spawn.mp3"
+const SFX_BIRD_FLUTTER := "res://assets/audio/sfx/sfx_bird_flutter.mp3"
+const SFX_HUNT_AIM_START := "res://assets/audio/sfx/sfx_hunt_aim_start.mp3"
+const SFX_HUNT_CATCH_SUCCESS := "res://assets/audio/sfx/sfx_hunt_catch_success.mp3"
+const SFX_HUNT_CATCH_FAIL := "res://assets/audio/sfx/sfx_hunt_catch_fail.mp3"
+const SFX_HUNT_GUNSHOT := "res://assets/audio/sfx/sfx_hunt_gunshot.mp3"
 
 ## 상태창(TAB) 설정 탭의 볼륨 슬라이더가 조작하는 오디오 버스 2개 - bgm은
 ## 브금 하나, sfx는 비/파도/강 등 나머지 배경음 전부를 묶는다(사용자가
@@ -610,8 +627,9 @@ func _fade_out_wave() -> void:
 ## 예전 sfx_bell 파일이 다른 효과음보다 크다는 피드백으로 20%(선형) 낮췄던
 ## 값(-1.9dB)이었으나, 사용자가 sfx_bell 파일 자체를 새로 교체하면서 그
 ## 보정이 새 파일 음량과 안 맞아 오히려 너무 작게 들린다는 리포트로 일단
-## 0(보정 없음)으로 되돌림 - 새 파일 기준으로 다시 들어보고 필요하면 조정.
-const SFX_BELL_VOLUME_DB := 0.0
+## 0(보정 없음)으로 되돌렸었다. 이후 "조금만 더 크게"(20% 더 키워달라는
+## 지시, 2026-08-30)로 20*log10(1.2) ≈ +1.6dB 적용.
+const SFX_BELL_VOLUME_DB := 1.6
 
 
 func _on_npc_arrived(_station_index: int, _npc_id: String) -> void:

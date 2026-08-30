@@ -4,7 +4,8 @@
         "duration_seconds": 15,
         "ingredients": {
             "corn": "cooked_corn",
-            "potato": "cooked_potato"
+            "potato": "cooked_potato",
+            "rabbit_meat": "cooked_rabbit_meat"
         }
     },
     "cooking_area2": {
@@ -15,7 +16,8 @@
             "beef": "cooked_beef",
             "salmon": "cooked_salmon",
             "mackerel": "cooked_mackerel",
-            "squid": "cooked_squid"
+            "squid": "cooked_squid",
+            "bird_meat": "cooked_bird_meat"
         }
     },
     "cooking_area3": {

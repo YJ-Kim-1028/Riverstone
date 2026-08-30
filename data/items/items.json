@@ -119,6 +119,26 @@
         "icon": "res://assets/icon/Food.png",
         "icon_index": 9
     },
+    "rabbit_meat": {
+        "id": "rabbit_meat",
+        "name": "토끼고기",
+        "category": "material",
+        "subtype": "meat",
+        "description": "사냥으로 잡은 토끼고기. 요리 재료로 쓴다.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 4,
+        "icon_row": 2
+    },
+    "bird_meat": {
+        "id": "bird_meat",
+        "name": "새고기",
+        "category": "material",
+        "subtype": "meat",
+        "description": "사냥으로 잡은 새고기. 요리 재료로 쓴다.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 1,
+        "icon_row": 2
+    },
     "fishing_rod": {
         "id": "fishing_rod",
         "name": "낚싯대",
@@ -159,6 +179,17 @@
         "description": "밭을 갈아 경작지를 만들 때 사용하는 도구.",
         "icon": "res://assets/icon/Tools.png",
         "icon_index": 12
+    },
+    "hunting_rifle": {
+        "id": "hunting_rifle",
+        "name": "사냥용 소총",
+        "category": "tool",
+        "slot": "hand",
+        "subtype": "",
+        "description": "사냥할 때 사용하는 도구.",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 0,
+        "icon_row": 2
     },
     "bucket": {
         "id": "bucket",
@@ -322,7 +353,7 @@
     },
     "blinder": {
         "id": "blinder",
-        "name": "블라인드",
+        "name": "그라인더",
         "category": "furniture",
         "subtype": "",
         "slot": "hand",
@@ -1168,5 +1199,27 @@
         "icon": "res://assets/icon/Food.png",
         "icon_index": 5,
         "icon_row": 3
+    },
+    "cooked_rabbit_meat": {
+        "id": "cooked_rabbit_meat",
+        "name": "삶은 토끼고기",
+        "category": "cooked_ingredient",
+        "subtype": "",
+        "base_material": "토끼고기",
+        "description": "냄비에 삶은 토끼고기.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 5,
+        "icon_row": 2
+    },
+    "cooked_bird_meat": {
+        "id": "cooked_bird_meat",
+        "name": "구운 새고기",
+        "category": "cooked_ingredient",
+        "subtype": "",
+        "base_material": "새고기",
+        "description": "프라이팬에 구운 새고기.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 2,
+        "icon_row": 2
     }
 }
