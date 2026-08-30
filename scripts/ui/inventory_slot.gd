@@ -93,7 +93,11 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 	# 당겨준다.
 	preview.position = -_icon.size / 2.0
 	set_drag_preview(preview)
-	return {"item_id": item_id, "count": count, "source": source_tag}
+	# from_index: 같은 그리드 내 재정렬(예: equipment_panel.gd의 인벤 그리드)에서
+	# "어느 슬롯에서 왔는지"를 받는 쪽이 알아야 swap_slots()를 호출할 수 있다.
+	# 다른 그리드로 넘어가는 기존 사용처(storage_screen.gd)는 이 키를 그냥
+	# 무시하므로 영향 없음.
+	return {"item_id": item_id, "count": count, "source": source_tag, "from_index": slot_index}
 
 
 func _can_drop_data(_at_position: Vector2, data) -> bool:

@@ -20,6 +20,9 @@ signal status_close_requested
 signal book_open_requested(item_id: String)
 
 const SlotScene := preload("res://scenes/ui/inventory_slot.tscn")
+## storage_screen.gd의 BAG_SOURCE와 같은 값 - 같은 그리드 내 드래그 재정렬용
+## source_tag로 쓴다(다른 화면과 데이터를 주고받는 용도가 아니라 단순 표식).
+const BAG_SOURCE := "bag"
 const INVALID_DROP_MESSAGE := "이 곳에는 착용할 수 없다."
 ## equipment_slot.gd의 equip_failed 참고 - 이미 장착된 아이템을 인벤토리로
 ## 돌려줄 자리가 없을 때 조용히 실패하던 걸 알려준다(사용자 리포트, 2026-08-27).
@@ -143,10 +146,22 @@ func _refresh_inventory() -> void:
 	for i in slots.size():
 		var slot_instance := SlotScene.instantiate() as TextureButton
 		_inventory_grid.add_child(slot_instance)
+		# status_screen.gd는 열고 닫을 때 그 순간 존재하는 서브트리에만 재귀로
+		# mouse_filter를 STOP/IGNORE 처리한다 - 닫혀있는 동안(예: 선물/퀘스트
+		# 보상으로) InventoryManager.inventory_changed가 쏴서 이 그리드가 다시
+		# 만들어지면, 새로 생긴 슬롯은 그 재귀를 못 거치고 TextureButton 기본값인
+		# STOP인 채로 남아 안 보이면서도 클릭을 가로챈다(사용자 리포트 - "인벤
+		# 창이 안 사라져서 요청함이 안 눌림"). 이 패널 자신의 mouse_filter는
+		# status_screen이 열고 닫을 때마다 항상 갱신되므로, 새 슬롯도 그 값을
+		# 그대로 물려받게 하면 닫힌 동안 생겨도 처음부터 IGNORE로 시작한다.
+		slot_instance.mouse_filter = mouse_filter
 		slot_instance.call("setup", i, slots[i])
 		slot_instance.tooltip_text = _tooltip_for(slots[i])
+		slot_instance.source_tag = BAG_SOURCE
+		slot_instance.accepts_drops = true
 		slot_instance.connect("slot_pressed", _on_slot_pressed)
 		slot_instance.connect("slot_right_clicked", _on_slot_right_clicked)
+		slot_instance.connect("slot_drop_received", _on_slot_drop_received)
 		slot_instance.modulate = SELECTED_TINT if i == _selected_index else Color.WHITE
 
 
@@ -162,6 +177,18 @@ func _tooltip_for(slot_data) -> String:
 func _on_slot_pressed(index: int) -> void:
 	_selected_index = -1 if _selected_index == index else index
 	_refresh_inventory()
+
+
+## 인벤 그리드 안에서 슬롯을 드래그해 다른 슬롯에 놓으면 두 자리를 맞바꾼다
+## (사용자 지시, 2026-08-30 - "인벤 내에서 위치 바꿀수있게끔"). 장비 슬롯(모자/
+## 손/신발)에서 꺼내는 드래그는 from_index가 없는 채로 여기까지 흘러올 수
+## 있는데(equipment_slot.gd의 드래그 데이터), 그 경우 그냥 무시한다 - 장착
+## 해제는 equipment_slot.gd의 NOTIFICATION_DRAG_END가 별도로 처리한다.
+func _on_slot_drop_received(_source_tag: String, target_index: int, data: Dictionary) -> void:
+	if not data.has("from_index"):
+		return
+	var from_index := int(data["from_index"])
+	InventoryManager.swap_slots(from_index, target_index)
 
 
 func _on_sort_pressed() -> void:
