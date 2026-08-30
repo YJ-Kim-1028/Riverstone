@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="13" height="13" tilewidth="16" tileheight="16" infinite="0" nextlayerid="11" nextobjectid="18">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="13" height="13" tilewidth="16" tileheight="16" infinite="0" nextlayerid="11" nextobjectid="22">
  <tileset firstgid="1" source="UI_Component.tsx"/>
  <tileset firstgid="257" source="cowshed.tsx"/>
  <tileset firstgid="513" source="generalStore.tsx"/>
@@ -133,6 +133,26 @@
   <object id="8" name="cash_register" x="24" y="89.75" width="16" height="16">
    <properties>
     <property name="shop_id" value="marr_shop"/>
+   </properties>
+  </object>
+  <object id="18" name="furniture_desc" x="128" y="160" width="32" height="16">
+   <properties>
+    <property name="id" value="door"/>
+   </properties>
+  </object>
+  <object id="19" name="furniture_desc" x="64" y="144" width="48" height="16">
+   <properties>
+    <property name="id" value="goods"/>
+   </properties>
+  </object>
+  <object id="20" name="furniture_desc" x="16" y="176" width="48" height="16">
+   <properties>
+    <property name="id" value="goods"/>
+   </properties>
+  </object>
+  <object id="21" name="furniture_desc" x="80" y="80" width="32" height="16">
+   <properties>
+    <property name="id" value="calc"/>
    </properties>
   </object>
  </objectgroup>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="13" height="13" tilewidth="16" tileheight="16" infinite="0" nextlayerid="12" nextobjectid="14">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="13" height="13" tilewidth="16" tileheight="16" infinite="0" nextlayerid="13" nextobjectid="17">
  <tileset firstgid="1" source="UI_Component.tsx"/>
  <tileset firstgid="257" source="temper.tsx"/>
  <tileset firstgid="513" source="farmStore.tsx"/>
@@ -34,7 +34,7 @@
 129,0,0,0,0,0,0,0,0,0,0,0,211,
 129,0,0,0,0,0,0,0,0,0,0,0,211,
 129,0,0,0,0,0,0,0,0,0,0,0,211,
-225,226,226,226,226,98,0,97,226,226,226,226,227
+225,226,226,226,98,0,0,0,97,226,226,226,227
 </data>
  </layer>
  <layer id="4" name="2ndFloor" width="13" height="13" locked="1">
@@ -140,18 +140,35 @@
 </data>
  </layer>
  <objectgroup id="9" name="Warp" visible="0" locked="1">
-  <object id="1" name="temple_out" x="96" y="192" width="16" height="16">
+  <object id="1" name="temple_out" x="80" y="192" width="48" height="16">
    <properties>
     <property name="target_map" value="plaza4"/>
     <property name="target_spawn" value="temple_exit"/>
    </properties>
   </object>
  </objectgroup>
- <objectgroup id="10" name="Spawn">
+ <objectgroup id="10" name="Spawn" visible="0" locked="1">
   <object id="2" name="temple_enterance" x="96" y="192" width="16" height="16"/>
   <object id="3" name="temple_sitting" x="64" y="128" width="16" height="16"/>
   <object id="4" name="temple_standing" x="104" y="128" width="16" height="16"/>
   <object id="13" name="lama_heart_player" x="136" y="136"/>
+ </objectgroup>
+ <objectgroup id="12" name="Interactable" visible="0" locked="1">
+  <object id="14" name="furniture_desc" x="96" y="128" width="32" height="16">
+   <properties>
+    <property name="id" value="statue"/>
+   </properties>
+  </object>
+  <object id="15" name="furniture_desc" x="160" y="96" width="32" height="16">
+   <properties>
+    <property name="id" value="donation_box"/>
+   </properties>
+  </object>
+  <object id="16" name="furniture_desc" x="16" y="96" width="32" height="16">
+   <properties>
+    <property name="id" value="donation_box"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup id="11" name="YSortAnchor" visible="0" locked="1">
   <object id="5" x="16" y="16" width="176" height="48"/>

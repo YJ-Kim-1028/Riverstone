@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="13" height="11" tilewidth="16" tileheight="16" infinite="0" nextlayerid="11" nextobjectid="17">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="13" height="11" tilewidth="16" tileheight="16" infinite="0" nextlayerid="11" nextobjectid="21">
  <tileset firstgid="1" source="UI_Component.tsx"/>
  <tileset firstgid="257" source="fishHouse.tsx"/>
  <tileset firstgid="513" source="restaurant.tsx"/>
@@ -45,7 +45,7 @@
 129,0,0,0,0,0,0,0,0,0,0,0,211,
 129,0,0,0,0,0,0,0,0,0,0,0,211,
 129,0,0,0,0,0,0,0,0,0,0,0,211,
-225,226,226,226,226,98,0,97,226,226,226,226,227
+225,226,226,226,98,0,0,97,226,226,226,226,227
 </data>
  </layer>
  <layer id="3" name="Furniture" width="13" height="11" locked="1">
@@ -94,7 +94,7 @@
 </data>
  </layer>
  <objectgroup id="7" name="Warp" visible="0" locked="1">
-  <object id="1" name="fish_out" x="96" y="160" width="16" height="16">
+  <object id="1" name="fish_out" x="80" y="160" width="32" height="16">
    <properties>
     <property name="target_map" value="plaza3"/>
     <property name="target_spawn" value="fish_exit"/>
@@ -109,6 +109,22 @@
   <object id="4" name="cash_register" x="40.4167" y="90.5833" width="16" height="16">
    <properties>
     <property name="shop_id" value="roshi_shop"/>
+   </properties>
+  </object>
+  <object id="17" name="furniture_desc" x="144" y="128" width="48" height="16"/>
+  <object id="18" name="furniture_desc" x="16" y="128" width="64" height="16">
+   <properties>
+    <property name="id" value="fish3"/>
+   </properties>
+  </object>
+  <object id="19" name="furniture_desc" x="112" y="80" width="32" height="16">
+   <properties>
+    <property name="id" value="box"/>
+   </properties>
+  </object>
+  <object id="20" name="furniture_desc" x="144" y="80" width="48" height="16">
+   <properties>
+    <property name="id" value="fish1"/>
    </properties>
   </object>
  </objectgroup>

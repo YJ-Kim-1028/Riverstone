@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="20" height="17" tilewidth="16" tileheight="16" infinite="0" nextlayerid="12" nextobjectid="33">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="20" height="17" tilewidth="16" tileheight="16" infinite="0" nextlayerid="12" nextobjectid="42">
  <tileset firstgid="1" source="UI_Component.tsx"/>
  <tileset firstgid="257" source="../map/pasture.tsx"/>
  <tileset firstgid="513" source="furnitureStore.tsx"/>
@@ -172,6 +172,46 @@
   <object id="6" name="cash_register" x="24.6667" y="105.333" width="16" height="16">
    <properties>
     <property name="shop_id" value="woody_shop"/>
+   </properties>
+  </object>
+  <object id="33" name="furniture_desc" x="160" y="128" width="16" height="16">
+   <properties>
+    <property name="id" value="bed"/>
+   </properties>
+  </object>
+  <object id="34" name="furniture_desc" x="192" y="80" width="16" height="16">
+   <properties>
+    <property name="id" value="picture"/>
+   </properties>
+  </object>
+  <object id="35" name="furniture_desc" x="208" y="160" width="16" height="16">
+   <properties>
+    <property name="id" value="shelf"/>
+   </properties>
+  </object>
+  <object id="36" name="furniture_desc" x="48" y="160" width="16" height="16">
+   <properties>
+    <property name="id" value="ref"/>
+   </properties>
+  </object>
+  <object id="37" name="furniture_desc" x="80" y="192" width="16" height="16">
+   <properties>
+    <property name="id" value="drawer"/>
+   </properties>
+  </object>
+  <object id="38" name="furniture_desc" x="288" y="112" width="16" height="16">
+   <properties>
+    <property name="id" value="sofa"/>
+   </properties>
+  </object>
+  <object id="39" name="furniture_desc" x="240" y="240" width="32" height="16">
+   <properties>
+    <property name="id" value="carpet"/>
+   </properties>
+  </object>
+  <object id="41" name="furniture_desc" x="112" y="176" width="16" height="16">
+   <properties>
+    <property name="id" value="chair"/>
    </properties>
   </object>
  </objectgroup>
