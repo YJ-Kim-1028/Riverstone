@@ -432,6 +432,11 @@ func get_affection_tier(npc_id: String) -> String:
 ## entry twice in a row when the pool has more than one option.
 const SAGE_NPC_ID := "sage"
 const POLI_NPC_ID := "poli"
+## 로시는 평일엔 비가 와야만 등장하는 스케줄이라(visible_only_when_raining),
+## 평일 만남이 전부 "비 오는 날"이 되어버려 rain_conversation이 매번 요일별
+## 대사 풀과 섞이며 어렵게 쓴 요일별 대사가 묻힌다는 지적(사용자 지시,
+## 2026-08-29) - 로시만 rain_conversation 혼합에서 제외한다.
+const ROSHI_NPC_ID := "roshi"
 ## 세이지 운세 보기(사용자 지시, 2026-08-25 - "세이지 메리트가 너무 없다") -
 ## 하루 일상 대사(스토리 대사 제외) 끝에 "봐줄까?" 선택지를 붙인다. 좋은/나쁜
 ## 결과는 player.apply_speed_effect()(모카 커피 버프/기절 디버프와 같은
@@ -647,7 +652,10 @@ func get_daily_dialogue(npc_id: String) -> Array:
 		var resolved := _resolve_daily_pool_entry(entry)
 		if not resolved.is_empty():
 			pool.append(resolved)
-	if WeatherManager.is_raining():
+	## 로시 제외(ROSHI_NPC_ID 참고) - 평일엔 비가 와야만 등장해서 평일 만남이
+	## 전부 "비 오는 날"이 되어버리는 바람에, 이 혼합이 매번 걸려서 요일별로
+	## 공들여 쓴 대사가 묻혔다(사용자 지시, 2026-08-29).
+	if WeatherManager.is_raining() and npc_id != ROSHI_NPC_ID:
 		pool.append_array(dialogue.get("rain_conversation", []))
 	if has_horror_mode_started():
 		## 사용자 지시(2026-08-23): "그 사람" 대신 실제 희생자 이름으로 - 가장
