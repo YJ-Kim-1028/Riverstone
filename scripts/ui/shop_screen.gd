@@ -167,15 +167,28 @@ func _unhandled_input(event: InputEvent) -> void:
 func open_shop(shop_id: String) -> void:
 	_shop_id = shop_id
 	_message_label.text = ""
-	_refresh_rows()
+	# _set_open(true)를 _refresh_rows()보다 먼저 불러야 한다 - 순서가 반대면
+	# _build_row()가 막 만든 상품 버튼 위 가격 아이콘/글자(mouse_filter=IGNORE,
+	# 클릭이 버튼까지 뚫고 내려가라고 일부러 지정한 것)가 재귀 STOP 적용에
+	# 다시 덮어써져서 클릭을 가로챈다 - kitchen_screen.gd 그리드 슬롯 아이콘이
+	# 겪었던 것과 동일한 함정(사용자 리포트, 2026-08-29 - "상점 구매 버튼이
+	# 안 눌림", 재접속 직후에도 재현되는 것으로 확인). close()는 반대로 rows를
+	# 먼저 갱신해야 하지만(맨 위 close() 주석 참고), open은 이 순서가 맞다.
 	_set_open(true)
+	_refresh_rows()
 
 
 func close() -> void:
-	_set_open(false)
+	# _refresh_rows()를 _set_open(false)보다 먼저 불러야 한다 - _build_row()가
+	# 만드는 상품 줄 버튼은 그때그때 새로 생성되는데, 순서가 반대면 이 새
+	# 버튼들이 막 지나간 재귀 mouse_filter 적용을 못 받고 TextureButton
+	# 기본값(STOP)인 채로 남아, 화면은 안 보여도 그 자리 클릭을 계속
+	# 가로챈다(사용자 리포트 - 인벤 창에서 같은 계열로 확인된 문제와 동일한
+	# 원인, equipment_panel.gd 참고).
 	_close_stall_picker()
 	_close_color_picker()
 	_refresh_rows()
+	_set_open(false)
 
 
 ## 이 화면의 루트는 전체화면이 아니라 가운데 고정 크기 박스라
@@ -183,25 +196,32 @@ func close() -> void:
 ## "스크롤도 잘 안먹어.. 상점에서도 그랬고") - 자기 값을 자기에게 재대입하는
 ## 방식은 효과가 없어서, 크기는 유지한 채 진짜로 다시 가운데 정렬시키는
 ## PRESET_CENTER + KEEP_SIZE로 교체한다.
+## mouse_filter는 정해진 노드 몇 개에만 수동으로 지정했었는데, _build_row()가
+## 매번 새로 만드는 상품 줄 버튼들은 그 목록에 없어서 기본값(STOP)인 채로
+## 남아 화면이 닫혀도 클릭을 가로챌 수 있었다(사용자 리포트, 2026-08-29 -
+## "인벤 창이 안 사라져서 요청함이 안 눌림"과 같은 계열, 코드 추적으로 이
+## 화면도 같은 구조적 원인이 있음을 확인함). 다른 17개 화면과 동일하게 자기
+## 서브트리 전체를 재귀로 처리하는 방식으로 교체한다.
 func _set_open(is_open: bool) -> void:
 	if is_open:
 		set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_KEEP_SIZE)
 	_is_open = is_open
 	modulate.a = 1.0 if is_open else 0.0
-	var filter := Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE
-	mouse_filter = filter
-	$Background.mouse_filter = filter
-	_close_button.mouse_filter = filter
-	$Background/Margin.mouse_filter = filter
-	$Background/Margin/VBox.mouse_filter = filter
-	_rows_scroll.mouse_filter = filter
-	_rows.mouse_filter = filter
+	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
 
 
 func _refresh_rows() -> void:
 	for child in _rows.get_children():
 		child.queue_free()
 	var stock: Array = ShopManager.get_stock(_shop_id)
+	## 집 확장이 최대치(더 이상 업글 불가, get_house_upgrade_cost() < 0)에
+	## 도달하면 "최대"라고 비활성화 버튼으로 남겨두는 대신, 낚싯대 같은
+	## 1회성 상품이 다 사고 나면 목록에서 사라지는 것과 동일하게 통째로
+	## 빼버린다(사용자 지시, 2026-08-30 - "최대 뜨지말고 사라지게").
+	stock = stock.filter(func(listing: Dictionary) -> bool:
+		return String(listing.get("item_id", "")) != HOUSE_UPGRADE_ITEM_ID \
+			or EconomyManager.get_house_upgrade_cost() >= 0
+	)
 	if stock.is_empty():
 		var empty_label := Label.new()
 		empty_label.text = "판매 중인 상품이 없습니다."
@@ -585,8 +605,17 @@ func _set_stall_picker_open(is_open: bool) -> void:
 	_apply_mouse_filter_recursive(_stall_picker, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
 
 
+## _color_picker/_stall_picker는 자기 열고 닫힘을 따로 관리한다
+## (_set_color_picker_open()/_set_stall_picker_open()) - 메인 창 전체를 도는
+## 재귀(_set_open()에서 self로 호출)가 그 둘까지 밟아버리면, 메인 창이 열릴 때
+## 지금 닫혀있는 두 팝업까지 STOP으로 덮어써서 안 보이는 채로 화면을 가로막게
+## 된다. 자식으로 만났을 때만 건너뛰고, 이 둘을 직접 node로 넘겨 호출하는
+## 기존 경로(_set_color_picker_open() 등)는 그대로 동작해야 하므로 진입점
+## 자체는 걸러내지 않는다.
 func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
 	if node is Control:
 		(node as Control).mouse_filter = filter
 	for child in node.get_children():
+		if child == _color_picker or child == _stall_picker:
+			continue
 		_apply_mouse_filter_recursive(child, filter)
