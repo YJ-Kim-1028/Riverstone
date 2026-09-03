@@ -279,6 +279,37 @@ func add_item(item_id: String, count: int) -> bool:
 	return true
 
 
+## add_item()과 같지만 자리가 있으면 무조건 target_index 칸에 먼저 채운다 -
+## 장비 해제처럼 "사용자가 놓은 정확히 그 칸에 들어가야" 하는 드롭 조작에서
+## 쓴다(사용자 리포트, 2026-09-01 - "원하는 칸에 드래그 했는데 항상 맨 앞칸으로
+## 들어간다"). target_index가 이미 다른 아이템으로 차 있으면 거기엔 못 넣고
+## add_item()과 동일하게 다른 빈 칸을 찾는다.
+func add_item_to_slot(item_id: String, count: int, target_index: int) -> bool:
+	if not _can_fit(item_id, count):
+		return false
+	if target_index < 0 or target_index >= _slots.size():
+		return add_item(item_id, count)
+	var stack_limit := get_stack_limit(item_id)
+	var remaining := count
+	var target_slot = _slots[target_index]
+	if target_slot == null:
+		var add_amount: int = mini(stack_limit, remaining)
+		_slots[target_index] = {"item_id": item_id, "count": add_amount}
+		remaining -= add_amount
+	elif String(target_slot.get("item_id", "")) == item_id and int(target_slot["count"]) < stack_limit:
+		var add_amount: int = mini(stack_limit - int(target_slot["count"]), remaining)
+		target_slot["count"] = int(target_slot["count"]) + add_amount
+		remaining -= add_amount
+	while remaining > 0:
+		var index := _find_empty_slot_index()
+		var add_amount: int = mini(stack_limit, remaining)
+		_slots[index] = {"item_id": item_id, "count": add_amount}
+		remaining -= add_amount
+	inventory_changed.emit()
+	item_added.emit(item_id, count)
+	return true
+
+
 ## System-level removal (bypasses the discardable check) for other systems
 ## to consume items: cooking materials, using rat poison, learning a recipe,
 ## registering a memento into the collection book, etc.
