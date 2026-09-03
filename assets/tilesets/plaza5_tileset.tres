@@ -1,9 +1,9 @@
-[gd_resource type="TileSet" format=3]
+[gd_resource type="TileSet" format=3 uid="uid://bm4581ydqxbj0"]
 
-[ext_resource type="Texture2D" path="res://assets/map/GPT.png" id="1_drynd"]
-[ext_resource type="Texture2D" path="res://assets/map/building.png" id="2_1gc8m"]
-[ext_resource type="Texture2D" path="res://assets/map/deco_col.png" id="3_jgcq1"]
-[ext_resource type="Texture2D" path="res://assets/map/tree.png" id="4_4syeq"]
+[ext_resource type="Texture2D" uid="uid://ca2n5640tbqq8" path="res://assets/map/GPT.png" id="1_drynd"]
+[ext_resource type="Texture2D" uid="uid://bunwufc67jqq7" path="res://assets/map/building.png" id="2_1gc8m"]
+[ext_resource type="Texture2D" uid="uid://bhqjql4b4vvxm" path="res://assets/map/deco_col.png" id="3_jgcq1"]
+[ext_resource type="Texture2D" uid="uid://ccljehdkngp1f" path="res://assets/map/tree.png" id="4_4syeq"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_umopd"]
 texture = ExtResource("1_drynd")

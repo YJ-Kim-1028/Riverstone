@@ -1,8 +1,8 @@
-[gd_resource type="TileSet" format=3]
+[gd_resource type="TileSet" format=3 uid="uid://dwsyqu3ebycob"]
 
-[ext_resource type="Texture2D" path="res://assets/ui/UI_Component.png" id="1_boqvr"]
-[ext_resource type="Texture2D" path="res://assets/interior/home.png" id="2_ocaxt"]
-[ext_resource type="Texture2D" path="res://assets/interior/restaurant.png" id="3_d6xg1"]
+[ext_resource type="Texture2D" uid="uid://c8c23alx1cdn6" path="res://assets/ui/UI_Component.png" id="1_boqvr"]
+[ext_resource type="Texture2D" uid="uid://b6w8rv87qbaei" path="res://assets/interior/home.png" id="2_ocaxt"]
+[ext_resource type="Texture2D" uid="uid://caffgel7h6toa" path="res://assets/interior/restaurant.png" id="3_d6xg1"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_nyld6"]
 texture = ExtResource("1_boqvr")

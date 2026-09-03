@@ -1,11 +1,11 @@
-[gd_resource type="TileSet" format=3]
+[gd_resource type="TileSet" format=3 uid="uid://bu0yhcjd8k77"]
 
-[ext_resource type="Texture2D" path="res://assets/ui/UI_Component.png" id="1_yh5fp"]
-[ext_resource type="Texture2D" path="res://assets/interior/hospital.png" id="2_8rhrb"]
-[ext_resource type="Texture2D" path="res://assets/interior/restaurant.png" id="3_pht72"]
-[ext_resource type="Texture2D" path="res://assets/interior/farmStore.png" id="4_imk53"]
-[ext_resource type="Texture2D" path="res://assets/interior/fishHouse.png" id="5_gcv3l"]
-[ext_resource type="Texture2D" path="res://assets/interior/cafe.png" id="6_ayg4f"]
+[ext_resource type="Texture2D" uid="uid://c8c23alx1cdn6" path="res://assets/ui/UI_Component.png" id="1_yh5fp"]
+[ext_resource type="Texture2D" uid="uid://ol2hm005mmof" path="res://assets/interior/hospital.png" id="2_8rhrb"]
+[ext_resource type="Texture2D" uid="uid://caffgel7h6toa" path="res://assets/interior/restaurant.png" id="3_pht72"]
+[ext_resource type="Texture2D" uid="uid://7dcnrwud54k5" path="res://assets/interior/farmStore.png" id="4_imk53"]
+[ext_resource type="Texture2D" uid="uid://divda3u7okelu" path="res://assets/interior/fishHouse.png" id="5_gcv3l"]
+[ext_resource type="Texture2D" uid="uid://bvbxk2pwuatss" path="res://assets/interior/cafe.png" id="6_ayg4f"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_s1r3t"]
 texture = ExtResource("1_yh5fp")

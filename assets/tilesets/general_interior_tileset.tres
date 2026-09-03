@@ -1,10 +1,10 @@
-[gd_resource type="TileSet" format=3]
+[gd_resource type="TileSet" format=3 uid="uid://d0sk75ul6ansi"]
 
-[ext_resource type="Texture2D" path="res://assets/ui/UI_Component.png" id="1_r108p"]
-[ext_resource type="Texture2D" path="res://assets/interior/cowshed.png" id="2_tuvby"]
-[ext_resource type="Texture2D" path="res://assets/interior/generalStore.png" id="3_b4nch"]
-[ext_resource type="Texture2D" path="res://assets/interior/farmStore.png" id="4_6f5d8"]
-[ext_resource type="Texture2D" path="res://assets/interior/cafe.png" id="5_o5hx5"]
+[ext_resource type="Texture2D" uid="uid://c8c23alx1cdn6" path="res://assets/ui/UI_Component.png" id="1_r108p"]
+[ext_resource type="Texture2D" uid="uid://dk5jkq6magbv8" path="res://assets/interior/cowshed.png" id="2_tuvby"]
+[ext_resource type="Texture2D" uid="uid://gsx4dd24835f" path="res://assets/interior/generalStore.png" id="3_b4nch"]
+[ext_resource type="Texture2D" uid="uid://7dcnrwud54k5" path="res://assets/interior/farmStore.png" id="4_6f5d8"]
+[ext_resource type="Texture2D" uid="uid://bvbxk2pwuatss" path="res://assets/interior/cafe.png" id="5_o5hx5"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_gyw1r"]
 texture = ExtResource("1_r108p")
