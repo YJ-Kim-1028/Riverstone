@@ -48,9 +48,9 @@ const MEMENTO_REMINDER_DELAY_DAYS := 3
 const AFFECTION_TIER_MID := 50
 const AFFECTION_TIER_HIGH := 100
 
-const AFFECTION_GAIN_TALK := 1
-const AFFECTION_GAIN_GIFT := 3
-const AFFECTION_GAIN_MEAL := 1
+const AFFECTION_GAIN_TALK := 2
+const AFFECTION_GAIN_GIFT := 5
+const AFFECTION_GAIN_MEAL := 3
 const AFFECTION_GAIN_FAVORITE_MEAL := 5
 const AFFECTION_LOSS_DISLIKED_MEAL := -5
 const AFFECTION_GAIN_EMAIL := 3
@@ -450,8 +450,7 @@ const FORTUNE_DEBUFF_PERCENT := -0.20
 ## 같다 - 기절 디버프(COLLAPSE_DEBUFF_MINUTES, main.gd)와 같은 환산.
 const FORTUNE_DURATION_MINUTES := 180
 ## 오늘 이미 운세를 물어봤는지(수락/거절 상관없이) - TimeManager.current_day와
-## 비교하는 방식이라 day_changed 신호를 따로 구독할 필요가 없다(email_manager.gd의
-## _last_greeting_day와 같은 패턴).
+## 비교하는 방식이라 day_changed 신호를 따로 구독할 필요가 없다.
 var _fortune_offered_day := -1
 ## 공범 엔딩(사용자 지시, 2026-08-24) - 어셔가 플레이어와 동거를 시작하면 매일
 ## 밤 자기 서점 대신 집으로 온다. 집 레벨(EconomyManager.house_level)에 따라
@@ -1231,6 +1230,24 @@ func _check_affection_events(npc_id: String, affection: int) -> void:
 			var required_npc_id := String(requires.get("npc_id", ""))
 			var required_threshold := int(requires.get("threshold", -1))
 			if not has_shown_event(required_npc_id, required_threshold):
+				continue
+		## requires와 반대로, 다른 NPC 쪽 이벤트가 "이미 나왔으면" 이 이벤트는
+		## 영원히 건너뛴다(재시도 큐에 안 넣음) - 황금 낚싯대처럼 로시/마린 중
+		## 한쪽만 줄 수 있는 상호 배타 이벤트용(사용자 지시, 2026-09 - "한번
+		## 황금 낚시대 얻으면 남은 로시or마린은 낚시대 이벤트 안나오는거로").
+		## has_shown_event()(대사로 실제 소비된 시점)가 아니라 has_completed_event()
+		## (임계값을 넘어 확정된 시점)로 판정해야 한다 - 두 NPC 호감도가 거의
+		## 동시에(예: 디버그로 전원 호감도 일괄 상승) 50을 넘으면, 아직 둘 다
+		## 대사로 소비되기 전이라 has_shown_event 기준으로는 서로를 못 막아서
+		## 로시/마린 둘 다 황금 낚싯대를 주는 버그가 있었다(사용자 리포트,
+		## 2026-09-04 - "황금 낚시대 마린한테 이미 받았는데 로시가 또 주는데?").
+		var requires_not_shown: Dictionary = event.get("requires_not_shown", {})
+		if not requires_not_shown.is_empty():
+			var excluded_npc_id := String(requires_not_shown.get("npc_id", ""))
+			var excluded_threshold := int(requires_not_shown.get("threshold", -1))
+			if has_completed_event(excluded_npc_id, excluded_threshold):
+				completed.append(threshold)
+				_completed_events[npc_id] = completed
 				continue
 		completed.append(threshold)
 		_completed_events[npc_id] = completed
