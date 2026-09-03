@@ -54,5 +54,21 @@
         "icon": "res://assets/icon/Records.png",
         "icon_index": 0,
         "item_id": "record_acoustic_pop"
+    },
+    "song_be_with_you": {
+        "id": "song_be_with_you",
+        "name": "Be with you",
+        "bgm_path": "res://assets/audio/bgm/bgm_be_with_you.mp3",
+        "icon": "res://assets/icon/Records.png",
+        "icon_index": 6,
+        "item_id": "record_be_with_you"
+    },
+    "song_the_day_after_you_came": {
+        "id": "song_the_day_after_you_came",
+        "name": "The day after you came",
+        "bgm_path": "res://assets/audio/bgm/bgm_the_day_after_you_came.mp3",
+        "icon": "res://assets/icon/Records.png",
+        "icon_index": 7,
+        "item_id": "record_the_day_after_you_came"
     }
 }

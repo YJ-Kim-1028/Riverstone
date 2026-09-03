@@ -131,5 +131,35 @@
             {"item_id": "americano", "price": 1000}
         ],
         "planned_stock": []
+    },
+    "kira_clothing_shop": {
+        "name": "♥ 키라의 의상샵",
+        "map_id": "",
+        "owner_npc_ids": [],
+        "stock": [
+            {"item_id": "outfit_look1", "price": 2500, "purchase_limit": 1},
+            {"item_id": "outfit_look2", "price": 2500, "purchase_limit": 1},
+            {"item_id": "outfit_look3", "price": 2500, "purchase_limit": 1},
+            {"item_id": "outfit_look4", "price": 2500, "purchase_limit": 1},
+            {"item_id": "outfit_look5", "price": 2500, "purchase_limit": 1},
+            {"item_id": "outfit_look6", "price": 2500, "purchase_limit": 1},
+            {"item_id": "outfit_look7", "price": 2500, "purchase_limit": 1},
+            {"item_id": "outfit_look8", "price": 2500, "purchase_limit": 1},
+            {"item_id": "outfit_look9", "price": 2500, "purchase_limit": 1},
+            {"item_id": "outfit_look10", "price": 2500, "purchase_limit": 1}
+        ],
+        "planned_stock": []
+    },
+    "para_hair_shop": {
+        "name": "♥ 파라의 헤어샵",
+        "map_id": "",
+        "owner_npc_ids": [],
+        "stock": [
+            {"item_id": "hair_special_hair1", "price": 2500, "purchase_limit": 1},
+            {"item_id": "hair_special_hair2", "price": 2500, "purchase_limit": 1},
+            {"item_id": "hair_special_hair3", "price": 2500, "purchase_limit": 1},
+            {"item_id": "hair_special_hair4", "price": 2500, "purchase_limit": 1}
+        ],
+        "planned_stock": []
     }
 }

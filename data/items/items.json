@@ -110,6 +110,15 @@
         "icon": "res://assets/icon/Food.png",
         "icon_index": 8
     },
+    "legendary_fish": {
+        "id": "legendary_fish",
+        "name": "전설의 물고기",
+        "category": "material",
+        "subtype": "fish",
+        "description": "황금 낚싯대로만 만날 수 있다는 전설 속 물고기. 실제로 본 사람은 거의 없다.",
+        "icon": "res://assets/icon/Food.png",
+        "icon_index": 8
+    },
     "berry": {
         "id": "berry",
         "name": "베리",
@@ -149,6 +158,17 @@
         "icon": "res://assets/icon/Tools.png",
         "icon_index": 3
     },
+    "golden_fishing_rod": {
+        "id": "golden_fishing_rod",
+        "name": "황금 낚싯대",
+        "category": "tool",
+        "slot": "hand",
+        "subtype": "",
+        "description": "빛나는 황금빛 낚싯대. 이걸 낚시가게 앞 바다에서 사용한다면...?",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 14,
+        "icon_row": 0
+    },
     "furniture_hammer": {
         "id": "furniture_hammer",
         "name": "가구용 망치",
@@ -169,6 +189,17 @@
         "description": "작물에 물을 줄 때 사용하는 도구.",
         "icon": "res://assets/icon/Tools.png",
         "icon_index": 0
+    },
+    "golden_watering_can": {
+        "id": "golden_watering_can",
+        "name": "황금 물뿌리개",
+        "category": "tool",
+        "slot": "hand",
+        "subtype": "",
+        "description": "은은하게 빛나는 황금빛 물뿌리개. 한 번에 주변 3x3 범위까지 물을 줄 수 있다.",
+        "icon": "res://assets/icon/Tools.png",
+        "icon_index": 15,
+        "icon_row": 0
     },
     "hoe": {
         "id": "hoe",
@@ -862,6 +893,18 @@
         "gift_affection": 10,
         "scent_color": "white"
     },
+    "perfume_somewhere_behind_you": {
+        "id": "perfume_somewhere_behind_you",
+        "name": "Somewhere behind you",
+        "category": "gift",
+        "slot": "hand",
+        "subtype": "perfume",
+        "description": "은은하게 남는 향수. 스쳐 지나간 자리에도 한동안 향이 남는다.",
+        "icon": "res://assets/icon/Gift.png",
+        "icon_index": 6,
+        "gift_affection": 10,
+        "scent_color": "gold"
+    },
     "animal_feed": {
         "id": "animal_feed",
         "name": "여물",
@@ -1062,6 +1105,24 @@
         "description": "주크박스에서 재생할 수 있는 음반이다.",
         "icon": "res://assets/icon/Records.png",
         "icon_index": 0
+    },
+    "record_be_with_you": {
+        "id": "record_be_with_you",
+        "name": "Be with you",
+        "category": "record",
+        "subtype": "",
+        "description": "주크박스에서 재생할 수 있는 음반이다.",
+        "icon": "res://assets/icon/Records.png",
+        "icon_index": 6
+    },
+    "record_the_day_after_you_came": {
+        "id": "record_the_day_after_you_came",
+        "name": "The day after you came",
+        "category": "record",
+        "subtype": "",
+        "description": "주크박스에서 재생할 수 있는 음반이다.",
+        "icon": "res://assets/icon/Records.png",
+        "icon_index": 7
     },
     "storage_box": {
         "id": "storage_box",
