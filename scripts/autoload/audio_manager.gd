@@ -45,6 +45,12 @@ const BGM_FADE_SECONDS := 1.0
 ## 약 30%). 슬라이더 상한(150%, set_bgm_volume 참고)은 그대로 유지 - 더
 ## 키우고 싶으면 슬라이더로 조절 가능.
 const BGM_TARGET_VOLUME_DB := -10.44
+## 곡마다 원본 mp3 자체 음량 편차가 있어서, 전체 기준(BGM_TARGET_VOLUME_DB)
+## 위에 트랙별로만 조금씩 보정한다(사용자 지시, 2026-09-04 - "be with you
+## 소리 좀만 키웠으면 좋겠어"). 필요한 트랙만 여기에 추가하면 된다.
+const BGM_VOLUME_OFFSETS_DB := {
+	"res://assets/audio/bgm/bgm_be_with_you.mp3": 3.0,
+}
 const NIGHT_BGM_START_HOUR := 17
 ## main.gd의 RESTAURANT_SIGN_MAP_ID와 같은 값이어야 한다.
 const RESTAURANT_MAP_ID := "restaurant_interior"
@@ -132,6 +138,10 @@ const SFX_COLLECTION_OPEN := "res://assets/audio/sfx/sfx_collection_open.mp3"
 const SFX_COLLECTION_VOLUME_DB := 1.6
 const SFX_DRINKING := "res://assets/audio/sfx/sfx_drinking.mp3"
 const SFX_FISHING_APPEAR := "res://assets/audio/sfx/sfx_fishing.mp3"
+## 낚시 실패(시간 초과/클릭 부족)에 사운드가 아예 없다는 피드백으로 추가
+## (사용자 지시, 2026-09-01) - 사냥 실패(SFX_HUNT_CATCH_FAIL)와 같은
+## sfx_fail.mp3를 공유해서 쓴다(사용자가 이 파일을 낚시용으로 지정).
+const SFX_FISHING_FAIL := "res://assets/audio/sfx/sfx_fail.mp3"
 const SFX_UI_SLOT_IN := "res://assets/audio/sfx/sfx_ui_slot_in.mp3"
 const SFX_UI_TAB := "res://assets/audio/sfx/sfx_ui_tab.mp3"
 ## 실내/실외 경계를 넘을 때(main.gd._load_map()가 이전 맵과 새 맵의
@@ -441,6 +451,7 @@ func play_bgm(path: String) -> void:
 	var stream: AudioStream = load(path)
 	if stream is AudioStreamMP3 or stream is AudioStreamOggVorbis:
 		stream.loop = true
+	var target_db := BGM_TARGET_VOLUME_DB + float(BGM_VOLUME_OFFSETS_DB.get(path, 0.0))
 	var tween := create_tween()
 	if _bgm_player.playing:
 		tween.tween_property(_bgm_player, "volume_db", -40.0, BGM_FADE_SECONDS)
@@ -449,7 +460,7 @@ func play_bgm(path: String) -> void:
 		_bgm_player.volume_db = -40.0
 		_bgm_player.play()
 	)
-	tween.tween_property(_bgm_player, "volume_db", BGM_TARGET_VOLUME_DB, BGM_FADE_SECONDS)
+	tween.tween_property(_bgm_player, "volume_db", target_db, BGM_FADE_SECONDS)
 
 
 func _update_rain_sfx() -> void:
