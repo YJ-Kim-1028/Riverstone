@@ -16,28 +16,85 @@ const HAIR_LIGHT_DELTA := 62.0 / 255.0
 const HAIR_DARK_DELTA := 68.0 / 255.0
 
 @onready var _preview: Control = $Panel/Margin/VBox/HBox/RightColumn/Preview
+## 눈동자/머리색만 고를 수 있다(사용자 지시, 2026-09-03 - "눈동자랑 머리색만
+## 남겨두고... 나머지 안쓰는색들 지워주는게 나을 거 같아") - 피부/뺨/악세서리
+## 색은 HD 모드에서 안 보여서 뺐다(character_creation_screen.gd와 같은 정리).
 @onready var _palette_tabs: Dictionary = {
-	"skin": $Panel/Margin/VBox/HBox/LeftColumn/TabRow/SkinCol/SkinTab,
 	"eye": $Panel/Margin/VBox/HBox/LeftColumn/TabRow/EyeCol/EyeTab,
 	"hair": $Panel/Margin/VBox/HBox/LeftColumn/TabRow/HairCol/HairTab,
-	"cheek": $Panel/Margin/VBox/HBox/LeftColumn/TabRow/CheekCol/CheekTab,
-	"outfit_1": $Panel/Margin/VBox/HBox/LeftColumn/TabRow/Outfit1Col/Outfit1Tab,
-	"outfit_2": $Panel/Margin/VBox/HBox/LeftColumn/TabRow/Outfit2Col/Outfit2Tab,
-	"outfit_3": $Panel/Margin/VBox/HBox/LeftColumn/TabRow/Outfit3Col/Outfit3Tab,
-	"accessory": $Panel/Margin/VBox/HBox/LeftColumn/TabRow/AccessoryCol/AccessoryTab,
 }
 @onready var _color_picker: ColorPicker = $Panel/Margin/VBox/HBox/LeftColumn/ColorPicker
-@onready var _hair_label: Label = $Panel/Margin/VBox/HBox/LeftColumn/HairRow/HairLabel
-@onready var _outfit_label: Label = $Panel/Margin/VBox/HBox/LeftColumn/OutfitRow/OutfitLabel
-@onready var _accessory_label: Label = $Panel/Margin/VBox/HBox/LeftColumn/AccessoryRow/AccessoryLabel
+@onready var _hairstyle_label: Label = $Panel/Margin/VBox/HBox/LeftColumn/HairstyleRow/HairstyleLabel
+@onready var _hd_outfit_label: Label = $Panel/Margin/VBox/HBox/LeftColumn/HdOutfitRow/HdOutfitLabel
+@onready var _eye_label: Label = $Panel/Margin/VBox/HBox/LeftColumn/EyeRow/EyeLabel
 @onready var _close_button: TextureButton = $Panel/CloseButton
 
 var _is_open := false
-var _active_palette_target := "skin"
+var _active_palette_target := "hair"
 
+## 구형 마커 리컬러 헤어 시스템 - 이 화면에서 더 이상 고를 수 없다(사용자 지시,
+## 2026-09-02 - "옛날 헤어 고르는 거 없애줘", HD 헤어스타일로 대체됨). GameManager.hair_id를
+## 그대로 읽어만 두는 캐시로만 남겨서, HD 스프라이트가 없는 방어적 상황(_refresh_pickers()
+## 의 else 분기)에서 폴백 미리보기가 여전히 뭔가는 그리게 한다.
 var _hair_index := 0
+## 구형 마커 리컬러 옷 시스템도 마찬가지로 이 화면에서 더 이상 고를 수 없다
+## (사용자 지시, 2026-09-03 - "기존 옷 구성은 날리고 새로 만드는거로 해줘",
+## HD 아웃핏 오버레이로 대체됨) - _hair_index와 같은 이유로 GameManager.outfit_id를
+## 읽어만 두는 캐시로 남겨서 폴백 미리보기가 계속 뭔가는 그리게 한다.
 var _outfit_index := 0
+## 악세서리 탭/순환도 이 화면에서 더 이상 고를 수 없다(사용자 지시, 2026-09-03 -
+## "악세사리 스타일 고르는거랑 나머지 안쓰는색들 지워주는게 나을 거 같아") -
+## 위 두 필드와 같은 이유로 폴백 미리보기용 캐시로만 남는다.
 var _accessory_index := 0
+
+## player.gd HD_HAIRSTYLES와 완전히 별개인 고해상도 프로토타입 헤어스타일 선택
+## (사용자 지시, 2026-09-02 - "거울에서 고를수있게 적용해주면 안 돼?"). 목록
+## 자체는 PlayerController.HD_HAIRSTYLES를 그대로 참조해서 두 곳에 중복 관리
+## 안 하고, 여긴 화면에 보여줄 한글 이름표만 둔다.
+const HAIRSTYLE_LABELS := {
+	"danbal": "단발",
+	"bun": "묶은머리",
+	"curl_short_hair": "곱슬 단발",
+	"one-side_tied": "한쪽 묶음",
+	"shortcut": "숏컷",
+	"straight_long_hair": "긴 생머리",
+	"twin_tail": "트윈테일",
+	"special_hair1": "스페셜 헤어 1",
+	"special_hair2": "스페셜 헤어 2",
+	"special_hair3": "스페셜 헤어 3",
+	"special_hair4": "스페셜 헤어 4",
+}
+var _hairstyle_index := 0
+
+## HD 아웃핏 오버레이 선택(player.gd HD_OUTFITS 참고) - 헤어스타일과 달리
+## "없음"(빈 문자열, 옷 안 입은 상태)이 목록 맨 앞에 항상 들어간다. 라벨도
+## 여기 한글 이름표로만 관리(중복 관리 방지는 헤어스타일과 동일한 방식).
+const OUTFIT_LABELS := {
+	"plain": "기본 세트 1",
+	"plain2": "기본 세트 2",
+	"look1": "룩 1",
+	"look2": "룩 2",
+	"look3": "룩 3",
+	"look4": "룩 4",
+	"look5": "룩 5",
+	"look6": "룩 6",
+	"look7": "룩 7",
+	"look8": "룩 8",
+	"look9": "룩 9",
+	"look10": "룩 10",
+}
+var _hd_outfit_index := 0
+
+## HD 눈 오버레이 선택(player.gd HD_EYE_STYLES 참고) - 옷과 달리 "없음"이
+## 목록에 없는 게 기본(항상 뭔가 하나는 낀 상태)이지만, 화살표로 계속 돌리면
+## "없음"도 고를 수 있게 목록 맨 끝에 붙여둔다.
+const EYE_LABELS := {
+	"anime_eyes": "애니메 눈",
+	"droopy_eyes": "처진 눈",
+	"fox_eyes": "여우 눈",
+	"lash_eyes": "속눈썹 눈",
+}
+var _hd_eye_index := 0
 
 var _skin_color := Color.WHITE
 var _eye_color := Color.WHITE
@@ -66,9 +123,9 @@ func _ready() -> void:
 	_color_picker.presets_visible = false
 	_color_picker.color_changed.connect(_on_color_picker_color_changed)
 	_close_button.pressed.connect(close)
-	_connect_arrows("Panel/Margin/VBox/HBox/LeftColumn/HairRow", "hair")
-	_connect_arrows("Panel/Margin/VBox/HBox/LeftColumn/OutfitRow", "outfit")
-	_connect_arrows("Panel/Margin/VBox/HBox/LeftColumn/AccessoryRow", "accessory")
+	_connect_hairstyle_arrows()
+	_connect_hd_outfit_arrows()
+	_connect_hd_eye_arrows()
 	for target in _palette_tabs.keys():
 		(_palette_tabs[target] as Button).pressed.connect(_on_palette_tab_pressed.bind(target))
 
@@ -81,6 +138,15 @@ func _unhandled_input(event: InputEvent) -> void:
 ## 캐릭터 생성 화면과 달리 디폴트로 리셋하지 않는다 - GameManager에 이미 저장된
 ## "지금 입고 있는" 외형을 그대로 불러와 편집을 시작한다.
 func open() -> void:
+	_hairstyle_index = _hd_hairstyle_choices().find(GameManager.hd_hairstyle_id)
+	if _hairstyle_index < 0:
+		_hairstyle_index = 0
+	_hd_outfit_index = _hd_outfit_choices().find(GameManager.hd_outfit_id)
+	if _hd_outfit_index < 0:
+		_hd_outfit_index = 0
+	_hd_eye_index = _hd_eye_choices().find(GameManager.hd_eye_style_id)
+	if _hd_eye_index < 0:
+		_hd_eye_index = 0
 	_hair_index = int(GameManager.hair_id)
 	_outfit_index = int(GameManager.outfit_id)
 	_accessory_index = int(GameManager.accessory_id)
@@ -99,7 +165,12 @@ func open() -> void:
 	_set_open(true)
 
 
+## 옷장은 고르는 즉시 GameManager에 반영되지만(주석 상단 참고), 취침/맵 이동
+## 때만 자동 저장되던 기존 규칙 그대로면 그 사이에 게임이 꺼질 경우 방금 고른
+## 외형이 날아간다 - 옷장을 닫는 시점에도 저장한다(사용자 지시, 2026-09-04 -
+## "옷장 닫을 때 플레이어 캐릭터 저장하는 거 있어야 할 거 같아").
 func close() -> void:
+	SaveManager.save_game(SaveManager.current_slot)
 	_set_open(false)
 
 
@@ -107,15 +178,6 @@ func _on_palette_tab_pressed(target: String) -> void:
 	_active_palette_target = target
 	_color_picker.color = _get_target_color(target)
 	_refresh_pickers()
-
-
-## 대머리/악세서리 "없음"이면 리컬러할 그림이 없어 팔레트를 숨긴다 - 탭이
-## disabled라 눌러서 들어올 순 없지만, 이미 보던 중 화살표로 0이 되는 경우도
-## 커버한다(사용자 지시, 2026-08-30).
-func _update_color_picker_visibility() -> void:
-	var hidden := (_active_palette_target == "hair" and _hair_index == 0) \
-		or (_active_palette_target == "accessory" and _accessory_index == 0)
-	_color_picker.visible = not hidden
 
 
 ## ColorPicker에서 색을 고를 때마다(드래그 중엔 여러 번) 바로 반영 - 캐릭터
@@ -129,61 +191,117 @@ func _on_color_picker_color_changed(color: Color) -> void:
 	GameManager.appearance_changed.emit()
 
 
-## 헤어/옷/악세서리 순환 화살표 공용 처리 - kind가 로컬 변수/GameManager 필드
-## 이름에 그대로 꽂히는 명명 규칙(get/set 동적 접근)으로 함수 3개를 합쳤다.
-func _cycle_style(kind: String, direction: int) -> void:
-	var row_count: int = get("_%s_row_count" % kind)
-	var index: int = wrapi(int(get("_%s_index" % kind)) + direction, 0, row_count)
-	set("_%s_index" % kind, index)
-	GameManager.set("%s_id" % kind, str(index))
+## HD 헤어스타일 전용 화살표 - GameManager 필드가
+## 숫자 인덱스가 아니라 스타일 이름 문자열이라 별도 함수로 뺐다.
+func _connect_hairstyle_arrows() -> void:
+	var row := get_node("Panel/Margin/VBox/HBox/LeftColumn/HairstyleRow") as HBoxContainer
+	(row.get_node("PrevButton") as TextureButton).pressed.connect(_cycle_hairstyle.bind(-1))
+	(row.get_node("NextButton") as TextureButton).pressed.connect(_cycle_hairstyle.bind(1))
+
+
+func _cycle_hairstyle(direction: int) -> void:
+	var choices := _hd_hairstyle_choices()
+	_hairstyle_index = wrapi(_hairstyle_index + direction, 0, choices.size())
+	GameManager.hd_hairstyle_id = choices[_hairstyle_index]
 	_refresh_pickers()
 	GameManager.appearance_changed.emit()
 
 
-## "outfit_1"/"outfit_2"/"outfit_3" 탭 이름의 접미사 숫자를 배열 인덱스로.
-func _outfit_slot(target: String) -> int:
-	return int(target.substr(7)) - 1
+## PlayerController.HD_HAIRSTYLES 전체가 아니라 실제로 소유한(기본 7종 +
+## 파라의 헤어샵에서 구매한 special_hair) 스타일로만 좁힌다(사용자 지시,
+## 2026-09-04) - _hd_outfit_choices()와 동일한 패턴, ShopManager.
+## is_hd_hairstyle_unlocked() 참고.
+func _hd_hairstyle_choices() -> Array[String]:
+	var choices: Array[String] = []
+	for style in PlayerController.HD_HAIRSTYLES:
+		if ShopManager.is_hd_hairstyle_unlocked(style):
+			choices.append(style)
+	return choices
 
 
-## outfit_* 이외는 로컬 변수 이름이 전부 "_<target>_color"라 get()으로 읽는다.
+## ""(없음)을 맨 앞에 붙인 목록 - player.gd resolve_hd_outfit_sprite_path()가
+## ""을 "옷 없음"으로 취급하는 것과 짝을 맞춘다. PlayerController.HD_OUTFITS
+## 전체가 아니라 실제로 소유한(기본 두 벌 + 온라인 상점에서 구매한) 스타일로만
+## 좁힌다(사용자 지시, 2026-09-03 - "온라인 상점에서 구매해야 해금") -
+## ShopManager.is_hd_outfit_unlocked() 참고.
+## 헤어/눈과 같은 방식으로 "없음"이 없다(사용자 지시, 2026-09-03 - "옷
+## 없음도 못고르게 지워줘") - 소유한 스타일 중에서만 순환한다.
+func _hd_outfit_choices() -> Array[String]:
+	var choices: Array[String] = []
+	for style in PlayerController.HD_OUTFITS:
+		if ShopManager.is_hd_outfit_unlocked(style):
+			choices.append(style)
+	return choices
+
+
+func _connect_hd_outfit_arrows() -> void:
+	var row := get_node("Panel/Margin/VBox/HBox/LeftColumn/HdOutfitRow") as HBoxContainer
+	(row.get_node("PrevButton") as TextureButton).pressed.connect(_cycle_hd_outfit.bind(-1))
+	(row.get_node("NextButton") as TextureButton).pressed.connect(_cycle_hd_outfit.bind(1))
+
+
+func _cycle_hd_outfit(direction: int) -> void:
+	var choices := _hd_outfit_choices()
+	_hd_outfit_index = wrapi(_hd_outfit_index + direction, 0, choices.size())
+	GameManager.hd_outfit_id = choices[_hd_outfit_index]
+	_refresh_pickers()
+	GameManager.appearance_changed.emit()
+
+
+## 헤어와 같은 방식으로 "없음"이 없다(사용자 지시, 2026-09-03 - "눈 없음은
+## 뭐야..? 이런게 있으면 안되지") - 항상 HD_EYE_STYLES 중 하나로만 순환한다.
+func _hd_eye_choices() -> Array[String]:
+	return PlayerController.HD_EYE_STYLES.duplicate()
+
+
+func _connect_hd_eye_arrows() -> void:
+	var row := get_node("Panel/Margin/VBox/HBox/LeftColumn/EyeRow") as HBoxContainer
+	(row.get_node("PrevButton") as TextureButton).pressed.connect(_cycle_hd_eye.bind(-1))
+	(row.get_node("NextButton") as TextureButton).pressed.connect(_cycle_hd_eye.bind(1))
+
+
+func _cycle_hd_eye(direction: int) -> void:
+	var choices := _hd_eye_choices()
+	_hd_eye_index = wrapi(_hd_eye_index + direction, 0, choices.size())
+	GameManager.hd_eye_style_id = choices[_hd_eye_index]
+	_refresh_pickers()
+	GameManager.appearance_changed.emit()
+
+
+## 로컬 변수 이름이 전부 "_<target>_color"라 get()으로 읽는다(옷은 더 이상
+## 탭이 없어 여기 안 옴 - _outfit_colors는 폴백 미리보기 색상 캐시로만 남음).
 func _get_target_color(target: String) -> Color:
-	if target.begins_with("outfit_"):
-		return _outfit_colors[_outfit_slot(target)]
 	return get("_%s_color" % target)
 
 
 func _set_target_color(color: Color) -> void:
-	if _active_palette_target.begins_with("outfit_"):
-		_outfit_colors[_outfit_slot(_active_palette_target)] = color
-		return
 	set("_%s_color" % _active_palette_target, color)
 
 
-## 머리/옷은 GameManager 필드 구조가 달라서(머리=자동 밝기 3색, 옷=슬롯별
-## 독립 3색) 예외 처리하고, 나머지는 필드 이름이 그대로 대응해 set()으로 쓴다.
+## 필드 이름이 그대로 대응해 set()으로 쓴다 - 단, 머리는 GameManager에
+## "hair_color"라는 필드가 없다(hair_color_1/2/3 3단계뿐, character_creation_screen.gd
+## _on_confirm_pressed()와 같은 스키마). 그대로 "%s_color" % "hair"로 쓰면
+## 존재하지 않는 필드라 Object.set()이 조용히 아무 일도 안 해서, 옷장 미리보기는
+## 로컬 _hair_color로 바로 반영되지만 실제 게임 캐릭터(player.gd가 읽는
+## GameManager.hair_color_2)는 절대 안 바뀌는 버그가 있었다(사용자 리포트,
+## 2026-09-04 - "거울에선 바뀌는데 실제로 걸을 때 안바뀜"). HD 리컬러
+## (recolor_grayscale_to_hue)는 밝기 보존이라 hair_color_1/3(옛 3단계 마커
+## 시스템용)은 안 쓰지만, SaveData 구조/구형 폴백 프리뷰 호환을 위해 그대로
+## 같이 채워둔다.
 func _write_target_to_game_manager(target: String) -> void:
-	if target.begins_with("outfit_"):
-		var slot := _outfit_slot(target)
-		GameManager.set("outfit_color_%d" % (slot + 1), _outfit_colors[slot].to_html(false))
-		return
+	var color: Color = get("_%s_color" % target)
 	if target == "hair":
-		GameManager.hair_color_1 = CharacterAppearance.offset_brightness(_hair_color, HAIR_LIGHT_DELTA).to_html(false)
-		GameManager.hair_color_2 = _hair_color.to_html(false)
-		GameManager.hair_color_3 = CharacterAppearance.offset_brightness(_hair_color, -HAIR_DARK_DELTA).to_html(false)
+		GameManager.hair_color_1 = CharacterAppearance.offset_brightness(color, HAIR_LIGHT_DELTA).to_html(false)
+		GameManager.hair_color_2 = color.to_html(false)
+		GameManager.hair_color_3 = CharacterAppearance.offset_brightness(color, -HAIR_DARK_DELTA).to_html(false)
 		return
-	GameManager.set("%s_color" % target, (get("_%s_color" % target) as Color).to_html(false))
+	GameManager.set("%s_color" % target, color.to_html(false))
 
 
 func _update_palette_tab_styles() -> void:
 	for target in _palette_tabs.keys():
 		var button := _palette_tabs[target] as Button
 		_set_swatch_style(button, _get_target_color(target), target == _active_palette_target)
-		if target == "hair":
-			button.disabled = _hair_index == 0
-		elif target == "accessory":
-			button.disabled = _accessory_index == 0
-		else:
-			button.disabled = false
 
 
 ## disabled 안 덮어쓰면 Godot 기본(둥근) 테마가 새어 나와 안 어울렸다.
@@ -208,17 +326,46 @@ func _set_swatch_style(button: Button, color: Color, is_active: bool) -> void:
 
 
 func _refresh_pickers() -> void:
-	_hair_label.text = "대머리" if _hair_index == 0 else "헤어 %d" % _hair_index
+	var hairstyle_id: String = _hd_hairstyle_choices()[_hairstyle_index]
+	_hairstyle_label.text = HAIRSTYLE_LABELS.get(hairstyle_id, hairstyle_id)
+	var hd_outfit_id: String = _hd_outfit_choices()[_hd_outfit_index]
+	_hd_outfit_label.text = NONE_LABEL if hd_outfit_id == "" else OUTFIT_LABELS.get(hd_outfit_id, hd_outfit_id)
+	var hd_eye_id: String = _hd_eye_choices()[_hd_eye_index]
+	_eye_label.text = EYE_LABELS.get(hd_eye_id, hd_eye_id)
 	_update_palette_tab_styles()
-	_update_color_picker_visibility()
-	_outfit_label.text = "옷 %d" % (_outfit_index + 1)
-	_accessory_label.text = NONE_LABEL if _accessory_index == 0 else "악세서리 %d" % _accessory_index
-	_preview.set_layers(
-		_current_body_texture(),
-		_current_outfit_texture(),
-		_current_hair_texture(),
-		_current_accessory_texture()
-	)
+	## 실제 인게임 플레이어가 HD 프로토타입으로 보이는 중이면(player.gd와
+	## 같은 판정 기준) 미리보기도 HD로 - 장신구는 아직 HD에 레이어가 없어서
+	## 이 모드일 땐 안 보여준다(사용자 지시, 2026-09-02 - 옷장에도 HD 반영).
+	## 옷/눈은 player.gd와 같은 별도 오버레이로 같이 그린다(사용자 지시,
+	## 2026-09-03 - "그냥 게임에 바로 적용해줘봐", "눈도... 고를수잇게 해줘").
+	if ResourceLoader.exists(PlayerController.hd_sprite_path(PlayerController.HD_SPRITE_DEFAULT_STYLE)):
+		var hairstyle_sprite_path := PlayerController.resolve_hd_sprite_path(hairstyle_id)
+		## 파라의 헤어샵 special_hair는 원본 색 그대로(사용자 지시, 2026-09-04) -
+		## player.gd build_hd_composite_texture()와 같은 기준.
+		if hairstyle_id in PlayerController.HD_HAIRSTYLES_FIXED_COLOR:
+			_preview.set_hd_texture(load(hairstyle_sprite_path))
+		else:
+			_preview.set_hd_texture(_recolored_hd_texture(hairstyle_sprite_path, _hair_color))
+		var outfit_path := PlayerController.resolve_hd_outfit_sprite_path(hd_outfit_id)
+		_preview.set_hd_outfit_texture(load(outfit_path) if outfit_path != "" else null)
+		var eye_path := PlayerController.resolve_hd_eye_sprite_path(hd_eye_id)
+		_preview.set_hd_eye_texture(_recolored_hd_texture(eye_path, _eye_color) if eye_path != "" else null)
+	else:
+		_preview.set_layers(
+			_current_body_texture(),
+			_current_outfit_texture(),
+			_current_hair_texture(),
+			_current_accessory_texture()
+		)
+
+
+## player.gd._build_hd_composite_texture()와 같은 회색조 hue 치환 리컬러를
+## 미리보기에도 적용한다(사용자 지시, 2026-09-03 - "고른 색이 머리랑 눈에
+## 적용이 안 돼").
+func _recolored_hd_texture(path: String, target_color: Color) -> Texture2D:
+	var image := (load(path) as Texture2D).get_image()
+	CharacterAppearance.recolor_grayscale_to_hue(image, target_color)
+	return ImageTexture.create_from_image(image)
 
 
 func _set_open(is_open: bool) -> void:
@@ -238,14 +385,6 @@ func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
 		(node as Control).mouse_filter = filter
 	for child in node.get_children():
 		_apply_mouse_filter_recursive(child, filter)
-
-
-func _connect_arrows(row_path: String, kind: String) -> void:
-	var row := get_node(row_path) as HBoxContainer
-	var prev_button := row.get_node("PrevButton") as TextureButton
-	var next_button := row.get_node("NextButton") as TextureButton
-	prev_button.pressed.connect(_cycle_style.bind(kind, -1))
-	next_button.pressed.connect(_cycle_style.bind(kind, 1))
 
 
 func _load_sheets() -> void:

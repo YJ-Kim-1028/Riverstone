@@ -1,0 +1,36 @@
+{
+  "group_id": "f00f6cec-2938-4b3c-a705-79e2eeef5c93",
+  "states": [
+    {
+      "character": {
+        "id": "d667f883-f309-443f-956b-a5a9b45cd966",
+        "name": "Idle",
+        "prompt": "Pixel art hairstyle only, matching the exact silhouette and style of the\nattached reference image. Do NOT include face features (no eyes, no nose,\nno mouth, no eyebrows) - hair and skin/scalp only, transparent background\neverywhere else. Match my existing character's body proportions (16x32\ncharacter scale, 32x64 per-frame canvas). Keep the reference image's hair\nshape, length, and coloring as-is.",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-09-03T15:48:21.075530+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-09-03T15:51:07.322056"
+}

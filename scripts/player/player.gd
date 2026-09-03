@@ -42,6 +42,68 @@ const WALK_FRAMES := {
 ## npc_sprite.gd의 값(0.35) 그대로 썼다가, 다리가 너무 빨리 번갈아져서
 ## "진동하는 것처럼 보인다"는 피드백으로 늘림(SPEED도 같이 낮춤, 위 참고).
 const WALK_FRAME_INTERVAL := 0.5
+
+## 고해상도 AI 아트 프로토타입(사용자 지시, 2026-09-02 - "npc 스프라이트 자체만으로
+## 움직일수있게해달라는뜻") - npc_sprite.gd와 동일한 레이아웃(32x64, 방향당
+## 1정지+8걷기=9칸, DOWN/LEFT/RIGHT/UP 순서)의 시트 하나로 그린다. 이 파일이
+## 있으면 CharacterAppearance 합성(옷 포함)을 건너뛰고 이 스프라이트 하나로
+## 대체한다 - 옷 레이어는 아직 없고("옷 안입힐거야"), GameManager.hd_hairstyle_id로
+## 고른 헤어스타일(HD_HAIRSTYLES) 파일을 불러온다.
+const HD_SPRITE_DIR := "res://assets/player/pixellab/"
+const HD_SPRITE_DEFAULT_STYLE := "danbal"
+## 거울(wardrobe_screen.gd)에서 고를 수 있는 헤어스타일 - player_hd_<style>.png
+## 파일 이름과 그대로 대응한다(사용자 지시, 2026-09-02). one-side_tied만 좌우
+## 비대칭이라 east/west를 따로 생성했고, 나머지는 east를 반전해서 만들었다.
+const HD_HAIRSTYLES: Array[String] = [
+	"danbal", "bun", "curl_short_hair", "one-side_tied",
+	"shortcut", "straight_long_hair", "twin_tail",
+	"special_hair1", "special_hair2", "special_hair3", "special_hair4",
+]
+## 파라의 헤어샵에서 파는 special_hair1~4는 기본 7종과 달리 회색조가 아니라
+## 실제 색(초록/파랑 등)으로 그려진 시트라, 머리색 리컬러(hue 치환)를 걸면
+## 색이 깨진다 - 그래서 이 스타일들은 머리색 선택을 무시하고 원본 색 그대로
+## 쓴다(사용자 지시, 2026-09-04 - "스페셜 헤어에 있는 것들은... 머리 색깔
+## 못바꾸게 해줘").
+const HD_HAIRSTYLES_FIXED_COLOR: Array[String] = [
+	"special_hair1", "special_hair2", "special_hair3", "special_hair4",
+]
+## 헤어 위에 겹쳐 그리는 별도 오버레이 레이어(사용자 지시, 2026-09-03 - "그냥
+## 게임에 바로 적용해줘봐") - player_hd_<style>.png와 달리 몸을 다시 구울 필요
+## 없이, 목 아래만 그려진(머리 부분 투명) player_outfit_<style>.png를 같은
+## 프레임 인덱스로 그 위에 얹기만 한다. 옷이 아직 없으면(파일 없음) 조용히
+## 아무것도 안 그림 - 옷장에서 "없음"을 고른 것과 같은 상태.
+const HD_OUTFIT_DIR := "res://assets/player/pixellab/"
+## 신규 캐릭터가 기본으로 입고 시작하는 두 벌(plain, plain2) 뒤에, 온라인 상점
+## (키라의 의상샵)에서 구매해야 옷장에서 고를 수 있는 스타일이 이어진다 -
+## 어느 게 기본 소유인지는 ShopManager.DEFAULT_UNLOCKED_HD_OUTFITS 참고(사용자
+## 지시, 2026-09-03 - "기본으로 착용할 수 있는건 plain1,2 옷만 되고 나머지는
+## 온라인 상점에서 구매해야 해금").
+const HD_OUTFITS: Array[String] = ["plain", "plain2", "look1", "look2", "look3", "look4", "look5", "look6", "look7", "look8", "look9", "look10"]
+## 헤어 위, 제일 위에 겹쳐 그리는 얼굴 오버레이(사용자 지시, 2026-09-03 - "눈도
+## 이미 있어 프리뷰도 내가 다 만들어놧고") - 옷과 같은 구조(목/머리 부분만
+## 그려진 투명 배경 시트, 같은 프레임 인덱스로 얹기만 함). 기본값은 첫 스타일 -
+## 옷과 달리 "없음"이 자연스러운 기본이 아니라서(얼굴에 눈이 없으면 이상해
+## 보임) hd_hairstyle_id처럼 항상 뭔가 하나는 끼워져 있는 쪽을 기본으로 한다.
+const HD_EYE_DIR := "res://assets/player/pixellab/"
+const HD_EYE_STYLES: Array[String] = ["anime_eyes", "droopy_eyes", "fox_eyes", "lash_eyes"]
+const HD_FRAME_WIDTH := 32
+const HD_FRAME_HEIGHT := 64
+const HD_WALK_FRAME_COUNT := 8
+const HD_GROUP_SIZE := 1 + HD_WALK_FRAME_COUNT
+const HD_DIRECTION_GROUP_INDEX := {
+	Vector2i(0, 1): 0, Vector2i(-1, 0): 1, Vector2i(1, 0): 2, Vector2i(0, -1): 3,
+}
+## 걷기 한 바퀴(8프레임) 전체 길이를 기존 2프레임 걷기 주기(WALK_FRAME_INTERVAL*2
+## =1.0초)와 비슷하게 맞춘 값(1.0/8).
+const HD_WALK_FRAME_INTERVAL := 0.125
+## 0.25로 넣었더니 기존 크기의 절반으로 작게 나온다는 리포트(사용자 지시,
+## 2026-09-02 - "엥 모야 왤케 작아?") - 32px 원본 기준 기존 16px와 같은
+## 화면 크기로 맞추려면 0.5가 기존과 동일한 크기다. 근데 AI 원본이 캐릭터
+## 주변에 여백을 두고 나와서(예전 손그림은 캔버스를 꽉 채워 그림) 0.5로도
+## 여전히 작아 보인다는 피드백(사용자 지시, 2026-09-02) - 1.3배로 키웠다가
+## "생각보다 크다"는 피드백으로 1.2배로 낮춤(같은 날). npc_sprite.gd의
+## HD_VISUAL_BOOST와 같은 배율(플레이어/NPC 크기 통일).
+const HD_SCALE := 0.5 * 1.2
 ## 머리 위 이모지(npc_sprite.gd의 EMOTE_OFFSET/EMOTE_DISPLAY_DURATION과 동일한
 ## 값) - 첫 번째 살인 비명 반응("!" 뒤 나레이션, main.gd) 등 플레이어 쪽에서도
 ## 이모지가 필요해져서 추가(사용자 지시, 2026-08-26).
@@ -71,6 +133,8 @@ var facing_direction := Vector2i(0, 1)  ## 기본값 아래
 var _atlas: AtlasTexture
 var _walk_frame_timer := 0.0
 var _walk_frame_toggle := false
+var _hd_mode := false
+var _hd_walk_frame_index := 0
 
 ## 이동속도 버프/디버프 - data/npc/mocha.json의 buff_item(이동속도 +30%,
 ## 3분)처럼 아이템/이벤트가 부여하는 일시적 배율. 게임 시간(TimeManager) 기준
@@ -96,15 +160,142 @@ var _emote_timer: Timer
 
 func _ready() -> void:
 	_sprite.centered = true
-	_sprite.offset = Vector2(0, -FRAME_HEIGHT / 2.0)
+	_hd_mode = ResourceLoader.exists(hd_sprite_path(HD_SPRITE_DEFAULT_STYLE))
+	if _hd_mode:
+		_sprite.scale = Vector2(HD_SCALE, HD_SCALE)
+		_sprite.offset = Vector2(0, -HD_FRAME_HEIGHT / 2.0)
+	else:
+		_sprite.offset = Vector2(0, -FRAME_HEIGHT / 2.0)
 	_build_emote_sprite()
 	_atlas = AtlasTexture.new()
-	_atlas.atlas = _build_appearance_texture()
-	_atlas.region = Rect2(IDLE_FRAME[facing_direction] * FRAME_WIDTH, 0, FRAME_WIDTH, FRAME_HEIGHT)
+	if _hd_mode:
+		_atlas.atlas = build_hd_composite_texture()
+		_atlas.region = Rect2(_hd_idle_index(facing_direction) * HD_FRAME_WIDTH, 0, HD_FRAME_WIDTH, HD_FRAME_HEIGHT)
+	else:
+		_atlas.atlas = _build_appearance_texture()
+		_atlas.region = Rect2(IDLE_FRAME[facing_direction] * FRAME_WIDTH, 0, FRAME_WIDTH, FRAME_HEIGHT)
 	_sprite.texture = _atlas
 	if not Engine.is_editor_hint():
 		TimeManager.minute_passed.connect(_on_minute_passed)
 		GameManager.appearance_changed.connect(refresh_appearance)
+
+
+## GameManager.hd_hairstyle_id가 HD_HAIRSTYLES 밖의 값이거나(잘못된 세이브 등)
+## 그 스타일 파일이 아직 없으면 HD_SPRITE_DEFAULT_STYLE로 조용히 폴백한다 -
+## 캐릭터가 아예 안 보이는 최악의 상황만 방지.
+static func _current_hd_sprite_path() -> String:
+	return resolve_hd_sprite_path(GameManager.hd_hairstyle_id)
+
+
+## static이라 인스턴스 없이도 부를 수 있다 - wardrobe_screen.gd 미리보기가
+## 임의의(아직 GameManager에 저장 전인) 스타일 경로를 같은 폴백 규칙으로
+## 구해야 해서 여기 로직을 그대로 재사용한다(중복 상수/로직 방지).
+static func resolve_hd_sprite_path(style: String) -> String:
+	if not (style in HD_HAIRSTYLES) or not ResourceLoader.exists(hd_sprite_path(style)):
+		style = HD_SPRITE_DEFAULT_STYLE
+	return hd_sprite_path(style)
+
+
+static func hd_sprite_path(style: String) -> String:
+	return "%splayer_hd_%s.png" % [HD_SPRITE_DIR, style]
+
+
+static func _current_hd_outfit_sprite_path() -> String:
+	return resolve_hd_outfit_sprite_path(GameManager.hd_outfit_id)
+
+
+## ""(없음)이면 오버레이 자체를 안 그린다 - HD_HAIRSTYLES와 달리 "없음"이 유효한
+## 선택지다(속옷 상태). GameManager.hd_outfit_id가 HD_OUTFITS 밖이거나 그 파일이
+## 없어도 "없음"으로 조용히 폴백한다(캐릭터가 안 보이는 게 아니라 그냥 옷만 안
+## 입은 상태가 되므로 hd_sprite_path처럼 기본 스타일로 강제할 필요가 없다).
+static func resolve_hd_outfit_sprite_path(outfit: String) -> String:
+	if outfit == "" or not (outfit in HD_OUTFITS) or not ResourceLoader.exists(hd_outfit_sprite_path(outfit)):
+		return ""
+	return hd_outfit_sprite_path(outfit)
+
+
+static func hd_outfit_sprite_path(outfit: String) -> String:
+	return "%splayer_outfit_%s.png" % [HD_OUTFIT_DIR, outfit]
+
+
+static func _current_hd_eye_sprite_path() -> String:
+	return resolve_hd_eye_sprite_path(GameManager.hd_eye_style_id)
+
+
+## hd_hairstyle_id와 같은 폴백 규칙(HD_HAIRSTYLES 밖이거나 파일이 없으면
+## 기본 스타일로) - 눈은 "없음"이 기본이 아니라서 hd_outfit_id 방식과 다르다.
+## 다만 명시적으로 ""을 고른 경우(옷장에서 "없음" 선택)는 그대로 존중해서
+## 오버레이를 끈다.
+static func resolve_hd_eye_sprite_path(style: String) -> String:
+	if style == "":
+		return ""
+	if not (style in HD_EYE_STYLES) or not ResourceLoader.exists(hd_eye_sprite_path(style)):
+		style = HD_EYE_STYLES[0]
+	return hd_eye_sprite_path(style)
+
+
+static func hd_eye_sprite_path(style: String) -> String:
+	return "%splayer_eyes_%s.png" % [HD_EYE_DIR, style]
+
+
+## 아웃핏/헤어/눈을 별도 Sprite2D 레이어로 겹쳐 그렸더니, z_index가 다른
+## 자식들이 생기면서 월드 Y-sort(가로등 등 오브젝트와 앞뒤 비교)가 깨지는
+## 문제가 생겼다(사용자 리포트, 2026-09-03 - "가로등 뒤에 서면 가로등이 목을
+## 관통한거처럼 보이잖아") - 플레이어 전체가 다시 Sprite2D 하나(=CanvasItem
+## 하나)여야 Y-sort가 정상 동작해서, 세 장을 런타임에 Image.blend_rect()로
+## 하나의 텍스처에 합성한다(옛 CharacterAppearance 마커 리컬러 시스템이
+## body/outfit/hair/accessory를 합치던 것과 같은 방식).
+##
+## 방향별로 옷/헤어 순서가 다르다 - 단, 기본 7종 헤어스타일은 옷/헤어 경계가
+## 서로 맞물리게(자투리 안 보이게) 딱 맞춰 그려져 있어서 항상 옷 위에 헤어를
+## 얹는 원래 순서를 유지해야 한다(정면만 순서를 바꿨더니 "머리랑 옷 사이에
+## 빈공간이 생겼다"는 리포트, 2026-09-04 - 정면에서 옷이 헤어의 겹치는 부분
+## 위에 그려지면서 그 밑에 있던 옷의 원래 그렸던 자투리 경계가 그대로 드러난
+## 것). 파라의 헤어샵 special_hair(HD_HAIRSTYLES_FIXED_COLOR)처럼 앞모습이
+## 몸통 전체를 덮을 만큼 큰 스타일만 정면(남쪽)에서 헤어 위에 옷을 얹어 옷이
+## 항상 보이게 하고, 나머지는 기존 순서(옷 -> 헤어) 그대로 둔다.
+static func build_hd_composite_texture() -> Texture2D:
+	var group_width := HD_FRAME_WIDTH * HD_GROUP_SIZE
+	var size := Vector2i(group_width * HD_DIRECTION_GROUP_INDEX.size(), HD_FRAME_HEIGHT)
+	var composite := Image.create(size.x, size.y, false, Image.FORMAT_RGBA8)
+	var outfit_path := _current_hd_outfit_sprite_path()
+	var outfit_image: Image = (load(outfit_path) as Texture2D).get_image() if outfit_path != "" else null
+	## 마커 없이 실측 회색조로만 그려진 시트라, 밝기 보존 hue 치환으로 리컬러
+	## 한다(CharacterAppearance.recolor_grayscale_to_hue 참고 - 사용자 지시,
+	## 2026-09-03 "1번 해봐 얼마나 부정확한지 보게").
+	var hair_image := (load(_current_hd_sprite_path()) as Texture2D).get_image()
+	var is_fixed_color_hair: bool = GameManager.hd_hairstyle_id in HD_HAIRSTYLES_FIXED_COLOR
+	if not is_fixed_color_hair:
+		CharacterAppearance.recolor_grayscale_to_hue(hair_image, Color(GameManager.hair_color_2))
+	var south_group_index: int = HD_DIRECTION_GROUP_INDEX[Vector2i(0, 1)]
+	for group_index in HD_DIRECTION_GROUP_INDEX.values():
+		var region := Rect2i(group_index * group_width, 0, group_width, HD_FRAME_HEIGHT)
+		if is_fixed_color_hair and group_index == south_group_index:
+			composite.blend_rect(hair_image, region, region.position)
+			if outfit_image != null:
+				composite.blend_rect(outfit_image, region, region.position)
+		else:
+			if outfit_image != null:
+				composite.blend_rect(outfit_image, region, region.position)
+			composite.blend_rect(hair_image, region, region.position)
+	var eye_path := _current_hd_eye_sprite_path()
+	if eye_path != "":
+		var eye_image := (load(eye_path) as Texture2D).get_image()
+		CharacterAppearance.recolor_grayscale_to_hue(eye_image, Color(GameManager.eye_color))
+		composite.blend_rect(eye_image, Rect2i(Vector2i.ZERO, size), Vector2i.ZERO)
+	return ImageTexture.create_from_image(composite)
+
+
+func _hd_group_index(direction: Vector2i) -> int:
+	return int(HD_DIRECTION_GROUP_INDEX.get(direction, 0))
+
+
+func _hd_idle_index(direction: Vector2i) -> int:
+	return _hd_group_index(direction) * HD_GROUP_SIZE
+
+
+func _hd_walk_index(direction: Vector2i, walk_frame: int) -> int:
+	return _hd_group_index(direction) * HD_GROUP_SIZE + 1 + (walk_frame % HD_WALK_FRAME_COUNT)
 
 
 ## 캐릭터 생성 화면에서 고른 외형(GameManager에 저장된 색/스타일)을 CharacterAppearance로
@@ -122,6 +313,9 @@ func _build_appearance_texture() -> Texture2D:
 ## 호출된다 - 시트를 다시 합성해서 이미 만들어둔 AtlasTexture의 atlas만 바꿔
 ## 끼운다(region은 그대로라 방향/포즈 프레임 좌표는 안 건드림).
 func refresh_appearance() -> void:
+	if _hd_mode:
+		_atlas.atlas = build_hd_composite_texture()
+		return
 	_atlas.atlas = _build_appearance_texture()
 
 
@@ -306,6 +500,9 @@ func _unhandled_input(event: InputEvent) -> void:
 ## 번갈아, 아니면 정지 프레임) - facing_direction 기준이라 방향키를 안 눌러도
 ## 마지막으로 보던 방향을 그대로 유지한다.
 func _update_animation(delta: float, is_moving: bool) -> void:
+	if _hd_mode:
+		_update_hd_animation(delta, is_moving)
+		return
 	if tool_overlay.is_active():
 		_set_frame(tool_overlay.get_frame(facing_direction))
 		tool_overlay.update_position(facing_direction)
@@ -324,10 +521,36 @@ func _update_animation(delta: float, is_moving: bool) -> void:
 		_set_frame(IDLE_FRAME[facing_direction])
 
 
+## _update_animation()의 HD 프로토타입 분기 - tool_overlay(도구 포즈)는 기존
+## 16x32 프레임 기준이라 아직 HD 시트와 안 맞는다. 프로토타입 단계라 도구
+## 포즈는 일단 무시하고 걷기/정지만 재현한다.
+func _update_hd_animation(delta: float, is_moving: bool) -> void:
+	if is_moving:
+		_walk_frame_timer += delta
+		if _walk_frame_timer >= HD_WALK_FRAME_INTERVAL:
+			_walk_frame_timer -= HD_WALK_FRAME_INTERVAL
+			_hd_walk_frame_index += 1
+			## 8프레임 전부에서 매번 울리면 발소리가 실제 걸음(한 걸음=4프레임)보다
+			## 4배 잦아진다(사용자 리포트, 2026-09-03 - "발소리가 경박할만큼
+			## 자주 들려") - 한 바퀴(8프레임)에 발이 땅에 닿는 지점 2번(0, 4번
+			## 프레임)에서만 울려서 구형 2프레임 걷기(WALK_FRAME_INTERVAL*2=1.0초에
+			## 2번)와 같은 빈도로 맞춘다.
+			if _hd_walk_frame_index % 4 == 0:
+				footstep.emit()
+		_set_frame(_hd_walk_index(facing_direction, _hd_walk_frame_index))
+	else:
+		_walk_frame_timer = 0.0
+		_hd_walk_frame_index = 0
+		_set_frame(_hd_idle_index(facing_direction))
+
+
 func _set_frame(frame_index: int) -> void:
 	if _atlas == null:
 		return
-	_atlas.region = Rect2(frame_index * FRAME_WIDTH, 0, FRAME_WIDTH, FRAME_HEIGHT)
+	if _hd_mode:
+		_atlas.region = Rect2(frame_index * HD_FRAME_WIDTH, 0, HD_FRAME_WIDTH, HD_FRAME_HEIGHT)
+	else:
+		_atlas.region = Rect2(frame_index * FRAME_WIDTH, 0, FRAME_WIDTH, FRAME_HEIGHT)
 
 
 ## 스크립트 이동(_scripted_move_direction, walk_to() 참고)은 _movement_enabled와

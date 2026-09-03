@@ -1,0 +1,36 @@
+{
+  "group_id": "dbfc3db4-d1ad-42ac-b109-9f48e60be2f5",
+  "states": [
+    {
+      "character": {
+        "id": "06610988-8720-48c4-b43c-d8dd16748977",
+        "name": "Idle",
+        "prompt": "downturned droopy eyes, gentle, pixel art, symmetrical, blank face otherwise (no eyebrows, nose, mouth, or hair)",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-09-03T07:46:27.333500+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-09-03T08:23:16.875987"
+}

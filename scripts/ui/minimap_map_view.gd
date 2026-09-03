@@ -35,13 +35,18 @@ const MAP_LAYOUT := {
 }
 
 ## 플레이어 위치 마커 - 빨간 점 대신 플레이어 얼굴 스프라이트를 그대로 오려서
-## 쓴다(사용자 지시, 2026-08-30). 정면(아래 방향) idle 프레임(시트의 0번째
-## 16x32 칸)의 위쪽 절반(머리)만 크롭. CharacterAppearance는 player.gd가 실제
-## 인게임 캐릭터를 그릴 때 쓰는 것과 같은 정적 유틸(scripts/player/
-## character_appearance.gd) - 헤어/피부/눈 색까지 실제 커스터마이징된 그대로
-## 합성해준다. 테두리/원 없이 이미지만 그린다(사용자 지시 - "프레임 안에 사진이
-## 있으니까 이상해보여").
+## 쓴다(사용자 지시, 2026-08-30). 정면(아래 방향) idle 프레임의 위쪽 절반(머리)만
+## 크롭한다. HD 헤어스타일 시트(player_hd_<style>.png)가 있으면 player.gd가 실제
+## 인게임 캐릭터를 그릴 때 쓰는 것과 같은 파일에서 바로 크롭해서 쓴다(사용자 지시,
+## 2026-09-03 - "인게임에서 픽셀 계산하고 잘라서 어쩌고 하는 게 있다면 그건
+## 지워줘" - 예전 CharacterAppearance 마커 리컬러 합성은 실제 헤어스타일과
+## 안 맞는 낡은 모습을 보여주고 있었다). HD 파일이 없는 방어적 상황에서만 그
+## 구형 합성으로 폴백한다. 테두리/원 없이 이미지만 그린다(사용자 지시 - "프레임
+## 안에 사진이 있으니까 이상해보여").
 const FACE_FRAME_SIZE := Vector2i(16, 16)
+## HD 시트(32x64)는 구형 프레임(16x32)의 정확히 2배 크기라 크롭 좌표도 그대로
+## 2배(위 여백 보정도 3px -> 6px).
+const HD_FACE_FRAME_SIZE := Vector2i(32, 32)
 const FACE_DISPLAY_SIZE := 5.0
 
 var _background_texture: Texture2D = load(MINIMAP_TEXTURE_PATH) as Texture2D
@@ -52,6 +57,12 @@ var _player_marker_visible := false
 
 func _get_face_texture() -> Texture2D:
 	if _face_texture != null:
+		return _face_texture
+	var hd_path := PlayerController.resolve_hd_sprite_path(GameManager.hd_hairstyle_id)
+	if ResourceLoader.exists(hd_path):
+		var hd_sheet := (load(hd_path) as Texture2D).get_image()
+		var face := hd_sheet.get_region(Rect2i(0, 6, HD_FACE_FRAME_SIZE.x, HD_FACE_FRAME_SIZE.y))
+		_face_texture = ImageTexture.create_from_image(face)
 		return _face_texture
 	var composite: Image = CharacterAppearance.build_current_composite_sheet()
 	if composite == null:

@@ -66,6 +66,31 @@ static func recolor_image(image: Image, markers: Array[Color], palette: Array[Co
 					break
 
 
+## 채도가 낮은(회색조) 픽셀만 골라 target_color의 색상(hue)+채도로 바꿔치기
+## 하되, 그 픽셀 자신의 명도(v)는 그대로 살린다 - 원본 그림의 음영을 유지한
+## 채로 색만 입히는 "듀오톤" 방식. 임계값보다 채도가 높은 픽셀(피부 등)은
+## 손대지 않는다. HD 헤어/눈 시트처럼 마커 없이 실측 회색조로만 그려진
+## 그림에 리컬러가 필요할 때 쓴다(사용자 지시, 2026-09-03 - "1번 해봐 얼마나
+## 부정확한지 보게" - 마커 리컬러 대신 휴리스틱으로 시도).
+## 흰색(하이라이트)/검은색(윤곽선)은 회색이라도 색을 입히면 안 됨(사용자
+## 지시, 2026-09-03 - "하얀색이랑 검은색은 덮어씌우지마 회색계열만 해야돼") -
+## 명도(v)가 min_value~max_value 범위 안인 픽셀만 대상으로 한다.
+static func recolor_grayscale_to_hue(
+	image: Image, target_color: Color, saturation_threshold: float = 0.15,
+	min_value: float = 0.15, max_value: float = 0.9
+) -> void:
+	var target_h := target_color.h
+	var target_s := target_color.s
+	for y in image.get_height():
+		for x in image.get_width():
+			var pixel := image.get_pixel(x, y)
+			if pixel.a <= 0.0 or pixel.s > saturation_threshold:
+				continue
+			if pixel.v < min_value or pixel.v > max_value:
+				continue
+			image.set_pixel(x, y, Color.from_hsv(target_h, target_s, pixel.v, pixel.a))
+
+
 ## 기준색 채널마다 delta를 더하고(0~1로 clamp) 밝음/어둠 톤을 만든다.
 static func offset_brightness(color: Color, delta: float) -> Color:
 	return Color(

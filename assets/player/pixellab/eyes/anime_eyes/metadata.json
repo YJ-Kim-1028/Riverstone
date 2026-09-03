@@ -1,0 +1,36 @@
+{
+  "group_id": "7a604c25-48fa-4b54-a46e-303d700d79aa",
+  "states": [
+    {
+      "character": {
+        "id": "47d07c81-4ad8-4597-857d-821126ec15fb",
+        "name": "Idle",
+        "prompt": " big anime eyes with highlight, vivid expressive, pixel art, symmetrical, blank face otherwise (no eyebrows, nose, mouth, or hair)",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-09-03T07:49:34.878093+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-09-03T08:23:18.064382"
+}

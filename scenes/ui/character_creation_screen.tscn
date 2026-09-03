@@ -85,24 +85,9 @@ theme_override_constants/separation = 6
 
 [node name="TabRow" type="GridContainer" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette"]
 layout_mode = 2
-columns = 5
+columns = 2
 theme_override_constants/h_separation = 1
 theme_override_constants/v_separation = 1
-
-[node name="SkinCol" type="VBoxContainer" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow"]
-layout_mode = 2
-theme_override_constants/separation = 0
-
-[node name="Label" type="Label" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow/SkinCol"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 5
-theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
-horizontal_alignment = 1
-text = "피부"
-
-[node name="SkinTab" type="Button" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow/SkinCol"]
-custom_minimum_size = Vector2(15, 8)
-layout_mode = 2
 
 [node name="EyeCol" type="VBoxContainer" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow"]
 layout_mode = 2
@@ -131,81 +116,6 @@ horizontal_alignment = 1
 text = "머리"
 
 [node name="HairTab" type="Button" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow/HairCol"]
-custom_minimum_size = Vector2(15, 8)
-layout_mode = 2
-
-[node name="CheekCol" type="VBoxContainer" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow"]
-layout_mode = 2
-theme_override_constants/separation = 0
-
-[node name="Label" type="Label" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow/CheekCol"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 5
-theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
-horizontal_alignment = 1
-text = "뺨"
-
-[node name="CheekTab" type="Button" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow/CheekCol"]
-custom_minimum_size = Vector2(15, 8)
-layout_mode = 2
-
-[node name="Outfit1Col" type="VBoxContainer" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow"]
-layout_mode = 2
-theme_override_constants/separation = 0
-
-[node name="Label" type="Label" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow/Outfit1Col"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 5
-theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
-horizontal_alignment = 1
-text = "상의"
-
-[node name="Outfit1Tab" type="Button" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow/Outfit1Col"]
-custom_minimum_size = Vector2(15, 8)
-layout_mode = 2
-
-[node name="Outfit2Col" type="VBoxContainer" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow"]
-layout_mode = 2
-theme_override_constants/separation = 0
-
-[node name="Label" type="Label" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow/Outfit2Col"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 5
-theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
-horizontal_alignment = 1
-text = "하의"
-
-[node name="Outfit2Tab" type="Button" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow/Outfit2Col"]
-custom_minimum_size = Vector2(15, 8)
-layout_mode = 2
-
-[node name="Outfit3Col" type="VBoxContainer" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow"]
-layout_mode = 2
-theme_override_constants/separation = 0
-
-[node name="Label" type="Label" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow/Outfit3Col"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 5
-theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
-horizontal_alignment = 1
-text = "신발"
-
-[node name="Outfit3Tab" type="Button" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow/Outfit3Col"]
-custom_minimum_size = Vector2(15, 8)
-layout_mode = 2
-
-[node name="AccessoryColorCol" type="VBoxContainer" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow"]
-layout_mode = 2
-theme_override_constants/separation = 0
-
-[node name="Label" type="Label" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow/AccessoryColorCol"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 5
-theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
-horizontal_alignment = 1
-text = "악세서리"
-
-[node name="AccessoryColorTab" type="Button" parent="Panel/Margin/VBox/HBox/LeftColumn/SkinEyePalette/TabRow/AccessoryColorCol"]
 custom_minimum_size = Vector2(15, 8)
 layout_mode = 2
 
@@ -324,81 +234,81 @@ theme_override_styles/focus = SubResource("StyleBoxFlat_lineedit")
 placeholder_text = "이름을 입력하세요"
 max_length = 12
 
-[node name="HairRow" type="HBoxContainer" parent="Panel/Margin/VBox/HBox/RightColumn"]
+[node name="HairstyleRow" type="HBoxContainer" parent="Panel/Margin/VBox/HBox/RightColumn"]
 layout_mode = 2
 alignment = 1
 theme_override_constants/separation = 4
 
-[node name="PrevButton" type="TextureButton" parent="Panel/Margin/VBox/HBox/RightColumn/HairRow"]
+[node name="PrevButton" type="TextureButton" parent="Panel/Margin/VBox/HBox/RightColumn/HairstyleRow"]
 custom_minimum_size = Vector2(10, 11)
 layout_mode = 2
 ignore_texture_size = true
 stretch_mode = 5
 texture_normal = ExtResource("4_prev")
 
-[node name="HairLabel" type="Label" parent="Panel/Margin/VBox/HBox/RightColumn/HairRow"]
+[node name="HairstyleLabel" type="Label" parent="Panel/Margin/VBox/HBox/RightColumn/HairstyleRow"]
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 5
 theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
 horizontal_alignment = 1
-text = "머리: 없음"
+text = "헤어스타일: 단발"
 
-[node name="NextButton" type="TextureButton" parent="Panel/Margin/VBox/HBox/RightColumn/HairRow"]
+[node name="NextButton" type="TextureButton" parent="Panel/Margin/VBox/HBox/RightColumn/HairstyleRow"]
 custom_minimum_size = Vector2(10, 11)
 layout_mode = 2
 ignore_texture_size = true
 stretch_mode = 5
 texture_normal = ExtResource("5_next")
 
-[node name="OutfitRow" type="HBoxContainer" parent="Panel/Margin/VBox/HBox/RightColumn"]
+[node name="EyeRow" type="HBoxContainer" parent="Panel/Margin/VBox/HBox/RightColumn"]
 layout_mode = 2
 alignment = 1
 theme_override_constants/separation = 4
 
-[node name="PrevButton" type="TextureButton" parent="Panel/Margin/VBox/HBox/RightColumn/OutfitRow"]
+[node name="PrevButton" type="TextureButton" parent="Panel/Margin/VBox/HBox/RightColumn/EyeRow"]
 custom_minimum_size = Vector2(10, 11)
 layout_mode = 2
 ignore_texture_size = true
 stretch_mode = 5
 texture_normal = ExtResource("4_prev")
 
-[node name="OutfitLabel" type="Label" parent="Panel/Margin/VBox/HBox/RightColumn/OutfitRow"]
+[node name="EyeLabel" type="Label" parent="Panel/Margin/VBox/HBox/RightColumn/EyeRow"]
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 5
 theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
 horizontal_alignment = 1
-text = "옷: 없음"
+text = "눈: 애니메 눈"
 
-[node name="NextButton" type="TextureButton" parent="Panel/Margin/VBox/HBox/RightColumn/OutfitRow"]
+[node name="NextButton" type="TextureButton" parent="Panel/Margin/VBox/HBox/RightColumn/EyeRow"]
 custom_minimum_size = Vector2(10, 11)
 layout_mode = 2
 ignore_texture_size = true
 stretch_mode = 5
 texture_normal = ExtResource("5_next")
 
-[node name="AccessoryRow" type="HBoxContainer" parent="Panel/Margin/VBox/HBox/RightColumn"]
+[node name="HdOutfitRow" type="HBoxContainer" parent="Panel/Margin/VBox/HBox/RightColumn"]
 layout_mode = 2
 alignment = 1
 theme_override_constants/separation = 4
 
-[node name="PrevButton" type="TextureButton" parent="Panel/Margin/VBox/HBox/RightColumn/AccessoryRow"]
+[node name="PrevButton" type="TextureButton" parent="Panel/Margin/VBox/HBox/RightColumn/HdOutfitRow"]
 custom_minimum_size = Vector2(10, 11)
 layout_mode = 2
 ignore_texture_size = true
 stretch_mode = 5
 texture_normal = ExtResource("4_prev")
 
-[node name="AccessoryLabel" type="Label" parent="Panel/Margin/VBox/HBox/RightColumn/AccessoryRow"]
+[node name="HdOutfitLabel" type="Label" parent="Panel/Margin/VBox/HBox/RightColumn/HdOutfitRow"]
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 5
 theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
 horizontal_alignment = 1
-text = "장신구: 없음"
+text = "옷: 기본 세트"
 
-[node name="NextButton" type="TextureButton" parent="Panel/Margin/VBox/HBox/RightColumn/AccessoryRow"]
+[node name="NextButton" type="TextureButton" parent="Panel/Margin/VBox/HBox/RightColumn/HdOutfitRow"]
 custom_minimum_size = Vector2(10, 11)
 layout_mode = 2
 ignore_texture_size = true
