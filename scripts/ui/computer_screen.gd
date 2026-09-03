@@ -17,6 +17,7 @@ enum Screen { DESKTOP, MAIL, SHOP }
 
 @onready var _desktop: Control = $Desktop
 @onready var _email_icon: TextureButton = $Desktop/EmailIcon
+@onready var _email_notify_icon: TextureRect = $Desktop/EmailIcon/NotifyIcon
 @onready var _shop_icon: TextureButton = $Desktop/ShopIcon
 @onready var _onoff_button: TextureButton = $Desktop/OnOffButton
 @onready var _mail_window: Control = $MailWindow
@@ -102,6 +103,13 @@ func _show_desktop() -> void:
 	_set_active(_desktop, true)
 	_set_active(_mail_window, false)
 	_set_active(_shop_window, false)
+	## 완료된(미수령) 요청이 있으면 메일 아이콘에도 `!` 배지(사용자 지시,
+	## 2026-09-01, 플레이테스트 23번 - "컴퓨터 메일 아이콘에서부터 있으면
+	## 좋을 듯"). _set_active(_desktop, true)가 방금 재귀로 STOP을 덮어썼으므로
+	## 순전히 장식용인 이 아이콘은 다시 IGNORE로 되돌린다(CLAUDE.md UI 모달
+	## mouse_filter 체크리스트 3번과 동일한 패턴).
+	_email_notify_icon.visible = EmailManager.has_claimable_request()
+	_email_notify_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
 ## 이 화면의 루트는 전체화면이 아니라 가운데 고정 크기 박스(anchor 0.5/0.5/

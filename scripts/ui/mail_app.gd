@@ -12,6 +12,12 @@ signal closed
 enum View { INBOX_LIST, SENT_LIST, INVITE_HISTORY, REQUEST_LIST, DETAIL, COMPOSE }
 
 const BUTTON_TEXTURE := preload("res://assets/ui/btn_computer.png")
+## 요청함 탭 버튼의 알림 배지 - Godot 내장 Button.icon 슬롯은 이 작은 픽셀
+## 스케일에서 위치/여백이 어색해서(사용자 지시, 2026-09-01) 직접 위치를
+## 계산하는 방식으로 되돌림. 텍스트가 가운데 정렬이라 버튼 폭이 바뀌어도
+## 항상 글씨 바로 왼쪽에 오도록, 보일 때마다 실제 렌더링된 글자 폭을 재서
+## 위치를 새로 잡는다(_refresh_request_notify_icon 참고).
+const NOTIFY_ICON_GAP := 1.0
 
 @onready var _close_button: TextureButton = $CloseButton
 @onready var _back_button: TextureButton = $BackButton
@@ -21,6 +27,7 @@ const BUTTON_TEXTURE := preload("res://assets/ui/btn_computer.png")
 @onready var _sent_button: Button = $ScaledContent/Margin/HBox/Sidebar/NavVBox/SentButton
 @onready var _invite_history_button: Button = $ScaledContent/Margin/HBox/Sidebar/NavVBox/InviteHistoryButton
 @onready var _request_button: Button = $ScaledContent/Margin/HBox/Sidebar/NavVBox/RequestButton
+@onready var _request_notify_icon: TextureRect = $ScaledContent/Margin/HBox/Sidebar/NavVBox/RequestButton/NotifyIcon
 @onready var _compose_button: Button = $ScaledContent/Margin/HBox/Sidebar/NavVBox/ComposeButton
 @onready var _compose_vbox: Control = $ScaledContent/Margin/HBox/Sidebar/ComposeVBox
 @onready var _compose_send_button: Button = $ScaledContent/Margin/HBox/Sidebar/ComposeVBox/SendButton
@@ -125,6 +132,9 @@ func _show_list(view: View) -> void:
 	_set_active(_list_panel, true)
 	_set_active(_detail_panel, false)
 	_set_active(_compose_panel, false)
+	## 요청함 탭에 완료된(미수령) 요청이 있다는 배지(사용자 지시,
+	## 2026-09-01, 플레이테스트 23번) - 이 창을 오갈 때마다 다시 확인한다.
+	_refresh_request_notify_icon()
 	match view:
 		View.INBOX_LIST:
 			_list_panel.display(EmailManager.get_inbox())
@@ -136,6 +146,31 @@ func _show_list(view: View) -> void:
 			_list_panel.display_requests(EmailManager.get_active_requests())
 		_:
 			pass
+
+
+## 완료된 요청이 있으면 배지를 켜고, 가운데 정렬된 "요청함" 글자의 실제
+## 렌더링 폭을 재서 그 바로 왼쪽에 위치시킨다(사용자 지시, 2026-09-01 -
+## "요청함 글씨 좌측 옆에 뜨게, 지금은 글씨랑 너무 멀어"). 고정 좌표 대신
+## 이렇게 재는 이유: 텍스트가 중앙 정렬이라 버튼 폭이 조금만 달라져도 글자
+## 시작 위치가 바뀐다. 아이콘 그림 대신 빨간 점(ColorRect)으로 그린다(사용자
+## 지시, 2026-09-01 - 작은 크기에서 느낌표보다 점이 더 잘 읽힘).
+func _refresh_request_notify_icon() -> void:
+	var claimable := EmailManager.has_claimable_request()
+	_request_notify_icon.visible = claimable
+	## 위 _set_active(_nav_vbox, true)가 재귀로 STOP을 덮어썼으므로, 순전히
+	## 장식용인 이 아이콘은 다시 IGNORE로 되돌린다(CLAUDE.md UI 모달
+	## mouse_filter 체크리스트 3번과 동일한 패턴).
+	_request_notify_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if not claimable:
+		return
+	var font := _request_button.get_theme_font("font")
+	var font_size := _request_button.get_theme_font_size("font_size")
+	var text_width := font.get_string_size(_request_button.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	var text_left := (_request_button.size.x - text_width) / 2.0
+	_request_notify_icon.position = Vector2(
+		text_left - _request_notify_icon.size.x - NOTIFY_ICON_GAP,
+		(_request_button.size.y - _request_notify_icon.size.y) / 2.0
+	)
 
 
 ## 메일쓰기는 버튼이 전송 하나뿐이라, 버튼 3개짜리 목록에서 쓰던 사이드바
@@ -197,11 +232,14 @@ func _on_request_row_selected(request_id: String) -> void:
 		return
 
 
-## 완료 버튼(사용자 지시) - 성공하면 보상 지급 안내 후 요청함으로 돌아간다.
+## 완료 버튼(사용자 지시) - 성공하면 보상을 받고 바로 요청함으로 돌아간다.
 ## 실패(목표 미달성 등)는 버튼이 애초에 비활성화돼 있어 정상 경로로는 안 일어남.
+## "보상을 받았다." 확인 팝업은 굳이 안 알려줘도 된다는 지적으로 제거하고
+## 코인 소리로만 알린다(사용자 지시, 2026-09-01).
 func _on_claim_pressed(request_id: String) -> void:
 	if EmailManager.claim_request(request_id):
-		_show_info_popup("보상을 받았다.", func() -> void: _show_list(View.REQUEST_LIST))
+		AudioManager.play_sfx(AudioManager.SFX_COIN)
+		_show_list(View.REQUEST_LIST)
 
 
 ## 자세히보기에서 사이드바 자리(원래 수신함/발신함 버튼이 있던 곳)에 발신인

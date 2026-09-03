@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/computer_screen.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/ui/computer_background.png" id="2_background"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/mail_app.tscn" id="5_mail_app"]
 [ext_resource type="PackedScene" path="res://scenes/ui/online_shop_panel.tscn" id="6_shop_panel"]
 [ext_resource type="Texture2D" path="res://assets/ui/icon_computer_onoff.png" id="7_onoff_icon"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_notify.png" id="8_notify"]
 
 [node name="ComputerScreen" type="Control"]
 anchor_left = 0.5
@@ -36,6 +37,19 @@ offset_top = 7.0
 offset_right = 17.0
 offset_bottom = 14.0
 texture_normal = ExtResource("3_email_icon")
+
+[node name="NotifyIcon" type="TextureRect" parent="Desktop/EmailIcon"]
+visible = false
+mouse_filter = 2
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -4.0
+offset_top = -2.0
+offset_right = 0.0
+offset_bottom = 5.0
+texture = ExtResource("8_notify")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="ShopIcon" type="TextureButton" parent="Desktop"]
 offset_left = 5.0

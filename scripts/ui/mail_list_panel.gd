@@ -101,21 +101,27 @@ func display_invite_history(entries: Array) -> void:
 func display_requests(requests: Array) -> void:
 	for child in _rows.get_children():
 		child.queue_free()
-	if requests.is_empty():
+	## 만료된 요청은 목록에서 아예 뺀다(사용자 지시, 2026-09-01) - "[만료]"
+	## 회색 표시로 남겨뒀더니 닫아도 안 없어져서 혼란스럽다는 지적. 데이터
+	## 자체는 EmailManager에 그대로 남아있고(claim 불가능해질 뿐), 여기 목록
+	## 표시에서만 걸러낸다.
+	var visible_requests: Array = requests.filter(func(entry): return not bool(entry.get("expired", false)))
+	if visible_requests.is_empty():
 		var empty_label := Label.new()
 		empty_label.text = "요청이 없습니다."
 		empty_label.add_theme_font_size_override("font_size", EMPTY_MESSAGE_FONT_SIZE)
 		empty_label.add_theme_color_override("font_color", Color.BLACK)
 		_rows.add_child(empty_label)
 		return
-	for entry in requests:
+	for entry in visible_requests:
 		_rows.add_child(_build_request_row(entry))
 		_rows.add_child(_build_divider())
 
 
+## display_requests()가 만료된 요청을 미리 걸러주므로, 여기 도달하는 entry는
+## 항상 만료되지 않은 상태다.
 func _build_request_row(entry: Dictionary) -> Control:
 	var request_id := String(entry.get("id", ""))
-	var expired := bool(entry.get("expired", false))
 	var button := Button.new()
 	button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
 	button.add_theme_stylebox_override("hover", StyleBoxEmpty.new())
@@ -135,22 +141,19 @@ func _build_request_row(entry: Dictionary) -> Control:
 	icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	## 읽음/안읽음은 수신함과 똑같이 실제로 열어봤는지를 따른다(사용자 지시,
-	## 2026-08-25) - "목표 달성"은 완전히 다른 축이라 아래 제목 글자색으로 따로
-	## 표시한다(PENDING_FALLBACK_COLOR, 초대 내역의 "결과 대기" 주황과 같은 톤).
+	## 2026-08-25). "목표 달성"은 완전히 다른 축이라 배지 대신 아래 제목
+	## 글자색(PENDING_FALLBACK_COLOR)으로만 구분한다 - 요청함 목록 자체에는
+	## 배지가 안 보였으면 좋겠다는 지적으로 뺌(사용자 지시, 2026-09-01).
+	## 사이드바 "요청함" 탭 버튼/데스크탑 메일 아이콘에는 그대로 남아있음.
 	icon_rect.texture = READ_ICON if EmailManager.is_request_read(request_id) else UNREAD_ICON
 	row.add_child(icon_rect)
 
 	var npc_id := String(entry.get("npc_id", ""))
 	var title_label := Label.new()
 	var title_text := String(entry.get("title", "")).replace("{player_name}", GameManager.player_name)
-	## 만료 요청 표시(사용자 지시, 2026-08-25 - "요청함에 도착하고 4일 이내...
-	## 만료 표시로") - 초대 내역의 "못 옴" 회색과 같은 톤을 재사용한다.
-	title_label.text = "[만료] %s" % title_text if expired else title_text
+	title_label.text = title_text
 	title_label.add_theme_font_size_override("font_size", ROW_FONT_SIZE)
-	if expired:
-		title_label.add_theme_color_override("font_color", MISSED_FALLBACK_COLOR)
-	else:
-		title_label.add_theme_color_override("font_color", PENDING_FALLBACK_COLOR if EmailManager.is_request_objective_met(request_id) else Color.BLACK)
+	title_label.add_theme_color_override("font_color", PENDING_FALLBACK_COLOR if EmailManager.is_request_objective_met(request_id) else Color.BLACK)
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(title_label)
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/mail_app.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/ui/computer_window.png" id="2_window"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/mail_detail_panel.tscn" id="7_detail"]
 [ext_resource type="PackedScene" path="res://scenes/ui/mail_compose_panel.tscn" id="8_compose"]
 [ext_resource type="Texture2D" path="res://assets/ui/frame_9slice.png" id="9_frame_9slice"]
+[ext_resource type="Texture2D" path="res://assets/ui/icon_notify.png" id="10_notify"]
 
 [node name="MailWindow" type="Control"]
 anchor_right = 1.0
@@ -98,6 +99,14 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.356863, 0.27451, 0.211765, 1)
 theme_override_font_sizes/font_size = 5
 text = "요청함"
+
+[node name="NotifyIcon" type="TextureRect" parent="ScaledContent/Margin/HBox/Sidebar/NavVBox/RequestButton"]
+visible = false
+mouse_filter = 2
+size = Vector2(4, 7)
+texture = ExtResource("10_notify")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="InviteHistoryButton" type="Button" parent="ScaledContent/Margin/HBox/Sidebar/NavVBox"]
 custom_minimum_size = Vector2(0, 12)
