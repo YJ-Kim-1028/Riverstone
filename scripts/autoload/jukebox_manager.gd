@@ -61,7 +61,14 @@ func is_unlocked(song_id: String) -> bool:
 	if bool(song.get("unlocked_by_default", false)):
 		return true
 	var item_id := String(song.get("item_id", ""))
-	return not item_id.is_empty() and ShopManager.get_purchase_count(item_id) > 0
+	if item_id.is_empty():
+		return false
+	## 상점에서 산 음반은 구매 기록만 남고 인벤토리엔 안 들어가지만(위 주석 -
+	## "템창은 안달라지고"), NPC 선물로 받는 음반(예: record_be_with_you)은
+	## grant_gift_item()을 거쳐 실제로 인벤토리에 들어간다 - 그래서 둘 중
+	## 하나만 만족해도 해금으로 친다(사용자 지시, 2026-09-04 - 어셔/마린 선물
+	## 음반이 주크박스에서 재생되게).
+	return ShopManager.get_purchase_count(item_id) > 0 or InventoryManager.has_item(item_id, 1)
 
 
 func get_unlocked_song_ids() -> Array:
