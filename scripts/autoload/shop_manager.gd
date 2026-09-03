@@ -31,6 +31,27 @@ const INVENTORY_EXPANSION_ITEM_ID := "inventory_expansion"
 ## HOUSE_UPGRADE_COST) shops.json에는 price를 안 적어둔다 - UI가
 ## get_house_upgrade_cost()로 매번 다시 조회해서 보여준다.
 const HOUSE_UPGRADE_ITEM_ID := "house_upgrade"
+## HD 아웃핏(player.gd HD_OUTFITS) 해금 구매 - 인벤토리 아이템이 아니라
+## 옷장에서 그 스타일을 고를 수 있게 되는 "1회 해금" 특수 항목이다(음반과
+## 완전히 같은 이유/구조, _buy_hd_outfit_unlock() 참고). item_id는 이
+## 접두사 뒤에 PlayerController.HD_OUTFITS의 스타일 이름을 그대로 붙인다
+## (예: "outfit_look1"). 신규 캐릭터가 기본으로 입고 시작하는 스타일은
+## 구매 없이도 항상 해금된 것으로 친다(사용자 지시, 2026-09-03 - "기본으로
+## 착용할 수 있는건 plain1,2 옷만 되고 나머지는 온라인 상점에서 구매해야
+## 해금").
+const HD_OUTFIT_ITEM_PREFIX := "outfit_"
+const DEFAULT_UNLOCKED_HD_OUTFITS: Array[String] = ["plain", "plain2"]
+## HD 헤어스타일(player.gd HD_HAIRSTYLES) 해금 구매 - HD_OUTFIT_ITEM_PREFIX와
+## 완전히 같은 구조(_buy_hd_hairstyle_unlock() 참고). item_id는 이 접두사 뒤에
+## PlayerController.HD_HAIRSTYLES의 스타일 이름을 그대로 붙인다(예:
+## "hair_special_hair1"). 원래 있던 7종(기본 헤어)은 구매 없이도 항상 해금된
+## 것으로 치고, special_hair1~4만 파라의 헤어샵에서 구매해야 한다(사용자 지시,
+## 2026-09-04 - "special hair도 온라인 판매만 할 건데").
+const HD_HAIRSTYLE_ITEM_PREFIX := "hair_"
+const DEFAULT_UNLOCKED_HD_HAIRSTYLES: Array[String] = [
+	"danbal", "bun", "curl_short_hair", "one-side_tied",
+	"shortcut", "straight_long_hair", "twin_tail",
+]
 ## 가구/바닥장식/벽장식을 하나라도 사면 우디가 선물로 가구용 망치를 준다
 ## (사용자 지시) - 손에 들고 있을 때만 배치된 가구를 회수할 수 있게 해서,
 ## 그냥 지나갈 때마다 "E 가구 회수" 프롬프트가 뜨는 게 거슬린다는 피드백을
@@ -191,6 +212,10 @@ func buy(shop_id: String, item_id: String, stall_index: int = -1, colors: Array[
 		return _buy_house_upgrade(shop_id, item_id)
 	if JukeboxManager.is_record_item(item_id):
 		return _buy_jukebox_record(shop_id, item_id)
+	if is_hd_outfit_unlock_item(item_id):
+		return _buy_hd_outfit_unlock(shop_id, item_id)
+	if is_hd_hairstyle_unlock_item(item_id):
+		return _buy_hd_hairstyle_unlock(shop_id, item_id)
 	var listing := _find_listing(shop_id, item_id)
 	if listing.is_empty():
 		return REASON_NOT_SOLD
@@ -308,6 +333,69 @@ func _buy_house_upgrade(shop_id: String, item_id: String) -> String:
 ## 바로 이 _purchase_counts를 보고 해금 여부를 판정하므로, 이 함수가 끝나는
 ## 순간 해당 곡이 즉시 재생 목록에 나타난다.
 func _buy_jukebox_record(shop_id: String, item_id: String) -> String:
+	var listing := _find_listing(shop_id, item_id)
+	if listing.is_empty():
+		return REASON_NOT_SOLD
+	var limit := int(listing.get("purchase_limit", 0))
+	if limit > 0 and get_purchase_count(item_id) >= limit:
+		return REASON_LIMIT_REACHED
+	var price := int(listing.get("price", 0))
+	if not EconomyManager.can_afford(price) or not EconomyManager.spend(price):
+		return REASON_NOT_ENOUGH_GOLD
+	_purchase_counts[item_id] = get_purchase_count(item_id) + 1
+	if not _purchase_days.has(item_id):
+		_purchase_days[item_id] = TimeManager.current_day
+	item_purchased.emit(shop_id, item_id, price)
+	return ""
+
+
+func is_hd_outfit_unlock_item(item_id: String) -> bool:
+	return item_id.begins_with(HD_OUTFIT_ITEM_PREFIX)
+
+
+## wardrobe_screen.gd/character_creation_screen.gd가 옷장 순환 목록을 소유한
+## 스타일로만 좁히는 데 쓴다 - 기본 두 벌은 항상 true, 그 외엔 대응하는
+## "outfit_<style>" 항목을 실제로 산 적이 있어야 true.
+func is_hd_outfit_unlocked(style: String) -> bool:
+	if style in DEFAULT_UNLOCKED_HD_OUTFITS:
+		return true
+	return get_purchase_count(HD_OUTFIT_ITEM_PREFIX + style) > 0
+
+
+## _buy_jukebox_record()와 완전히 같은 구조/이유 - 인벤토리에 들어갈 물건이
+## 아니라 옷장에서 그 스타일을 고를 수 있게 되는 1회 해금이다.
+func _buy_hd_outfit_unlock(shop_id: String, item_id: String) -> String:
+	var listing := _find_listing(shop_id, item_id)
+	if listing.is_empty():
+		return REASON_NOT_SOLD
+	var limit := int(listing.get("purchase_limit", 0))
+	if limit > 0 and get_purchase_count(item_id) >= limit:
+		return REASON_LIMIT_REACHED
+	var price := int(listing.get("price", 0))
+	if not EconomyManager.can_afford(price) or not EconomyManager.spend(price):
+		return REASON_NOT_ENOUGH_GOLD
+	_purchase_counts[item_id] = get_purchase_count(item_id) + 1
+	if not _purchase_days.has(item_id):
+		_purchase_days[item_id] = TimeManager.current_day
+	item_purchased.emit(shop_id, item_id, price)
+	return ""
+
+
+func is_hd_hairstyle_unlock_item(item_id: String) -> bool:
+	return item_id.begins_with(HD_HAIRSTYLE_ITEM_PREFIX)
+
+
+## wardrobe_screen.gd/character_creation_screen.gd가 헤어스타일 순환 목록을
+## 소유한 스타일로만 좁히는 데 쓴다 - is_hd_outfit_unlocked()와 동일한 패턴.
+func is_hd_hairstyle_unlocked(style: String) -> bool:
+	if style in DEFAULT_UNLOCKED_HD_HAIRSTYLES:
+		return true
+	return get_purchase_count(HD_HAIRSTYLE_ITEM_PREFIX + style) > 0
+
+
+## _buy_hd_outfit_unlock()과 완전히 같은 구조/이유 - 인벤토리에 들어갈 물건이
+## 아니라 옷장에서 그 헤어스타일을 고를 수 있게 되는 1회 해금이다.
+func _buy_hd_hairstyle_unlock(shop_id: String, item_id: String) -> String:
 	var listing := _find_listing(shop_id, item_id)
 	if listing.is_empty():
 		return REASON_NOT_SOLD
