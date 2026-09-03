@@ -851,6 +851,30 @@ func _forget_npc(npc_id: String) -> void:
 ## 다시 false로 불러서 되돌려야 한다. 이 시점에 스프라이트가 아직 없으면
 ## (플레이어가 이 NPC의 평소 맵에 없던 경우) 조용히 넘어간다 - 나중에
 ## 스케줄상 다시 등장해도 그때는 정상적으로 보임.
+## 신규 슬롯 튜토리얼(main.gd._maybe_play_tutorial_intro()) 전용 - 숨겨진
+## NPC가 다른 맵으로 이동할 때 쓴다. set_npc_sprite_hidden()만으로는 이
+## NPC의 추적 위치(_npc_last_map)가 여전히 이전 맵을 가리키고 있어서,
+## 플레이어가 새 맵으로 넘어오는 순간 _populate_initial()이 "이 NPC는 이
+## 맵에 없다"고 판단해 스프라이트를 그냥 지워버렸다(사용자 리포트,
+## 2026-09-02 - "튜토리얼 컷신에서만 사라지는거야" - 일반 손님은 한 번도
+## 숨겨진 적이 없어서 이 문제가 없었음). 추적 상태를 지금 맵/좌표에 있는
+## 것으로 강제로 다시 심고, 스프라이트도 그 자리에 직접 만들어 둔다.
+func plant_npc_at(npc_id: String, map_id: String, position: Vector2, hidden: bool) -> void:
+	_npc_in_transit.erase(npc_id)
+	_npc_offscreen_remaining.erase(npc_id)
+	_npc_route.erase(npc_id)
+	_npc_final_target.erase(npc_id)
+	_npc_pending_spawn.erase(npc_id)
+	_npc_same_map_target.erase(npc_id)
+	_npc_last_map[npc_id] = map_id
+	_npc_last_position[npc_id] = position
+	_npc_journey_target_map[npc_id] = map_id
+	NPCManager.set_npc_physical_spot(npc_id, map_id, position)
+	var sprite := _ensure_sprite(npc_id)
+	sprite.call("snap_to", position)
+	sprite.visible = not hidden
+
+
 func set_npc_sprite_hidden(npc_id: String, hidden: bool) -> void:
 	var sprite: Node2D = _active_sprites.get(npc_id)
 	if sprite != null:

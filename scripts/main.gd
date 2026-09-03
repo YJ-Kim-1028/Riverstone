@@ -35,6 +35,10 @@ const RESTAURANT_NOT_READY_MESSAGE := "먼저 레스토랑을 열자."
 const ALREADY_SERVED_MESSAGE := "이미 손님이 요리를 먹고 있다."
 const RESTAURANT_HOURS_MESSAGE := "오전 10시부터 오후 4시까지만 영업할 수 있다."
 const RESTAURANT_CANNOT_LEAVE_MESSAGE := "영업 중에는 레스토랑을 벗어날 수 없다."
+## RestaurantManager.can_player_leave()가 false인 두 번째 경우(문은 닫았지만
+## 아직 식사 중인 손님이 남음) 전용 - 위 메시지를 그대로 쓰면 "영업 중"이라고
+## 나와서 "닫았는데 뭔 소리냐"는 혼란을 준다(사용자 리포트, 2026-09-01).
+const RESTAURANT_CUSTOMERS_REMAINING_MESSAGE := "아직 손님이 남아있다."
 ## 영업 종료 시간(CLOSE_HOUR)이 지나도 레스토랑은 자동으로 안 닫히고 플레이어가
 ## 직접 팻말에서 닫아야 하는데(RestaurantManager.is_open이 하루가 바뀔 때만
 ## 초기화됨), 그 사실을 알려주는 문구가 하나도 없어서 마감 시간이 지난 줄
@@ -46,6 +50,10 @@ const RESTAURANT_CLOSING_TIME_MESSAGE := "영업 종료 시간이다."
 ## "레스토랑 안에 있을 때 4시가 넘어서 자동으로 레스토랑 문이 닫히는 경우...
 ## 아직 소리소문 없이 닫히는 중").
 const RESTAURANT_AUTO_CLOSED_MESSAGE := "4시가 지나 영업이 종료되었다."
+## RestaurantManager.all_visitors_served 전용(사용자 피드백 42번, 2026-09-01) -
+## 오늘 배정된 손님을 전부 받으면 영업시간이 남아있어도 더 이상 새 손님이
+## 안 온다는 걸 알려준다.
+const RESTAURANT_ALL_VISITORS_SERVED_MESSAGE := "오늘 손님은 전부 받았다."
 ## horror_events.md "NPC 집 잠금" - "NPC맵=NPC가게"(사용자 확정 2026-08-16)라
 ## 상점 맵으로 해석해서 막는다.
 const SHOP_LOCKED_MESSAGE := "문이 굳게 잠겨 있다."
@@ -292,6 +300,33 @@ var _wall_decor_preview: Sprite2D = null
 ## 흰색/붉은색만 바꿔가며 재사용). 실제 아이템 그림이 아니라 흰 정사각형
 ## 하나를 코드로 만들어 쓴다(assets/ 폴더에 새 그림 추가 불가 - CLAUDE.md).
 var _farm_tile_highlight: Sprite2D = null
+## 튜토리얼 컷신(_maybe_play_tutorial_intro())이 특정 상호작용 지점을 노란색
+## 점멸로 가리키는 데 쓴다 - _farm_tile_highlight와 달리 한 번에 여러 지점을
+## 동시에 가리켜야 할 때가 있어서(냄비+프라이팬 둘 다 완료됐을 때) 배열로 둔다.
+var _tutorial_highlights: Array[Sprite2D] = []
+var _tutorial_highlight_tweens: Array[Tween] = []
+## _on_restaurant_confirmed()이 RestaurantManager.open_restaurant()에
+## bypass_hours로 그대로 넘겨준다 - 신규 슬롯 튜토리얼이 "restaurant_open"
+## 하이라이트를 켜둔 구간에서만 true(사용자 지시, 2026-09-01 - "튜토일때는
+## 영업시간 전이어도 열수있게 해주고").
+var _tutorial_awaiting_restaurant_open := false
+## 튜토리얼이 강제로 열어둔 레스토랑을 플레이어가 중간에 직접 닫아버리지
+## 못하게 막는다(사용자 지시, 2026-09-01 - "열었을땐 못닫게 해줘") - 개점
+## 직후부터 튜토리얼이 끝나며 스스로 close_restaurant()를 부를 때까지 켜둔다.
+var _tutorial_locks_restaurant_close := false
+## 레스토랑에 들어온 뒤부터(_tutorial_intro_locks_movement가 풀린 뒤) 요리/서빙
+## 튜토리얼이 끝날 때까지 건물 워프로 나가는 것 자체를 막는다(사용자 지시,
+## 2026-09-03 - "튜토때 레스토랑 밖으로 못나가게 막아야할거같아") - 입구
+## 스폰이 나가는 워프("restaurant_out")와 좌표가 겹쳐 있어서, 들어가자마자
+## 그 자리에서 E를 누르면 곧바로 튕겨 나가는 문제가 있었다(스폰 좌표는
+## restaurant_interior_new.tmx에서 따로 옮겨 고쳤지만, 재발 방지로 이중 잠금).
+var _tutorial_locks_restaurant_exit := false
+## 신규 슬롯 튜토리얼이 레스토랑 안으로 들어가기 전(폴리 인사~문 앞 이동
+## 구간)에는 플레이어가 직접 걸어다닐 수 없게 막는다(사용자 지시, 2026-09-01 -
+## "튜토 레스토랑 들어가기 전까지는 플레이어가 조작 못하게 해줘 이동
+## 누르게 되네") - player.set_movement_enabled()를 매 프레임 재계산하는
+## 코드(아래 _murder_scene_active 등과 같은 자리)에 같이 얹는다.
+var _tutorial_intro_locks_movement := false
 
 var _is_transitioning := false
 ## _on_murder_occurred() 진행 중에는 참 - 플레이어가 player.walk_to()로
@@ -429,6 +464,7 @@ func _ready() -> void:
 	HuntingManager.player = player
 	RestaurantManager.restaurant_opened.connect(_update_restaurant_sign)
 	RestaurantManager.restaurant_closed.connect(_update_restaurant_sign)
+	RestaurantManager.all_visitors_served.connect(_on_all_visitors_served)
 	TimeManager.restaurant_closed.connect(_on_restaurant_auto_closed)
 	InventoryManager.item_used.connect(_on_item_used)
 	CookingManager.recipe_learned.connect(_on_recipe_learned)
@@ -463,6 +499,7 @@ func _ready() -> void:
 	await _load_map("Home", "start_spawn")
 	## _load_map()이 끝나 _is_transitioning이 풀린 뒤에 불러야 안에서 또
 	## _load_map()을 부르는 이 함수가 씹히지 않는다.
+	await _maybe_play_tutorial_intro()
 	_maybe_resume_accomplice_ending()
 	_maybe_resume_arrest_ending()
 
@@ -500,10 +537,13 @@ func _on_memento_received(npc_id: String) -> void:
 
 ## dialogue_screen.gd의 "buff" 타입 대사 줄(세이지 운세 보기 전용)을 실제
 ## 이동속도 효과로 적용한다 - 모카 커피/기절 디버프와 완전히 같은
-## player.apply_speed_effect() 경로를 그대로 쓴다.
+## player.apply_speed_effect() 경로를 그대로 쓴다. 아메리카노/기력회복제는
+## 마실 때 SFX_DRINKING이 나는데 이 경로만 효과음이 없었다(사용자 리포트,
+## 2026-09-01 - 플레이테스트 13번) - 버프/디버프를 구분해서 재생한다.
 func _on_dialogue_buff_requested(percent: float, duration_minutes: int, is_debuff: bool) -> void:
 	if player != null:
 		player.apply_speed_effect(percent, duration_minutes, is_debuff)
+	AudioManager.play_sfx(AudioManager.SFX_FISHING_FAIL if is_debuff else AudioManager.SFX_GIFT)
 
 
 ## 23시가 되면 취침(24시 강제취침)이 머지않았음을 미리 알린다(사용자 지시).
@@ -685,6 +725,77 @@ const KNOCK_CHECK_RESULT_MONOLOGUE: Array[String] = [
 	"...아무도 없다.",
 	"그냥 기분 탓이었나.",
 ]
+
+## 신규 슬롯 튜토리얼 컷신(_maybe_play_tutorial_intro()) 전용 - 사용자 지시,
+## 2026-09-01. 폴리가 첫 손님이 되어 레스토랑 조작법을 안내한다.
+const TUTORIAL_POLI_ID := "poli"
+## Home 맵에 미리 배치해야 하는 스폰 지점 - 게임 시작 시 플레이어(start_spawn)
+## 바로 옆에서 인사를 건네는 위치(폴리가 뛰어와서 도착하는 지점).
+const TUTORIAL_POLI_HOME_SPAWN := "poli_tutorial_greet"
+## Home 맵에 미리 배치해야 하는 스폰 지점 - 폴리가 인사하러 뛰어오기 시작하는
+## 출발 위치(사용자 지시, 2026-09-01 - "가만히 있는 플레이어에게 뛰어오는
+## 폴리 모션이 없음"). start_spawn(320,224)에서 살짝 떨어진, 화면 안에서
+## 뛰어오는 게 보일만한 지점으로 잡아야 함.
+const TUTORIAL_POLI_RUN_START_SPAWN := "poli_tutorial_run_start"
+## Home.tmx의 실제 "restaurant_in" Warp 오브젝트(x=112,y=208,w=32,h=16) 중심
+## 좌표 - Tiled 오브젝트는 파싱 시 좌상단이 아니라 중심점으로 변환되므로
+## (home_map.gd 오브젝트 파싱 참고) 112+16, 208+8. 플레이어를 프리 무브 대신
+## 컷신으로 문 앞까지 직접 걸어가게 한 뒤(사용자 지시, 2026-09-01 - "플레이어
+## 자유 이동이 아니라 알아서 컷씬 이벤트로 이동 되어야됨") 바로 이 지점에서
+## restaurant_interior로 넘긴다. 새 스폰을 따로 안 만들고 이미 있는 실제 문
+## 위치를 그대로 쓴다.
+const TUTORIAL_PLAYER_DOOR_POSITION := Vector2(128.0, 216.0)
+## restaurant_interior_new.tmx에 이미 있는 정식 입장 스폰(사용자가 새로 만들
+## 필요 없음) - 평소 Warp도 이 스폰으로 들어온다.
+const TUTORIAL_RESTAURANT_ENTRANCE_SPAWN := "restaurant_enterance"
+## 폴리 분신이 문 앞까지 같이 걸어가는 시간 제한(usher_decoy 걷기 대기와 동일
+## 이유 - 길찾기가 실패해도 컷신이 영원히 멈추지 않게).
+const TUTORIAL_DECOY_WALK_TIMEOUT_SECONDS := 8.0
+## restaurant_interior 맵에 미리 배치해야 하는 스폰 지점 - 개점 전까지 문 안쪽에
+## 서서 기다리는 위치(restaurant_seat1 자리에 바로 앉지 않고, 개점 후에야
+## 자리로 걸어감).
+const TUTORIAL_POLI_RESTAURANT_SPAWN := "poli_tutorial_entrance"
+const TUTORIAL_POLI_STATION_INDEX := 0
+const TUTORIAL_SIGN_INTERACTABLE := "restaurant_open"
+const TUTORIAL_POLI_GREETING_LINES: Array[String] = [
+	"어서오게, 청년.",
+	"이름이?",
+	"{player_name}. 좋아. 오늘 새로 왔다고 들었어.",
+	"우리 마을에 유일한 음식점이 생긴다 하여 다들 기대중이야.",
+	"괜찮다면 먼저 한 접시 대접해주겠나?",
+]
+const TUTORIAL_OPEN_HINT_LINES: Array[String] = [
+	"먼저 레스토랑을 열자.",
+]
+const TUTORIAL_POLI_SEATED_LINES: Array[String] = [
+	"기대가 되는군.",
+]
+const TUTORIAL_POLI_FAREWELL_LINES: Array[String] = [
+	"정말 맛있군. 앞으로도 자주 와야겠어.",
+	"마을 사람들에겐 내가 미리 말해두었다네. 아마 지금쯤이면 다들 환영 메일을 쓰고 있을 거야.",
+]
+const TUTORIAL_MAIL_HINT_LINES: Array[String] = [
+	"집 컴퓨터에서 메일을 확인 해보자.",
+	"또한, 메일로 하루에 한 명 음식점에 초대할 수 있다.",
+]
+## cooking_stations.json 확인 결과 냄비=potato->cooked_potato,
+## 프라이팬=mackerel->cooked_mackerel, 15초 조리. cooked_mackerel+cooked_potato는
+## recipes.json에 실제로 등록된 레시피(생선과 감자튀김을 곁들인 요리)라 서빙도
+## 정상적으로 완성된다.
+const TUTORIAL_POT_STATION := "cooking_area1"
+const TUTORIAL_PAN_STATION := "cooking_area2"
+const TUTORIAL_RAW_POTATO_ID := "potato"
+const TUTORIAL_RAW_MACKEREL_ID := "mackerel"
+const TUTORIAL_COOKED_POTATO_ID := "cooked_potato"
+const TUTORIAL_COOKED_MACKEREL_ID := "cooked_mackerel"
+const TUTORIAL_SERVING_STATION := "serving_area1"
+## KitchenManager에 진행 상태 신호가 없어서(is_busy/is_ready를 매번 다시 물어야
+## 함) usher_decoy 걷기 대기(위 _play_accomplice_ending_sequence 근방)와 동일한
+## 폴링 방식을 쓴다.
+const TUTORIAL_POLL_INTERVAL_SECONDS := 0.2
+const TUTORIAL_HIGHLIGHT_COLOR := Color(1.0, 0.92, 0.25, 0.6)
+const TUTORIAL_HIGHLIGHT_DIM_ALPHA := 0.15
+const TUTORIAL_HIGHLIGHT_PULSE_DURATION := 0.5
 
 ## 1차 살인 비명 직후, 바로 뛰어가지 않고 "!" 반응 + 한 박자 나레이션을
 ## 먼저 보여준다(사용자 지시, 2026-08-26 - "바로 뛰어가는 것보다 플레이어
@@ -1902,6 +2013,20 @@ func _input(event: InputEvent) -> void:
 ## 다시 확인할 필요는 없다. 손에 장착 가능한 아이템은 한 번에 하나뿐이라
 ## 네 미리보기가 동시에 보이는 경우는 없다.
 func _unhandled_input(event: InputEvent) -> void:
+	## 아무 창도 안 떠 있을 때 ESC를 누르면 게임 종료 확인창을 띄운다(사용자
+	## 지시, 2026-09-01 - 플레이테스트 피드백 20번, "보통 ESC 눌러서 나가기
+	## 때문에"). TAB 상태창 맨 아래 종료 버튼이 이미 여는 것과 같은 팝업을
+	## 재사용한다(status_screen.gd의 QuitConfirmPopup) - "예"를 누르면 그
+	## 팝업이 이미 현재 슬롯 저장 후 종료까지 처리한다. 컷신 진행 중에는 다른
+	## 모달 열림 판정과 같은 기준(_murder_scene_active 등)으로 막는다.
+	## _is_any_modal_open()이 아니라 _any_modal_open_last_frame(이전 프레임
+	## 기준)을 보는 이유는 그 변수 선언부 주석 참고 - 같은 ESC 입력으로
+	## 인벤토리 등이 먼저 닫히는 것과의 경쟁을 피하기 위함.
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE \
+			and status_screen != null and not _any_modal_open_last_frame and not _murder_scene_active \
+			and not _heart_event_active and not _memento_event_active and not _revival_event_active:
+		status_screen.open_quit_confirm()
+		return
 	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
 		return
 	if _box_preview != null and _box_preview.visible:
@@ -2211,7 +2336,11 @@ func _process(delta: float) -> void:
 			if _message_timer <= 0.0:
 				player.show_interaction_prompt("E 낚시 취소")
 			return
-		if FishingManager.can_start_fishing() and _is_facing_water() and not InventoryManager.is_full():
+		if FishingManager.can_start_fishing() and _is_facing_water():
+			## 가방에 자리가 있는지는 여기서 미리 안 본다 - E를 눌러서 실제로
+			## 시작하지 못했을 때만 "가방이 가득 찼다."를 짧게 띄운다(사용자
+			## 지시, 2026-09-01 - "E 낚시가 먼저 뜨고, 눌렀는데 안 되는 상태일
+			## 때만 짧게 나오는 게 맞지"). 아래 실제 시작 처리(E 입력) 참고.
 			if _message_timer <= 0.0:
 				player.show_interaction_prompt("E 낚시하기")
 			return
@@ -2320,7 +2449,7 @@ func _on_livestock_confirmed() -> void:
 func _on_restaurant_confirmed() -> void:
 	if RestaurantManager.is_open:
 		RestaurantManager.close_restaurant()
-	elif not RestaurantManager.open_restaurant():
+	elif not RestaurantManager.open_restaurant(_tutorial_awaiting_restaurant_open):
 		_show_temporary_message(RESTAURANT_HOURS_MESSAGE)
 
 
@@ -2373,6 +2502,7 @@ func _is_any_modal_open() -> bool:
 		or (jukebox_screen != null and jukebox_screen.modulate.a > 0.0) \
 		or (wardrobe_screen != null and wardrobe_screen.modulate.a > 0.0) \
 		or (minimap_screen != null and minimap_screen.modulate.a > 0.0) \
+		or (status_screen != null and status_screen.is_quit_confirm_open()) \
 		or _is_sleep_transition_playing
 
 
@@ -2396,6 +2526,16 @@ func _should_pause_time() -> bool:
 ## 시간까지 멈추면 레스토랑 영업시간/NPC 스케줄이 그만큼 밀리는 게 사용자
 ## 피드백으로 어색하다고 확인됨 - 조리기구 화면만 열려있을 땐 시간이 계속 간다.
 var _debug_last_open_screens := ""
+## ESC로 "모달 없을 때 종료 확인"을 판단할 때 쓴다(main.gd._unhandled_input) -
+## 그 자리에서 직접 _is_any_modal_open()을 불러서 비교하면, 인벤토리(TAB)처럼
+## 자기 자신도 ESC로 닫히는 화면이 같은 키 입력에 대해 먼저 닫히고 난 뒤에
+## (둘 다 _unhandled_input이라 한 이벤트에 여러 핸들러가 다 불림, 아무도
+## set_input_as_handled()를 안 부름) 이 코드가 "이제 모달이 없네"로 잘못
+## 판단해서 인벤토리를 닫자마자 종료 확인창까지 같이 떠버렸다(사용자 리포트,
+## 2026-09-01 - "인벤 띄우고 esc 눌러도 종료하시겠습니까 팝업 나오는데").
+## 매 프레임 끝에서 그 시점 상태를 저장해두고, ESC 핸들러는 이 "이전 프레임"
+## 값을 보게 하면 같은 프레임 안에서의 경쟁이 사라진다.
+var _any_modal_open_last_frame := false
 
 func _update_ui_blocking() -> void:
 	var any_open := _is_any_modal_open()
@@ -2433,7 +2573,7 @@ func _update_ui_blocking() -> void:
 		# 2026-08-26 - "2차 살인 컷씬이 진행되는 동안 플레이어가 움직이면
 		# 안될 거 같아").
 		player.set_movement_enabled(not any_open and not _memento_event_active and not _revival_event_active \
-			and not _murder_scene_active and not _heart_event_active \
+			and not _murder_scene_active and not _heart_event_active and not _tutorial_intro_locks_movement \
 			and not FishingManager.is_active() and not HuntingManager.is_active() and not AudioManager.is_knock_playing())
 	if _ui_dim != null:
 		# furniture_desc(배경 가구 설명)는 박스 높이도 짧게 줄였는데, 화면
@@ -2460,6 +2600,7 @@ func _update_ui_blocking() -> void:
 		var focus_owner := get_viewport().gui_get_focus_owner()
 		if focus_owner != null:
 			get_viewport().gui_release_focus()
+	_any_modal_open_last_frame = any_open
 
 
 ## 조리기구 화면을 열어둔 채로 그 기구 범위를 벗어나면 자동으로 닫는다 - 안 그러면
@@ -2548,6 +2689,49 @@ func _build_farm_tile_highlight() -> void:
 	world_map.add_child(_farm_tile_highlight)
 
 
+## 튜토리얼 컷신 전용 - 상호작용(interactable) 이름으로 위치를 찾아 그 위에
+## 노란 점멸 사각형을 띄운다. 한 번에 여러 지점(냄비+프라이팬)을 동시에
+## 가리켜야 할 때가 있어서 이름 배열을 받는다 - 이미 켜져 있던 하이라이트는
+## 먼저 정리하고 다시 만든다. world_map.get_interactable_position()이
+## Vector2.INF를 돌려주면(아직 Tiled에 배치 안 된 지점) 그 이름만 조용히
+## 건너뛴다.
+func _set_tutorial_highlight(interactable_names: Array) -> void:
+	_clear_tutorial_highlight()
+	if world_map == null:
+		return
+	var image := Image.create(WorldMap.TILE_SIZE, WorldMap.TILE_SIZE, false, Image.FORMAT_RGBA8)
+	image.fill(TUTORIAL_HIGHLIGHT_COLOR)
+	var texture := ImageTexture.create_from_image(image)
+	for interactable_name in interactable_names:
+		var pos: Vector2 = world_map.get_interactable_position(String(interactable_name))
+		if pos == Vector2.INF:
+			push_warning("Tutorial highlight target is missing: %s" % interactable_name)
+			continue
+		var sprite := Sprite2D.new()
+		sprite.texture = texture
+		sprite.position = pos
+		sprite.z_index = WorldMap.FLAT_Z_INDEX
+		world_map.add_child(sprite)
+		_tutorial_highlights.append(sprite)
+	for sprite in _tutorial_highlights:
+		var tween := create_tween()
+		tween.set_loops()
+		tween.tween_property(sprite, "modulate:a", TUTORIAL_HIGHLIGHT_DIM_ALPHA, TUTORIAL_HIGHLIGHT_PULSE_DURATION).set_ease(Tween.EASE_IN_OUT)
+		tween.tween_property(sprite, "modulate:a", 1.0, TUTORIAL_HIGHLIGHT_PULSE_DURATION).set_ease(Tween.EASE_IN_OUT)
+		_tutorial_highlight_tweens.append(tween)
+
+
+func _clear_tutorial_highlight() -> void:
+	for tween in _tutorial_highlight_tweens:
+		if tween != null:
+			tween.kill()
+	_tutorial_highlight_tweens.clear()
+	for sprite in _tutorial_highlights:
+		if is_instance_valid(sprite):
+			sprite.queue_free()
+	_tutorial_highlights.clear()
+
+
 ## 괭이/물뿌리개를 들고 밭(FarmingManager.FARM_MAP_ID)의 Farmable 칸 위에 서
 ## 있을 때만 표시한다 - 같은 맵이어도 Farmable이 아닌 칸(길/잔디 등)에서는
 ## 뜨면 안 된다는 리포트로 is_farmable_cell 체크 추가(2026-08-12). 할 수
@@ -2558,7 +2742,7 @@ func _update_farm_tile_highlight() -> void:
 		return
 	var equipped := EquipmentManager.get_equipped(EquipmentManager.HAND_SLOT)
 	var show_highlight := not _is_any_modal_open() \
-		and (equipped == "hoe" or equipped == "watering_can") \
+		and (equipped == "hoe" or equipped == "watering_can" or equipped == FarmingManager.GOLDEN_WATERING_CAN_ITEM_ID) \
 		and GameManager.current_map_id == FarmingManager.FARM_MAP_ID \
 		and world_map.is_farmable_cell(player.position)
 	_farm_tile_highlight.visible = show_highlight
@@ -2873,6 +3057,14 @@ func _on_restaurant_auto_closed() -> void:
 		_show_temporary_message(RESTAURANT_AUTO_CLOSED_MESSAGE)
 
 
+## 오늘 배정된 손님(RestaurantManager.DAILY_VISITOR_COUNT명 한도)을 전부
+## 서빙하면 뜬다 - cook_and_serve()로만 트리거되므로 항상 레스토랑 안일 때만
+## 불리지만, 다른 자동 메시지들과 동일하게 맵 확인은 방어적으로 남겨둔다.
+func _on_all_visitors_served() -> void:
+	if GameManager.current_map_id == RESTAURANT_SIGN_MAP_ID:
+		_show_temporary_message(RESTAURANT_ALL_VISITORS_SERVED_MESSAGE)
+
+
 ## 영업 종료 시간(RestaurantManager.CLOSE_HOUR)이 지났는데 레스토랑 안에 있고
 ## 아직 영업 중이면(직접 안 닫았으면 자동으로 안 닫힘) 하루에 한 번만 알려준다
 ## (사용자 지시, 2026-08-25 - "소리소문없이 닫혀서 플레이어가 모를 거 같다").
@@ -2899,6 +3091,221 @@ func _fade_in(duration: float = FADE_DURATION) -> void:
 	var tween := create_tween()
 	tween.tween_property(_fade, "color:a", 0.0, duration)
 	await tween.finished
+
+
+## 새 슬롯을 만들고 처음 게임에 들어온 순간(_ready()의 boot _load_map() 직후)
+## 딱 한 번만 재생하는 튜토리얼 컷신(사용자 지시, 2026-09-01) -
+## GameManager.tutorial_intro_shown이 신규 게임에서만 false로 시작한다(기존
+## 세이브를 이어할 땐 항상 true라 여긴 그냥 지나감, game_manager.gd 참고).
+## 실제 연출(대사/카메라 이동/NPC 배치 등)은 사용자가 직접 채울 예정이라,
+## heart_event_30과 동일한 페이드 인/아웃 브래킷만 갖춘 자리표시자로 남겨둔다.
+func _maybe_play_tutorial_intro() -> void:
+	if GameManager.tutorial_intro_shown:
+		return
+	GameManager.tutorial_intro_shown = true
+	if dialogue_screen == null or npc_world_manager == null or world_map == null:
+		return
+	## 레스토랑에 들어가기 전(인사~문 앞 이동)까지는 플레이어 직접 조작을
+	## 막는다 - _get_move_direction()이 스크립트 이동(player.walk_to())은
+	## _movement_enabled와 무관하게 항상 우선 처리하므로, 아래 player.walk_to()
+	## 호출 자체는 이 락과 무관하게 정상 동작한다(player.gd 참고).
+	_tutorial_intro_locks_movement = true
+	await _fade_out(HEART_EVENT_FADE_DURATION)
+	## 사용자 지시(2026-09-01) - 신규 게임 첫 화면에 "1일차" 카드가 안 뜨던
+	## 문제. 취침/기절 전환(_play_sleep_transition/_play_collapse_transition)과
+	## 동일한 구조(암전 -> N일차 표시 -> 대기 -> 숨김)를 튜토리얼 맨 앞으로
+	## 당겨서 넣는다.
+	if _day_label != null:
+		_day_label.text = "%d일차" % TimeManager.current_day
+		_day_label.modulate.a = 1.0
+		await get_tree().create_timer(DAY_LABEL_HOLD_DURATION).timeout
+		_day_label.modulate.a = 0.0
+	npc_world_manager.set_npc_sprite_hidden(TUTORIAL_POLI_ID, true)
+	## 가만히 서 있는 플레이어에게 폴리가 뛰어와서 도착하는 모습을 보여준다
+	## (사용자 지시, 2026-09-01 - "가만히 있는 플레이어에게 뛰어오는 폴리
+	## 모션이 없음") - 화면이 밝아진 뒤에 걷는 모습이 보여야 하므로, 분신은
+	## 출발 지점에 세워만 두고 실제로 걷기 시작하는 건 fade_in 이후다.
+	var decoy := _tutorial_spawn_decoy(TUTORIAL_POLI_ID, TUTORIAL_POLI_RUN_START_SPAWN)
+	await _fade_in(HEART_EVENT_FADE_DURATION)
+	if decoy != null:
+		await _tutorial_walk_decoy_to_spawn(decoy, TUTORIAL_POLI_HOME_SPAWN)
+	dialogue_screen.open_special(TUTORIAL_POLI_ID, TUTORIAL_POLI_GREETING_LINES.duplicate(), false)
+	await dialogue_screen.closed
+	## 플레이어 자유 이동이 아니라 컷신이 직접 문 앞까지 걸어가게 한다(사용자
+	## 지시, 2026-09-01 - "플레이어 자유 이동이 아니라 알아서 컷씬 이벤트로
+	## 이동 되어야됨"). 폴리도 같은 타이밍에 같은 문으로 같이 걸어가게 해서
+	## "바로 뒤따라서 들어옴"을 재현한다 - 폴리 쪽은 await 안 하고 먼저
+	## 걷기 시작만 시켜서 플레이어와 거의 동시에 도착하게 한다.
+	if decoy != null and is_instance_valid(decoy):
+		var decoy_path: PackedVector2Array = world_map.find_path(decoy.position, TUTORIAL_PLAYER_DOOR_POSITION)
+		decoy.call("walk_to", decoy_path)
+	await player.walk_to(TUTORIAL_PLAYER_DOOR_POSITION, false)
+	## 플레이어가 먼저 도착해도 폴리가 아직 문 앞까지 안 왔으면 잠깐 기다렸다가
+	## 맵을 넘긴다(사용자 지시, 2026-09-01 - "폴리가 레스토랑 문 앞에 오기
+	## 전까지 레스토랑 들어가지마").
+	if decoy != null and is_instance_valid(decoy):
+		var wait_elapsed := 0.0
+		while bool(decoy.call("is_walking")) and wait_elapsed < TUTORIAL_DECOY_WALK_TIMEOUT_SECONDS:
+			await get_tree().create_timer(TUTORIAL_POLL_INTERVAL_SECONDS).timeout
+			wait_elapsed += TUTORIAL_POLL_INTERVAL_SECONDS
+		decoy.queue_free()
+	await _load_map(RESTAURANT_SIGN_MAP_ID, TUTORIAL_RESTAURANT_ENTRANCE_SPAWN)
+	## 레스토랑 안으로 들어온 뒤부터는 냄비/프라이팬/완성대를 직접 찾아가야
+	## 하므로 여기서 조작 잠금을 푼다. 대신 요리/서빙이 끝날 때까지 밖으로
+	## 나가는 것 자체는 계속 막는다(_tutorial_locks_restaurant_exit 참고).
+	_tutorial_intro_locks_movement = false
+	_tutorial_locks_restaurant_exit = true
+	## 진짜 원인을 찾음(사용자 지시, 2026-09-02 - "레스토랑 열어서 확인했는데
+	## 일반 npc들 안사라져 튜토리얼 컷신에서만 사라지는거야") - _load_map()이
+	## 맵을 바꾸면 NPCWorldManager._populate_initial()이 모든 NPC를 훑으며
+	## "마지막으로 추적된 맵 != 지금 맵"이면 스프라이트를 그냥 지워버린다.
+	## 폴리는 숨겨진 채 계속 Home으로 추적되고 있었어서 방금 그 체크에 걸려
+	## 스프라이트가 파괴됐던 것 - 이후 set_npc_sprite_hidden(false)를 불러도
+	## 이미 없는 노드라 아무 일도 안 일어났다. 일반 손님이 안 그런 건 한 번도
+	## 숨겨진 적이 없어서 추적이 안 끊겼기 때문. plant_npc_at()으로 추적
+	## 상태와 스프라이트를 지금 이 자리에 다시 심어서 근본 원인을 고친다.
+	## 문 앞에서 기다리는 분신은 스폰 좌표가 벽 위/안쪽에 겹쳐서 어색하게 서
+	## 있는 모습이 됐다(사용자 지시, 2026-09-02 - "레스토랑 열기 전까지는
+	## 폴리가 안보여야할거같아 벽에 서있어") - 개점 전까지는 아예 안 보이게
+	## 두고, 개점하는 순간 실제 시스템이 문에서부터 자리까지 걸어오는 모습을
+	## 처음 보여주는 것으로 단순화한다.
+	var entrance_position := world_map.get_spawn_position(TUTORIAL_POLI_RESTAURANT_SPAWN)
+	if entrance_position != Vector2.INF:
+		npc_world_manager.plant_npc_at(TUTORIAL_POLI_ID, RESTAURANT_SIGN_MAP_ID, entrance_position, true)
+	dialogue_screen.open_description(TUTORIAL_OPEN_HINT_LINES.duplicate())
+	await dialogue_screen.closed
+	## 게임이 09:00에 시작하는데 정식 영업시간(10시)까지 기다리게 하면 튜토리얼이
+	## 막힌다는 지적(사용자 지시, 2026-09-01) - 이 하이라이트가 켜져 있는 동안만
+	## _on_restaurant_confirmed()가 영업시간 제한을 건너뛰게 한다. 그리고 방문객
+	## 자동 추첨/착석도 꺼서(RestaurantManager.suppress_auto_visitors) 튜토리얼
+	## 도중에 엉뚱한 손님이 같이 들어오지 않게 한다(사용자 지시 - "튜토일때는
+	## 레스토랑 열어도 손님 안오게 해줘"). 둘 다 튜토리얼이 끝날 때 되돌린다.
+	_tutorial_awaiting_restaurant_open = true
+	RestaurantManager.suppress_auto_visitors = true
+	_set_tutorial_highlight([TUTORIAL_SIGN_INTERACTABLE])
+	await RestaurantManager.restaurant_opened
+	_tutorial_awaiting_restaurant_open = false
+	_tutorial_locks_restaurant_close = true
+	_clear_tutorial_highlight()
+	## plant_npc_at()로 추적이 이미 이 맵(entrance 좌표)에 정확히 심어져 있으니,
+	## 이제 정식 착석 시스템(force_seat_npc -> NPCManager 재조정)이 매일 오는
+	## 손님과 완전히 같은 경로로 문 앞에서 자리까지 실제로 걸어가게 둔다.
+	## 개점 전까지 숨겨뒀던 걸 여기서 처음 보여준다.
+	npc_world_manager.set_npc_sprite_hidden(TUTORIAL_POLI_ID, false)
+	RestaurantManager.force_seat_npc(TUTORIAL_POLI_STATION_INDEX, TUTORIAL_POLI_ID)
+	while not RestaurantManager.is_station_npc_settled(TUTORIAL_POLI_STATION_INDEX):
+		await get_tree().create_timer(TUTORIAL_POLL_INTERVAL_SECONDS).timeout
+	dialogue_screen.open_special(TUTORIAL_POLI_ID, TUTORIAL_POLI_SEATED_LINES.duplicate(), false)
+	await dialogue_screen.closed
+	## 오직 튜토리얼에서만 지급하는 재료(사용자 지시) - 감자는 냄비(cooking_area1),
+	## 고등어는 프라이팬(cooking_area2)에서만 조리 가능하다(cooking_stations.json).
+	InventoryManager.add_item(TUTORIAL_RAW_POTATO_ID, 1)
+	InventoryManager.add_item(TUTORIAL_RAW_MACKEREL_ID, 1)
+	_set_tutorial_highlight([TUTORIAL_POT_STATION])
+	while not KitchenManager.is_busy(TUTORIAL_POT_STATION):
+		await get_tree().create_timer(TUTORIAL_POLL_INTERVAL_SECONDS).timeout
+	_set_tutorial_highlight([TUTORIAL_PAN_STATION])
+	while not KitchenManager.is_busy(TUTORIAL_PAN_STATION):
+		await get_tree().create_timer(TUTORIAL_POLL_INTERVAL_SECONDS).timeout
+	_clear_tutorial_highlight()
+	## KitchenManager.is_ready()는 수거하는 순간 다시 false로 돌아간다 - 두
+	## 기구가 거의 동시에 다 됐을 때 플레이어가 한쪽을 먼저 수거해버리면
+	## "둘 다 동시에 ready인 순간"이 폴링(0.2초 간격)에 안 걸려서 무한 대기에
+	## 빠졌다(사용자 리포트, 2026-09-02 - "재료 두 개 다 수급했는데 요리
+	## 상호작용이 깜빡이질 않아"). is_ready 게이트를 없애고 인벤토리 보유
+	## 여부만으로 판정한다 - 각 기구가 다 익기 전에 하이라이트가 살짝 일찍
+	## 켜질 수는 있지만(대기 시간 자체를 숨기진 못함), 수거 순서와 무관하게
+	## 항상 정확히 끝난다.
+	_set_tutorial_highlight([TUTORIAL_POT_STATION, TUTORIAL_PAN_STATION])
+	while not (InventoryManager.has_item(TUTORIAL_COOKED_POTATO_ID, 1) and InventoryManager.has_item(TUTORIAL_COOKED_MACKEREL_ID, 1)):
+		await InventoryManager.inventory_changed
+	_set_tutorial_highlight([TUTORIAL_SERVING_STATION])
+	while true:
+		await RestaurantManager.dish_served
+		if RestaurantManager.get_station_npc(TUTORIAL_POLI_STATION_INDEX) == TUTORIAL_POLI_ID \
+				and not RestaurantManager.get_station_dish(TUTORIAL_POLI_STATION_INDEX).is_empty():
+			break
+	_clear_tutorial_highlight()
+	## 실제 자동 완료 타이머(RestaurantManager._on_minute_passed)가 식사를 끝내며
+	## 자리를 비우는 순간, 분신으로 자리를 지켜서 대사가 뜨기 전에 폴리가 먼저
+	## 걸어 나가버리는 것처럼 보이지 않게 한다(사용자 지시 - "폴리가 다 먹을
+	## 때까지 잠시 대기... 다 먹으면 바로 자리를 뜨지 않고, 대사가 먼저 뜸").
+	var seat_state := NPCManager.resolve_state_position("restaurant_seat%d" % (TUTORIAL_POLI_STATION_INDEX + 1))
+	var seat_position: Vector2 = seat_state.get("position", Vector2.INF)
+	var eating_decoy: Node2D = null
+	if seat_position != Vector2.INF:
+		npc_world_manager.set_npc_sprite_hidden(TUTORIAL_POLI_ID, true)
+		eating_decoy = _spawn_npc_decoy(TUTORIAL_POLI_ID, seat_position)
+	while true:
+		await RestaurantManager.npc_departed
+		if RestaurantManager.get_station_npc(TUTORIAL_POLI_STATION_INDEX).is_empty():
+			break
+	dialogue_screen.open_special(TUTORIAL_POLI_ID, TUTORIAL_POLI_FAREWELL_LINES.duplicate(), false)
+	await dialogue_screen.closed
+	dialogue_screen.open_description(TUTORIAL_MAIL_HINT_LINES.duplicate())
+	await dialogue_screen.closed
+	## 여기서부터 실제 관리 스프라이트를 되돌린다 - 평소 스케줄로 복귀하며
+	## 걸어 나가는 모습이 그대로 "폴리가 나가는 애니메이션"이 된다.
+	if eating_decoy != null and is_instance_valid(eating_decoy):
+		eating_decoy.queue_free()
+	npc_world_manager.set_npc_sprite_hidden(TUTORIAL_POLI_ID, false)
+	## 튜토리얼 동안 영업시간을 무시하고 강제로 열어뒀던 레스토랑을 정리한다
+	## (사용자 지시, 2026-09-01 - "튜토 끝나면 레스토랑 닫아줘"). 방문객 억제도
+	## 같이 풀어서 이후로는 평소처럼 정상 영업/방문객 추첨이 동작하게 한다.
+	RestaurantManager.suppress_auto_visitors = false
+	_tutorial_locks_restaurant_close = false
+	_tutorial_locks_restaurant_exit = false
+	if RestaurantManager.is_open:
+		RestaurantManager.close_restaurant()
+
+
+## _maybe_play_tutorial_intro() 전용 헬퍼 - 지정한 스폰 지점에 분신을 세운다.
+## 스폰 지점이 아직 Tiled에 배치되지 않았으면(Vector2.INF) 경고만 남기고
+## null을 돌려준다 - 씬 전체가 멈추면 안 되므로 조용히 건너뛴다.
+func _tutorial_spawn_decoy(npc_id: String, spawn_name: String) -> Node2D:
+	var spawn_position := world_map.get_spawn_position(spawn_name)
+	if spawn_position == Vector2.INF:
+		push_warning("Tutorial spawn point is missing: %s" % spawn_name)
+		return null
+	var decoy := _spawn_npc_decoy(npc_id, spawn_position)
+	## npc_sprite.gd의 _process()는 TimeManager.is_running이 false면(대사창 등
+	## 모달이 열려있는 동안 자동으로 멈춘다) _ignore_time_pause가 아닌 이상
+	## 걷기/애니메이션을 아예 처리하지 않는다 - 튜토리얼 분신은 대사창이 뜬
+	## 직후에도 걸어야 하므로 항상 무시하게 한다(사용자 리포트, 2026-09-01 -
+	## "한 5초있다가 폴리가 정한 지점으로 순간이동하는데" - 멈춰있다가
+	## _tutorial_walk_decoy_to_spawn()의 타임아웃 snap_to로만 넘어간 것).
+	if decoy != null:
+		decoy.call("set_ignore_time_pause", true)
+	return decoy
+
+
+## _maybe_play_tutorial_intro() 전용 헬퍼 - 분신을 지정한 스폰 지점까지 실제로
+## 걸어가게 한다(usher_decoy 걷기 대기 - _play_accomplice_ending_sequence()
+## 근방 - 와 동일한 패턴). 목표 스폰이 없으면 조용히 넘어간다. 길찾기가
+## 실패하거나(장애물에 막혀 find_path()가 빈 경로를 돌려주면 walk_to()가
+## 즉시 멈춤) 타임아웃에 걸려도, 마지막에 무조건 target으로 snap_to해서
+## "도착 안 했는데 다음 대사가 먼저 뜨는" 상황이 안 생기게 한다(사용자 리포트,
+## 2026-09-01 - "폴리가 지점에 도착 안했는데 대사 재생됨").
+func _tutorial_walk_decoy_to_spawn(decoy: Node2D, spawn_name: String) -> void:
+	var target := world_map.get_spawn_position(spawn_name)
+	if target == Vector2.INF:
+		push_warning("Tutorial spawn point is missing: %s" % spawn_name)
+		return
+	await _tutorial_walk_decoy_to_position(decoy, target)
+
+
+## _tutorial_walk_decoy_to_spawn()의 좌표 버전 - restaurant_seatN처럼
+## Spawn 오브젝트가 아니라 NPCManager.resolve_state_position()으로 얻는
+## 좌표까지 걸어갈 때 쓴다.
+func _tutorial_walk_decoy_to_position(decoy: Node2D, target: Vector2) -> void:
+	var path: PackedVector2Array = world_map.find_path(decoy.position, target)
+	decoy.call("walk_to", path)
+	var elapsed := 0.0
+	while bool(decoy.call("is_walking")) and elapsed < TUTORIAL_DECOY_WALK_TIMEOUT_SECONDS:
+		await get_tree().create_timer(TUTORIAL_POLL_INTERVAL_SECONDS).timeout
+		elapsed += TUTORIAL_POLL_INTERVAL_SECONDS
+	decoy.call("snap_to", target)
+	decoy.call("face_down")
 
 
 ## 침대 확인창에서 "예"를 고르면 화면을 잠깐 까맣게 만들고 그 위에 "N일차"를
@@ -3009,6 +3416,20 @@ func _on_interact_pressed() -> void:
 		return
 	var warp: Dictionary = world_map.get_warp_at(player.position)
 	if not warp.is_empty() and _is_building_transition(warp):
+		# 신규 슬롯 튜토리얼(사용자 지시, 2026-09-01 - "사용자 E 조작해서
+		# 레스토랑 들어가지잖아 조작 막아달라고") - 이동은 막아도 E는 별개
+		# 입력이라 플레이어가 문 앞에 스크립트로 도착한 뒤(또는 접근 중) 직접
+		# E를 눌러 먼저 들어가버릴 수 있었다. 조작 잠금 구간에는 건물 워프
+		# 진입 자체를 막는다 - main.gd._maybe_play_tutorial_intro()가 끝나면
+		# _load_map()을 직접 불러서 넘긴다.
+		if _tutorial_intro_locks_movement:
+			return
+		# 신규 슬롯 튜토리얼: 레스토랑에 들어온 뒤 요리/서빙이 끝날 때까지는
+		# 밖으로 나가는 워프 자체를 막는다(_tutorial_locks_restaurant_exit 참고,
+		# 사용자 지시, 2026-09-03 - "튜토때 레스토랑 밖으로 못나가게 막아야할거같아").
+		if _tutorial_locks_restaurant_exit:
+			_show_temporary_message(RESTAURANT_CANNOT_LEAVE_MESSAGE)
+			return
 		# 공범 엔딩(사용자 지시, 2026-08-24): 노크 소리가 끝난 뒤 문 앞에서 E를
 		# 누르면 평소처럼 밖으로 나가는 대신 어셔를 맞이하는 컷신으로 이어진다.
 		if _accomplice_awaiting_door_open and GameManager.current_map_id == ACCOMPLICE_MAIL_MAP_ID:
@@ -3023,7 +3444,7 @@ func _on_interact_pressed() -> void:
 		# 영업을 종료해야 한다." RestaurantManager.can_player_leave()는 이미
 		# 있었는데 아무도 호출을 안 해서 실제로는 막히지 않고 있었다.
 		if GameManager.current_map_id == RESTAURANT_SIGN_MAP_ID and not RestaurantManager.can_player_leave():
-			_show_temporary_message(RESTAURANT_CANNOT_LEAVE_MESSAGE)
+			_show_temporary_message(RESTAURANT_CANNOT_LEAVE_MESSAGE if RestaurantManager.is_open else RESTAURANT_CUSTOMERS_REMAINING_MESSAGE)
 			return
 		if _is_locked_shop_map(String(warp["target_map"])):
 			_show_temporary_message(SHOP_LOCKED_MESSAGE)
@@ -3075,12 +3496,22 @@ func _on_interact_pressed() -> void:
 		# 정리한다(2026-08-12) - 여기서 따로 stop() 안 불러도 됨.
 		FishingManager.cancel_fishing()
 		return
-	if FishingManager.can_start_fishing() and _is_facing_water() and not InventoryManager.is_full():
+	if FishingManager.can_start_fishing() and _is_facing_water():
+		if not FishingManager.can_fit_all_species():
+			_show_temporary_message("가방이 가득 찼다.")
+			return
 		if FishingManager.start_fishing():
 			AudioManager.play_sfx(AudioManager.SFX_BUBBLE)
 			player.tool_overlay.start("fishing_rod")
 		return
-	if not InventoryManager.is_full() and HuntingManager.try_catch(GameManager.current_map_id):
+	if not HuntingManager.get_interact_prompt(GameManager.current_map_id).is_empty():
+		## 낚시와 동일한 패턴(사용자 지시, 2026-09-01) - "E 조준"은 인벤 상태와
+		## 무관하게 항상 뜨고, 실제로 눌러서 담을 자리가 없을 때만 "가방이
+		## 가득 찼다."를 짧게 보여준다.
+		if not HuntingManager.can_fit_catch(GameManager.current_map_id):
+			_show_temporary_message("가방이 가득 찼다.")
+		else:
+			HuntingManager.try_catch(GameManager.current_map_id)
 		return
 	var available_bush := BerryBushManager.get_available_bush(player.position)
 	if not available_bush.is_empty():
@@ -3211,9 +3642,15 @@ func _handle_interaction(interactable: Dictionary) -> void:
 		# 10시 전에 팻말 앞에서 연타하다 열렸다 닫혔다 하는 문제(사용자 리포트)로
 		# 즉시 토글하지 않고 매번 확인창을 거친다 - 팝업이 열려있는 동안은
 		# _is_any_modal_open()이 막아줘서 그 사이엔 다시 연타해도 안 먹힌다.
+		if RestaurantManager.is_open and _tutorial_locks_restaurant_close:
+			# 신규 슬롯 튜토리얼이 강제로 열어둔 레스토랑은 튜토리얼이 끝날
+			# 때까지 플레이어가 직접 닫을 수 없다(사용자 지시, 2026-09-01 -
+			# "열었을땐 못닫게 해줘").
+			return
 		if RestaurantManager.is_open:
 			restaurant_confirm_popup.open_with_message("레스토랑을 닫으시겠습니까?")
-		elif TimeManager.current_hour < RestaurantManager.OPEN_HOUR or TimeManager.current_hour >= RestaurantManager.CLOSE_HOUR:
+		elif not _tutorial_awaiting_restaurant_open \
+				and (TimeManager.current_hour < RestaurantManager.OPEN_HOUR or TimeManager.current_hour >= RestaurantManager.CLOSE_HOUR):
 			_show_temporary_message(RESTAURANT_HOURS_MESSAGE)
 		else:
 			restaurant_confirm_popup.open_with_message("레스토랑을 여시겠습니까?")

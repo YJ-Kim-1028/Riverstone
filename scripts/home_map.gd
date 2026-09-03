@@ -541,6 +541,15 @@ func get_interactable_at(world_position: Vector2) -> Dictionary:
 	return {}
 
 
+## 이름으로 Interactable의 월드 좌표를 찾는다(사용자 지시, 2026-09-01 - 튜토리얼
+## 컷신에서 특정 상호작용 지점을 하이라이트하는 용도). 못 찾으면 Vector2.INF.
+func get_interactable_position(interactable_name: String) -> Vector2:
+	for interactable in _interactables:
+		if String(interactable.get("name", "")) == interactable_name:
+			return interactable["position"]
+	return Vector2.INF
+
+
 ## 외양간 문(door1_open~4 등, get_interactable_at()이 돌려주는 것과 같은
 ## Dictionary) 바로 위 1칸에 걸쳐 있는 "Door" 레이어 타일을 열고/닫는다(사용자
 ## 지시: 상호작용 오브젝트 사각형과 같은 가로 폭만큼, 그 한 칸 위). 열면 그

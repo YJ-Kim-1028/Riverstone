@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="22" nextobjectid="169">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="22" nextobjectid="173">
  <tileset firstgid="1" source="UI_Component.tsx"/>
  <tileset firstgid="257" source="restaurant.tsx"/>
  <layer id="6" name="Tile" width="20" height="20" locked="1">
@@ -233,8 +233,8 @@
   </object>
  </objectgroup>
  <objectgroup id="12" name="Spawn" visible="0" locked="1">
-  <object id="3" name="restaurant_enterance_backyard" x="144" y="64" width="32" height="16"/>
-  <object id="4" name="restaurant_enterance" x="144" y="304" width="32" height="16"/>
+  <object id="3" name="restaurant_enterance_backyard" x="144" y="80" width="32" height="16"/>
+  <object id="4" name="restaurant_enterance" x="144" y="288" width="32" height="16"/>
   <object id="5" name="restaurant_seat1" x="152" y="120"/>
   <object id="6" name="restaurant_seat2" x="216" y="120"/>
   <object id="7" name="restaurant_seat3" x="280" y="120"/>
@@ -242,6 +242,7 @@
   <object id="127" name="restaurant_dish2" x="208" y="112" width="16" height="16"/>
   <object id="128" name="restaurant_dish3" x="272" y="112" width="16" height="16"/>
   <object id="166" name="restaurant_storage_box" x="192" y="64" width="16" height="16"/>
+  <object id="200" name="poli_tutorial_entrance" x="176" y="304" width="16" height="16"/>
  </objectgroup>
  <objectgroup id="15" name="Interactable" visible="0" locked="1">
   <object id="125" name="restaurant_open" x="96.1364" y="256" width="16" height="16"/>
@@ -268,9 +269,13 @@
   <object id="146" name="desk5" x="32" y="240" width="48" height="32"/>
   <object id="148" name="desk6" x="32" y="160" width="48" height="32"/>
  </objectgroup>
- <objectgroup id="21" name="EffectArea" locked="1">
+ <objectgroup id="21" name="EffectArea" visible="0" locked="1">
   <object id="165" name="restaurant_frame_blood" x="180" y="211" width="40" height="25"/>
   <object id="167" name="cooking_area1_fire" x="16" y="64" width="32" height="32"/>
   <object id="168" name="cooking_area2_fire" x="16" y="96" width="32" height="32"/>
+  <object id="169" name="cooking_area1_bar" x="48" y="83"/>
+  <object id="170" name="cooking_area2_bar" x="48" y="113"/>
+  <object id="171" name="cooking_area3_bar" x="48" y="133"/>
+  <object id="172" name="cooking_area4_bar" x="48" y="151"/>
  </objectgroup>
 </map>
