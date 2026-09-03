@@ -42,19 +42,22 @@ const INTRO_BUTTON_FADE_SECONDS := 0.4
 @onready var _start_button: Button = $ButtonColumn/StartButton
 @onready var _continue_button: Button = $ButtonColumn/ContinueButton
 @onready var _language_button: Button = $ButtonColumn/LanguageButton
+@onready var _settings_button: Button = $ButtonColumn/SettingsButton
 @onready var _quit_button: Button = $ButtonColumn/QuitButton
 @onready var _slot_picker: Control = $SlotPickerScreen
 @onready var _character_creation: Control = $CharacterCreationScreen
 @onready var _language_screen: Control = $LanguageSettingsScreen
+@onready var _settings_screen: Control = $TitleSettingsScreen
 @onready var _fade: ColorRect = $TransitionLayer/Fade
 
 
 func _ready() -> void:
-	for button in [_start_button, _continue_button, _language_button, _quit_button]:
+	for button in [_start_button, _continue_button, _language_button, _settings_button, _quit_button]:
 		_style_button(button)
 	_start_button.pressed.connect(func() -> void: _slot_picker.open(MODE_NEW_GAME))
 	_continue_button.pressed.connect(func() -> void: _slot_picker.open(MODE_CONTINUE))
 	_language_button.pressed.connect(_language_screen.open)
+	_settings_button.pressed.connect(_settings_screen.open)
 	_quit_button.pressed.connect(func() -> void: get_tree().quit())
 	_slot_picker.slot_confirmed.connect(_on_slot_confirmed)
 	_slot_picker.closed.connect(_refresh_continue_button)
@@ -76,7 +79,7 @@ func _play_intro_animation() -> void:
 		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
 	logo_tween.tween_property(_logo, "modulate:a", 1.0, INTRO_LOGO_DURATION)
 
-	var buttons := [_start_button, _continue_button, _language_button, _quit_button]
+	var buttons := [_start_button, _continue_button, _language_button, _settings_button, _quit_button]
 	for button in buttons:
 		button.modulate.a = 0.0
 	var button_tween := create_tween()

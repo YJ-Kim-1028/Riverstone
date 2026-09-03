@@ -1,25 +1,32 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene format=3 uid="uid://ms4ropb1qdc6"]
 
-[ext_resource type="Script" path="res://scripts/ui/title_screen.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/ui/bg_mainmenu.png" id="2_bg"]
-[ext_resource type="Texture2D" path="res://assets/ui/logo.png" id="3_logo"]
+[ext_resource type="Script" uid="uid://d20ashpssu80r" path="res://scripts/ui/title_screen.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://cmaljcttrt5a4" path="res://assets/ui/bg_mainmenu.png" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://cic4y2mk1obfo" path="res://assets/ui/logo.png" id="3_logo"]
 [ext_resource type="PackedScene" path="res://scenes/ui/slot_picker_screen.tscn" id="4_slot_picker"]
 [ext_resource type="PackedScene" path="res://scenes/ui/character_creation_screen.tscn" id="5_character_creation"]
 [ext_resource type="PackedScene" path="res://scenes/ui/language_settings_screen.tscn" id="6_language_settings"]
+[ext_resource type="PackedScene" path="res://scenes/ui/title_settings_screen.tscn" id="7_settings"]
 
-[node name="TitleScreen" type="Control"]
+[node name="TitleScreen" type="Control" unique_id=607178369]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="Background" type="TextureRect" parent="."]
+[node name="Background" type="TextureRect" parent="." unique_id=1426520418]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 texture = ExtResource("2_bg")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="Logo" type="TextureRect" parent="."]
+[node name="Logo" type="TextureRect" parent="." unique_id=1533474134]
+layout_mode = 0
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -80.0
@@ -30,53 +37,66 @@ texture = ExtResource("3_logo")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="ButtonColumn" type="VBoxContainer" parent="."]
+[node name="ButtonColumn" type="VBoxContainer" parent="." unique_id=790729020]
+layout_mode = 0
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -35.0
-offset_top = -98.0
+offset_top = -119.0
 offset_right = 35.0
 offset_bottom = -34.0
 theme_override_constants/separation = 5
 
-[node name="StartButton" type="Button" parent="ButtonColumn"]
+[node name="StartButton" type="Button" parent="ButtonColumn" unique_id=1392733168]
 custom_minimum_size = Vector2(70, 16)
 layout_mode = 2
 theme_override_font_sizes/font_size = 5
 text = "시작하기"
 
-[node name="ContinueButton" type="Button" parent="ButtonColumn"]
+[node name="ContinueButton" type="Button" parent="ButtonColumn" unique_id=674392223]
 custom_minimum_size = Vector2(70, 16)
 layout_mode = 2
 theme_override_font_sizes/font_size = 5
 text = "이어하기"
 
-[node name="LanguageButton" type="Button" parent="ButtonColumn"]
+[node name="LanguageButton" type="Button" parent="ButtonColumn" unique_id=337872366]
 custom_minimum_size = Vector2(70, 16)
 layout_mode = 2
 theme_override_font_sizes/font_size = 5
 text = "언어"
 
-[node name="QuitButton" type="Button" parent="ButtonColumn"]
+[node name="SettingsButton" type="Button" parent="ButtonColumn" unique_id=822782294]
+custom_minimum_size = Vector2(70, 16)
+layout_mode = 2
+theme_override_font_sizes/font_size = 5
+text = "설정"
+
+[node name="QuitButton" type="Button" parent="ButtonColumn" unique_id=948003643]
 custom_minimum_size = Vector2(70, 16)
 layout_mode = 2
 theme_override_font_sizes/font_size = 5
 text = "종료"
 
-[node name="SlotPickerScreen" parent="." instance=ExtResource("4_slot_picker")]
+[node name="SlotPickerScreen" parent="." unique_id=793385363 instance=ExtResource("4_slot_picker")]
+anchors_preset = 0
 
-[node name="CharacterCreationScreen" parent="." instance=ExtResource("5_character_creation")]
+[node name="CharacterCreationScreen" parent="." unique_id=637300687 instance=ExtResource("5_character_creation")]
+anchors_preset = 0
 
-[node name="LanguageSettingsScreen" parent="." instance=ExtResource("6_language_settings")]
+[node name="LanguageSettingsScreen" parent="." unique_id=446446814 instance=ExtResource("6_language_settings")]
+anchors_preset = 0
 
-[node name="TransitionLayer" type="CanvasLayer" parent="."]
+[node name="TitleSettingsScreen" parent="." unique_id=222760602 instance=ExtResource("7_settings")]
+anchors_preset = 0
+
+[node name="TransitionLayer" type="CanvasLayer" parent="." unique_id=126645051]
 layer = 3
 
-[node name="Fade" type="ColorRect" parent="TransitionLayer"]
-mouse_filter = 2
+[node name="Fade" type="ColorRect" parent="TransitionLayer" unique_id=1797297045]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+mouse_filter = 2
 color = Color(0, 0, 0, 0)
