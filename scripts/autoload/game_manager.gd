@@ -18,10 +18,31 @@ const DEFAULT_PLAYER_NAME := "Player"
 ## 자리표시자 대신 이 필드를 참조하게 바꿨다.
 const DEFAULT_RESTAURANT_NAME := "우리 레스토랑"
 
+## 커스텀 마우스 커서(사용자 지시, 2026-09-01) - 사용자가 UI_Component.png(16px
+## 타일 시트, 16열)에 직접 그려둔 칸을 그대로 쓴다. "5행 5열"은 1-인덱스
+## 표현이라 0-인덱스로 -1씩 뺀 값.
+const CURSOR_SHEET_PATH := "res://assets/ui/UI_Component.png"
+const CURSOR_CELL_SIZE := 16
+const CURSOR_ROW := 4
+const CURSOR_COLUMN := 4
+## 커서는 게임 UI(320x180 -> 1280x720, project.godot의 canvas_items 스트레치)와
+## 달리 실제 화면 픽셀 그대로 그려져서, 16px 원본을 그대로 쓰면 나머지 4배로
+## 확대된 UI에 비해 작아 보인다 - 같은 배율로 직접 확대해서 맞춘다.
+const CURSOR_DISPLAY_SCALE := 4
+## 커서 그림에서 실제 클릭 지점(끝)이 어디인지 - 기본은 좌상단. 다른 지점이면
+## 이 값만 바꾸면 된다(원본 16px 셀 기준 좌표, 화면 배율은 자동 반영됨).
+const CURSOR_HOTSPOT := Vector2i(0, 0)
+
 var player_name := DEFAULT_PLAYER_NAME
 var restaurant_name := DEFAULT_RESTAURANT_NAME
 var play_time_seconds := 0.0
 var current_map_id := ""
+## 새 슬롯 생성 직후 딱 한 번만 트리거되는 튜토리얼 컷신용 플래그(사용자
+## 지시, 2026-09-01). 기본값은 true("이미 봤다"/보여줄 필요 없음)로 둬야
+## 이 필드가 없는 기존 세이브를 이어할 때 컷신이 뒤늦게 뜨지 않는다 -
+## character_creation_screen.gd의 _on_confirm_pressed()가 신규 게임일 때만
+## 명시적으로 false로 꺼서 "보여줄 차례"로 표시한다.
+var tutorial_intro_shown := true
 ## 캐릭터 생성 화면에서 고른 외형. 전부 한 장짜리 시트(player_hair.png/
 ## player_outfit.png/player_shoes.png/player_accessory.png)에서 고른 "줄 번호"를
 ## 문자열로 담는다(hair_id는 "0"=대머리, accessory_id는 "0"=없음, outfit_id/
@@ -30,6 +51,23 @@ var hair_id := ""
 var outfit_id := ""
 var shoe_id := ""
 var accessory_id := ""
+## 고해상도 AI 아트 프로토타입 전용(player.gd HD_HAIRSTYLES 참고) - 위 hair_id
+## (구형 마커 리컬러 시스템)와는 완전히 별개로, assets/player/pixellab/의
+## player_hd_<style>.png 파일 이름 중 하나를 그대로 담는다(사용자 지시,
+## 2026-09-02 - "거울에서 고를수있게 적용해주면 안 돼?"). 기존 세이브(이 필드가
+## 없던)를 이어할 때도 지금까지 보이던 모습(danbal) 그대로 유지되도록 기본값을
+## danbal로 둔다.
+var hd_hairstyle_id := "danbal"
+## 마찬가지로 구형 outfit_id(마커 리컬러)와 별개 - player_outfit_<style>.png
+## 오버레이 파일 이름을 담는다(사용자 지시, 2026-09-03 - "그냥 게임에 바로
+## 적용해줘봐"). ""은 "옷 없음"(속옷 상태)이라는 유효한 선택지라 hd_hairstyle_id와
+## 달리 폴백용 기본 스타일이 없다 - player.gd의 resolve_hd_outfit_sprite_path
+## 참고. 지금 유일한 스타일(plain)을 기본값으로 둬서 만들자마자 바로 보이게 함.
+var hd_outfit_id := "plain"
+## 눈 오버레이(player.gd HD_EYE_STYLES) - 옷과 달리 "없음"이 기본값이 아니다
+## (얼굴에 눈이 없으면 부자연스러워서). PlayerController.HD_EYE_STYLES[0]과
+## 맞춰 첫 스타일을 기본값으로 둔다.
+var hd_eye_style_id := "anime_eyes"
 ## 피부색/눈동자색 - hair_color_1/2/3와 같은 형식(HTML 헥스 문자열). 색상환
 ## (SVSquare+HueStrip)에서 자유롭게 고른 색을 그대로 담는다 - 고정 목록
 ## 인덱스가 아니다(사용자 확정: 프리셋 방식에서 자유 색상 선택으로 변경).
@@ -71,6 +109,23 @@ var _play_timer_running := false
 ## 먼저 여기서 한 번 시드를 흩뿌린다.
 func _ready() -> void:
 	randomize()
+	_apply_custom_cursor()
+
+
+## UI_Component.png에서 커서 칸(CURSOR_ROW/CURSOR_COLUMN)만 잘라 화면 배율에
+## 맞게 확대한 뒤 OS 커서로 등록한다. get_image()가 필요해서 CURSOR_SHEET_PATH의
+## import 압축 모드가 Lossless(무손실)여야 한다(현재 그대로 확인됨) - VRAM
+## 압축으로 바뀌면 내보낸 빌드에서 get_image()가 실패할 수 있다.
+func _apply_custom_cursor() -> void:
+	var sheet := load(CURSOR_SHEET_PATH) as Texture2D
+	if sheet == null:
+		return
+	var region := Rect2i(CURSOR_COLUMN * CURSOR_CELL_SIZE, CURSOR_ROW * CURSOR_CELL_SIZE, CURSOR_CELL_SIZE, CURSOR_CELL_SIZE)
+	var cell_image := sheet.get_image().get_region(region)
+	var display_size := CURSOR_CELL_SIZE * CURSOR_DISPLAY_SCALE
+	cell_image.resize(display_size, display_size, Image.INTERPOLATE_NEAREST)
+	var cursor_texture := ImageTexture.create_from_image(cell_image)
+	Input.set_custom_mouse_cursor(cursor_texture, Input.CURSOR_ARROW, Vector2(CURSOR_HOTSPOT * CURSOR_DISPLAY_SCALE))
 
 
 func _process(delta: float) -> void:
@@ -110,11 +165,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	## 옮긴다.
 	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F1:
 		MurderManager.debug_force_arrest_ending()
-	## 우디 호감도 50 옷장 이벤트 테스트용(사용자 지시, 2026-08-30) - F키가
+	## 호감도 이벤트 테스트용(사용자 지시, 2026-08-30 우디 단독 -> 2026-09-04
+	## 전체 NPC로 확장, "1번 누르면 모든 npc 호감도 10씩 올리게 해줘") - F키가
 	## 전부 차서 숫자키로 뺌. debug_set_affection()은 F8 자리에 있던 그
 	## 기존 함수를 그대로 재사용.
 	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_1:
-		NPCManager.debug_set_affection("woody", NPCManager.get_affection("woody") + 10)
+		for npc_id in NPCManager.get_all_ids():
+			NPCManager.debug_set_affection(npc_id, NPCManager.get_affection(npc_id) + 10)
 	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_2:
 		EconomyManager.add_income(10000)
 
@@ -196,6 +253,7 @@ func get_save_data() -> Dictionary:
 		"restaurant_name": restaurant_name,
 		"play_time_seconds": play_time_seconds,
 		"current_map_id": current_map_id,
+		"tutorial_intro_shown": tutorial_intro_shown,
 		"hair_id": hair_id,
 		"hair_color_1": hair_color_1,
 		"hair_color_2": hair_color_2,
@@ -211,6 +269,9 @@ func get_save_data() -> Dictionary:
 		"outfit_id": outfit_id,
 		"shoe_id": shoe_id,
 		"accessory_id": accessory_id,
+		"hd_hairstyle_id": hd_hairstyle_id,
+		"hd_outfit_id": hd_outfit_id,
+		"hd_eye_style_id": hd_eye_style_id,
 	}
 
 
@@ -219,6 +280,7 @@ func load_save_data(data: Dictionary) -> void:
 	restaurant_name = String(data.get("restaurant_name", DEFAULT_RESTAURANT_NAME))
 	play_time_seconds = float(data.get("play_time_seconds", 0.0))
 	current_map_id = String(data.get("current_map_id", ""))
+	tutorial_intro_shown = bool(data.get("tutorial_intro_shown", true))
 	hair_id = String(data.get("hair_id", ""))
 	hair_color_1 = String(data.get("hair_color_1", "d8d8d8"))
 	hair_color_2 = String(data.get("hair_color_2", "9a9a9a"))
@@ -234,3 +296,6 @@ func load_save_data(data: Dictionary) -> void:
 	outfit_id = String(data.get("outfit_id", ""))
 	shoe_id = String(data.get("shoe_id", ""))
 	accessory_id = String(data.get("accessory_id", ""))
+	hd_hairstyle_id = String(data.get("hd_hairstyle_id", "danbal"))
+	hd_outfit_id = String(data.get("hd_outfit_id", "plain"))
+	hd_eye_style_id = String(data.get("hd_eye_style_id", "anime_eyes"))
