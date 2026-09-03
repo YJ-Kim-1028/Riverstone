@@ -71,16 +71,17 @@ func get_available_action(world_position: Vector2) -> String:
 		return ""
 	var cell := _world_to_cell(world_position)
 	var equipped := EquipmentManager.get_equipped(EquipmentManager.HAND_SLOT)
+	var is_watering_can := equipped == "watering_can" or equipped == GOLDEN_WATERING_CAN_ITEM_ID
 	if not _plots.has(cell):
 		if equipped == "hoe":
 			return "till"
-		if equipped == "watering_can":
+		if is_watering_can:
 			return "needs_till"
 		return ""
 	var plot: Dictionary = _plots[cell]
 	if _is_grown(plot):
 		return "harvest"
-	if equipped == "watering_can":
+	if is_watering_can:
 		return "water"
 	if _seed_to_crop.has(equipped) and String(plot.get("crop_type", "")).is_empty():
 		return "plant"
@@ -126,22 +127,44 @@ func perform_untill(world_position: Vector2) -> String:
 	return ""
 
 
+## 플로라 호감도 50 선물(items.json golden_watering_can) - 정면 한 칸이 아니라
+## 그 칸을 중심으로 3x3 범위 전체에 물을 준다(사용자 지시, 2026-09-03 -
+## "황금 물뿌리개는 주변 3x3 범위 물 줄수있는거로").
+const GOLDEN_WATERING_CAN_ITEM_ID := "golden_watering_can"
+
 ## 오늘 이미 물을 준 칸이어도 다시 물을 줄 수 있다(사용자 지시, 2026-08-12) -
 ## 다만 성장에 반영되는 건 하루 첫 급수뿐이라, watered_count는 그 경우에만
 ## 올린다(급수 무제한 반복으로 하루 만에 다 자라는 걸 막기 위한 기존 규칙 유지).
 func perform_water(world_position: Vector2) -> String:
 	if get_available_action(world_position) != "water":
 		return ""
-	var cell := _world_to_cell(world_position)
+	var center_cell := _world_to_cell(world_position)
+	_water_cell(center_cell)
+	if EquipmentManager.get_equipped(EquipmentManager.HAND_SLOT) == GOLDEN_WATERING_CAN_ITEM_ID:
+		for dx in [-1, 0, 1]:
+			for dy in [-1, 0, 1]:
+				if dx == 0 and dy == 0:
+					continue
+				_water_cell(center_cell + Vector2i(dx, dy))
+	AudioManager.play_sfx(AudioManager.SFX_WATERING_CAN)
+	# 젖은 흙 그림이 바로 보이니 별도 문구 없이 조용히 처리한다(사용자 지시).
+	return ""
+
+
+## perform_water()가 중심 칸+황금 물뿌리개의 주변 8칸에 공용으로 쓴다 - 경작지가
+## 아니거나(밭이 아님) 이미 다 자란 칸은 조용히 건너뛴다(get_available_action()의
+## "water" 판정과 동일한 기준).
+func _water_cell(cell: Vector2i) -> void:
+	if not _plots.has(cell):
+		return
 	var plot: Dictionary = _plots[cell]
+	if _is_grown(plot):
+		return
 	var first_watering_today := not bool(plot.get("watered_today", false))
 	plot["watered_today"] = true
 	if first_watering_today and not String(plot.get("crop_type", "")).is_empty():
 		plot["watered_count"] = int(plot.get("watered_count", 0)) + 1
 	_update_plot_sprites(cell)
-	AudioManager.play_sfx(AudioManager.SFX_WATERING_CAN)
-	# 젖은 흙 그림이 바로 보이니 별도 문구 없이 조용히 처리한다(사용자 지시).
-	return ""
 
 
 ## 심는 시점에 이미 오늘 물 준(젖은) 경작지면 급수 1번을 이미 받은 것으로

@@ -21,6 +21,14 @@ const BITE_WAIT_MAX_SECONDS := 8.0
 const SPECIES_WEIGHTS := {"salmon": 45, "mackerel": 40, "squid": 15}
 ## bait 설명("오징어를 낚을 확률이 증가한다")과 일치하도록 오징어 가중치만 올린다.
 const BAIT_SQUID_WEIGHT_BONUS := 25
+## 황금 낚싯대(items.json golden_fishing_rod)로 GHOST_BITE_MAP_ID(플라자3)에서
+## 낚시할 때만 등장 확률에 섞이는 희귀 물고기(사용자 지시, 2026-09 - "황금
+## 물뿌리개로 플라자 3에서 낚시하면 희박한 확률로 전설 물고기가 나온다는
+## 설정이야" - 물뿌리개는 오타로 판단, 황금 낚싯대로 해석). 그 외 조건에선
+## weights 딕셔너리에 아예 안 들어가므로 절대 나오지 않는다.
+const GOLDEN_FISHING_ROD_ITEM_ID := "golden_fishing_rod"
+const LEGENDARY_FISH_ITEM_ID := "legendary_fish"
+const LEGENDARY_FISH_WEIGHT := 6
 ## 어종별 난이도(사용자 지시) - 물고기가 화면에 보이는/숨는 시간, 완료까지
 ## 필요한 클릭 수. 어종은 입질이 시작되는 순간(_roll_species(), 미니게임
 ## 시작 시점) 미리 정해져 있어야 fishing_fish.gd가 처음부터 맞는 난이도로
@@ -35,6 +43,7 @@ const SPECIES_DIFFICULTY := {
 	"salmon": {"appear": 0.5, "hide": 0.5, "hits": 6},
 	"mackerel": {"appear": 0.5, "hide": 0.5, "hits": 6},
 	"squid": {"appear": 0.45, "hide": 0.55, "hits": 6},
+	"legendary_fish": {"appear": 0.45, "hits": 10},
 }
 const DEFAULT_DIFFICULTY := {"appear": 0.5, "hide": 0.5, "hits": 6}
 
@@ -85,11 +94,35 @@ func _process(delta: float) -> void:
 		Phase.MINIGAME:
 			_minigame_elapsed += delta
 			if _minigame_elapsed >= MINIGAME_TIME_LIMIT_SECONDS:
+				## 실패(시간 초과)에 사운드가 아예 없다는 피드백(사용자 지시,
+				## 2026-09-01) - hunting_manager.gd의 SFX_HUNT_CATCH_FAIL과
+				## 동일한 패턴(실패가 확정되는 지점에서 바로 재생).
+				AudioManager.play_sfx(AudioManager.SFX_FISHING_FAIL)
 				_finish({"success": false, "item_id": ""})
 
 
 func can_start_fishing() -> bool:
-	return _phase == Phase.IDLE and EquipmentManager.get_equipped(EquipmentManager.HAND_SLOT) == "fishing_rod"
+	if _phase != Phase.IDLE:
+		return false
+	var equipped := EquipmentManager.get_equipped(EquipmentManager.HAND_SLOT)
+	return equipped == "fishing_rod" or equipped == GOLDEN_FISHING_ROD_ITEM_ID
+
+
+## main.gd가 낚시 프롬프트/시작을 `InventoryManager.is_full()`(빈 칸 0개)로만
+## 막았더니, 가방에 이미 연어/고등어/오징어가 스택으로 들어있어(빈 칸은 없어도
+## 그 스택엔 여유가 있는) 실제로는 더 잡을 수 있는 상황에서도 "E 낚시하기"
+## 프롬프트 자체가 안 뜨던 문제(사용자 리포트, 2026-09-01). 어종은 입질이 온
+## 뒤에야 정해지므로(_roll_species) 캐스팅 시점엔 어떤 게 나올지 모른다 -
+## "하나라도 자리가 있으면 통과"로 하면, 예를 들어 고등어 자리만 있는데
+## 연어가 나오는 경우 낚시는 시작됐지만 결국 못 담는 상황이 생긴다(사용자
+## 지적, 2026-09-01 - "고등어만 있다가 연어 나오면 어떡하려고"). 그래서 세
+## 어종 전부 자리가 있을 때만 통과시켜, 무엇이 나오든 반드시 담을 수 있다는
+## 게 보장될 때만 "E 낚시하기"를 띄운다.
+func can_fit_all_species() -> bool:
+	for species in SPECIES_WEIGHTS:
+		if not InventoryManager.can_add_item(String(species), 1):
+			return false
+	return true
 
 
 func start_fishing() -> bool:
@@ -187,6 +220,9 @@ func _roll_species() -> void:
 	var weights: Dictionary = SPECIES_WEIGHTS.duplicate()
 	if InventoryManager.has_item("bait", 1):
 		weights["squid"] = int(weights["squid"]) + BAIT_SQUID_WEIGHT_BONUS
+	if EquipmentManager.get_equipped(EquipmentManager.HAND_SLOT) == GOLDEN_FISHING_ROD_ITEM_ID \
+			and GameManager.current_map_id == GHOST_BITE_MAP_ID:
+		weights[LEGENDARY_FISH_ITEM_ID] = LEGENDARY_FISH_WEIGHT
 	_current_species = _roll_weighted(weights)
 
 
