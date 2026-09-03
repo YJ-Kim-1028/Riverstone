@@ -20,6 +20,11 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
 	TimeManager.forced_sleep.connect(_on_forced_sleep)
 	GameManager.map_changed.connect(_on_map_changed)
+	## 구매는 즉시 골드가 빠지고(EconomyManager) 옷장/의상샵 해금 같은 항목은
+	## 인벤토리에 안 남아서, 취침/맵 이동 전에 게임이 꺼지면 "돈만 나가고
+	## 아무것도 못 받은" 상태로 남는다(사용자 리포트, 2026-09-04 - "구매
+	## 후에도 저장되는 거 있어야할 거 같은데... 돈만 날아가고 템은 없어서").
+	ShopManager.item_purchased.connect(_on_item_purchased)
 
 
 func set_current_slot(slot: int) -> void:
@@ -90,6 +95,10 @@ func _on_map_changed(_map_id: String) -> void:
 	save_game(current_slot)
 
 
+func _on_item_purchased(_shop_id: String, _item_id: String, _price: int) -> void:
+	save_game(current_slot)
+
+
 func _slot_path(slot: int) -> String:
 	return SAVE_DIR + "save_slot_%d.json" % slot
 
@@ -108,6 +117,9 @@ func _gather_save_data() -> Dictionary:
 			"map": GameManager.current_map_id,
 			"play_time_seconds": GameManager.play_time_seconds,
 			"inventory": InventoryManager.get_save_data(),
+			"hd_hairstyle_id": GameManager.hd_hairstyle_id,
+			"hd_outfit_id": GameManager.hd_outfit_id,
+			"hd_eye_style_id": GameManager.hd_eye_style_id,
 			"hair_id": GameManager.hair_id,
 			"hair_color_1": GameManager.hair_color_1,
 			"hair_color_2": GameManager.hair_color_2,
@@ -185,6 +197,9 @@ func _apply_save_data(data: Dictionary) -> void:
 		"restaurant_name": player.get("restaurant_name", GameManager.DEFAULT_RESTAURANT_NAME),
 		"play_time_seconds": player.get("play_time_seconds", 0.0),
 		"current_map_id": player.get("map", ""),
+		"hd_hairstyle_id": player.get("hd_hairstyle_id", "danbal"),
+		"hd_outfit_id": player.get("hd_outfit_id", "plain"),
+		"hd_eye_style_id": player.get("hd_eye_style_id", "anime_eyes"),
 		"hair_id": player.get("hair_id", ""),
 		"hair_color_1": player.get("hair_color_1", "d8d8d8"),
 		"hair_color_2": player.get("hair_color_2", "9a9a9a"),
