@@ -78,8 +78,13 @@ func is_unlocked(song_id: String) -> bool:
 	## 상점 구매는 ShopManager.purchase_counts로, NPC 선물은 _gift_unlocked_item_ids로
 	## 각각 영구 기록한다 - 둘 다 인벤토리 보유 여부와 무관하다(사용자 지시,
 	## 2026-09-04 - "LP판 한번 npc에게 선물 받거나 구매하면, 들고 있지 않아도
-	## 주크박스에 자동으로 저장되게 해줘").
-	return ShopManager.get_purchase_count(item_id) > 0 or bool(_gift_unlocked_item_ids.get(item_id, false))
+	## 주크박스에 자동으로 저장되게 해줘"). InventoryManager.has_item()도 같이
+	## 본다 - 이 수정 이전에 이미 선물받아 _gift_unlocked_item_ids에 없는
+	## 기존 세이브(예: 어셔의 "Be with you")도 지금 인벤토리에 들고 있는 동안은
+	## 계속 재생 가능해야 하기 때문(과거 지급분에 대한 하위 호환).
+	return ShopManager.get_purchase_count(item_id) > 0 \
+		or bool(_gift_unlocked_item_ids.get(item_id, false)) \
+		or InventoryManager.has_item(item_id, 1)
 
 
 func get_unlocked_song_ids() -> Array:
@@ -120,11 +125,15 @@ func get_current_bgm_path() -> String:
 
 
 func get_save_data() -> Dictionary:
-	return {"selected_song_id": _current_song_id}
+	return {
+		"selected_song_id": _current_song_id,
+		"gift_unlocked_item_ids": _gift_unlocked_item_ids.duplicate(),
+	}
 
 
 func load_save_data(data: Dictionary) -> void:
 	_current_song_id = String(data.get("selected_song_id", DEFAULT_SONG_ID))
+	_gift_unlocked_item_ids = (data.get("gift_unlocked_item_ids", {}) as Dictionary).duplicate()
 
 
 func _load_songs() -> void:
