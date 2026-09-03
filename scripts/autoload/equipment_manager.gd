@@ -103,6 +103,23 @@ func unequip(slot: String) -> bool:
 	return true
 
 
+## unequip()과 같지만 인벤토리의 특정 칸(target_index)에 돌려준다 - 인벤토리
+## 그리드 위로 드래그해서 뺄 때, 그 칸에 그대로 놓이게 하는 용도
+## (equipment_slot.gd/equipment_panel.gd 참고).
+func unequip_to_slot(slot: String, target_index: int) -> bool:
+	if not EQUIP_SLOTS.has(slot):
+		return false
+	var current := String(_equipped.get(slot, ""))
+	if current.is_empty():
+		return false
+	if not InventoryManager.add_item_to_slot(current, get_equipped_count(slot), target_index):
+		return false
+	_equipped[slot] = ""
+	_equipped_counts[slot] = 0
+	equipment_changed.emit()
+	return true
+
+
 ## 여물처럼 한 번 쓰면 사라지는 소모성 장비를 한 개 소모한다 - unequip()과
 ## 달리 인벤토리로 돌려주지 않는다(LivestockManager.perform_feed()가 급여
 ## 성공 시 호출). 여러 개를 들고 있었으면 개수만 줄고, 마지막 1개를 쓰면

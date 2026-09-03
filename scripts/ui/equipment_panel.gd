@@ -29,7 +29,6 @@ const INVALID_DROP_MESSAGE := "이 곳에는 착용할 수 없다."
 const EQUIP_FAILED_MESSAGE := "인벤토리에 자리가 없어 교체할 수 없다."
 const MESSAGE_DURATION := 2.0
 const SELECTED_TINT := Color(1.3, 1.15, 0.7)
-const TOOLTIP_FONT_SIZE := 5
 ## 다른 화면(상점창 등)의 _style_scrollbar()와 동일한 값 - 창마다 스크롤바
 ## 굵기/색이 달라 보인다는 피드백으로 전부 통일한다.
 const SCROLLBAR_WIDTH := 4
@@ -42,13 +41,14 @@ const SCROLLBAR_WIDTH := 4
 @onready var _sort_button: TextureButton = $VBox/TopRow/ButtonsVBox/SortButton
 @onready var _discard_button: TextureButton = $VBox/TopRow/ButtonsVBox/DiscardButton
 @onready var _message_label: Label = $MessageLabel
+@onready var _tooltip: PanelContainer = $Tooltip
+@onready var _tooltip_label: Label = $Tooltip/Label
 
 var _message_timer := 0.0
 var _selected_index := -1
 
 
 func _ready() -> void:
-	theme = _build_tooltip_theme()
 	## 모자/신발 관련 아이템이 아직 하나도 없어서(items.json에 subtype
 	## "hat"/"shoes" 항목 자체가 없음) 지금 상태로 내보내면 아무것도 착용 못 할
 	## 빈 슬롯만 보인다(사용자 지시, 2026-08-26 - "현재 개발한 게 없어서 지금은
@@ -63,6 +63,12 @@ func _ready() -> void:
 	_hat_slot.equip_failed.connect(_show_equip_failed_message)
 	_hand_slot.equip_failed.connect(_show_equip_failed_message)
 	_shoes_slot.equip_failed.connect(_show_equip_failed_message)
+	_hat_slot.mouse_entered.connect(_show_tooltip.bind(_hat_slot))
+	_hat_slot.mouse_exited.connect(_hide_tooltip)
+	_hand_slot.mouse_entered.connect(_show_tooltip.bind(_hand_slot))
+	_hand_slot.mouse_exited.connect(_hide_tooltip)
+	_shoes_slot.mouse_entered.connect(_show_tooltip.bind(_shoes_slot))
+	_shoes_slot.mouse_exited.connect(_hide_tooltip)
 	_sort_button.pressed.connect(_on_sort_pressed)
 	_discard_button.pressed.connect(_on_discard_pressed)
 	_style_scrollbar()
@@ -87,23 +93,32 @@ func _style_scrollbar() -> void:
 	scrollbar.add_theme_stylebox_override("grabber_pressed", grabber)
 
 
-## collection_screen.gd와 동일 - 기본 툴팁(엔진 기본 테마의 큼직한 회색
-## 박스)이 이 작은 픽셀아트 UI랑 안 어울려서 폰트/배경만 작게 덮어쓴다.
-func _build_tooltip_theme() -> Theme:
-	var tooltip_theme := Theme.new()
-	var panel_style := StyleBoxFlat.new()
-	panel_style.bg_color = Color(0.98, 0.93, 0.82, 0.95)
-	panel_style.border_color = Color(0.42, 0.27, 0.15, 1)
-	panel_style.set_border_width_all(1)
-	panel_style.set_corner_radius_all(1)
-	panel_style.content_margin_left = 3.0
-	panel_style.content_margin_right = 3.0
-	panel_style.content_margin_top = 1.0
-	panel_style.content_margin_bottom = 1.0
-	tooltip_theme.set_stylebox("panel", "TooltipPanel", panel_style)
-	tooltip_theme.set_font_size("font_size", "TooltipLabel", TOOLTIP_FONT_SIZE)
-	tooltip_theme.set_color("font_color", "TooltipLabel", Color(0.42, 0.27, 0.15, 1))
-	return tooltip_theme
+## 엔진 기본 툴팁(Control.tooltip_text)은 이 게임이 320x180 캔버스를 4배로
+## 확대해서 보여주는 구조(project.godot의 window/stretch/mode="canvas_items")와
+## 안 맞아서, 확대된 화면 기준으로 보면 커서와 동떨어진 자리에 뜬다(사용자
+## 리포트, 2026-09-01 - "툴팁 뜨는 위치 이상하다") - 엔진 팝업은 이 캔버스
+## 스케일을 모르는 별도 좌표계에서 위치를 계산하기 때문. 그래서 기본
+## tooltip_text 대신 이 화면 안에 있는 일반 Control(Tooltip)을 직접 켜고/끄고
+## 위치를 맞추는 방식으로 대체한다 - 같은 캔버스 안에 있으니 확대 배율이
+## 자동으로 맞는다. 슬롯 쪽은 `.tooltip_text`(엔진 팝업을 같이 띄움) 대신
+## `set_meta("tooltip_text", ...)`로 문구만 들고 있게 했다
+## (_refresh_inventory()/equipment_slot.gd 참고).
+func _show_tooltip(source: Control) -> void:
+	var text := String(source.get_meta("tooltip_text", ""))
+	if text.is_empty():
+		return
+	_tooltip_label.text = text
+	_tooltip.visible = true
+	_tooltip.size = _tooltip.get_combined_minimum_size()
+	var viewport_size := get_viewport_rect().size
+	var target := source.get_global_rect().position + Vector2(0, source.get_global_rect().size.y + 2.0)
+	target.x = clampf(target.x, 0.0, viewport_size.x - _tooltip.size.x)
+	target.y = clampf(target.y, 0.0, viewport_size.y - _tooltip.size.y)
+	_tooltip.global_position = target
+
+
+func _hide_tooltip() -> void:
+	_tooltip.visible = false
 
 
 func _process(delta: float) -> void:
@@ -135,9 +150,19 @@ func refresh() -> void:
 	_hand_slot.refresh()
 	_shoes_slot.refresh()
 	_refresh_inventory()
+	## Tooltip은 순전히 장식용(클릭이 통과해야 함)이라 .tscn에 mouse_filter=
+	## IGNORE로 지정해뒀는데, status_screen.gd가 TAB을 열 때 이 화면 서브트리
+	## 전체를 재귀로 STOP 처리하면서 이것도 덮어써진다 - CLAUDE.md의 UI 모달
+	## mouse_filter 체크리스트 3번과 동일한 패턴이라, 열릴 때마다 다시 IGNORE로
+	## 되돌린다.
+	_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_tooltip_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
 func _refresh_inventory() -> void:
+	## 그리드가 통째로 다시 만들어지므로, 지금 뜬 툴팁이 가리키던 슬롯도 같이
+	## 사라진다 - mouse_exited가 그 슬롯에서 안 올 수 있으니 여기서 미리 끈다.
+	_hide_tooltip()
 	for child in _inventory_grid.get_children():
 		child.queue_free()
 	var slots: Array = InventoryManager.get_slots()
@@ -156,7 +181,9 @@ func _refresh_inventory() -> void:
 		# 그대로 물려받게 하면 닫힌 동안 생겨도 처음부터 IGNORE로 시작한다.
 		slot_instance.mouse_filter = mouse_filter
 		slot_instance.call("setup", i, slots[i])
-		slot_instance.tooltip_text = _tooltip_for(slots[i])
+		slot_instance.set_meta("tooltip_text", _tooltip_for(slots[i]))
+		slot_instance.mouse_entered.connect(_show_tooltip.bind(slot_instance))
+		slot_instance.mouse_exited.connect(_hide_tooltip)
 		slot_instance.source_tag = BAG_SOURCE
 		slot_instance.accepts_drops = true
 		slot_instance.connect("slot_pressed", _on_slot_pressed)
@@ -181,14 +208,18 @@ func _on_slot_pressed(index: int) -> void:
 
 ## 인벤 그리드 안에서 슬롯을 드래그해 다른 슬롯에 놓으면 두 자리를 맞바꾼다
 ## (사용자 지시, 2026-08-30 - "인벤 내에서 위치 바꿀수있게끔"). 장비 슬롯(모자/
-## 손/신발)에서 꺼내는 드래그는 from_index가 없는 채로 여기까지 흘러올 수
-## 있는데(equipment_slot.gd의 드래그 데이터), 그 경우 그냥 무시한다 - 장착
-## 해제는 equipment_slot.gd의 NOTIFICATION_DRAG_END가 별도로 처리한다.
+## 손/신발)에서 꺼내는 드래그(equipment_slot.gd)는 from_index 대신
+## equipment_slot 키가 실려오는데, 놓은 칸(target_index) 그대로 돌려준다
+## (사용자 리포트, 2026-09-01 - "원하는 칸에 드래그 했는데 항상 맨 앞칸으로
+## 들어간다" - 예전엔 여기서 그냥 무시하고 equipment_slot.gd의
+## NOTIFICATION_DRAG_END 쪽 fallback이 항상 첫 빈 칸에 넣었었다). 그리드
+## 바깥(빈 공간)에 놓는 경우는 이 신호 자체가 안 와서 여전히 그 fallback이
+## 처리한다.
 func _on_slot_drop_received(_source_tag: String, target_index: int, data: Dictionary) -> void:
-	if not data.has("from_index"):
-		return
-	var from_index := int(data["from_index"])
-	InventoryManager.swap_slots(from_index, target_index)
+	if data.has("from_index"):
+		InventoryManager.swap_slots(int(data["from_index"]), target_index)
+	elif data.has("equipment_slot"):
+		EquipmentManager.unequip_to_slot(String(data["equipment_slot"]), target_index)
 
 
 func _on_sort_pressed() -> void:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/equipment_panel.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://scenes/ui/equipment_slot.tscn" id="2_slot"]
@@ -7,6 +7,22 @@
 [ext_resource type="Texture2D" path="res://assets/ui/icon_sort_hover.png" id="5_sort_hover"]
 [ext_resource type="Texture2D" path="res://assets/ui/icon_trash.png" id="6_trash"]
 [ext_resource type="Texture2D" path="res://assets/ui/icon_trash_hover.png" id="7_trash_hover"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tooltip"]
+bg_color = Color(0.98, 0.93, 0.82, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.42, 0.27, 0.15, 1)
+corner_radius_top_left = 1
+corner_radius_top_right = 1
+corner_radius_bottom_right = 1
+corner_radius_bottom_left = 1
+content_margin_left = 3.0
+content_margin_right = 3.0
+content_margin_top = 1.0
+content_margin_bottom = 1.0
 
 [node name="EquipmentPanel" type="Control"]
 anchor_right = 1.0
@@ -94,3 +110,14 @@ offset_top = -14.0
 theme_override_font_sizes/font_size = 5
 theme_override_colors/font_color = Color(0.7, 0.15, 0.15, 1)
 horizontal_alignment = 1
+
+[node name="Tooltip" type="PanelContainer" parent="."]
+visible = false
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_tooltip")
+
+[node name="Label" type="Label" parent="Tooltip"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 5
+theme_override_colors/font_color = Color(0.42, 0.27, 0.15, 1)

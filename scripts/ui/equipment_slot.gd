@@ -50,8 +50,11 @@ func refresh() -> void:
 	var count := EquipmentManager.get_equipped_count(slot_name)
 	_count_label.text = str(count) if count > 1 else ""
 	## 인벤토리 그리드 슬롯(equipment_panel.gd의 _tooltip_for())과 동일한
-	## 형식의 마우스 오버 툴팁 - 사용자 지시, 2026-08-24.
-	tooltip_text = _tooltip_for(item_id)
+	## 형식의 마우스 오버 툴팁 - 사용자 지시, 2026-08-24. 엔진 기본
+	## `tooltip_text`는 안 쓴다(equipment_panel.gd의 _show_tooltip() 주석 참고 -
+	## 이 게임의 4배 확대 캔버스에서 위치가 어긋난다) - 문구만 메타데이터로
+	## 들고 있으면 equipment_panel.gd가 mouse_entered/exited로 직접 띄운다.
+	set_meta("tooltip_text", _tooltip_for(item_id))
 	## status_screen.gd(TAB 창 본체)가 열릴 때마다 자기 서브트리 전체의
 	## mouse_filter를 STOP으로 재귀 강제하는데, 그 안에 이 슬롯도 포함돼서
 	## Icon/CountLabel에 .tscn에서 지정해둔 IGNORE(클릭이 밑의 EquipmentSlot
@@ -108,7 +111,10 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 	preview.custom_minimum_size = _icon.size
 	preview.position = -_icon.size / 2.0
 	set_drag_preview(preview)
-	return {"item_id": item_id, "count": EquipmentManager.get_equipped_count(slot_name), "source": "equipment"}
+	# equipment_slot: equipment_panel.gd가 인벤토리 그리드 슬롯 위로 놓였을 때
+	# 어느 장비 슬롯을 해제할지 알아야 그 칸으로 정확히 돌려줄 수 있다
+	# (EquipmentManager.unequip_to_slot() 참고).
+	return {"item_id": item_id, "count": EquipmentManager.get_equipped_count(slot_name), "source": "equipment", "equipment_slot": slot_name}
 
 
 func _notification(what: int) -> void:
