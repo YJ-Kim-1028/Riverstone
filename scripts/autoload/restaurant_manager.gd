@@ -25,6 +25,12 @@ signal npc_arrived(station_index: int, npc_id: String)
 signal npc_departed(station_index: int, npc_id: String, paid_amount: int)
 signal dish_served(station_index: int, npc_id: String, dish: Dictionary)
 signal npc_poisoned(npc_id: String)
+## 오늘 배정된 손님(_todays_visitors, 최대 DAILY_VISITOR_COUNT명) 전원이
+## 서빙까지 완료된 순간 정확히 한 번만 쏜다 - 영업시간이 남아도 더 이상 새
+## 손님은 안 온다는 걸 플레이어에게 알려주기 위함(사용자 피드백 42번,
+## 2026-09-01 - "4시까지 영업이 길어서 10명 채워도 시간이 남을 듯. 오늘 받을
+## 손님이 없을 때는 머리 위에 띄워주기").
+signal all_visitors_served
 
 const STATION_COUNT := 3
 const OPEN_HOUR := 10
@@ -38,14 +44,27 @@ const NEW_GUEST_CUTOFF_MINUTE := 30
 ## 회전 속도 중 가장 작은 값으로 자연히 정해진다.
 const DAILY_VISITOR_COUNT := 10
 const EATING_DURATION_MINUTES := 30
+## 호감도를 고루고루 올리게 유도하려고(사용자 지시, 2026-09-04 - "호감도 제일
+## 낮은 npc 2명을 항상 레스토랑 열자마자 초대") 매일 호감도가 가장 낮은 살아있는
+## NPC 2명을 자동으로 오늘 방문객 맨 앞에 꽂는다 - 수동 초대(_invited_npc_id)와
+## 합쳐도 최대 3명(=STATION_COUNT)이라 자리가 모자라지 않는다.
+const AUTO_LOW_AFFECTION_INVITE_COUNT := 2
 
 var is_open := false
+## 신규 슬롯 튜토리얼(main.gd._maybe_play_tutorial_intro()) 전용 - true인 동안
+## 정상적인 방문객 자동 추첨/착석(_try_admit_next_visitor)을 건너뛴다(사용자
+## 지시, 2026-09-01 - "튜토일때는 레스토랑 열어도 손님 안오게 해줘"). 튜토리얼이
+## force_seat_npc()로 폴리를 직접 앉히는 것과는 무관하게 항상 동작한다.
+var suppress_auto_visitors := false
 
 var _stations: Array = []
 var _todays_visitors: Array = []
 var _visited_today: Dictionary = {}
 ## 다음날 확정 방문으로 예약된 초대(invite_npc()가 채움, _generate_daily_visitors()가
 ## 그날 방문객 목록에 반영하며 비움).
+## all_visitors_served를 하루에 한 번만 쏘기 위한 플래그 - _generate_daily_visitors()가
+## 매일 리셋한다.
+var _all_visitors_notified := false
 var _invited_npc_id := ""
 ## _generate_daily_visitors()가 _invited_npc_id를 소비하는 순간, "오늘 확정
 ## 방문객으로 반영된 NPC가 누구였는지"를 하루 동안 기억해두는 용도 -
@@ -78,8 +97,12 @@ func notify_npc_entered_map(npc_id: String) -> void:
 		npc_arrived.emit(station_index, npc_id)
 
 
-func open_restaurant() -> bool:
-	if is_open or TimeManager.current_hour < OPEN_HOUR or TimeManager.current_hour >= CLOSE_HOUR:
+## bypass_hours: 신규 슬롯 튜토리얼(main.gd._maybe_play_tutorial_intro()) 전용
+## - 게임이 09:00에 시작하는데 정식 영업시간(OPEN_HOUR=10)까지 기다리게
+## 하면 튜토리얼이 막힌다는 지적(사용자 지시, 2026-09-01 - "튜토일때는
+## 영업시간 전이어도 열수있게 해주고"). 튜토리얼이 끝나면 다시 닫아준다.
+func open_restaurant(bypass_hours: bool = false) -> bool:
+	if is_open or (not bypass_hours and (TimeManager.current_hour < OPEN_HOUR or TimeManager.current_hour >= CLOSE_HOUR)):
 		return false
 	is_open = true
 	restaurant_opened.emit()
@@ -189,6 +212,9 @@ func cook_and_serve(station_index: int, ingredient_a: String, ingredient_b: Stri
 	# 앉기만 하고 서빙 전에 쫓겨나면(_evict_unserved_customers) 방문한 게
 	# 아니므로 다음에 다시 앉을 수 있어야 한다.
 	_visited_today[npc_id] = true
+	if not _all_visitors_notified and _visited_today.size() >= _todays_visitors.size():
+		_all_visitors_notified = true
+		all_visitors_served.emit()
 	# 돈은 여기서 바로 받지 않는다 - 호감도(위 NPCManager.feed 등)는 서빙 즉시
 	# 반영되지만, 실제 결제는 손님이 식사를 마치고 떠날 때(_on_minute_passed)로
 	# 미룬다(사용자 지시).
@@ -305,16 +331,35 @@ func _generate_daily_visitors() -> void:
 	if not _invited_npc_id.is_empty() and NPCManager.is_alive(_invited_npc_id):
 		visitors.append(_invited_npc_id)
 		candidates.erase(_invited_npc_id)
+	for npc_id in _lowest_affection_npc_ids(AUTO_LOW_AFFECTION_INVITE_COUNT, visitors):
+		visitors.append(npc_id)
+		candidates.erase(npc_id)
 	for npc_id in candidates:
 		if visitors.size() >= DAILY_VISITOR_COUNT:
 			break
 		visitors.append(npc_id)
 	_todays_visitors = visitors
 	_visited_today.clear()
+	_all_visitors_notified = false
 	# _resolve_invite_outcome()이 내일 이 값으로 "오늘 초대 확정 방문객이 실제로
 	# 왔는지" 판정한다 - _invited_npc_id를 비우기 전에 넘겨받아야 한다.
 	_todays_invited_npc_id = _invited_npc_id
 	_invited_npc_id = ""
+
+
+## 호감도가 가장 낮은 살아있는 NPC부터 count명을 뽑는다(exclude에 이미 담긴,
+## 예를 들어 수동 초대로 이미 오늘 방문이 확정된 NPC는 제외) - 동점자는 매일
+## 다른 순서로 섞여서 항상 같은 두 명으로 고정되지 않는다. 이 목록은 그날
+## 스케줄상 보이는지와 무관하게 강제로 방문시킨다(수동 초대 invite_npc()와
+## 같은 취급 - 로시처럼 원래 안 보이는 날에도 예외적으로 온다).
+func _lowest_affection_npc_ids(count: int, exclude: Array) -> Array:
+	var pool: Array = []
+	for npc_id in NPCManager.get_all_ids():
+		if NPCManager.is_alive(npc_id) and not exclude.has(npc_id):
+			pool.append(npc_id)
+	pool.shuffle()
+	pool.sort_custom(func(a, b): return NPCManager.get_affection(a) < NPCManager.get_affection(b))
+	return pool.slice(0, count)
 
 
 func _is_past_new_guest_cutoff() -> bool:
@@ -324,7 +369,7 @@ func _is_past_new_guest_cutoff() -> bool:
 
 
 func _try_admit_next_visitor() -> void:
-	if not is_open or _is_past_new_guest_cutoff():
+	if suppress_auto_visitors or not is_open or _is_past_new_guest_cutoff():
 		return
 	var station_index := _find_free_station()
 	if station_index == -1:
@@ -339,6 +384,20 @@ func _try_admit_next_visitor() -> void:
 			continue
 		_seat_npc(station_index, npc_id)
 		return
+
+
+## 신규 슬롯 튜토리얼 컷신(main.gd._maybe_play_tutorial_intro()) 전용 - 정상적인
+## 방문객 추첨(_generate_daily_visitors/_try_admit_next_visitor)을 거치지 않고
+## 특정 NPC를 특정 자리에 강제로 앉힌다. _seat_npc()와 동일하게 npc_seated를
+## 쏘므로, NPCManager는 평소 손님과 똑같이 그 자리로 걸어가게 만든다(사용자
+## 지시, 2026-09-01). 자리가 이미 차 있으면 아무 일도 안 하고 false.
+func force_seat_npc(station_index: int, npc_id: String) -> bool:
+	if station_index < 0 or station_index >= STATION_COUNT:
+		return false
+	if not String(_stations[station_index].get("npc_id", "")).is_empty():
+		return false
+	_seat_npc(station_index, npc_id)
+	return true
 
 
 func _seat_npc(station_index: int, npc_id: String) -> void:
