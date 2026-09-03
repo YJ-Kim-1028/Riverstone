@@ -21,10 +21,22 @@ const ICON_GRID_SIZE := 16
 
 var _songs: Dictionary = {}
 var _current_song_id := DEFAULT_SONG_ID
+## item_id -> true, 선물로 받은 음반을 "영구 해금"으로 기록한다 - 인벤토리에
+## 계속 들고 있어야만 재생 가능했던 문제(사용자 리포트, 2026-09-04 - "be with
+## you 들고 있지 않으니까 재생을 못한다") 수정. 상점 구매(ShopManager.
+## purchase_counts)와 마찬가지로 한 번 받으면 영구 - 나중에 그 음반 아이템을
+## 다른 칸(보관함 등)으로 옮기거나 해도 재생 가능 상태는 그대로 유지된다.
+var _gift_unlocked_item_ids: Dictionary = {}
 
 
 func _ready() -> void:
 	_load_songs()
+	NPCManager.npc_gift_item_triggered.connect(_on_npc_gift_item_triggered)
+
+
+func _on_npc_gift_item_triggered(_npc_id: String, item_id: String) -> void:
+	if is_record_item(item_id):
+		_gift_unlocked_item_ids[item_id] = true
 
 
 func get_song_ids() -> Array:
@@ -63,12 +75,11 @@ func is_unlocked(song_id: String) -> bool:
 	var item_id := String(song.get("item_id", ""))
 	if item_id.is_empty():
 		return false
-	## 상점에서 산 음반은 구매 기록만 남고 인벤토리엔 안 들어가지만(위 주석 -
-	## "템창은 안달라지고"), NPC 선물로 받는 음반(예: record_be_with_you)은
-	## grant_gift_item()을 거쳐 실제로 인벤토리에 들어간다 - 그래서 둘 중
-	## 하나만 만족해도 해금으로 친다(사용자 지시, 2026-09-04 - 어셔/마린 선물
-	## 음반이 주크박스에서 재생되게).
-	return ShopManager.get_purchase_count(item_id) > 0 or InventoryManager.has_item(item_id, 1)
+	## 상점 구매는 ShopManager.purchase_counts로, NPC 선물은 _gift_unlocked_item_ids로
+	## 각각 영구 기록한다 - 둘 다 인벤토리 보유 여부와 무관하다(사용자 지시,
+	## 2026-09-04 - "LP판 한번 npc에게 선물 받거나 구매하면, 들고 있지 않아도
+	## 주크박스에 자동으로 저장되게 해줘").
+	return ShopManager.get_purchase_count(item_id) > 0 or bool(_gift_unlocked_item_ids.get(item_id, false))
 
 
 func get_unlocked_song_ids() -> Array:
