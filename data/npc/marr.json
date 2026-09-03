@@ -44,6 +44,9 @@
         "angry": "res://assets/npc/portrait/marr_port.png"
     },
     "sprite": "res://assets/npc/sprite/marrSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
     "schedule": {
         "mon_wed_thu": {
             "visible_only_when_raining": false,
@@ -85,6 +88,20 @@
         ]
     },
     "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "description": "가게에서 파는 향수 중 하나를 별다른 설명 없이 건넨다.",
+            "lines": [
+                "{player_name}. 잠깐 시간 괜찮으십니까.",
+                "드릴 게 있습니다.",
+                {"type": "gift", "item_id": "perfume_somewhere_behind_you"},
+                "제가 {player_name}님을 생각 하면서 만든 향수 입니다. 이름은 'Somewhere behind you'.",
+                "향수는 뿌리고 지나가면 향이 남는다고 하잖아요. 설령 그 자리에 더는 없을지라도.",
+                "{player_name}님은 향수처럼 제게 기억에 남는 분 입니다.",
+                "다른 분들께는.... 절대 나누어 주지 마세요."
+            ]
+        },
         {
             "threshold": 70,
             "type": "dialogue",

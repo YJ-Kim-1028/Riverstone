@@ -44,6 +44,9 @@
         "angry": "res://assets/npc/portrait/roshi_port.png"
     },
     "sprite": "res://assets/npc/sprite/roshiSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
     "schedule": {
         "mon_wed_thu": {
             "visible_only_when_raining": true,
@@ -81,6 +84,20 @@
         ]
     },
     "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "requires_not_shown": {"npc_id": "marin", "threshold": 50},
+            "description": "오래 아껴온 황금 낚싯대를 건넨다.",
+            "lines": [
+                "자네, 잠깐 이리 와보게.",
+                {"text": "이건 내가 젊었을 때부터 아껴 쓰던 낚싯대일세. 이제 손이 예전 같지 않아서 잘 안 쓰게 되더군.", "emotion": "happy"},
+                {"type": "gift", "item_id": "golden_fishing_rod"},
+                "마린한테 물려주려고도 했는데, 그 녀석은 낚시보다 다른 데 관심이 많아서 말이야.",
+                {"text": "자네라면 이 녀석을 제대로 써줄 것 같아서 그러네.", "emotion": "happy"},
+                {"text": "오래 쓴 물건이라 그런지, 가끔은 보통 물고기가 아닌 것도 걸릴지 모르지.", "emotion": "happy"}
+            ]
+        },
         {
             "threshold": 100,
             "type": "memento",

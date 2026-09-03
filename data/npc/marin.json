@@ -34,6 +34,9 @@
         "angry": "res://assets/npc/portrait/marin_port.png"
     },
     "sprite": "res://assets/npc/sprite/marinSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
     "schedule": {
         "mon_wed_thu": {
             "visible_only_when_raining": false,
@@ -84,6 +87,33 @@
         ]
     },
     "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "requires_not_shown": {"npc_id": "roshi", "threshold": 50},
+            "description": "아버지의 낡은 낚싯대 대신 특별히 손봐온 황금 낚싯대를 건넨다.",
+            "lines": [
+                "{player_name}, 잠깐만 이리 와봐! 너 보여주고 싶은 게 있어.",
+                {"text": "이거 봐봐, 죽이지 않아? 아빠 창고 뒤지다가 발견했는데 완전 반짝반짝하더라고.", "emotion": "happy"},
+                {"type": "gift", "item_id": "golden_fishing_rod"},
+                "원래 할아버지가 쓰시던 거래. 아빠는 손 놓은 지 오래됐고, 나도 별로 안 써서 그냥 창고에 처박혀 있었어.",
+                {"text": "근데 너 낚시하는 거 보니까 이건 네가 갖고 있는 게 맞는 거 같아서.", "emotion": "happy"},
+                {"text": "혹시 알아? 이걸로 낚시하면 진짜 이무기라도 낚을지.", "emotion": "happy"}
+            ]
+        },
+        {
+            "threshold": 65,
+            "type": "dialogue",
+            "description": "제목을 보고 충동적으로 산 음반을 건넨다.",
+            "lines": [
+                "{player_name}! 잘 만났다, 안 그래도 너 주려고 들고 다녔어.",
+                {"text": "이거 음반이야. 사실 나 예전에 어셔한테 작곡 하는 법 배웠거든.", "emotion": "happy"},
+                {"type": "gift", "item_id": "record_the_day_after_you_came"},
+                "'The day after you came'. 뭐, 딱히 뮤즈도 없고. 나랑 친한 건 너 뿐이고. 너 위해서 썼어.",
+                {"text": "막상 주니까 부끄럽네. 몰래 편지로 붙일 걸 그랬나봐.", "emotion": "happy"},
+                {"text": "어셔만큼 잘 쓰진 않으니까 너무 기대하진 마.", "emotion": "happy"}
+            ]
+        },
         {
             "threshold": 80,
             "type": "dialogue",

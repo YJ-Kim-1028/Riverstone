@@ -35,6 +35,9 @@
         "angry": "res://assets/npc/portrait/flora_angry.png"
     },
     "sprite": "res://assets/npc/sprite/floraSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
     "schedule": {
         "mon_wed_thu": {
             "visible_only_when_raining": false,
@@ -84,6 +87,17 @@
         ]
     },
     "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "description": "화분에 물 주다가 충동적으로 산 황금 물뿌리개를 건넨다.",
+            "lines": [
+                "저기, {player_name}! 이거 봐봐.",
+                {"text": "너 위해서 준비 했어. 요즘 농사 자주 하는 거 같더라.", "emotion": "happy"},
+                {"type": "gift", "item_id": "golden_watering_can"},
+                "이걸 쓰면 밭 일이 더 쉬워질 거야."
+            ]
+        },
         {
             "threshold": 80,
             "type": "dialogue",

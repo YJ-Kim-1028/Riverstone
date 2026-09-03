@@ -35,6 +35,9 @@
         "angry": "res://assets/npc/portrait/usher_angry.png"
     },
     "sprite": "res://assets/npc/sprite/usherSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
     "schedule": {
         "mon_wed_thu": {
             "visible_only_when_raining": false,
@@ -83,6 +86,21 @@
         "corroboration_line": "그러고보니, 세이지가 요즘 좀 안 좋은 기운이 느껴진다고 하더라고. 혹시 너도 들었어?"
     },
     "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "description": "직접 작곡한 음반을 건넨다.",
+            "lines": [
+                "{player_name}! 마침 잘 왔다. 딱 좋은 타이밍이야.",
+                "사실 나 취미로 음악도 만들고 있거든.",
+                {"text": "알지 모르겠지만 여기 있는 음반도 다 내가 만든 거야.", "emotion": "happy"},
+                "요새 너와 친해진 게 좋아서, 널 생각 하면서 짧은 음악을 하나 만들었어.",
+                {"type": "gift", "item_id": "record_be_with_you"},
+                "부담은 갖지 마. 내가 좋아서 주는 거니까.",
+                {"text": "음악엔 별로 재능이 없거든. 너무 기대하진 말고.", "emotion": "happy"},
+                "주크박스에 틀어놓고 가끔 들어줘. 내 생각 좀 하면서."
+            ]
+        },
         {
             "threshold": 100,
             "type": "memento",
