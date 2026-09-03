@@ -3,6 +3,7 @@
 [ext_resource type="Texture2D" path="res://assets/ui/frame_fishing.png" id="1_frame"]
 [ext_resource type="Script" path="res://scripts/ui/fishing_screen.gd" id="2_script"]
 [ext_resource type="Script" path="res://scripts/ui/fishing_time_bar.gd" id="4_timebar"]
+[ext_resource type="Script" path="res://scripts/ui/fishing_hit_gauge.gd" id="7_hitgauge"]
 [ext_resource type="Script" path="res://scripts/ui/fishing_fish.gd" id="5_fish"]
 [ext_resource type="Texture2D" path="res://assets/ui/icon_fish.png" id="6_fish_icon"]
 
@@ -26,21 +27,20 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 texture = ExtResource("1_frame")
 
-[node name="HitLabel" type="Label" parent="Background"]
+[node name="HitGauge" type="Control" parent="Background"]
 offset_left = 10.0
 offset_top = 8.0
 offset_right = 70.0
-offset_bottom = 20.0
-theme_override_font_sizes/font_size = 5
-theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
-text = "0 / 6"
+offset_bottom = 14.0
+custom_minimum_size = Vector2(60, 6)
+script = ExtResource("7_hitgauge")
 
 [node name="TimeBar" type="Control" parent="Background"]
-offset_left = 84.0
-offset_top = 10.0
-offset_right = 144.0
-offset_bottom = 16.0
-custom_minimum_size = Vector2(60, 6)
+offset_left = 147.0
+offset_top = 20.0
+offset_right = 153.0
+offset_bottom = 80.0
+custom_minimum_size = Vector2(6, 60)
 script = ExtResource("4_timebar")
 
 [node name="SpawnPoints" type="Control" parent="Background"]

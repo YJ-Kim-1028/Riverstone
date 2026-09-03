@@ -12,7 +12,7 @@ const RESULT_HOLD_SECONDS := 1.5
 
 @onready var _spawn_points: Node = $Background/SpawnPoints
 @onready var _fish: FishingFish = $Background/Fish
-@onready var _hit_label: Label = $Background/HitLabel
+@onready var _hit_gauge: FishingHitGauge = $Background/HitGauge
 @onready var _time_bar: FishingTimeBar = $Background/TimeBar
 @onready var _result_icon: TextureRect = $Background/ResultIcon
 @onready var _result_label: Label = $Background/ResultLabel
@@ -53,7 +53,8 @@ func _open() -> void:
 	_set_open(true)
 	_result_label.visible = false
 	_result_icon.visible = false
-	_hit_label.text = "0 / %d" % FishingManager.get_required_hits()
+	_hit_gauge.required_hits = FishingManager.get_required_hits()
+	_hit_gauge.hit_count = 0
 	_last_spawn_index = -1
 	_relocate_fish()
 
@@ -74,7 +75,7 @@ func _relocate_fish() -> void:
 func _on_fish_hit() -> void:
 	if not FishingManager.register_hit():
 		return
-	_hit_label.text = "%d / %d" % [FishingManager.get_hit_count(), FishingManager.get_required_hits()]
+	_hit_gauge.hit_count = FishingManager.get_hit_count()
 	if FishingManager.is_biting():
 		_relocate_fish()
 
@@ -90,11 +91,14 @@ func _on_fishing_ended(result: Dictionary) -> void:
 
 
 ## 성공하면 물고기 이름 대신 잡은 아이콘 그림 + "획득!"을 보여준다(사용자
-## 지시) - 인벤토리가 꽉 차서 못 넣었거나 실패했을 때는 아이콘 없이 문구만.
+## 지시) - 인벤토리가 꽉 차서 못 넣었을 때는 아이콘 없이 문구만. 그냥 실패
+## (시간 초과)는 이제 SFX_FISHING_FAIL 사운드로 알리므로 "실패" 글자는 아예
+## 안 띄운다(사용자 지시, 2026-09-01 - "사운드 있으니까 실패 글씨는 안떠도
+## 될 거 같아").
 func _show_result(result: Dictionary) -> void:
 	if not bool(result.get("success", false)):
 		_result_icon.visible = false
-		_result_label.text = "실패"
+		_result_label.visible = false
 		return
 	var item_id := String(result.get("item_id", ""))
 	if not bool(result.get("added_to_inventory", true)):

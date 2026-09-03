@@ -36,7 +36,7 @@ const CATCH_RADIUS := 45.0
 ## 사용자 지시, 2026-08-31 - "새보다 토끼가 더 어려웠으면 좋겠어... 바 움직이는
 ## 속도 더 높이고 성공 간격 더 줄이라고" - 토끼가 새보다 짧은 주기(더 빠른
 ## 마커)로 바뀜(원래는 새가 더 빡빡했다).
-const MARKER_PERIOD_SECONDS := {AnimalType.RABBIT: 0.6, AnimalType.BIRD: 0.85}
+const MARKER_PERIOD_SECONDS := {AnimalType.RABBIT: 0.6, AnimalType.BIRD: 0.6}
 ## 강조 구간(포획 성공 판정 범위)의 폭 - 0.0~1.0 비율. 토끼가 새보다 더
 ## 좁아짐(위 MARKER_PERIOD_SECONDS와 같은 이유).
 const SWEET_SPOT_WIDTH := {AnimalType.RABBIT: 0.15, AnimalType.BIRD: 0.2}
@@ -236,6 +236,21 @@ func get_interact_prompt(map_id: String) -> String:
 	if animal == null:
 		return ""
 	return "E 조준"
+
+
+## fishing_manager.gd의 can_fit_all_species()와 같은 이유(사용자 리포트,
+## 2026-09-01 - "인벤 가득 차있을 때 E 조준은 뜨는데 사냥 자체가 안 되네") -
+## 낚시와 달리 어떤 동물을 잡을지 조준 전에 이미 정해져 있어서(가장 가까운
+## 동물의 종류), 그 동물 하나의 아이템만 확인하면 된다. main.gd가 이걸로
+## "E 조준"을 누른 시점에 자리가 없으면 조준을 시작하는 대신 "가방이 가득
+## 찼다."를 보여준다.
+func can_fit_catch(map_id: String) -> bool:
+	var animal := _nearest_animal(map_id, CATCH_RADIUS)
+	if animal == null:
+		return true
+	var animal_type := int(animal.get("animal_type")) as AnimalType
+	var item_id := RABBIT_ITEM_ID if animal_type == AnimalType.RABBIT else BIRD_ITEM_ID
+	return InventoryManager.can_add_item(item_id, 1)
 
 
 func _has_rifle_equipped() -> bool:
