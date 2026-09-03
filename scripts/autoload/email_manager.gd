@@ -11,10 +11,10 @@ extends Node
 ## limit for that greeting mail.
 ##
 ## NOTE: the daily send-decision rules below (_generate_daily_emails) were
-## redesigned 2026-08-15 per user spec - gift_thanks/event_invite stay
-## affection-independent reactions to real player actions, greeting requires
-## GREETING_AFFECTION_THRESHOLD+ affection and a GREETING_COOLDOWN_DAYS
-## rotation capped at MAX_GREETING_EMAILS_PER_DAY/day. EVENT_INVITE_CHANCE_PER_DAY
+## redesigned 2026-09-04 per user spec - gift_thanks/event_invite stay
+## affection-independent reactions to real player actions, greeting is now a
+## 3-stage per-NPC affection milestone (GREETING_THRESHOLDS, no daily cap/
+## cooldown - see _maybe_send_greeting_milestones). EVENT_INVITE_CHANCE_PER_DAY
 ## is still an untuned placeholder (email.md has no frequency spec) - fine to
 ## adjust that one number freely, but check with the user before changing the
 ## rules/priority structure itself again.
@@ -27,15 +27,16 @@ signal mail_received(entry: Dictionary)
 ## greeting are conditional-certain sends, see the constants below).
 const EVENT_INVITE_CHANCE_PER_DAY := 0.5
 
-## 2026-08-15 재설계(사용자 확정): 안부(greeting) 메일은 호감도 80 이상인 NPC만
-## 후보가 되고, 같은 NPC가 다시 안부 메일을 보내려면 최소 7일 쿨다운을 거쳐야
-## 하며, 하루에 최대 2명까지만 실제로 발송된다 - 13명이 매일 각자 확률을 굴리면
-## 하루에 몰려서 오거나 매일 오는 느낌이라, 대신 "일주일에 나눠서, 하루 1~2통,
-## 안 오는 날도 있음"이 되도록 로테이션 방식으로 바꿈. gift_thanks/event_invite는
-## 플레이어의 실제 행동(선물/초대)에 대한 반응이라 호감도/쿨다운 없이 그대로 유지.
-const GREETING_AFFECTION_THRESHOLD := 80
-const GREETING_COOLDOWN_DAYS := 7
-const MAX_GREETING_EMAILS_PER_DAY := 2
+## 2026-09-04 재설계(사용자 지시 - "메일은 첫번째 메일은 호감도 20, 두번째
+## 메일은 호감도 40, 세 번째 메일은 호감도 75에서 발송되게 해줘"): 안부(greeting)
+## 메일이 더 이상 호감도 80 단일 임계값 + 7일 쿨다운 + 하루 2명 랜덤 추첨이
+## 아니라, NPC별 emails.greeting 풀(3개)을 순서대로 이 임계값들에 맞춰 마일스톤
+## 처럼 발송한다 - affection_events의 threshold 패턴과 동일한 개념. 하루 추첨
+## 상한이 없어져서, 같은 날 여러 NPC가(혹은 한 NPC가 디버그 등으로 여러 단계를
+## 한꺼번에 넘으면 그 NPC가 한 번에 여러 통을) 받을 수 있다 - 의도된 동작.
+## gift_thanks/event_invite는 플레이어의 실제 행동(선물/초대)에 대한 반응이라
+## 호감도/쿨다운 없이 그대로 유지.
+const GREETING_THRESHOLDS: Array[int] = [20, 40, 75]
 
 ## 요청함(사용자 지시, 2026-08-25 - "초반에 할 게 없다"는 문제를 온보딩성
 ## 부탁으로 풀어보려는 시도) - 일반 수신함과 분리된 별도 목록. 목표(objective_type/
@@ -71,7 +72,9 @@ var _greeted_npc_ids: Dictionary = {}
 const RECURRING_TEMPLATES_PATH := "res://data/requests/recurring_templates.json"
 const RECURRING_INTERVAL_MIN_DAYS := 2
 const RECURRING_INTERVAL_MAX_DAYS := 3
-const RECURRING_NPC_COUNT_PER_CYCLE := 2
+## 원래 2명씩 뽑았으나, 요청함이 한꺼번에 너무 많이 쌓인다는 사용자 지시로
+## 사이클당 1명으로 축소(2026-09-04).
+const RECURRING_NPC_COUNT_PER_CYCLE := 1
 const RECURRING_REWARD_GOLD := 150
 ## 선호 재료 한국어 이름 -> 실제 인벤토리 아이템 id. data/npc/*.json의
 ## preferred_food는 요리 판정용 한국어 원재료 이름이고(base_material과 동일
@@ -145,9 +148,10 @@ var _gifted_today: Dictionary = {}
 ## 스냅샷을 뜨고 비운다(아래 _generate_daily_emails 참고).
 var _favorite_food_served_today: Dictionary = {}
 var _sent_story_triggers: Dictionary = {}
-## npc_id -> TimeManager.current_day (안부 메일을 마지막으로 보낸 날) - GREETING_COOLDOWN_DAYS
-## 쿨다운 판정에 쓴다. gift_thanks/event_invite는 여기 안 남는다(호감도/쿨다운 대상이 아님).
-var _last_greeting_day: Dictionary = {}
+## npc_id -> 그 NPC의 emails.greeting 풀에서 몇 번째(0-based)까지 이미 보냈는지
+## (GREETING_THRESHOLDS와 같은 길이/순서) - 마일스톤이 중복 발송되지 않게 막는
+## 진행도 저장소. gift_thanks/event_invite는 여기 안 남는다(마일스톤 대상이 아님).
+var _greeting_stage_sent: Dictionary = {}
 ## npc_id -> 플레이어가 compose_and_send()로 마지막으로 보낸 자유 작성 메일의
 ## 본문. NPCManager.get_daily_dialogue()가 이 NPC와 대화할 때 dialogue.mail_reaction
 ## 풀에서 하나를 뽑아 "{player_mail_content}"를 이 값으로 채워 넣을 후보로 쓴다 -
@@ -255,6 +259,17 @@ func get_active_requests() -> Array:
 		entry["expired"] = _is_request_expired(entry)
 		active.append(entry)
 	return active
+
+
+## 완료됐지만 아직 안 받은 요청이 있는지 - `!` 알림 배지 표시 여부 판단용
+## (mail_app.gd 사이드바 요청함 탭, computer_screen.gd 데스크탑 메일 아이콘,
+## 사용자 지시 2026-09-01, 플레이테스트 23번).
+func has_claimable_request() -> bool:
+	for entry in get_active_requests():
+		var request_id := String(entry.get("id", ""))
+		if not bool(entry.get("expired", false)) and is_request_objective_met(request_id):
+			return true
+	return false
 
 
 func _is_request_expired(definition: Dictionary) -> bool:
@@ -559,7 +574,7 @@ func get_save_data() -> Dictionary:
 		"gifted_today": _gifted_today.duplicate(),
 		"favorite_food_served_today": _favorite_food_served_today.duplicate(),
 		"sent_story_triggers": _sent_story_triggers.duplicate(true),
-		"last_greeting_day": _last_greeting_day.duplicate(),
+		"greeting_stage_sent": _greeting_stage_sent.duplicate(),
 		"pending_mail_reaction": _pending_mail_reaction.duplicate(),
 		"claimed_requests": _claimed_requests.duplicate(),
 		"read_requests": _read_requests.duplicate(),
@@ -587,7 +602,7 @@ func load_save_data(data: Dictionary) -> void:
 	_gifted_today = (data.get("gifted_today", {}) as Dictionary).duplicate()
 	_favorite_food_served_today = (data.get("favorite_food_served_today", {}) as Dictionary).duplicate()
 	_sent_story_triggers = (data.get("sent_story_triggers", {}) as Dictionary).duplicate(true)
-	_last_greeting_day = (data.get("last_greeting_day", {}) as Dictionary).duplicate()
+	_greeting_stage_sent = (data.get("greeting_stage_sent", {}) as Dictionary).duplicate()
 	_pending_mail_reaction = (data.get("pending_mail_reaction", {}) as Dictionary).duplicate()
 
 
@@ -623,10 +638,9 @@ func _generate_daily_emails() -> void:
 	## 바로 비운다(_event_invite_target_npc_id 주석 참고).
 	var event_invite_target := _event_invite_target_npc_id
 	_event_invite_target_npc_id = ""
-	## 오늘 이미 gift_thanks/event_invite를 보낸 NPC는 안부 후보에서 제외(하루 1통
-	## 원칙) - 그 외 호감도 80+ & 쿨다운 지난 NPC만 후보로 모았다가 섞어서 최대
-	## MAX_GREETING_EMAILS_PER_DAY명만 실제로 보낸다.
-	var greeting_candidates: Array = []
+	## 오늘 이미 gift_thanks/event_invite를 보낸 NPC는 안부 마일스톤 체크에서
+	## 제외한다(하루 1통 원칙) - 그 외 전원은 매일 자기 호감도가 다음 안부
+	## 마일스톤(GREETING_THRESHOLDS)을 넘었는지 확인한다.
 	for npc_id in NPCManager.get_all_ids():
 		if not NPCManager.is_alive(npc_id):
 			continue
@@ -635,18 +649,34 @@ func _generate_daily_emails() -> void:
 			_maybe_send_category(npc_id, "gift_thanks", 1.0)
 		elif npc_id == event_invite_target:
 			_maybe_send_category(npc_id, "event_invite", EVENT_INVITE_CHANCE_PER_DAY, favorite_food_served_yesterday.has(npc_id))
-		elif NPCManager.get_affection(npc_id) >= GREETING_AFFECTION_THRESHOLD and _is_greeting_off_cooldown(npc_id):
-			greeting_candidates.append(npc_id)
-	greeting_candidates.shuffle()
-	for npc_id in greeting_candidates.slice(0, MAX_GREETING_EMAILS_PER_DAY):
-		if _maybe_send_category(npc_id, "greeting", 1.0):
-			_last_greeting_day[npc_id] = TimeManager.current_day
+		else:
+			_maybe_send_greeting_milestones(npc_id)
 
 
-func _is_greeting_off_cooldown(npc_id: String) -> bool:
-	if not _last_greeting_day.has(npc_id):
-		return true
-	return TimeManager.current_day - int(_last_greeting_day[npc_id]) >= GREETING_COOLDOWN_DAYS
+## GREETING_THRESHOLDS를 순서대로 통과했는지 확인해 그만큼 emails.greeting
+## 풀(0번째, 1번째, 2번째...)을 보낸다 - 디버그 등으로 여러 임계값을 한 번에
+## 넘으면 이 안에서 while로 몇 통이든 그날 한꺼번에 보낸다. 그 NPC의 풀이
+## 3개보다 적으면(예: 아직 이메일 없는 NPC) 있는 만큼만 보내고 멈춘다.
+func _maybe_send_greeting_milestones(npc_id: String) -> void:
+	var stage := int(_greeting_stage_sent.get(npc_id, 0))
+	var affection := NPCManager.get_affection(npc_id)
+	while stage < GREETING_THRESHOLDS.size() and affection >= int(GREETING_THRESHOLDS[stage]):
+		if not _send_greeting_stage(npc_id, stage):
+			break
+		stage += 1
+	_greeting_stage_sent[npc_id] = stage
+
+
+func _send_greeting_stage(npc_id: String, stage: int) -> bool:
+	var emails: Dictionary = NPCManager.get_definition(npc_id).get("emails", {})
+	var pool: Array = (emails.get("greeting", []) as Array).filter(
+		func(entry): return NPCManager.requires_alive_met(entry.get("requires_alive", ""))
+	)
+	if stage >= pool.size():
+		return false
+	var entry: Dictionary = pool[stage]
+	_add_mail(npc_id, "greeting", String(entry.get("title", "")), (entry.get("lines", []) as Array).duplicate())
+	return true
 
 
 ## favorite_food_served: event_invite 전용 - 오늘 이 NPC에게 실제로 선호 재료가
