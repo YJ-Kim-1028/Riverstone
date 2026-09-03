@@ -39,14 +39,42 @@ func set_open_blocked_check(check: Callable) -> void:
 	_open_blocked_check = check
 
 
+## QuitConfirmPopup은 원래 전체화면 딤을 깔도록 설계됐지만(quit_confirm_popup.tscn
+## 루트가 anchor 0/0/1/1), 이 상태창(StatusScreen) 자신이 화면 전체가 아니라
+## 가운데 고정된 작은 박스(240x144, clip_contents=true)라서 그 안에 자식으로
+## 있는 한 딤도 그 작은 박스 크기로만 잘려 보인다 - TAB 메뉴를 거쳐 열든
+## (기존 경로) ESC로 단독으로 열든(신규 경로, 2026-09-01) 마찬가지 문제라서,
+## 열 때마다 이 상태창 밖(같은 부모인 UI CanvasLayer)으로 잠깐 옮겨서 진짜
+## 전체화면으로 뜨게 하고, 닫히면 제자리로 돌려놓는다. 이렇게 하면 두 경로가
+## 완전히 같은 코드를 타서 별도 "단독으로 열었는지" 상태를 안 들고 있어도 된다.
+func open_quit_confirm() -> void:
+	var ui_layer := get_parent()
+	remove_child(_quit_confirm_popup)
+	ui_layer.add_child(_quit_confirm_popup)
+	_quit_confirm_popup.open()
+
+
+func is_quit_confirm_open() -> bool:
+	return _quit_confirm_popup.modulate.a > 0.0
+
+
+func _on_quit_confirm_canceled() -> void:
+	var ui_layer := _quit_confirm_popup.get_parent()
+	if ui_layer == self:
+		return
+	ui_layer.remove_child(_quit_confirm_popup)
+	add_child(_quit_confirm_popup)
+
+
 func _ready() -> void:
 	_set_open(false)
 	_panels = [_equipment_panel, _affection_panel, _settings_panel]
 	_equipment_tab_button.pressed.connect(_show_tab.bind(0))
 	_affection_tab_button.pressed.connect(_show_tab.bind(1))
 	_settings_tab_button.pressed.connect(_show_tab.bind(2))
-	_end_tab_button.pressed.connect(_quit_confirm_popup.open)
+	_end_tab_button.pressed.connect(open_quit_confirm)
 	_quit_confirm_popup.confirmed.connect(_on_quit_confirmed)
+	_quit_confirm_popup.canceled.connect(_on_quit_confirm_canceled)
 	_close_button.pressed.connect(close)
 	_equipment_panel.status_close_requested.connect(close)
 	_equipment_panel.book_open_requested.connect(func(item_id: String) -> void: book_open_requested.emit(item_id))

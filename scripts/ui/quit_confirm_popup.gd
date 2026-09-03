@@ -5,6 +5,9 @@ extends Control
 ## modulate.a + mouse_filter로 열고 닫기).
 
 signal confirmed
+## "아니오"/ESC로 취소했을 때만 쏜다 - status_screen.gd가 ESC 단독 오픈
+## 경로(open_quit_confirm())에서 자신의 modulate를 임시로 되돌리는 데 쓴다.
+signal canceled
 
 const BUTTON_TEXTURE := preload("res://assets/ui/button.png")
 const BUTTON_HOVER_TEXTURE := preload("res://assets/ui/button_hover.png")
@@ -24,6 +27,14 @@ func _ready() -> void:
 
 func open() -> void:
 	_set_open(true)
+
+
+## main.gd가 모달 없을 때 ESC로 이 팝업을 단독으로 여는 경로가 생기면서
+## (2026-09-01, 플레이테스트 20번) ESC로 취소도 되어야 자연스럽다 - "아니오"와
+## 동일하게 처리한다.
+func _unhandled_input(event: InputEvent) -> void:
+	if modulate.a > 0.0 and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+		_on_no_pressed()
 
 
 func _style_button(button: Button) -> void:
@@ -79,3 +90,4 @@ func _on_yes_pressed() -> void:
 
 func _on_no_pressed() -> void:
 	_set_open(false)
+	canceled.emit()
