@@ -56,6 +56,8 @@ const SHAKE_DURATION := 0.12
 @onready var _status_icon_texture: TextureRect = $Background/Margin/VBox/StatusRow/ToolVessel/StatusIcon/Icon
 @onready var _start_button: Button = $Background/Margin/VBox/StatusRow/StartButton
 @onready var _close_button: TextureButton = $Background/CloseButton
+@onready var _tooltip: PanelContainer = $Tooltip
+@onready var _tooltip_label: Label = $Tooltip/Label
 
 var _station_id := ""
 var _slots: Array = []
@@ -75,6 +77,74 @@ func _ready() -> void:
 	_style_confirm_button(_start_button)
 	InventoryManager.inventory_changed.connect(_refresh)
 	_style_scrollbar()
+	## 인벤은 드래그인데 요리할 때는 클릭이라 헷갈린다는 피드백(플레이테스트
+	## 8번, 사용자 지시 2026-09-01) - 클릭은 그대로 두고, 재료 슬롯을 조리기구
+	## 그림(ToolVessel) 위로 드래그해도 클릭과 똑같이 선택되게 한다. 그리드
+	## 슬롯(InventorySlot)은 이미 자체적으로 드래그 소스를 지원해서
+	## (inventory_slot.gd의 _get_drag_data(), from_index 포함) 여기선 드롭
+	## 대상만 Control.set_drag_forwarding()으로 즉석에서 연결한다.
+	_tool_vessel.set_drag_forwarding(
+		func(_at_position: Vector2) -> Variant: return null,
+		_can_drop_ingredient,
+		_drop_ingredient
+	)
+	## ToolVessel 안의 ToolImage/FireIcon은 mouse_filter=IGNORE라 드롭이 그
+	## 밑의 ToolVessel까지 그대로 통과하지만, StatusIcon(재료 아이콘이 실제로
+	## 보이는 자리 - 화면 정중앙이라 가장 먼저 드롭을 시도하게 되는 위치)은
+	## 자기 버튼이 STOP으로 가로채서 안 통과했다(사용자 리포트, 2026-09-01 -
+	## "도마에 드래그로 재료 올리니까 안되는데"). 여기도 같은 대상으로 연결.
+	_status_icon.set_drag_forwarding(
+		func(_at_position: Vector2) -> Variant: return null,
+		_can_drop_ingredient,
+		_drop_ingredient
+	)
+
+
+func _can_drop_ingredient(_at_position: Vector2, data: Variant) -> bool:
+	return typeof(data) == TYPE_DICTIONARY and data.has("from_index")
+
+
+func _drop_ingredient(_at_position: Vector2, data: Variant) -> void:
+	_on_slot_pressed(int(data["from_index"]))
+
+
+## 요리대에서도 재료 설명을 보고 싶다는 피드백(플레이테스트 39번, 사용자
+## 지시 2026-09-01 - "조리창, 요리창 띄웠을 때 툴팁 보여달라는 요청") -
+## equipment_panel.gd와 동일한 방식(엔진 기본 tooltip_text는 이 게임의 4배
+## 확대 캔버스에서 위치가 어긋나서 안 씀, 자체 Tooltip 노드를 직접 위치
+## 계산). 이 화면은 clip_contents=true인 작은 고정 박스라 뷰포트 크기가
+## 아니라 자기 자신의 크기(size)로 클램프한다.
+func _show_tooltip(source: Control) -> void:
+	var text := String(source.get_meta("tooltip_text", ""))
+	if text.is_empty():
+		return
+	_tooltip_label.text = text
+	_tooltip.visible = true
+	_tooltip.size = _tooltip.get_combined_minimum_size()
+	## get_global_transform().affine_inverse()로 변환해야 이 화면(또는
+	## cooking_screen.gd처럼 scale이 1이 아닌 화면)에서도 정확한 로컬 좌표가
+	## 나온다 - 단순히 global_position을 빼기만 하면 scale이 걸린 화면에서는
+	## 배율만큼 어긋난다.
+	var source_rect := source.get_global_rect()
+	var local_top: Vector2 = get_global_transform().affine_inverse() * source_rect.position
+	var local_bottom: Vector2 = get_global_transform().affine_inverse() * (source_rect.position + source_rect.size)
+	var target := Vector2(local_top.x, local_bottom.y + 2.0)
+	target.x = clampf(target.x, 0.0, size.x - _tooltip.size.x)
+	target.y = clampf(target.y, 0.0, size.y - _tooltip.size.y)
+	_tooltip.position = target
+
+
+func _hide_tooltip() -> void:
+	_tooltip.visible = false
+
+
+func _tooltip_for(slot_data) -> String:
+	if slot_data == null:
+		return ""
+	var definition := InventoryManager.get_item_definition(String(slot_data.get("item_id", "")))
+	var name_text := String(definition.get("name", ""))
+	var description_text := String(definition.get("description", ""))
+	return "%s\n%s" % [name_text, description_text] if not description_text.is_empty() else name_text
 
 
 func _process(_delta: float) -> void:
@@ -148,6 +218,11 @@ func _set_open(is_open: bool) -> void:
 	# 2026-08-27: "조리 다 된 거 클릭해도 안꺼내져") - fishing_screen.gd의
 	# Fish/Icon과 동일한 문제/해법. 재귀 적용 후 다시 IGNORE로 되돌린다.
 	_status_icon_texture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	## Tooltip도 순수 장식용(클릭이 통과해야 함)이라 위 재귀 호출이 덮어쓴
+	## mouse_filter를 다시 IGNORE로 되돌린다(CLAUDE.md UI 모달 mouse_filter
+	## 체크리스트 3번과 동일한 패턴).
+	_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_tooltip_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
 func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
@@ -165,6 +240,9 @@ func _refresh() -> void:
 	if _station_id.is_empty():
 		return
 	_update_status()
+	## 그리드가 통째로 다시 만들어지므로, 지금 뜬 툴팁이 가리키던 슬롯도 같이
+	## 사라진다 - mouse_exited가 그 슬롯에서 안 올 수 있으니 여기서 미리 끈다.
+	_hide_tooltip()
 	for child in _grid.get_children():
 		child.queue_free()
 	_slots = InventoryManager.get_slots()
@@ -187,6 +265,9 @@ func _refresh() -> void:
 		var enabled := not busy and not item_id.is_empty() and available.has(item_id) and KitchenManager.can_start(_station_id, item_id)
 		slot_instance.call("set_enabled", enabled)
 		slot_instance.connect("slot_pressed", _on_slot_pressed)
+		slot_instance.set_meta("tooltip_text", _tooltip_for(_slots[i]))
+		slot_instance.mouse_entered.connect(_show_tooltip.bind(slot_instance))
+		slot_instance.mouse_exited.connect(_hide_tooltip)
 	_refresh_start_button()
 
 

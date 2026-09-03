@@ -36,6 +36,11 @@ const PAID_TEXT_RISE_DISTANCE := 12.0
 const PAID_TEXT_DURATION := 0.9
 const PAID_TEXT_FONT_SIZE := 6
 const PAID_TEXT_COLOR := Color(1.0, 0.85, 0.2)
+## 수익 표시가 배경이랑 잘 안 구분된다는 지적(사용자 지시, 2026-09-01 -
+## 플레이테스트 31번, 검은 테두리 + 노란 글씨로) - 프로젝트 기존 관례와
+## 동일한 두께(hud.tscn 등).
+const PAID_TEXT_OUTLINE_COLOR := Color(0, 0, 0, 1)
+const PAID_TEXT_OUTLINE_SIZE := 2
 
 var _active_sprites: Dictionary = {}
 var _dish_spawns: Dictionary = {}
@@ -69,6 +74,8 @@ func _spawn_paid_text(station_index: int, paid_amount: int) -> void:
 	label.text = "+%d" % paid_amount
 	label.add_theme_font_size_override("font_size", PAID_TEXT_FONT_SIZE)
 	label.add_theme_color_override("font_color", PAID_TEXT_COLOR)
+	label.add_theme_color_override("font_outline_color", PAID_TEXT_OUTLINE_COLOR)
+	label.add_theme_constant_override("outline_size", PAID_TEXT_OUTLINE_SIZE)
 	label.z_index = PAID_TEXT_Z_INDEX
 	label.position = seat_position + PAID_TEXT_HEAD_OFFSET
 	var home_map := get_parent().get_node_or_null("HomeMap")

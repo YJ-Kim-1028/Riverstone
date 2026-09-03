@@ -14,18 +14,26 @@ const STATION_POSITIONS := {
 	"cooking_area3": Vector2(32, 128),
 	"cooking_area4": Vector2(32, 150),
 }
-const BAR_OFFSET := Vector2(-7, -16)
+## 진행바가 조리기구 그림 위에 겹쳐서 가린다는 의견으로 아래쪽으로 옮김
+## (사용자 지시) - +18은 너무 아래로 처져 보인다는 피드백으로 +12로 줄임.
+## x는 가로/세로 맞바꾼 뒤 너비(_SIZE.x=4)에 맞춰 재조정.
+const BAR_OFFSET := Vector2(-2, 12)
 ## player.tscn/npc_sprite.tscn 둘 다 z_index=0이다 - 8은 restaurant_dish_layer.gd가
 ## 이미 한 번 확인 없이 넘겨짚었다가 정정한 것과 같은 잘못된 값이었다. 이 값이
 ## 그대로면 불 애니메이션이 플레이어 머리 위 상호작용 프롬프트(E OO 사용)보다
 ## 항상 위에 그려져서 글자를 가려버린다(사용자 리포트, 2026-08-29). 프롬프트
 ## 라벨/아이콘은 player.tscn에 z_index=2로 별도 지정해 항상 그 위에 뜨게 했다.
 const Z_INDEX := 0
+## 진행바(KitchenBar)를 불 애니메이션보다 위에 그리기 위한 값 - 둘 다 Z_INDEX로
+## 같으면 같은 프레임에 나중에 add_child되는 쪽(불, _ensure_fire가 _ensure_bar
+## 다음에 호출됨)이 위로 그려져서 냄비/프라이팬은 진행바가 불에 가려 아예 안
+## 보였다(사용자 리포트, 2026-09-01 - "프라이팬이랑 냄비는 바가 아예 안뜨는데").
+const BAR_Z_INDEX := 1
 ## 기구별 진행바 색(사용자 지정 헥스값) - 전부 같은 색이라 진행 상황을 구분하기
 ## 어렵다는 피드백으로 기구마다 다르게 칠한다.
 const BAR_COLORS := {
 	"cooking_area1": Color(0xc4 / 255.0, 0x7a / 255.0, 0x2e / 255.0), # 냄비
-	"cooking_area2": Color(0x95 / 255.0, 0x53 / 255.0, 0x1a / 255.0), # 프라이팬
+	"cooking_area2": Color(0xd8 / 255.0, 0x2b / 255.0, 0x2b / 255.0), # 프라이팬
 	"cooking_area3": Color(0x6b / 255.0, 0x8f / 255.0, 0x3a / 255.0), # 도마
 	"cooking_area4": Color(0x4d / 255.0, 0x9c / 255.0, 0xa7 / 255.0), # 믹서기
 }
@@ -49,6 +57,16 @@ const FIRE_TEXTURES := {
 const FIRE_EFFECT_AREA_NAMES := {
 	"cooking_area1": "cooking_area1_fire",
 	"cooking_area2": "cooking_area2_fire",
+}
+## 진행바 위치를 STATION_POSITIONS 추측 좌표 대신 사용자가 직접 찍는
+## "EffectArea" 오브젝트로 받기 위한 이름(사용자 지시, 2026-09-01 - 조리기구
+## 위치를 직접 잡아주겠다고 함). 아직 안 찍혀 있으면(area.position == INF)
+## _ensure_bar()가 조용히 기존 STATION_POSITIONS+BAR_OFFSET으로 대체한다.
+const BAR_EFFECT_AREA_NAMES := {
+	"cooking_area1": "cooking_area1_bar",
+	"cooking_area2": "cooking_area2_bar",
+	"cooking_area3": "cooking_area3_bar",
+	"cooking_area4": "cooking_area4_bar",
 }
 const FIRE_ANIMATION := &"fire"
 ## 초당 프레임 전환 수 - 4면 0.25초마다 그림이 바뀐다. 체감으로 조정 가능.
@@ -100,11 +118,21 @@ func _ensure_bar(station_id: String) -> void:
 	if _bars.has(station_id):
 		return
 	var bar := KitchenBar.new()
-	bar.position = STATION_POSITIONS.get(station_id, Vector2.ZERO) + BAR_OFFSET
-	bar.z_index = Z_INDEX
+	bar.position = _bar_position(station_id)
+	bar.z_index = BAR_Z_INDEX
 	bar.fill_color = BAR_COLORS.get(station_id, bar.fill_color)
 	add_child(bar)
 	_bars[station_id] = bar
+
+
+## BAR_EFFECT_AREA_NAMES에 찍힌 EffectArea가 있으면 그 중심을 쓰고(KitchenBar는
+## 좌상단 기준으로 그리므로 _SIZE/2만큼 되돌린다), 없으면 기존 추측 좌표를 쓴다.
+func _bar_position(station_id: String) -> Vector2:
+	var area_name: String = BAR_EFFECT_AREA_NAMES.get(station_id, "")
+	var area := _world_map.get_effect_area(area_name)
+	if area.position != Vector2.INF:
+		return area.position + area.size / 2.0 - KitchenBar._SIZE / 2.0
+	return STATION_POSITIONS.get(station_id, Vector2.ZERO) + BAR_OFFSET
 
 
 func _remove_bar(station_id: String) -> void:
@@ -149,20 +177,41 @@ func _remove_fire(station_id: String) -> void:
 		_fires.erase(station_id)
 
 
-## 조리기구 위에 뜨는 미니 진행바 하나. 그림 없이 직접 그린다(작은 사각형
-## 2개 - 배경 + 진행분).
+## 조리기구 아래에 뜨는 미니 진행바 하나. 그림 없이 직접 그린다 - 노란
+## 테두리 + 흰 배경 + 기구별 색으로 채워지는 진행분(hunting/catch_bar.gd와
+## 동일한 흰바탕/노란테두리 톤으로 맞춤).
 class KitchenBar:
 	extends Node2D
+
+	## 가로로 채워지는 것보다 세로로(아래에서 위로) 차오르는 게 낫다는 피드백으로
+	## 가로/세로를 맞바꿈(사용자 지시, 2026-09-01).
+	const _SIZE := Vector2(4, 14)
+	const _BG_COLOR := Color(0.95, 0.95, 0.95, 0.9)
+	const _SPARKLE_COLOR := Color(1.0, 1.0, 1.0, 1.0)
 
 	var progress := 0.0:
 		set(value):
 			progress = clampf(value, 0.0, 1.0)
-			queue_redraw()
 
 	var fill_color := Color(0.85, 0.65, 0.25, 1.0)
 
-	const _SIZE := Vector2(14, 3)
+	func _process(_delta: float) -> void:
+		queue_redraw()
 
 	func _draw() -> void:
-		draw_rect(Rect2(Vector2.ZERO, _SIZE), Color(0, 0, 0, 0.5))
-		draw_rect(Rect2(Vector2(1, 1), Vector2(_SIZE.x - 2, _SIZE.y - 2) * Vector2(progress, 1.0)), fill_color)
+		draw_rect(Rect2(Vector2.ZERO, _SIZE), _BG_COLOR)
+		var inner_height := _SIZE.y - 2
+		var fill_height := inner_height * progress
+		if fill_height <= 0.0:
+			return
+		var fill_rect := Rect2(Vector2(1, 1 + inner_height - fill_height), Vector2(_SIZE.x - 2, fill_height))
+		draw_rect(fill_rect, fill_color)
+		_draw_sparkle(fill_rect)
+
+	## 채워진 부분 전체가 밝기 펄스로 반짝이게 흰 반투명 레이어를 겹쳐 그린다
+	## (끝부분 점 하나만 반짝이던 이전 버전은 진행분 전체가 반짝이길 원한다는
+	## 피드백으로 교체).
+	func _draw_sparkle(fill_rect: Rect2) -> void:
+		var t := Time.get_ticks_msec() / 1000.0
+		var glow := sin(t * 6.0) * 0.5 + 0.5
+		draw_rect(fill_rect, Color(_SPARKLE_COLOR, glow * 0.35))

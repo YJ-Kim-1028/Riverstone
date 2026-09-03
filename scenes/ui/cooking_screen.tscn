@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/ui/cooking_frame.png" id="1_frame"]
 [ext_resource type="Script" path="res://scripts/ui/cooking_screen.gd" id="2_script"]
@@ -7,6 +7,22 @@
 [ext_resource type="Texture2D" path="res://assets/ui/slot_hotbar.png" id="5_slot"]
 [ext_resource type="Texture2D" path="res://assets/ui/cooking_inventory.png" id="6_inv"]
 [ext_resource type="Texture2D" path="res://assets/ui/frame_9slice.png" id="7_frame_9slice"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tooltip"]
+bg_color = Color(0.98, 0.93, 0.82, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.42, 0.27, 0.15, 1)
+corner_radius_top_left = 1
+corner_radius_top_right = 1
+corner_radius_bottom_right = 1
+corner_radius_bottom_left = 1
+content_margin_left = 3.0
+content_margin_right = 3.0
+content_margin_top = 1.0
+content_margin_bottom = 1.0
 
 [node name="CookingScreen" type="Control"]
 anchor_left = 0.5
@@ -184,3 +200,14 @@ custom_minimum_size = Vector2(48, 18)
 layout_mode = 2
 theme_override_font_sizes/font_size = 5
 text = "아니오"
+
+[node name="Tooltip" type="PanelContainer" parent="."]
+visible = false
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_tooltip")
+
+[node name="Label" type="Label" parent="Tooltip"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 5
+theme_override_colors/font_color = Color(0.42, 0.27, 0.15, 1)

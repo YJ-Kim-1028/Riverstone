@@ -32,6 +32,8 @@ const BUTTON_TEXT_COLOR := Color(0.25, 0.15, 0.08)
 @onready var _confirm_dim: ColorRect = $ConfirmPopup/Dim
 @onready var _confirm_yes: Button = $ConfirmPopup/Panel/Margin/VBox/ButtonRow/YesButton
 @onready var _confirm_no: Button = $ConfirmPopup/Panel/Margin/VBox/ButtonRow/NoButton
+@onready var _tooltip: PanelContainer = $Tooltip
+@onready var _tooltip_label: Label = $Tooltip/Label
 
 var _station_index := -1
 var _selected_a := ""
@@ -55,6 +57,26 @@ func _ready() -> void:
 	InventoryManager.inventory_changed.connect(_on_inventory_changed)
 	RestaurantManager.npc_departed.connect(_on_station_state_changed)
 	RestaurantManager.dish_served.connect(_on_station_state_changed)
+	## 인벤은 드래그인데 요리할 때는 클릭이라 헷갈린다는 피드백(플레이테스트
+	## 8번, 사용자 지시 2026-09-01) - 재료 아이콘을 냄비 위로 드래그해도 클릭과
+	## 똑같이 선택되게 한다. SlotA/SlotB는 냄비(Pot) 위에 얹힌 별도 버튼이라
+	## Pot에만 연결하면 정작 재료가 실제로 들어가는 자리(슬롯 위)에 놓았을 때
+	## 안 먹힌다(kitchen_screen.gd의 StatusIcon과 같은 문제, 사용자 리포트,
+	## 2026-09-01) - 셋 다 각각 연결한다.
+	for target in [_pot, _slot_a, _slot_b]:
+		(target as Control).set_drag_forwarding(
+			func(_at_position: Vector2) -> Variant: return null,
+			_can_drop_ingredient,
+			_drop_ingredient
+		)
+
+
+func _can_drop_ingredient(_at_position: Vector2, data: Variant) -> bool:
+	return typeof(data) == TYPE_DICTIONARY and String(data.get("item_id", "")).length() > 0
+
+
+func _drop_ingredient(_at_position: Vector2, data: Variant) -> void:
+	_on_ingredient_picked(String(data["item_id"]))
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -160,6 +182,9 @@ func _on_station_state_changed(_station_index: int, _npc_id: String = "", _dish:
 
 
 func _refresh_ingredient_grid() -> void:
+	## 그리드가 통째로 다시 만들어지므로, 지금 뜬 툴팁이 가리키던 버튼도 같이
+	## 사라진다 - mouse_exited가 그 버튼에서 안 올 수 있으니 여기서 미리 끈다.
+	_hide_tooltip()
 	for child in _ingredient_grid.get_children():
 		child.queue_free()
 	var seen_ids: Dictionary = {}
@@ -190,7 +215,62 @@ func _build_ingredient_button(item_id: String) -> TextureButton:
 	button.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
 	button.texture_normal = InventoryManager.get_item_icon_texture(item_id)
 	button.pressed.connect(func() -> void: _on_ingredient_picked(item_id))
+	# 이 버튼은 코드로 즉석에서 만들어져서 inventory_slot.gd처럼 스크립트를
+	# 따로 못 붙이니, 드래그 소스도 set_drag_forwarding()으로 연결한다(이
+	# 버튼 자신은 드롭을 받지 않으므로 can_drop/drop은 항상 거부).
+	button.set_drag_forwarding(
+		func(_at_position: Vector2) -> Variant: return _make_ingredient_drag_data(button, item_id),
+		func(_at_position: Vector2, _data: Variant) -> bool: return false,
+		func(_at_position: Vector2, _data: Variant) -> void: pass
+	)
+	## 요리대에서도 재료 설명을 보고 싶다는 피드백(플레이테스트 39번, 사용자
+	## 지시 2026-09-01).
+	button.set_meta("tooltip_text", _tooltip_for(item_id))
+	button.mouse_entered.connect(_show_tooltip.bind(button))
+	button.mouse_exited.connect(_hide_tooltip)
 	return button
+
+
+func _tooltip_for(item_id: String) -> String:
+	var definition := InventoryManager.get_item_definition(item_id)
+	var name_text := String(definition.get("name", ""))
+	var description_text := String(definition.get("description", ""))
+	return "%s\n%s" % [name_text, description_text] if not description_text.is_empty() else name_text
+
+
+## kitchen_screen.gd의 _show_tooltip()과 동일한 방식 - 엔진 기본 tooltip_text
+## 대신 자체 Tooltip 노드를 직접 위치 계산한다. 이 화면은 scale=2.5가 걸려
+## 있어서(cooking_screen.tscn) get_global_transform().affine_inverse()로
+## 변환해야 배율만큼 어긋나지 않는다.
+func _show_tooltip(source: Control) -> void:
+	var text := String(source.get_meta("tooltip_text", ""))
+	if text.is_empty():
+		return
+	_tooltip_label.text = text
+	_tooltip.visible = true
+	_tooltip.size = _tooltip.get_combined_minimum_size()
+	var source_rect := source.get_global_rect()
+	var local_top: Vector2 = get_global_transform().affine_inverse() * source_rect.position
+	var local_bottom: Vector2 = get_global_transform().affine_inverse() * (source_rect.position + source_rect.size)
+	var target := Vector2(local_top.x, local_bottom.y + 2.0)
+	target.x = clampf(target.x, 0.0, size.x - _tooltip.size.x)
+	target.y = clampf(target.y, 0.0, size.y - _tooltip.size.y)
+	_tooltip.position = target
+
+
+func _hide_tooltip() -> void:
+	_tooltip.visible = false
+
+
+func _make_ingredient_drag_data(button: TextureButton, item_id: String) -> Dictionary:
+	var preview := TextureRect.new()
+	preview.texture = button.texture_normal
+	preview.custom_minimum_size = button.custom_minimum_size
+	preview.size = button.custom_minimum_size
+	preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	preview.position = -button.custom_minimum_size / 2.0
+	button.set_drag_preview(preview)
+	return {"item_id": item_id}
 
 
 func _on_ingredient_picked(item_id: String) -> void:
