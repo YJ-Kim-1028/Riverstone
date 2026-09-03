@@ -1,0 +1,36 @@
+{
+  "group_id": "f4f21d39-7e15-45e8-8080-7c9426d24c6f",
+  "states": [
+    {
+      "character": {
+        "id": "7f0bf8c5-b2be-46f7-8f2e-d5e95bc9fc3c",
+        "name": "Idle",
+        "prompt": "pretty 30s woman doctor character, long straight black hair, thin round glasses,\nwhite lab coat over teal scrubs, stethoscope, standing front-facing pose,\nlow top-down 3/4 view, realistic body proportions not chibi,\npixel art, RPG game sprite",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-09-01T08:57:53.204017+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-09-01T09:00:08.531164"
+}

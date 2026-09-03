@@ -1,0 +1,36 @@
+{
+  "group_id": "ba7982ed-6ff0-48e1-991a-402fdb9e1816",
+  "states": [
+    {
+      "character": {
+        "id": "abe8ae02-4cae-44d1-89ca-c0d29df04ed3",
+        "name": "Idle",
+        "prompt": "big eyes, smile face",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-09-01T11:26:35.238975+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-09-01T11:31:18.843569"
+}

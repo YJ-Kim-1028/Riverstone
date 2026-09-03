@@ -1,0 +1,36 @@
+{
+  "group_id": "eaaba916-2516-4812-afa4-db1e5726c5c4",
+  "states": [
+    {
+      "character": {
+        "id": "e28c4689-d8ea-40d2-9097-a16d4b73b68f",
+        "name": "Idle",
+        "prompt": "same woman as reference, standing relaxed pose, empty hands at sides,\nlow top-down 3/4 view, realistic body proportions not chibi",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-09-01T10:13:41.274744+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-09-01T10:17:30.968762"
+}

@@ -2,34 +2,38 @@ extends Node2D
 class_name NPCSprite
 
 ## Visual stand-in for one NPC on the currently active map. Shows the real
-## sprite sheet (assets/npc/sprite/*.png, 16x32 프레임, 가로 한 줄에 12칸)
-## and animates a 4방향 걷기 사이클 while walking. 프레임 순서(기획자가 확정한
-## 배치, 0-indexed):
-##   0=정면 정지, 1/2=정면 걷기(왼발/오른발), 3=좌측 정지, 4/5=좌측 걷기(발모임/발벌림),
-##   6=우측 정지, 7/8=우측 걷기(발모임/발벌림), 9=뒷모습 정지, 10/11=뒷모습 걷기(왼발/오른발)
-## 좌/우 전용 정지 프레임(3, 6)이 추가되기 전에는 발이 모인 쪽 걷기 프레임을
-## 정지 포즈로 재사용했었으나, 전 NPC 시트에 전용 프레임이 그려지면서 더 이상
-## 재사용하지 않는다.
+## sprite sheet (assets/npc/sprite/*.png, 기본 16x32 프레임) and animates a
+## 4방향 걷기 사이클 while walking. 시트는 방향 그룹 4개(DOWN,LEFT,RIGHT,UP
+## 순서)가 나란히 있고, 그룹 하나는 [정지 1칸, 걷기 N칸]으로 구성된다 -
+## 기본은 N=2(기획자가 확정한 배치, 총 12칸: 0=정면 정지, 1/2=정면 걷기,
+## 3=좌측 정지, 4/5=좌측 걷기, 6=우측 정지, 7/8=우측 걷기, 9=뒷모습 정지,
+## 10/11=뒷모습 걷기). data/npc/*.json의 "sprite_walk_frame_count"로 이
+## N을 NPC마다 다르게 지정할 수 있다(사용자 지시, 2026-09-01 - 이샤를 AI로
+## 8프레임짜리 걷기 애니메이션으로 새로 그림) - 안 쓰면 기존 2 그대로라
+## 다른 NPC는 전혀 영향 없다. 실제 인덱스는 _apply_npc_id()가 계산한다.
 
 const FRAME_WIDTH := 16
 const FRAME_HEIGHT := 32
+## AI 원본이 캐릭터 주변에 여백을 두고 나와서(예전 손그림은 캔버스를 꽉 채워
+## 그림) 16x32 기준으로 스케일을 맞춰도 작아 보인다는 피드백(사용자 지시,
+## 2026-09-02) - 고해상도 NPC(sprite_frame_width/height 지정된 NPC)만
+## 더 키운다(_apply_npc_id() 참고). 1.3배로 했다가 "생각보다 크다"는
+## 피드백으로 1.2배로 낮춤(같은 날). player.gd HD_SCALE과 같은 배율로
+## 플레이어/NPC 크기를 통일한다.
+const HD_VISUAL_BOOST := 1.2
 enum Direction { DOWN, UP, LEFT, RIGHT }
-const IDLE_FRAME := {
-	Direction.DOWN: 0,
-	Direction.UP: 9,
-	Direction.LEFT: 3,
-	Direction.RIGHT: 6,
-}
-const WALK_FRAMES := {
-	Direction.DOWN: [1, 2],
-	Direction.UP: [10, 11],
-	Direction.LEFT: [4, 5],
-	Direction.RIGHT: [7, 8],
-}
-## 걷기 프레임을 바꾸는 간격(초) - 두 걷기 프레임 차이가 커서 빠르게 돌리면
-## 걷는 게 아니라 춤추는 것처럼 보인다는 피드백으로 넉넉하게 잡았다. 실제
-## 게임에서 보면서 조정할 값.
-const WALK_FRAME_INTERVAL := 0.35
+## 시트 안에서 방향 그룹이 나열되는 순서(기존 12칸 배치 - 0=DOWN, 3=LEFT,
+## 6=RIGHT, 9=UP - 와 동일하게 유지).
+const DIRECTION_ORDER: Array[Direction] = [Direction.DOWN, Direction.LEFT, Direction.RIGHT, Direction.UP]
+const DEFAULT_WALK_FRAME_COUNT := 2
+## 한 방향 걷기 프레임을 처음부터 끝까지 한 바퀴 도는 데 걸리는 시간(초) -
+## 프레임 전환 간격이 아니라 "전체 한 걸음 주기"를 고정해두고, 실제 프레임당
+## 간격(_walk_frame_interval)은 이 값을 프레임 개수로 나눠서 정한다. 기존
+## 2프레임(0.35초 간격 - 두 걷기 프레임 차이가 커서 빠르게 돌리면 걷는 게
+## 아니라 춤추는 것처럼 보인다는 피드백으로 넉넉하게 잡았던 값)과 정확히
+## 같은 체감 속도가 나오도록 0.35*2=0.7로 역산했다 - 프레임이 8개인 NPC
+## (이샤)도 같은 한 걸음 주기를 유지하면서 프레임만 더 촘촘해진다.
+const WALK_CYCLE_DURATION := 0.7
 const SCENT_CENTER := Vector2(0, -FRAME_HEIGHT / 2.0)
 const SCENT_COUNT := 3
 const SCENT_ORBIT := Vector2(10.0, 6.0)
@@ -38,6 +42,7 @@ const SCENT_TEXTURES := {
 	"blue": preload("res://assets/img/scent/ocean_scent.png"),
 	"purple": preload("res://assets/img/scent/lilac_scent.png"),
 	"white": preload("res://assets/img/scent/light_scent.png"),
+	"gold": preload("res://assets/img/scent/gold_scent.png"),
 }
 ## 플레이어(SPEED=80.0, player.gd)보다 느리게 걸어서 좀 더 여유 있는 걸음처럼
 ## 보이게 한다.
@@ -62,9 +67,25 @@ var _path: PackedVector2Array = PackedVector2Array()
 var _path_index := 0
 var _is_walking := false
 var _atlas: AtlasTexture
+## 대부분 NPC는 FRAME_WIDTH/FRAME_HEIGHT(16x32) 그대로지만, 고해상도로 새로
+## 그린 NPC는 data/npc/*.json에 "sprite_frame_width"/"sprite_frame_height"를
+## 지정해 더 큰 원본을 쓸 수 있다(사용자 지시, 2026-09-01 - 이샤를 AI로
+## 32x64 2배 해상도로 다시 그림). 화면에 보이는 실제 크기는 항상 16x32와
+## 같게 유지해야 해서, _apply_npc_id()가 이 실제 프레임 크기 대비 배율만큼
+## _sprite에 보정 스케일을 건다 - 그래야 다른 NPC들과 크기가 안 어긋난다.
+var _frame_width := FRAME_WIDTH
+var _frame_height := FRAME_HEIGHT
+## Direction -> 정지 프레임 인덱스 / Direction -> 걷기 프레임 인덱스 배열.
+## _apply_npc_id()가 _walk_frame_count 기준으로 매번 다시 계산한다(기본값
+## 2일 때는 기존 IDLE_FRAME/WALK_FRAMES 상수와 동일한 값이 나온다).
+var _idle_frame: Dictionary = {}
+var _walk_frames: Dictionary = {}
+var _walk_frame_interval := WALK_CYCLE_DURATION / float(DEFAULT_WALK_FRAME_COUNT)
 var _facing := Direction.DOWN
 var _walk_frame_timer := 0.0
-var _walk_frame_toggle := false
+## 불리언 토글 대신 인덱스로 순환 - 걷기 프레임이 2개가 아니라 N개일 수
+## 있어서(_walk_frame_count).
+var _walk_frame_index := 0
 var _emote_sprite: Sprite2D
 var _emote_timer: Timer
 ## 호감도 100 컷신(main.gd)이 이 NPC를 플레이어 쪽으로 걸어오게 만드는 그
@@ -80,6 +101,8 @@ var _ignore_time_pause := false
 
 func _ready() -> void:
 	_sprite.centered = true
+	## offset/scale은 실제 프레임 크기가 정해지는 _apply_npc_id()에서 맞춘다
+	## (기본 16x32 NPC는 거기서 결국 이 값과 동일하게 다시 세팅됨).
 	_sprite.offset = Vector2(0, -FRAME_HEIGHT / 2.0)
 	_build_scent_sprites()
 	_build_emote_sprite()
@@ -261,25 +284,26 @@ func _direction_from_vector(v: Vector2) -> int:
 func _update_animation(delta: float) -> void:
 	if _is_walking:
 		_walk_frame_timer += delta
-		if _walk_frame_timer >= WALK_FRAME_INTERVAL:
-			_walk_frame_timer -= WALK_FRAME_INTERVAL
-			_walk_frame_toggle = not _walk_frame_toggle
-		var frames: Array = WALK_FRAMES[_facing]
-		_set_frame(frames[1] if _walk_frame_toggle else frames[0])
+		if _walk_frame_timer >= _walk_frame_interval:
+			_walk_frame_timer -= _walk_frame_interval
+			_walk_frame_index += 1
+		var frames: Array = _walk_frames[_facing]
+		_set_frame(frames[_walk_frame_index % frames.size()])
 	else:
 		_walk_frame_timer = 0.0
-		_walk_frame_toggle = false
-		_set_frame(IDLE_FRAME[_facing])
+		_walk_frame_index = 0
+		_set_frame(_idle_frame[_facing])
 
 
 func _set_frame(frame_index: int) -> void:
 	if _atlas == null:
 		return
-	_atlas.region = Rect2(frame_index * FRAME_WIDTH, 0, FRAME_WIDTH, FRAME_HEIGHT)
+	_atlas.region = Rect2(frame_index * _frame_width, 0, _frame_width, _frame_height)
 
 
 func _apply_npc_id() -> void:
-	var sprite_path := String(NPCManager.get_definition(npc_id).get("sprite", ""))
+	var definition := NPCManager.get_definition(npc_id)
+	var sprite_path := String(definition.get("sprite", ""))
 	if sprite_path.is_empty():
 		push_error("NPC has no sprite path registered: %s" % npc_id)
 		return
@@ -287,7 +311,40 @@ func _apply_npc_id() -> void:
 	if texture == null:
 		push_error("NPC sprite texture could not be loaded: %s" % sprite_path)
 		return
+	## 기본값(FRAME_WIDTH/HEIGHT)과 다른 원본 해상도를 쓰는 NPC는
+	## "sprite_frame_width"/"sprite_frame_height"로 지정한다 - 없으면 기존
+	## 16x32 그대로. 화면에 보이는 크기는 항상 16x32와 같아야 하므로, 그
+	## 비율만큼 _sprite에 보정 스케일을 걸어 실제 원본 해상도와 무관하게
+	## 다른 NPC들과 동일한 크기로 보이게 한다.
+	_frame_width = int(definition.get("sprite_frame_width", FRAME_WIDTH))
+	_frame_height = int(definition.get("sprite_frame_height", FRAME_HEIGHT))
+	var base_scale := Vector2(FRAME_WIDTH / float(_frame_width), FRAME_HEIGHT / float(_frame_height))
+	## 기본 해상도(16x32) NPC는 base_scale이 이미 1.0이라 그대로 둔다 - 같이
+	## 키우면 이 NPC들만 이상하게 커진다. 고해상도 NPC만 부스트 적용.
+	if _frame_width != FRAME_WIDTH or _frame_height != FRAME_HEIGHT:
+		base_scale *= HD_VISUAL_BOOST
+	_sprite.scale = base_scale
+	_sprite.offset = Vector2(0, -_frame_height / 2.0)
+	_build_frame_indices(int(definition.get("sprite_walk_frame_count", DEFAULT_WALK_FRAME_COUNT)))
 	_atlas = AtlasTexture.new()
 	_atlas.atlas = texture
-	_atlas.region = Rect2(IDLE_FRAME[_facing] * FRAME_WIDTH, 0, FRAME_WIDTH, FRAME_HEIGHT)
+	_atlas.region = Rect2(_idle_frame[_facing] * _frame_width, 0, _frame_width, _frame_height)
 	_sprite.texture = _atlas
+
+
+## 시트 안 방향 그룹 순서(DIRECTION_ORDER)를 따라 [정지 1칸, 걷기
+## walk_frame_count칸]씩 차례로 배정한다 - walk_frame_count가 기본값 2면
+## 기존 12칸 배치(0,1,2 / 3,4,5 / 6,7,8 / 9,10,11)와 완전히 같은 값이 나온다.
+func _build_frame_indices(walk_frame_count: int) -> void:
+	_idle_frame.clear()
+	_walk_frames.clear()
+	_walk_frame_interval = WALK_CYCLE_DURATION / float(walk_frame_count)
+	var group_size := 1 + walk_frame_count
+	for i in DIRECTION_ORDER.size():
+		var direction: Direction = DIRECTION_ORDER[i]
+		var base := i * group_size
+		_idle_frame[direction] = base
+		var walk: Array = []
+		for w in walk_frame_count:
+			walk.append(base + 1 + w)
+		_walk_frames[direction] = walk

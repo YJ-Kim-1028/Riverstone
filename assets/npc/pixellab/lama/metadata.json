@@ -1,0 +1,36 @@
+{
+  "group_id": "fef4adb7-8fb8-46c5-9c0e-a6c6b68d956d",
+  "states": [
+    {
+      "character": {
+        "id": "d304eeaf-9643-4f55-8edd-a0471f1b5ecd",
+        "name": "Idle",
+        "prompt": "head is about 1/4 of total body height, tall adult body proportions",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-09-01T10:35:53.577655+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-09-01T10:37:49.552139"
+}
