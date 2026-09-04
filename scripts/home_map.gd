@@ -238,8 +238,19 @@ var _tilemap_door_layer: TileMapLayer = null
 ## 전용 변수를 새로 만드는 대신 범용으로 뒀다(erase_toggleable_cell()/
 ## restore_toggleable_cell()/find_toggleable_clusters() 참고). 키는
 ## "레이어이름:칸x,칸y" -> {source_id, atlas_coords, alt_id, layer}.
-const TOGGLEABLE_TILE_LAYERS := {"Grass": true}
+## "Grave"도 여기 포함 - Home.tmx에 사용자가 직접 그려둔 무덤 3기(아래
+## GRAVE_CELL_GROUPS)를 사망한 NPC 수만큼만 드러내는 데 erase/restore를
+## 재사용한다(_refresh_graves() 참고, 사용자 지시 2026-09-05).
+const TOGGLEABLE_TILE_LAYERS := {"Grass": true, "Grave": true}
 var _toggleable_tile_cells: Dictionary = {}
+## Home.tmx "Grave" 레이어에 사용자가 직접 그린 무덤 3기의 칸 좌표(각 무덤은
+## 16x32px = 세로 2칸). 그룹 순서대로 첫 번째 죽은 NPC가 첫 무덤을 드러낸다.
+const GRAVE_LAYER_NAME := "Grave"
+const GRAVE_CELL_GROUPS: Array = [
+	[Vector2i(35, 6), Vector2i(35, 7)],
+	[Vector2i(36, 6), Vector2i(36, 7)],
+	[Vector2i(37, 6), Vector2i(37, 7)],
+]
 ## TILE_SET_RESOURCES는 preload라 WorldMap 인스턴스마다 새로 만들어지지 않고
 ## 전부 같은 리소스를 공유한다 - 텍스처->source_id, (좌표+y_sort_origin)->대체
 ## 타일 id 캐시도 인스턴스가 아니라 리소스 자체에 속한 정보라 static으로 공유
@@ -252,6 +263,16 @@ static var _tile_alt_id_cache: Dictionary = {}
 
 func _ready() -> void:
 	load_map(map_path)
+	## Home에 계속 서 있는 채로 밤을 넘기는 경우(맵 전환 없이 취침) load_map()이
+	## 다시 안 불려서 _refresh_graves()도 다시 안 도는데, 그래도 다음날 무덤이
+	## 반영돼야 한다(사용자 지시 - "npc 1명이 사망할 때마다 다음 날 무덤 하나씩
+	## 보이게"). 이 맵 인스턴스가 사라지면(다른 맵으로 이동) Godot이 이 연결도
+	## 자동으로 끊어준다.
+	TimeManager.day_changed.connect(_on_day_changed_refresh_graves)
+
+
+func _on_day_changed_refresh_graves(_day: int, _weekday: String) -> void:
+	_refresh_graves()
 
 
 func load_map(next_map_path: String, render: bool = true) -> void:
@@ -330,7 +351,15 @@ func load_map(next_map_path: String, render: bool = true) -> void:
 	for stored_layer_name in _layer_gids:
 		layer_order[stored_layer_name] = layer_order.size()
 	for stored_layer_name in _layer_gids:
-		if not _layer_visibility.get(stored_layer_name, true):
+		## TOGGLEABLE_TILE_LAYERS는 Tiled의 visible 플래그와 무관하게 항상 실제로
+		## 그린다 - "Grave"를 Tiled에서 안 보이게(visible="0") 꺼둔 채로 그려서
+		## (사용자가 그런 것으로 확인됨, Home.tmx) 이 게이트에 걸려 타일 자체가
+		## 아예 생성되지 않았고, 그래서 _toggleable_tile_cells에도 안 쌓여
+		## erase_toggleable_cell()/restore_toggleable_cell()이 전부 조용히
+		## 무시되고 있었다(사용자 리포트, 2026-09-05 - "이미 죽은 경우에는
+		## 무덤 안보여?... 안보이는뎀"). 대신 타일은 항상 만들고, 기본 숨김은
+		## load_map() 끝의 _refresh_graves()가 담당한다.
+		if not _layer_visibility.get(stored_layer_name, true) and not TOGGLEABLE_TILE_LAYERS.has(stored_layer_name):
 			continue
 		_create_layer_tiles(stored_layer_name, layer_order[stored_layer_name])
 	# _blocked_cells는 위 루프(_create_tile)에서 render 여부와 무관하게 항상
@@ -338,6 +367,7 @@ func load_map(next_map_path: String, render: bool = true) -> void:
 	if _render_enabled:
 		_compute_light_source_positions()
 	_rebuild_pathfinding_grid()
+	_refresh_graves()
 
 
 func get_map_size() -> Vector2i:
@@ -603,6 +633,26 @@ func restore_toggleable_cell(layer_name: String, cell: Vector2i) -> void:
 	if data.is_empty():
 		return
 	(data["layer"] as TileMapLayer).set_cell(cell, data["source_id"], data["atlas_coords"], data["alt_id"])
+
+
+## 사망한 NPC 수만큼(단, 어제 이전에 죽은 NPC만 - 최대 GRAVE_CELL_GROUPS
+## 개수)만 GRAVE_CELL_GROUPS 앞에서부터 드러내고, 나머지는 지운다. load_map()
+## 끝(맵이 Home이 아니면 _tile_map_layers/_toggleable_tile_cells에 "Grave"가
+## 아예 없어서 둘 다 조용히 무시됨)과 TimeManager.day_changed(위 _ready() 참고)
+## 양쪽에서 호출한다. "죽은 당일이 아니라 다음 날부터"(사용자 지시)라서
+## death_day < 오늘로 걸러야 한다 - 안 그러면 죽은 그날 바로 Home에 들어와도
+## 무덤이 보여버린다.
+func _refresh_graves() -> void:
+	var dead_count := 0
+	for npc_id in NPCManager.get_dead_npc_ids():
+		if NPCManager.get_death_day(npc_id) < TimeManager.current_day:
+			dead_count += 1
+	for i in GRAVE_CELL_GROUPS.size():
+		for cell in (GRAVE_CELL_GROUPS[i] as Array):
+			if i < dead_count:
+				restore_toggleable_cell(GRAVE_LAYER_NAME, cell)
+			else:
+				erase_toggleable_cell(GRAVE_LAYER_NAME, cell)
 
 
 ## layer_name에 실제로 그려진 칸들을 4방향 인접 클러스터로 묶어서 돌려준다

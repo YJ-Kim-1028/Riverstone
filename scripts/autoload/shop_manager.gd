@@ -170,6 +170,15 @@ func get_purchase_count(item_id: String) -> int:
 func _is_release_unlocked(listing: Dictionary) -> bool:
 	if bool(listing.get("requires_murder", false)) and MurderManager.get_murder_count() < 1:
 		return false
+	## legend_statue는 황금 낚싯대를 받은 뒤부터만 낚시가게에 보여야 한다(사용자
+	## 지시, 2026-09-05 - "황금 낚시대 받고난 이후부터 보여야지"). golden_fishing_rod는
+	## category "tool"이라 NON_DISCARDABLE이므로, 한 번 받으면 인벤토리/장착/
+	## 보관함(사용자 지시 - "보관함에 있을수도 있잖아") 중 어딘가에 영구히 남는다.
+	if bool(listing.get("requires_golden_fishing_rod", false)) \
+			and not InventoryManager.has_item(FishingManager.GOLDEN_FISHING_ROD_ITEM_ID, 1) \
+			and EquipmentManager.get_equipped(EquipmentManager.HAND_SLOT) != FishingManager.GOLDEN_FISHING_ROD_ITEM_ID \
+			and not StorageBoxManager.has_item_anywhere(FishingManager.GOLDEN_FISHING_ROD_ITEM_ID):
+		return false
 	var prerequisite := String(listing.get("unlocks_after", ""))
 	if prerequisite.is_empty():
 		return true
@@ -201,9 +210,19 @@ const REASON_INVENTORY_FULL := "인벤토리가 가득 찼습니다."
 const REASON_STALL_OCCUPIED := "이미 다른 동물이 있는 칸입니다."
 const REASON_CANNOT_PLACE := "동물을 배치할 수 없습니다."
 const REASON_MAX_LEVEL := "더 이상 확장할 수 없습니다."
+const REASON_NOT_ENOUGH_FISH := "전설의 물고기가 부족합니다."
+## 골드가 아니라 전설의 물고기 100마리를 직접 내고 교환하는 구조(사용자
+## 지시, 2026-09-05 - "돈 주고 사는 게 아니라 전설 물고기 100마리로 교환해야
+## 하는 시스템이야"). 처음엔 "누적 100마리 낚으면 해금"으로 잘못 구현했다가
+## (구매 자체는 골드로) 정정됨 - 이제 상점엔 항상 떠 있고, 살 때 인벤토리의
+## legendary_fish 100개를 실제로 소모한다.
+const LEGEND_STATUE_ITEM_ID := "legend_statue"
+const LEGEND_STATUE_FISH_COST := 100
 
 
 func buy(shop_id: String, item_id: String, stall_index: int = -1, colors: Array[Color] = []) -> String:
+	if item_id == LEGEND_STATUE_ITEM_ID:
+		return _buy_legend_statue(shop_id, item_id)
 	if item_id.begins_with(LIVESTOCK_PREFIX):
 		return _buy_livestock(shop_id, item_id, stall_index)
 	if item_id == INVENTORY_EXPANSION_ITEM_ID:
@@ -255,17 +274,53 @@ func buy(shop_id: String, item_id: String, stall_index: int = -1, colors: Array[
 	return ""
 
 
+## 골드 대신 인벤토리의 legendary_fish LEGEND_STATUE_FISH_COST개를 직접
+## 소모하는 교환 구매(사용자 지시, 2026-09-05). purchase_limit은 다른 항목과
+## 동일하게 listing에서 읽는다(shops.json에 1로 지정 - 한 번만 교환 가능).
+func _buy_legend_statue(shop_id: String, item_id: String) -> String:
+	var listing := _find_listing(shop_id, item_id)
+	if listing.is_empty():
+		return REASON_NOT_SOLD
+	var limit := int(listing.get("purchase_limit", 0))
+	if limit > 0 and get_purchase_count(item_id) >= limit:
+		return REASON_LIMIT_REACHED
+	if not InventoryManager.has_item(FishingManager.LEGENDARY_FISH_ITEM_ID, LEGEND_STATUE_FISH_COST):
+		return REASON_NOT_ENOUGH_FISH
+	if not InventoryManager.can_add_item(item_id, 1):
+		return REASON_INVENTORY_FULL
+	InventoryManager.remove_item(FishingManager.LEGENDARY_FISH_ITEM_ID, LEGEND_STATUE_FISH_COST)
+	InventoryManager.add_item(item_id, 1)
+	_purchase_counts[item_id] = get_purchase_count(item_id) + 1
+	if not _purchase_days.has(item_id):
+		_purchase_days[item_id] = TimeManager.current_day
+	item_purchased.emit(shop_id, item_id, 0)
+	return ""
+
+
 ## FURNITURE_HAMMER_TRIGGER_CATEGORIES에 속한 아이템을 처음 사는 순간 그
 ## 상점의 주인 NPC가 선물로 망치를 끼워준다 - 온라인/현장 구매 둘 다(방금
 ## 위에서 이미 결제/지급이 끝난 뒤라 실패할 이유가 없음). 인벤토리가 꽉 차
 ## 있으면 조용히 건너뛴다(구매 자체를 막을 정도의 문제는 아님) - 다음에
 ## 가구를 또 사면 그때 다시 시도된다.
+## "이미 받았는지"를 인벤토리 보유 개수(get_item_count)로 판정했더니, 이
+## 망치는 "손에 들고 있을 때만 가구를 회수할 수 있다"(items.json)는
+## 손 장착 도구라 - 장착 중이면 인벤토리 슬롯이 아니라 장비창에 있어서
+## get_item_count가 0을 돌려줬다. 그래서 망치를 손에 들고 있는 상태로
+## 가구를 또 사면 "아직 안 받음"으로 잘못 판정해 매번 다시 지급되는 버그가
+## 있었다(사용자 리포트, 2026-09-05 - "온라인에서 가구사면 우디가 갑자기
+## 영혼만 나와서 망치 계속 줌"). 현재 보유 여부 대신 "한 번이라도 받았는지"
+## 자체를 별도 플래그로 영구히 기억한다.
+var _furniture_hammer_granted := false
+
+
 func _grant_furniture_hammer_if_needed(shop_id: String, item_id: String) -> void:
+	if _furniture_hammer_granted:
+		return
 	if not FURNITURE_HAMMER_TRIGGER_CATEGORIES.has(InventoryManager.get_item_category(item_id)):
 		return
-	if InventoryManager.get_item_count(FURNITURE_HAMMER_ITEM_ID) > 0:
+	if not InventoryManager.add_item(FURNITURE_HAMMER_ITEM_ID, 1):
 		return
-	InventoryManager.add_item(FURNITURE_HAMMER_ITEM_ID, 1)
+	_furniture_hammer_granted = true
 	var owner_ids: Array = get_shop_definition(shop_id).get("owner_npc_ids", [])
 	if not owner_ids.is_empty():
 		furniture_hammer_granted.emit(String(owner_ids[0]))
@@ -417,22 +472,35 @@ func get_save_data() -> Dictionary:
 		"purchase_counts": _purchase_counts.duplicate(),
 		"purchase_days": _purchase_days.duplicate(),
 		"pending_deliveries": _pending_deliveries.duplicate(true),
+		"furniture_hammer_granted": _furniture_hammer_granted,
 	}
 
 
+## furniture_hammer_granted가 없는 기존 세이브(이 수정 이전)는 false로
+## 시작한다 - 이미 망치를 갖고 있었던 플레이어는 다음 가구 구매 때 한 번
+## 더 지급받을 수 있지만(중복 1개, 장착 여부까지 정확히 판별하려면
+## EquipmentManager가 이 시점엔 아직 로드 전이라 안전하게 확인 불가), 매번
+## 반복 지급되던 원래 버그에 비하면 무해한 일회성 부작용이라 감수한다.
 func load_save_data(data: Dictionary) -> void:
 	_purchase_counts = (data.get("purchase_counts", {}) as Dictionary).duplicate()
 	_purchase_days = (data.get("purchase_days", {}) as Dictionary).duplicate()
 	_pending_deliveries = (data.get("pending_deliveries", []) as Array).duplicate(true)
+	_furniture_hammer_granted = bool(data.get("furniture_hammer_granted", false))
 
 
+## 인벤토리가 꽉 차서 못 넣은 배송은 그냥 사라지면 안 된다(사용자 리포트,
+## 2026-09-05 - "배송된다고 하고 인벤 가득 차있으면 어떻게 돼") - 예전엔
+## 실패해도 push_warning만 남기고 _pending_deliveries를 통째로 비워서 그
+## 주문이 영구히 사라졌다. NPC 선물 마일스톤 대기열(npc_manager.gd)과 같은
+## 원칙 - 성공한 것만 빼고, 실패한 배송은 큐에 남겨 다음 날 다시 시도한다.
 func _on_day_changed(_day: int, _weekday: String) -> void:
+	var still_pending: Array = []
 	for delivery in _pending_deliveries:
 		var item_id := String(delivery.get("item_id", ""))
 		var count := int(delivery.get("count", 0))
 		if not InventoryManager.add_item(item_id, count):
-			push_warning("Inventory full - could not deliver online order: %s" % item_id)
-	_pending_deliveries.clear()
+			still_pending.append(delivery)
+	_pending_deliveries = still_pending
 
 
 func _on_npc_died(npc_id: String) -> void:

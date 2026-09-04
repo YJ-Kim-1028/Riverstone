@@ -116,8 +116,8 @@
         "category": "material",
         "subtype": "fish",
         "description": "황금 낚싯대로만 만날 수 있다는 전설 속 물고기. 실제로 본 사람은 거의 없다.",
-        "icon": "res://assets/icon/Food.png",
-        "icon_index": 8
+        "icon": "res://assets/img/fishing/legend_fish_icon.png",
+        "icon_index": 0
     },
     "berry": {
         "id": "berry",
@@ -168,6 +168,21 @@
         "icon": "res://assets/icon/Tools.png",
         "icon_index": 14,
         "icon_row": 0
+    },
+    "legend_statue": {
+        "id": "legend_statue",
+        "name": "전설의 동상",
+        "category": "furniture",
+        "subtype": "",
+        "slot": "hand",
+        "stack_limit": 1,
+        "description": "전설의 물고기 100마리와 교환할 수 있는 동상.",
+        "icon": "res://assets/img/fishing/legend_statue_icon.png",
+        "icon_index": 0,
+        "icon_color": "",
+        "world_sprite": "res://assets/img/fishing/legend_statue.png",
+        "footprint_width": 2,
+        "footprint_height": 1
     },
     "furniture_hammer": {
         "id": "furniture_hammer",
@@ -896,13 +911,11 @@
     "perfume_somewhere_behind_you": {
         "id": "perfume_somewhere_behind_you",
         "name": "Somewhere behind you",
-        "category": "gift",
-        "slot": "hand",
+        "category": "perfume",
         "subtype": "perfume",
-        "description": "은은하게 남는 향수. 스쳐 지나간 자리에도 한동안 향이 남는다.",
+        "description": "마르가 선물해준 향수. 우클릭으로 사용이 가능하다.",
         "icon": "res://assets/icon/Gift.png",
         "icon_index": 6,
-        "gift_affection": 10,
         "scent_color": "gold"
     },
     "animal_feed": {
@@ -1123,6 +1136,24 @@
         "description": "주크박스에서 재생할 수 있는 음반이다.",
         "icon": "res://assets/icon/Records.png",
         "icon_index": 7
+    },
+    "record_the_heart_sutra_remix": {
+        "id": "record_the_heart_sutra_remix",
+        "name": "The heart sutra (remix)",
+        "category": "record",
+        "subtype": "",
+        "description": "주크박스에서 재생할 수 있는 음반이다.",
+        "icon": "res://assets/icon/Records.png",
+        "icon_index": 9
+    },
+    "record_we_are_all_christmas": {
+        "id": "record_we_are_all_christmas",
+        "name": "We are all christmas",
+        "category": "record",
+        "subtype": "",
+        "description": "주크박스에서 재생할 수 있는 음반이다.",
+        "icon": "res://assets/icon/Records.png",
+        "icon_index": 8
     },
     "storage_box": {
         "id": "storage_box",

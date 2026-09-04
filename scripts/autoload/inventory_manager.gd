@@ -42,9 +42,16 @@ const CATEGORY_STACK_LIMITS := {
 	"equipment": 1,
 	"cooked_ingredient": 99,
 	"record": 1,
+	"perfume": 1,
 }
 
-const NON_DISCARDABLE_CATEGORIES := ["tool", "rat_poison", "memento", "recipe", "quest_item", "book", "record"]
+## "perfume"(마르가 호감도 선물로 주는 perfume_somewhere_behind_you 전용
+## 카테고리, 사용자 지시 2026-09-05 - "아무에게도 선물해서는 안되고 내가
+## 뿌릴 수 있어야 하는데") - 일반 "gift"와 달리 give_gift()/give_gift_from_hand()
+## 대상에서 자동으로 빠지고(둘 다 category=="gift" 검사), use_perfume()으로
+## 몇 번이든 다시 쓸 수 있다(소모 안 됨). memento/record처럼 유일무이한
+## 서사 아이템이라 버릴 수 없게 같이 등록.
+const NON_DISCARDABLE_CATEGORIES := ["tool", "rat_poison", "memento", "recipe", "quest_item", "book", "record", "perfume"]
 
 var slot_count := DEFAULT_SLOT_COUNT
 
@@ -459,6 +466,24 @@ func use_item(slot_index: int) -> String:
 		return ""
 	var item_id := String(slot.get("item_id", ""))
 	if get_item_category(item_id) != "consumable" or not _remove_from_slot(slot_index, 1):
+		return ""
+	item_used.emit(item_id)
+	return item_id
+
+
+## use_item()과 같은 신호(item_used)를 쓰지만 아이템을 소모하지 않는다 -
+## 향수(category=="perfume")는 몇 번이든 다시 뿌릴 수 있어야 한다(사용자
+## 지시, 2026-09-05 - "일회용도 아니고 계속 사용할 수 있어야돼 사용한다고
+## 없어지면 안 돼"). 실제 효과(플레이어 몸에 향 파티클 이펙트)는 book과
+## 같은 분리 원칙으로 player.gd/main.gd 쪽에서 처리한다.
+func use_perfume(slot_index: int) -> String:
+	if slot_index < 0 or slot_index >= _slots.size():
+		return ""
+	var slot = _slots[slot_index]
+	if slot == null:
+		return ""
+	var item_id := String(slot.get("item_id", ""))
+	if get_item_category(item_id) != "perfume":
 		return ""
 	item_used.emit(item_id)
 	return item_id

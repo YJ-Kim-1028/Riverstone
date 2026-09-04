@@ -77,6 +77,21 @@ func get_box_slots(map_id: String, cell: Vector2i) -> Array:
 	return (get_box(map_id, cell).get("items", []) as Array).duplicate(true)
 
 
+## 지금 있는 맵/보관함 하나가 아니라 마을 어디든(맵 전체, 상자 전체) 이
+## 아이템이 하나라도 들어있는지 확인한다 - shop_manager.gd가 "황금 낚싯대를
+## 받은 적이 있는지"를 판정할 때 인벤토리/장착뿐 아니라 보관함에 넣어뒀을
+## 경우도 놓치지 않게 쓴다(사용자 지시, 2026-09-05 - "보관함에 있을수도
+## 있잖아").
+func has_item_anywhere(item_id: String) -> bool:
+	for map_id in _boxes:
+		for cell in (_boxes[map_id] as Dictionary):
+			var items: Array = ((_boxes[map_id] as Dictionary)[cell] as Dictionary).get("items", [])
+			for slot in items:
+				if slot != null and String((slot as Dictionary).get("item_id", "")) == item_id:
+					return true
+	return false
+
+
 ## InventoryManager.sort_by_name()과 동일한 방식 - 이름순으로 앞에서부터
 ## 다시 채운다(빈 칸은 뒤로 몰림).
 func sort_box(map_id: String, cell: Vector2i) -> void:

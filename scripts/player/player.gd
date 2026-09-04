@@ -109,6 +109,23 @@ const HD_SCALE := 0.5 * 1.2
 ## 이모지가 필요해져서 추가(사용자 지시, 2026-08-26).
 const EMOTE_OFFSET := Vector2(0, -FRAME_HEIGHT - 6)
 const EMOTE_DISPLAY_DURATION := 1.0
+## 향수(마르가 호감도 선물로 주는 perfume_somewhere_behind_you)를 우클릭해
+## 뿌리면 뜨는 파티클 - npc_sprite.gd의 SCENT_* 상수/로직과 동일한 패턴을
+## 플레이어 쪽에 그대로 옮겼다(사용자 지시, 2026-09-05).
+const SCENT_CENTER := Vector2(0, -FRAME_HEIGHT / 2.0)
+const SCENT_COUNT := 3
+const SCENT_ORBIT := Vector2(10.0, 6.0)
+const SCENT_SPEED := 1.4
+const SCENT_TEXTURES := {
+	"blue": preload("res://assets/img/scent/ocean_scent.png"),
+	"purple": preload("res://assets/img/scent/lilac_scent.png"),
+	"white": preload("res://assets/img/scent/light_scent.png"),
+	"gold": preload("res://assets/img/scent/gold_scent.png"),
+}
+## 한 번 뿌리면 이 시간(게임 분) 동안 향이 남는다. 다시 뿌리면(아이템이
+## 소모되지 않으므로 몇 번이든 가능) 남은 시간과 무관하게 이 값으로 갱신된다.
+## 게임 내 5시간(사용자 지시, 2026-09-05).
+const SCENT_DURATION_MINUTES := 300
 
 @onready var _interaction_prompt: Label = $InteractionPrompt
 @onready var _interaction_icon: TextureRect = $InteractionIcon
@@ -157,6 +174,11 @@ var _scripted_move_direction := Vector2.ZERO
 var _emote_sprite: Sprite2D
 var _emote_timer: Timer
 
+var _scent_sprites: Array[Sprite2D] = []
+var _scent_time := 0.0
+var _has_scent := false
+var _scent_minutes_remaining := 0
+
 
 func _ready() -> void:
 	_sprite.centered = true
@@ -167,6 +189,7 @@ func _ready() -> void:
 	else:
 		_sprite.offset = Vector2(0, -FRAME_HEIGHT / 2.0)
 	_build_emote_sprite()
+	_build_scent_sprites()
 	_atlas = AtlasTexture.new()
 	if _hd_mode:
 		_atlas.atlas = build_hd_composite_texture()
@@ -177,6 +200,7 @@ func _ready() -> void:
 	_sprite.texture = _atlas
 	if not Engine.is_editor_hint():
 		TimeManager.minute_passed.connect(_on_minute_passed)
+		TimeManager.day_changed.connect(_on_day_changed_clear_scent)
 		GameManager.appearance_changed.connect(refresh_appearance)
 
 
@@ -412,6 +436,12 @@ func get_speed_effect_info() -> Dictionary:
 
 
 func _on_minute_passed(_hour: int, _minute: int) -> void:
+	if _scent_minutes_remaining > 0:
+		_scent_minutes_remaining -= 1
+		if _scent_minutes_remaining <= 0:
+			_has_scent = false
+			for sprite in _scent_sprites:
+				sprite.visible = false
 	if _speed_effect_minutes_remaining <= 0:
 		return
 	_speed_effect_minutes_remaining -= 1
@@ -452,10 +482,16 @@ func _is_blocked_at(check_position: Vector2, extra_north_margin: float = 0.0) ->
 	return _world_map.is_cell_blocked(probe_position)
 
 
-func _process(_delta: float) -> void:
-	if Engine.is_editor_hint() or not (_interaction_prompt.visible or _interaction_icon.visible):
+func _process(delta: float) -> void:
+	if Engine.is_editor_hint():
 		return
-	_keep_prompt_on_screen()
+	if _has_scent:
+		_scent_time += delta
+		for i in _scent_sprites.size():
+			var phase := _scent_time * SCENT_SPEED + i * (TAU / SCENT_COUNT)
+			_scent_sprites[i].position = SCENT_CENTER + Vector2(cos(phase) * SCENT_ORBIT.x, sin(phase) * SCENT_ORBIT.y)
+	if _interaction_prompt.visible or _interaction_icon.visible:
+		_keep_prompt_on_screen()
 
 
 ## The prompt normally floats above the player's head. Near a map edge the
@@ -651,6 +687,41 @@ func show_emote(emote_id: String, duration: float = EMOTE_DISPLAY_DURATION) -> v
 	_emote_sprite.visible = true
 	_emote_timer.wait_time = duration
 	_emote_timer.start()
+
+
+## npc_sprite.gd의 _build_scent_sprites()와 동일한 패턴.
+func _build_scent_sprites() -> void:
+	for i in SCENT_COUNT:
+		var sprite := Sprite2D.new()
+		sprite.visible = false
+		add_child(sprite)
+		_scent_sprites.append(sprite)
+
+
+## 향수를 우클릭했을 때(equipment_panel.gd → InventoryManager.use_perfume() →
+## main.gd._on_item_used()) 호출된다. 이미 향이 있는 상태에서 또 뿌려도
+## 아이템이 소모되지 않으므로(use_perfume() 참고) 남은 시간만 새로 갱신된다.
+func apply_scent(color_name: String) -> void:
+	var texture: Texture2D = SCENT_TEXTURES.get(color_name)
+	if texture == null:
+		return
+	_has_scent = true
+	_scent_minutes_remaining = SCENT_DURATION_MINUTES
+	for sprite in _scent_sprites:
+		sprite.visible = true
+		sprite.texture = texture
+
+
+## 취침(TimeManager._advance_day())은 밤사이 분을 하나씩 흘려보내지 않고
+## 다음날 09:00로 바로 건너뛴다 - _on_minute_passed()의 카운트다운이 한 번도
+## 안 불려서, 자기 전에 남아있던 향이 자고 일어나도 그대로 남아있었다(사용자
+## 리포트, 2026-09-05 - "자고 일어나도 향수가 그대로 있어 자고 일어나면
+## 리셋 돼어야 돼"). 하루가 바뀌면 무조건 지운다.
+func _on_day_changed_clear_scent(_day: int, _weekday: String) -> void:
+	_has_scent = false
+	_scent_minutes_remaining = 0
+	for sprite in _scent_sprites:
+		sprite.visible = false
 
 
 func set_camera_bounds(map_size: Vector2i) -> void:

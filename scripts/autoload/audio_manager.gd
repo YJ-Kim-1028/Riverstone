@@ -137,6 +137,9 @@ const SFX_COLLECTION_OPEN := "res://assets/audio/sfx/sfx_collection_open.mp3"
 ## 지시) = 20*log10(1.2) ≈ +1.6dB.
 const SFX_COLLECTION_VOLUME_DB := 1.6
 const SFX_DRINKING := "res://assets/audio/sfx/sfx_drinking.mp3"
+## 향수(perfume_somewhere_behind_you) 우클릭 사용 전용(main.gd _on_item_used()) -
+## 사용자 지시, 2026-09-05.
+const SFX_PERFUME_SPRAY := "res://assets/audio/sfx/sfx_perfume_spray.mp3"
 const SFX_FISHING_APPEAR := "res://assets/audio/sfx/sfx_fishing.mp3"
 ## 낚시 실패(시간 초과/클릭 부족)에 사운드가 아예 없다는 피드백으로 추가
 ## (사용자 지시, 2026-09-01) - 사냥 실패(SFX_HUNT_CATCH_FAIL)와 같은

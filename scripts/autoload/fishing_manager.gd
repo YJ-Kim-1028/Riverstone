@@ -58,6 +58,10 @@ const GHOST_BITE_MAP_ID := "plaza3"
 const GHOST_BITE_CHANCE := 0.35
 const GHOST_STRUGGLE_DURATION_SECONDS := 1.3
 const GHOST_STRUGGLE_SFX_INTERVAL_SECONDS := 0.12
+## 전설의 물고기(legend_statue 100마리) 사냥과 같은 자리(plaza3)에서 겹치다
+## 보니 물귀신 연출이 너무 자주 끼어들어 거슬린다는 피드백(사용자 지시,
+## 2026-09-05) - 하루 최대 이 횟수까지만 뜨게 제한한다.
+const GHOST_BITE_DAILY_LIMIT := 2
 
 var _phase := Phase.IDLE
 var _bite_wait_elapsed := 0.0
@@ -67,6 +71,15 @@ var _hit_count := 0
 var _current_species := ""
 var _is_ghost_bite := false
 var _ghost_struggle_sfx_elapsed := 0.0
+var _ghost_bite_count_today := 0
+
+
+func _ready() -> void:
+	TimeManager.day_changed.connect(_on_day_changed_reset_ghost_bite)
+
+
+func _on_day_changed_reset_ghost_bite(_day: int, _weekday: String) -> void:
+	_ghost_bite_count_today = 0
 
 
 func _process(delta: float) -> void:
@@ -133,7 +146,10 @@ func start_fishing() -> bool:
 	_bite_wait_duration = randf_range(BITE_WAIT_MIN_SECONDS, BITE_WAIT_MAX_SECONDS)
 	_is_ghost_bite = GameManager.current_map_id == GHOST_BITE_MAP_ID \
 			and MurderManager.get_murder_count() > 0 \
+			and _ghost_bite_count_today < GHOST_BITE_DAILY_LIMIT \
 			and randf() < GHOST_BITE_CHANCE
+	if _is_ghost_bite:
+		_ghost_bite_count_today += 1
 	return true
 
 

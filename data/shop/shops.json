@@ -45,7 +45,8 @@
         "owner_npc_ids": ["roshi", "marin"],
         "stock": [
             {"item_id": "fishing_rod", "price": 500, "purchase_limit": 1},
-            {"item_id": "bait", "price": 10}
+            {"item_id": "bait", "price": 10},
+            {"item_id": "legend_statue", "purchase_limit": 1, "requires_golden_fishing_rod": true}
         ],
         "planned_stock": []
     },
