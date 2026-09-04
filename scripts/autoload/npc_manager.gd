@@ -126,6 +126,27 @@ var _dead_npc_ids: Array[String] = []
 var _death_days: Dictionary = {}
 var _last_daily_dialogue_index: Dictionary = {}
 var _talked_today: Dictionary = {}
+## npc_id -> bool - 오늘 그 NPC와 나눈 마지막 대화가 "특수 대사"(마일스톤/
+## 알리바이/애도/세이지 전용 트리거 등, get_daily_dialogue()의 여러 조기
+## return 분기 - 일회성이라 다시 보여주면 안 됨)였는지. true면 오늘은 다시
+## 말을 못 건다. 일상 잡담 로테이션(요일/호감도 풀, 비/공포 대화, 메일 반응,
+## 세이지 운세 포함)만 나왔을 땐 false라 하루에 여러 번 계속 말을 걸 수
+## 있다 - 단 호감도는 talk()이 하루 1회로 별도 제한(사용자 지시, 2026-09-05 -
+## "일상 대사는 같은 말 계속 걸어도... 호감도는 처음 1번만 올려주고, 대사는
+## 계속 보여주는 식... 특수한 대사일 경우... 하루에 한번만", 다음날 세션).
+var _special_dialogue_shown_today: Dictionary = {}
+## npc_id -> 오늘 처음 뽑힌 일상 잡담 대사(최종 결과, 메일 반응 등 그때 같이
+## 붙은 것까지 포함) - 재대화 때마다 로테이션으로 다른 대사가 나오지 말고,
+## 그날 정해진 대사를 계속 그대로 보여줘야 한다(사용자 지시, 2026-09-05 -
+## "요일 대사 돌아가면서 보여주는 게 아니라 그 날 보여주기로 지정된 대사를
+## 계속 보여주는 게 나을 거 같아"). _on_day_changed()에서 비운다.
+## 세이지 운세는 여기 포함하지 않는다 - 캐시에 같이 구워버리면 오늘 첫
+## 운세가 붙은 대사가 재대화할 때마다 매번 다시 나와서 운세가 반복되는
+## 버그가 있었다(사용자 리포트, 2026-09-05 - "운세 중복으로 나와"). 아래
+## get_daily_dialogue()가 캐시 히트/미스와 무관하게 매번 별도로 붙인다 -
+## _build_fortune_offer_lines() 자체가 _fortune_offered_day로 하루 1회만
+## 실제 내용을 돌려주므로 중복 없이 딱 한 번만 섞여 들어간다.
+var _daily_dialogue_cache: Dictionary = {}
 var _spawn_index: Dictionary = {}
 var _pending_scent: Dictionary = {}
 var _active_scent: Dictionary = {}
@@ -203,6 +224,13 @@ func talk(npc_id: String) -> void:
 
 func has_talked_today(npc_id: String) -> bool:
 	return bool(_talked_today.get(npc_id, false))
+
+
+## npc_world_manager.gd get_nearest_talkable_npc()가 이걸로 "오늘 다시 말 걸
+## 수 있는지"를 판단한다(has_talked_today()가 아니라) - get_daily_dialogue()
+## 참고.
+func has_special_dialogue_shown_today(npc_id: String) -> bool:
+	return bool(_special_dialogue_shown_today.get(npc_id, false))
 
 
 ## amount/scent_color come from the gifted item's data (items.json's
@@ -408,6 +436,18 @@ func get_milestone_dialogue(npc_id: String, threshold: int) -> Array:
 	return []
 
 
+## get_milestone_dialogue()와 같은 이벤트를 찾아, lines 안에 있는
+## {"type":"gift","item_id":...} 줄의 item_id를 돌려준다(없으면 빈 문자열) -
+## _check_affection_events()가 큐에 넣기 전에 인벤토리 자리를 미리 확인하는
+## 용도. 이벤트 하나에 gift 줄이 여러 개면 첫 번째만 본다(지금까지 실제로는
+## 항상 하나뿐).
+func _find_gift_item_id(threshold: int, npc_id: String) -> String:
+	for line in get_milestone_dialogue(npc_id, threshold):
+		if line is Dictionary and String(line.get("type", "")) == "gift":
+			return String(line.get("item_id", ""))
+	return ""
+
+
 func has_completed_event(npc_id: String, threshold: int) -> bool:
 	return (_completed_events.get(npc_id, []) as Array).has(threshold)
 
@@ -524,6 +564,12 @@ func _resolve_daily_pool_entry(entry: Variant) -> Array:
 
 
 func get_daily_dialogue(npc_id: String) -> Array:
+	## 기본값은 "특수 대사"(오늘 다시 말 못 검) - 아래 일상 잡담 로테이션까지
+	## 무사히 도달했을 때만 false로 내린다(_special_dialogue_shown_today 선언부
+	## 주석 참고). 이 함수의 조기 return 분기들(애도/알리바이/마일스톤/세이지
+	## 전용 트리거/파트너 사망 반응)은 전부 일회성이라 따로 안 건드려도 기본값
+	## true가 자연히 적용된다.
+	_special_dialogue_shown_today[npc_id] = true
 	## murder_system.md 경찰 조사 - 살인 후 5일 이내 이 NPC와 처음 나누는
 	## 대화는 그 자체로 애도+알리바이 대화여야 한다(사용자 지시, 2026-08-23 -
 	## "살인 일어난 후 바로 다음 대화는 알리바이와 애도여야 할 거 같아"). 다른
@@ -610,7 +656,18 @@ func get_daily_dialogue(npc_id: String) -> Array:
 			continue
 		var threshold := int(pending.get("threshold", -1))
 		var is_memento := bool(pending.get("is_memento", false))
-		var inventory_ok := not is_memento or InventoryManager.can_add_item("memento_%s" % npc_id, 1)
+		## 추억의 물건뿐 아니라 일반 선물(음반 등, lines 안 {"type":"gift",...}
+		## 줄)도 인벤토리 자리를 확인해야 한다 - 자리가 없으면 선물 줄이 조용히
+		## InventoryManager.add_item() 실패로 넘어가서 대사는 나왔는데 아이템은
+		## 영영 사라지는 버그가 있었다(사용자 리포트, 2026-09-05 - "음반 못
+		## 받았어.. 인벤이 다 차서 그런가바"). 추억의 물건과 같은 방식으로
+		## 자리 날 때까지 큐에 그대로 대기시킨다.
+		var gift_item_id := _find_gift_item_id(threshold, npc_id)
+		var inventory_ok := true
+		if is_memento:
+			inventory_ok = InventoryManager.can_add_item("memento_%s" % npc_id, 1)
+		elif not gift_item_id.is_empty():
+			inventory_ok = InventoryManager.can_add_item(gift_item_id, 1)
 		if inventory_ok:
 			var milestone_lines: Array = get_milestone_dialogue(npc_id, threshold)
 			consume_pending_milestone(npc_id)
@@ -643,59 +700,72 @@ func get_daily_dialogue(npc_id: String) -> Array:
 			var warnings: Array = get_definition(npc_id).get("story_dialogue", {}).get("murder_warning_examples", [])
 			if not warnings.is_empty():
 				return (warnings.pick_random() as Array).duplicate()
-	var dialogue: Dictionary = get_definition(npc_id).get("dialogue", {})
-	var daily: Dictionary = dialogue.get("daily", {})
-	var day: Dictionary = daily.get(TimeManager.get_weekday(), {})
-	var pool: Array = []
-	for entry in (day.get(get_affection_tier(npc_id), []) as Array):
-		var resolved := _resolve_daily_pool_entry(entry)
-		if not resolved.is_empty():
-			pool.append(resolved)
-	## 로시 제외(ROSHI_NPC_ID 참고) - 평일엔 비가 와야만 등장해서 평일 만남이
-	## 전부 "비 오는 날"이 되어버리는 바람에, 이 혼합이 매번 걸려서 요일별로
-	## 공들여 쓴 대사가 묻혔다(사용자 지시, 2026-08-29).
-	if WeatherManager.is_raining() and npc_id != ROSHI_NPC_ID:
-		pool.append_array(dialogue.get("rain_conversation", []))
-	if has_horror_mode_started():
-		## 사용자 지시(2026-08-23): "그 사람" 대신 실제 희생자 이름으로 - 가장
-		## 최근 사건의 피해자 이름을 {victim_name} 자리에 채운다.
-		var victim_name: String = String(get_definition(get_most_recent_death_npc_id()).get("name", "그 사람"))
-		for entry in (dialogue.get("horror_conversation", []) as Array):
-			pool.append(_substitute_victim_name(entry, victim_name))
-	## 플레이어가 이 NPC에게 자유 작성 메일을 보냈고 아직 언급 안 됐으면, 오늘의
-	## 후보 풀에 mail_reaction 템플릿 하나를 더 끼워 넣는다 - "{player_mail_content}"를
-	## 실제 메일 본문으로 바로 치환해서 넣어둔다(EmailManager.clear_pending_mail_reaction()로
-	## 지우기 전에 내용을 먼저 읽어와야 하므로 여기서 치환까지 끝내는 게 안전함).
-	## 이게 뽑히면 아래에서 지워서 같은 메일이 두 번 언급되지 않게 한다.
-	var mail_reaction_index := -1
-	if EmailManager.has_pending_mail_reaction(npc_id):
-		var mail_templates: Array = dialogue.get("mail_reaction", [])
-		if not mail_templates.is_empty():
-			var mail_content := EmailManager.get_pending_mail_reaction_content(npc_id)
-			mail_reaction_index = pool.size()
-			pool.append(_substitute_mail_content(mail_templates.pick_random(), mail_content))
-	if pool.is_empty():
-		return []
-	var index := randi() % pool.size()
-	if pool.size() > 1 and index == int(_last_daily_dialogue_index.get(npc_id, -1)):
-		index = (index + 1) % pool.size()
-	_last_daily_dialogue_index[npc_id] = index
-	if index == mail_reaction_index:
-		EmailManager.clear_pending_mail_reaction(npc_id)
-	var picked: Array = pool[index]
-	## 셰퍼드/모카는 서로 불륜 상대다(shepherd.json/mocha.json special_notes) -
-	## 둘 중 한쪽이 살해당하면, 남은 쪽에게는 위 애도+알리바이 대화 다음번
-	## 재회 때 한정으로 한 번 더 특별한 반응을 보여준다(사용자 지시,
-	## 2026-08-23). PARTNER_DEATH_PAIRS에 없는 NPC나 상대가 죽지 않았으면
-	## 그냥 무시하고 평소 잡담으로 넘어간다.
-	if PARTNER_DEATH_PAIRS.has(npc_id):
-		var partner_id: String = PARTNER_DEATH_PAIRS[npc_id]
-		if not is_alive(partner_id) and not bool(_partner_death_reaction_shown.get(npc_id, false)):
-			var reaction: Array = get_definition(npc_id).get("story_dialogue", {}).get("partner_death_reaction", [])
-			if not reaction.is_empty():
-				_partner_death_reaction_shown[npc_id] = true
-				_partner_death_reaction_shown_day[npc_id] = TimeManager.current_day
-				return reaction.duplicate()
+	## 오늘 이미 일상 잡담이 한 번 뽑혔으면 새로 굴리지 않고 그대로 재생 -
+	## _daily_dialogue_cache 선언부 주석 참고. (세이지 운세는 이 캐시에
+	## 안 구워져 있으므로 아래에서 캐시 히트/미스와 무관하게 항상 따로 붙인다.)
+	var picked: Array
+	if _daily_dialogue_cache.has(npc_id):
+		picked = (_daily_dialogue_cache[npc_id] as Array).duplicate(true)
+	else:
+		var dialogue: Dictionary = get_definition(npc_id).get("dialogue", {})
+		var daily: Dictionary = dialogue.get("daily", {})
+		var day: Dictionary = daily.get(TimeManager.get_weekday(), {})
+		var pool: Array = []
+		for entry in (day.get(get_affection_tier(npc_id), []) as Array):
+			var resolved := _resolve_daily_pool_entry(entry)
+			if not resolved.is_empty():
+				pool.append(resolved)
+		## 로시 제외(ROSHI_NPC_ID 참고) - 평일엔 비가 와야만 등장해서 평일 만남이
+		## 전부 "비 오는 날"이 되어버리는 바람에, 이 혼합이 매번 걸려서 요일별로
+		## 공들여 쓴 대사가 묻혔다(사용자 지시, 2026-08-29).
+		if WeatherManager.is_raining() and npc_id != ROSHI_NPC_ID:
+			pool.append_array(dialogue.get("rain_conversation", []))
+		if has_horror_mode_started():
+			## 사용자 지시(2026-08-23): "그 사람" 대신 실제 희생자 이름으로 - 가장
+			## 최근 사건의 피해자 이름을 {victim_name} 자리에 채운다.
+			var victim_name: String = String(get_definition(get_most_recent_death_npc_id()).get("name", "그 사람"))
+			for entry in (dialogue.get("horror_conversation", []) as Array):
+				pool.append(_substitute_victim_name(entry, victim_name))
+		## 플레이어가 이 NPC에게 자유 작성 메일을 보냈고 아직 언급 안 됐으면, 오늘의
+		## 후보 풀에 mail_reaction 템플릿 하나를 더 끼워 넣는다 - "{player_mail_content}"를
+		## 실제 메일 본문으로 바로 치환해서 넣어둔다(EmailManager.clear_pending_mail_reaction()로
+		## 지우기 전에 내용을 먼저 읽어와야 하므로 여기서 치환까지 끝내는 게 안전함).
+		## 이게 뽑히면 아래에서 지워서 같은 메일이 두 번 언급되지 않게 한다.
+		var mail_reaction_index := -1
+		if EmailManager.has_pending_mail_reaction(npc_id):
+			var mail_templates: Array = dialogue.get("mail_reaction", [])
+			if not mail_templates.is_empty():
+				var mail_content := EmailManager.get_pending_mail_reaction_content(npc_id)
+				mail_reaction_index = pool.size()
+				pool.append(_substitute_mail_content(mail_templates.pick_random(), mail_content))
+		if pool.is_empty():
+			return []
+		var index := randi() % pool.size()
+		if pool.size() > 1 and index == int(_last_daily_dialogue_index.get(npc_id, -1)):
+			index = (index + 1) % pool.size()
+		_last_daily_dialogue_index[npc_id] = index
+		if index == mail_reaction_index:
+			EmailManager.clear_pending_mail_reaction(npc_id)
+		picked = pool[index]
+		## 셰퍼드/모카는 서로 불륜 상대다(shepherd.json/mocha.json special_notes) -
+		## 둘 중 한쪽이 살해당하면, 남은 쪽에게는 위 애도+알리바이 대화 다음번
+		## 재회 때 한정으로 한 번 더 특별한 반응을 보여준다(사용자 지시,
+		## 2026-08-23). PARTNER_DEATH_PAIRS에 없는 NPC나 상대가 죽지 않았으면
+		## 그냥 무시하고 평소 잡담으로 넘어간다.
+		if PARTNER_DEATH_PAIRS.has(npc_id):
+			var partner_id: String = PARTNER_DEATH_PAIRS[npc_id]
+			if not is_alive(partner_id) and not bool(_partner_death_reaction_shown.get(npc_id, false)):
+				var reaction: Array = get_definition(npc_id).get("story_dialogue", {}).get("partner_death_reaction", [])
+				if not reaction.is_empty():
+					_partner_death_reaction_shown[npc_id] = true
+					_partner_death_reaction_shown_day[npc_id] = TimeManager.current_day
+					return reaction.duplicate()
+		## 여기까지 왔으면 정말로 일상 잡담 로테이션(비/공포 대화, 메일 반응
+		## 포함)이라 오늘 다시 말 걸 수 있다 - 이번에 뽑힌 대사(운세 제외)를
+		## 오늘 하루 고정으로 캐시해서, 재대화 때 로테이션 대신 같은 대사를
+		## 반복한다.
+		_daily_dialogue_cache[npc_id] = picked.duplicate(true)
+	_special_dialogue_shown_today[npc_id] = false
 	if npc_id == SAGE_NPC_ID:
 		var fortune_lines := _build_fortune_offer_lines()
 		if not fortune_lines.is_empty():
@@ -1111,6 +1181,8 @@ func get_save_data() -> Dictionary:
 			"murder_candidate_flagged": bool(_murder_candidate_flagged.get(npc_id, false)),
 			"partner_death_reaction_shown": bool(_partner_death_reaction_shown.get(npc_id, false)),
 			"talked_today": has_talked_today(npc_id),
+			"special_dialogue_shown_today": has_special_dialogue_shown_today(npc_id),
+			"daily_dialogue_cache": (_daily_dialogue_cache.get(npc_id, []) as Array).duplicate(true),
 			"current_position": _serialize_position(npc_id),
 			"death_day": get_death_day(npc_id),
 			"scent_color": get_scent_color(npc_id),
@@ -1147,6 +1219,10 @@ func load_save_data(data: Dictionary) -> void:
 		_murder_candidate_flagged[npc_id] = bool(state.get("murder_candidate_flagged", false))
 		_partner_death_reaction_shown[npc_id] = bool(state.get("partner_death_reaction_shown", false))
 		_talked_today[npc_id] = bool(state.get("talked_today", false))
+		_special_dialogue_shown_today[npc_id] = bool(state.get("special_dialogue_shown_today", false))
+		var cached_daily_dialogue: Array = (state.get("daily_dialogue_cache", []) as Array).duplicate(true)
+		if not cached_daily_dialogue.is_empty():
+			_daily_dialogue_cache[npc_id] = cached_daily_dialogue
 		var death_day := int(state.get("death_day", -1))
 		if death_day >= 0:
 			_death_days[npc_id] = death_day
@@ -1346,6 +1422,8 @@ func grant_gift_item(npc_id: String, item_id: String) -> void:
 
 func _on_day_changed(_day: int, _weekday: String) -> void:
 	_talked_today.clear()
+	_special_dialogue_shown_today.clear()
+	_daily_dialogue_cache.clear()
 	_active_scent = _pending_scent.duplicate()
 	_pending_scent.clear()
 	for npc_id in SELF_SCENT_NPC_IDS:

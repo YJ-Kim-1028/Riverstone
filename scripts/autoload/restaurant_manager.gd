@@ -78,7 +78,7 @@ var _invite_used_today := false
 
 func _ready() -> void:
 	for i in STATION_COUNT:
-		_stations.append({"npc_id": "", "dish": null, "eating_until": -1})
+		_stations.append({"npc_id": "", "dish": null, "eating_until": -1, "entry_notified": false})
 	TimeManager.day_changed.connect(_on_day_changed)
 	TimeManager.restaurant_closed.connect(_on_time_restaurant_closed)
 	TimeManager.minute_passed.connect(_on_minute_passed)
@@ -91,10 +91,18 @@ func _ready() -> void:
 ## 판정이 들쭉날쭉하고(특히 화면 밖에서 미리 정착 처리된 경우) 한 손님한테
 ## 여러 번 울리기도 하는 문제가 있었다 - "문에 들어온 순간 정확히 한 번"으로
 ## 단순화(사용자 지시).
+## entry_notified로 이 좌석(=이번 착석)당 딱 한 번만 실제로 울리게 막는다 -
+## 튜토리얼의 폴리처럼 plant_npc_at()으로 직접 배치된 NPC는 정상 스케줄
+## 재조정(스케줄상 다른 곳에 있어야 한다고 판단해 몰래 나갔다 돌아오는 등)이
+## 이 함수를 자연스럽게도 한 번 더 호출할 수 있어서, 벨이 두 번 울리는 문제가
+## 있었다(사용자 리포트, 2026-09-05 - "폴리 들어올 때 띵동소리가 두번
+## 울리는데"). _seat_npc()가 새로 앉을 때마다 다시 false로 리셋한다.
 func notify_npc_entered_map(npc_id: String) -> void:
 	var station_index := get_seated_station(npc_id)
-	if station_index != -1:
-		npc_arrived.emit(station_index, npc_id)
+	if station_index == -1 or bool(_stations[station_index].get("entry_notified", false)):
+		return
+	_stations[station_index]["entry_notified"] = true
+	npc_arrived.emit(station_index, npc_id)
 
 
 ## bypass_hours: 신규 슬롯 튜토리얼(main.gd._maybe_play_tutorial_intro()) 전용
@@ -349,13 +357,18 @@ func _generate_daily_visitors() -> void:
 
 ## 호감도가 가장 낮은 살아있는 NPC부터 count명을 뽑는다(exclude에 이미 담긴,
 ## 예를 들어 수동 초대로 이미 오늘 방문이 확정된 NPC는 제외) - 동점자는 매일
-## 다른 순서로 섞여서 항상 같은 두 명으로 고정되지 않는다. 이 목록은 그날
-## 스케줄상 보이는지와 무관하게 강제로 방문시킨다(수동 초대 invite_npc()와
-## 같은 취급 - 로시처럼 원래 안 보이는 날에도 예외적으로 온다).
+## 다른 순서로 섞여서 항상 같은 두 명으로 고정되지 않는다.
+## 로시처럼 그날 스케줄이 아예 없는 NPC(예: 비 안 오는 날)는 후보에서
+## 제외한다(사용자 지시, 2026-09-05) - 처음엔 수동 초대처럼 스케줄 무관하게
+## 강제 방문시켰는데, 그러면 "걸어올 원래 자리"가 없어서 순간이동하듯 이미
+## 좌석에 앉아있는 것처럼 보이는 문제가 있었다("로시가 문 열자마자 이미
+## 앉아있었다" 리포트) - 로시의 "비 오는 날 외엔 안 보임" 규칙 자체는 이
+## 자동 초대에서도 그대로 지킨다.
 func _lowest_affection_npc_ids(count: int, exclude: Array) -> Array:
 	var pool: Array = []
 	for npc_id in NPCManager.get_all_ids():
-		if NPCManager.is_alive(npc_id) and not exclude.has(npc_id):
+		if NPCManager.is_alive(npc_id) and not exclude.has(npc_id) \
+				and not NPCManager.get_schedule_only_position(npc_id).is_empty():
 			pool.append(npc_id)
 	pool.shuffle()
 	pool.sort_custom(func(a, b): return NPCManager.get_affection(a) < NPCManager.get_affection(b))
@@ -404,6 +417,7 @@ func _seat_npc(station_index: int, npc_id: String) -> void:
 	_stations[station_index]["npc_id"] = npc_id
 	_stations[station_index]["dish"] = null
 	_stations[station_index]["eating_until"] = -1
+	_stations[station_index]["entry_notified"] = false
 	npc_seated.emit(station_index, npc_id)
 
 

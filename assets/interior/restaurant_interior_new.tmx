@@ -232,12 +232,12 @@
    </properties>
   </object>
  </objectgroup>
- <objectgroup id="12" name="Spawn">
+ <objectgroup id="12" name="Spawn" visible="0" locked="1">
   <object id="3" name="restaurant_enterance_backyard" x="144" y="80" width="32" height="16"/>
   <object id="4" name="restaurant_enterance" x="144" y="288" width="32" height="16"/>
-  <object id="5" name="restaurant_seat1" x="152" y="128"/>
-  <object id="6" name="restaurant_seat2" x="216" y="120"/>
-  <object id="7" name="restaurant_seat3" x="280" y="120"/>
+  <object id="5" name="restaurant_seat1" x="152" y="127"/>
+  <object id="6" name="restaurant_seat2" x="216" y="127"/>
+  <object id="7" name="restaurant_seat3" x="280" y="127"/>
   <object id="126" name="restaurant_dish1" x="144" y="112" width="16" height="16"/>
   <object id="127" name="restaurant_dish2" x="208" y="112" width="16" height="16"/>
   <object id="128" name="restaurant_dish3" x="272" y="112" width="16" height="16"/>

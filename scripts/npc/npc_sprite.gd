@@ -34,6 +34,12 @@ const DEFAULT_WALK_FRAME_COUNT := 2
 ## 같은 체감 속도가 나오도록 0.35*2=0.7로 역산했다 - 프레임이 8개인 NPC
 ## (이샤)도 같은 한 걸음 주기를 유지하면서 프레임만 더 촘촘해진다.
 const WALK_CYCLE_DURATION := 0.7
+## 레스토랑에서 서빙받은 뒤 먹는 동안(RestaurantManager.EATING_DURATION_MINUTES)
+## 재생하는 별도 시트(assets/npc/sprite/<sprite 파일명에서 "Sprite"를 "Eating"으로
+## 바꾼 이름>.png, 정면 한 방향만 가로로 나열된 프레임들 - build_eating_sheet.ps1
+## 참고) - 없는 NPC는 조용히 기존 정지/앉은 자세 그대로 유지한다(사용자 지시,
+## 2026-09-05 - "요리대에서 요리 완성하고 먹는 30초동안 이 gif가 나오도록").
+const EATING_FRAME_INTERVAL := 0.35
 const SCENT_CENTER := Vector2(0, -FRAME_HEIGHT / 2.0)
 const SCENT_COUNT := 3
 const SCENT_ORBIT := Vector2(10.0, 6.0)
@@ -88,6 +94,14 @@ var _walk_frame_timer := 0.0
 var _walk_frame_index := 0
 var _emote_sprite: Sprite2D
 var _emote_timer: Timer
+## 이 NPC의 정상 걷기/정지 시트 - 먹는 동안 _atlas.atlas를 _eating_texture로
+## 바꿨다가 stop_eating()에서 이걸로 되돌리는 데 쓴다.
+var _normal_texture: Texture2D
+var _eating_texture: Texture2D
+var _eating_frame_count := 0
+var _is_eating := false
+var _eating_frame_index := 0
+var _eating_frame_timer := 0.0
 ## 호감도 100 컷신(main.gd)이 이 NPC를 플레이어 쪽으로 걸어오게 만드는 그
 ## 한 번의 걸음만 예외적으로 시간 정지 중에도 진행되게 한다(NPCWorldManager.
 ## walk_npc_to_position()이 걷는 동안만 true로 세팅) - 그 컷신 자체가
@@ -239,6 +253,32 @@ func face_down() -> void:
 	_facing = Direction.DOWN
 
 
+## RestaurantManager가 서빙 순간 호출한다(npc_world_manager.gd 경유) - 먹는
+## 시트가 없는 NPC는 조용히 무시하고 기존 앉은 정지 자세 그대로 유지한다.
+func start_eating() -> void:
+	if _eating_texture == null or _eating_frame_count <= 0:
+		return
+	face_down()
+	_is_eating = true
+	_eating_frame_index = 0
+	_eating_frame_timer = 0.0
+	_atlas.atlas = _eating_texture
+	_atlas.region = Rect2(0, 0, _frame_width, _frame_height)
+
+
+## 다 먹었을 때(퇴장 등) 원래 시트로 되돌린다 - 이미 안 먹는 중이면 조용히 무시.
+func stop_eating() -> void:
+	if not _is_eating:
+		return
+	_is_eating = false
+	_atlas.atlas = _normal_texture
+	_set_frame(_idle_frame[_facing])
+
+
+func is_eating() -> bool:
+	return _is_eating
+
+
 ## 공범 엔딩 경찰서 씬(main.gd) - 어셔가 도착 지점(usher_ending)에서 좌측을
 ## 보고 서게 하는 용도(사용자 지시, 2026-08-26).
 func face_left() -> void:
@@ -282,6 +322,13 @@ func _direction_from_vector(v: Vector2) -> int:
 
 
 func _update_animation(delta: float) -> void:
+	if _is_eating:
+		_eating_frame_timer += delta
+		if _eating_frame_timer >= EATING_FRAME_INTERVAL:
+			_eating_frame_timer -= EATING_FRAME_INTERVAL
+			_eating_frame_index = (_eating_frame_index + 1) % _eating_frame_count
+		_atlas.region = Rect2(_eating_frame_index * _frame_width, 0, _frame_width, _frame_height)
+		return
 	if _is_walking:
 		_walk_frame_timer += delta
 		if _walk_frame_timer >= _walk_frame_interval:
@@ -326,10 +373,33 @@ func _apply_npc_id() -> void:
 	_sprite.scale = base_scale
 	_sprite.offset = Vector2(0, -_frame_height / 2.0)
 	_build_frame_indices(int(definition.get("sprite_walk_frame_count", DEFAULT_WALK_FRAME_COUNT)))
+	_normal_texture = texture
 	_atlas = AtlasTexture.new()
 	_atlas.atlas = texture
 	_atlas.region = Rect2(_idle_frame[_facing] * _frame_width, 0, _frame_width, _frame_height)
 	_sprite.texture = _atlas
+	_load_eating_texture(sprite_path)
+
+
+## "beljeSprite.png" -> "beljeEating.png"처럼 정상 시트 파일명에서 "Sprite"를
+## "Eating"으로 바꾼 경로를 찾는다 - NPC마다 sprite 파일명 표기가 제각각이라
+## (예: 라마는 ramaSprite.png, 모카는 mokaSprite.png) npc_id에서 바로 유도할
+## 수 없어서, 이미 정상 동작하는 sprite_path를 그대로 재활용한다. 없으면
+## 조용히 무시(_eating_texture null 유지) - start_eating()이 알아서 아무 것도
+## 안 한다.
+func _load_eating_texture(sprite_path: String) -> void:
+	_eating_texture = null
+	_eating_frame_count = 0
+	if not sprite_path.ends_with("Sprite.png"):
+		return
+	var eating_path := sprite_path.replace("Sprite.png", "Eating.png")
+	if not ResourceLoader.exists(eating_path):
+		return
+	var eating_texture := load(eating_path) as Texture2D
+	if eating_texture == null:
+		return
+	_eating_texture = eating_texture
+	_eating_frame_count = int(eating_texture.get_width() / _frame_width)
 
 
 ## 시트 안 방향 그룹 순서(DIRECTION_ORDER)를 따라 [정지 1칸, 걷기

@@ -116,6 +116,8 @@ func _ready() -> void:
 	NPCManager.npc_emote_requested.connect(_on_npc_emote_requested)
 	RestaurantManager.npc_seated.connect(_on_restaurant_seating_changed)
 	RestaurantManager.npc_departed.connect(_on_restaurant_seating_changed)
+	RestaurantManager.dish_served.connect(_on_dish_served)
+	RestaurantManager.npc_departed.connect(_on_npc_departed_stop_eating)
 	## _world_map은 이 노드의 부모(get_parent())라, _ready() 시점엔 부모가 아직
 	## 자기 자식들(이 노드 포함)을 추가하는 중이라 "Parent node is busy setting
 	## up children" 에러로 add_child()가 막힌다(_ensure_sprite()의
@@ -137,13 +139,38 @@ func _on_npc_emote_requested(npc_id: String, emote_id: String, duration: float) 
 		sprite.call("show_emote", emote_id)
 
 
+## 서빙 순간(RestaurantManager.dish_served) 그 NPC가 지금 화면에 있으면 먹는
+## 애니메이션을 시작한다 - EATING_DURATION_MINUTES(30게임분=현실 30초) 동안
+## 재생되다가 손님이 떠날 때(_on_npc_departed_stop_eating) 원래 모습으로
+## 돌아간다(사용자 지시, 2026-09-05 - "요리대에서 요리 완성하고 먹는 30초동안
+## 이 gif가 나오도록").
+func _on_dish_served(_station_index: int, npc_id: String, _dish: Dictionary) -> void:
+	var sprite: Node2D = _active_sprites.get(npc_id)
+	if sprite == null:
+		return
+	sprite.call("start_eating")
+
+
+## 정상적으로 다 먹고 떠나든, 서빙 전에 쫓겨나든(이 경우 먹는 중이 아니었으니
+## NPCSprite.stop_eating()이 조용히 무시) 상관없이 먹는 애니메이션을 끈다.
+func _on_npc_departed_stop_eating(_station_index: int, npc_id: String, _paid_amount: int) -> void:
+	var sprite: Node2D = _active_sprites.get(npc_id)
+	if sprite == null:
+		return
+	sprite.call("stop_eating")
+
+
 func _on_map_changed(_map_id: String) -> void:
 	_populate_initial()
 
 
 ## 지금 화면에 보이는(현재 맵의) NPC 중 position 근처(TALK_RADIUS 이내)에
-## 있으면서 오늘 아직 대화하지 않은 NPC 중 가장 가까운 쪽을 찾아
-## {"npc_id": String, "distance": float}로 반환한다(없으면 빈 Dictionary).
+## 있으면서 오늘 아직 "특수 대사"(일회성 - 마일스톤/알리바이 등)를 안 본 NPC
+## 중 가장 가까운 쪽을 찾아 {"npc_id": String, "distance": float}로 반환한다
+## (없으면 빈 Dictionary). 일상 잡담만 나온 상대는 하루에 여러 번 말 걸 수
+## 있다(호감도는 NPCManager.talk()이 별도로 하루 1회만 - 사용자 지시,
+## 2026-09-05: "일상 대사는 계속 걸어도 되고, 호감도는 처음 1번만, 특수
+## 대사면 하루 한번만").
 ## NPC는 고정된 Tiled Interactable이 아니라 매 순간 위치가 바뀌므로, WorldMap의
 ## 정적 오브젝트 판정과 별개로 여기서 동적으로 확인해야 한다. distance를 같이
 ## 주는 이유는, TALK_RADIUS를 넓힌 뒤로 계산대처럼 가까이 붙어있는 정적
@@ -153,11 +180,11 @@ func _on_map_changed(_map_id: String) -> void:
 ## 대화 했었는데.. 레스토랑 안에서 대화 안되게 해줘") - 손님 응대/서빙에
 ## 집중하는 공간이라 잡담이 끼어들면 안 된다는 취지.
 ## ignore_talked_today: main.gd가 손에 선물을 들고 있을 때 넘긴다 - 선물하기도
-## 이 함수로 대상 NPC를 찾는데, "오늘 대화함" 필터를 그대로 적용하면 한 번
-## 대화한 NPC에게는 그 날 선물을 아예 줄 수 없게 막혀버린다(사용자 리포트,
+## 이 함수로 대상 NPC를 찾는데, "오늘 특수 대사를 봤음" 필터를 그대로 적용하면
+## 그 NPC에게는 그 날 선물을 아예 줄 수 없게 막혀버린다(사용자 리포트,
 ## 2026-08-27 - "대화 하고 나면 선물하는 게 안 돼... 하루에 한번 대화할 수
-## 있는게 선물하기도 막고 있는게 아닌가"). 선물 여부와 무관하게 하루 한 번
-## 제한이 필요한 건 대화 자체지 선물이 아니므로, 선물 중일 땐 이 필터를 끈다.
+## 있는게 선물하기도 막고 있는게 아닌가"). 선물 여부와 무관하게 이 제한이
+## 필요한 건 대화 자체지 선물이 아니므로, 선물 중일 땐 이 필터를 끈다.
 func get_nearest_talkable_npc(position: Vector2, ignore_talked_today: bool = false) -> Dictionary:
 	if GameManager.current_map_id == RESTAURANT_MAP_ID:
 		return {}
@@ -166,7 +193,7 @@ func get_nearest_talkable_npc(position: Vector2, ignore_talked_today: bool = fal
 	for npc_id in _active_sprites:
 		if not NPCManager.is_alive(npc_id):
 			continue
-		if not ignore_talked_today and NPCManager.has_talked_today(npc_id):
+		if not ignore_talked_today and NPCManager.has_special_dialogue_shown_today(npc_id):
 			continue
 		var sprite: Node2D = _active_sprites[npc_id]
 		var distance := sprite.position.distance_to(position)
@@ -374,8 +401,14 @@ func _populate_initial() -> void:
 		else:
 			var sprite2 := _ensure_sprite(npc_id)
 			sprite2.call("snap_to", _npc_last_position.get(npc_id, Vector2.ZERO))
-			if RestaurantManager.get_seated_station(npc_id) != -1:
+			var seated_station2 := RestaurantManager.get_seated_station(npc_id)
+			if seated_station2 != -1:
 				sprite2.call("face_down")
+				## 먹는 중에 맵을 나갔다가 다시 들어온 경우(새 스프라이트 인스턴스라
+				## _is_eating이 기본값으로 리셋됨) - 아직 식사 중이면(dish 있음)
+				## 먹는 애니메이션도 다시 켜준다.
+				if not RestaurantManager.get_station_dish(seated_station2).is_empty():
+					sprite2.call("start_eating")
 
 
 ## 지금 진행 중인 홉(경유 홉이면 다음 문, 마지막 다리면 최종 목표)의 목적지
@@ -582,7 +615,20 @@ func _settle_in_place(npc_id: String, map_id: String, target_pos: Vector2, playe
 	if not _active_sprites.has(npc_id):
 		var sprite := _ensure_sprite(npc_id)
 		sprite.call("snap_to", last_pos)
-	if not last_pos.is_equal_approx(target_pos):
+	## 이미 다른 목적지(예: 퇴장 중이던 출구)로 걷고 있는 중이면 _npc_last_position은
+	## 아직 "예전에 확정됐던" 위치라 target_pos랑 우연히 같아 보일 수 있다(예: 같은
+	## 좌석으로 다시 배정됨) - last_pos만 보고 "이미 도착함"으로 오판하면, 실제로
+	## 걷고 있는 애니메이션은 그대로 방치된 채(_npc_same_map_target을 지워버려서
+	## 도착 판정도 다시는 안 됨) 새 목표로 걷기 명령이 안 나가서 중간에 멈춰버린다
+	## (사용자 리포트, 2026-09-05 - "닫으니까 나가더라고. 근데 나가다가 문을
+	## 다시 여니까 로시가 그 자리에 멈췄어"). 지금 실제로 걷는 중이면 last_pos
+	## 비교와 무관하게 무조건 새로 걷기 명령을 낸다.
+	var is_currently_walking := _npc_same_map_target.has(npc_id) \
+		and _active_sprites.has(npc_id) and bool(_active_sprites[npc_id].call("is_walking"))
+	if is_currently_walking or not last_pos.is_equal_approx(target_pos):
+		## 퇴장 중이었다가 다시 배정된 경우(닫았다 여니까 재초대 등) - 출구 도착
+		## 시 지워버리는 판정이 새 목표(좌석) 도착에 잘못 걸리지 않도록 취소한다.
+		_npc_exit_pending.erase(npc_id)
 		_start_same_map_walk(npc_id, target_pos)
 		_npc_same_map_target[npc_id] = target_pos
 	else:
@@ -747,6 +793,14 @@ func _check_same_map_arrivals() -> void:
 			_npc_exit_pending.erase(npc_id)
 			_forget_npc(npc_id)
 			continue
+		if RestaurantManager.get_seated_station(npc_id) != -1:
+			## 레스토랑 좌석은 의자에 앉은 것처럼 보이도록 픽셀 단위로 정확한
+			## 위치가 필요한데, WorldMap.find_path()가 목적지를 16px 타일
+			## 칸 중심으로 스냅해버려서 일반 걷기 도착 지점은 그 정밀도가 안
+			## 나온다(사용자 지시, 2026-09-05 - "레스토랑 seat 1,2,3만 픽셀
+			## 단위로") - 좌석에 한해서만 도착 직후 정확한 좌표로 한 번 더
+			## 보정한다.
+			_active_sprites[npc_id].call("snap_to", target)
 		NPCManager.set_npc_physical_spot(npc_id, String(_npc_last_map.get(npc_id, "")), target)
 
 
@@ -760,6 +814,12 @@ func _complete_current_hop(npc_id: String, player_map: String) -> void:
 		_npc_in_transit.erase(npc_id)
 		NPCManager.set_npc_physical_spot(npc_id, String(_npc_last_map.get(npc_id, "")), _npc_last_position[npc_id])
 		if RestaurantManager.get_seated_station(npc_id) != -1 and _active_sprites.has(npc_id):
+			## 다른 맵에서 걸어 들어오는 손님(대부분의 경우)은 이 크로스맵 홉
+			## 경로로 도착하지, 같은 맵 안 이동(_check_same_map_arrivals())을
+			## 안 거친다 - 그쪽에만 픽셀 보정을 넣었더니 실제로 안 먹힌 이유가
+			## 이거였다(사용자 리포트, 2026-09-05 - "레스토랑 좌석 보정 안됐어").
+			## 여기도 동일하게 정확한 좌표로 스냅한다.
+			_active_sprites[npc_id].call("snap_to", _npc_last_position[npc_id])
 			_active_sprites[npc_id].call("face_down")
 		return
 
