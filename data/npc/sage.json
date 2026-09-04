@@ -81,6 +81,18 @@
     },
     "affection_events": [
         {
+            "threshold": 50,
+            "type": "dialogue",
+            "description": "직접 고른 음반을 건넨다.",
+            "lines": [
+                "{player_name}. 이거 받아.",
+                {"type": "gift", "item_id": "record_we_are_all_christmas"},
+                "나 이 마을에 오기 전에는 홋카이도에 있었거든. 거긴 눈이 정말 많이 와서, 다들 겨울 축제를 즐기곤 했어",
+                "이건 내가 그 마을에 있을 때 녹음한 겨울 축제 음반이야.",
+                "나에게 정말 좋은 추억이었거든. 잘 가지고 있어 줘."
+            ]
+        },
+        {
             "threshold": 100,
             "type": "memento",
             "description": "액막이 부적을 건네준다.",

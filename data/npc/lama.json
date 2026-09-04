@@ -97,6 +97,18 @@
             ]
         },
         {
+            "threshold": 80,
+            "type": "dialogue",
+            "description": "취미로 만든 음반을 몰래 준다.",
+            "lines": [
+                "{player_name}, 이리 좀 와봐.",
+                "요새 절에 자주 오는 거 같은데, 마음에 걸리는 일이라도 있나봐?",
+                "이건 내가 명상할 때 쓰는 음악이거든. 너도 이걸 들으면 마음이 편해질 거야.",
+                {"type": "gift", "item_id": "record_the_heart_sutra_remix"},
+                "너한테만 특별히 주는 거야. 잘 들어줘."
+            ]
+        },
+        {
             "threshold": 60,
             "type": "dialogue",
             "description": "이샤가 마린의 엄마 일로 절에서 고해성사하는 걸 엿들었던 일을 무심코 흘린다.",

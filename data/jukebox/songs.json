@@ -70,5 +70,21 @@
         "icon": "res://assets/icon/Records.png",
         "icon_index": 7,
         "item_id": "record_the_day_after_you_came"
+    },
+    "song_the_heart_sutra_remix": {
+        "id": "song_the_heart_sutra_remix",
+        "name": "The heart sutra (remix)",
+        "bgm_path": "res://assets/audio/bgm/bgm_the_heart_sutra_remix.mp3",
+        "icon": "res://assets/icon/Records.png",
+        "icon_index": 9,
+        "item_id": "record_the_heart_sutra_remix"
+    },
+    "song_we_are_all_christmas": {
+        "id": "song_we_are_all_christmas",
+        "name": "We are all christmas",
+        "bgm_path": "res://assets/audio/bgm/bgm_we_are_all_christmas.mp3",
+        "icon": "res://assets/icon/Records.png",
+        "icon_index": 8,
+        "item_id": "record_we_are_all_christmas"
     }
 }

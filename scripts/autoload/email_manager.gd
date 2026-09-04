@@ -80,7 +80,8 @@ const RECURRING_REWARD_GOLD := 150
 ## preferred_food는 요리 판정용 한국어 원재료 이름이고(base_material과 동일
 ## 규칙 - npc_manager.gd get_food_preference_for_ingredients 참고), 배달 요청의
 ## 목표 아이템 id로 쓰려면 이 변환이 필요하다. data/items/items.json의 원재료
-## (material) 9종 + 우유 전부.
+## (material) 9종 + 우유 + 사냥 고기(토끼고기/새고기, 2026-09-05 우디/어셔
+## 선호 재료 변경) 전부.
 const FOOD_NAME_TO_ITEM_ID := {
 	"감자": "potato",
 	"옥수수": "corn",
@@ -92,6 +93,8 @@ const FOOD_NAME_TO_ITEM_ID := {
 	"오징어": "squid",
 	"베리": "berry",
 	"우유": "milk",
+	"토끼고기": "rabbit_meat",
+	"새고기": "bird_meat",
 }
 ## "요청함에 도착하고 4일 이내"(사용자 지시) - 지나면 claim 불가하고 "만료"로
 ## 표시된다. 만료된 채로 하루 더 남겨뒀다가(사용자가 놓쳤다는 걸 확인할 시간)
