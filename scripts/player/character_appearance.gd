@@ -75,12 +75,22 @@ static func recolor_image(image: Image, markers: Array[Color], palette: Array[Co
 ## 흰색(하이라이트)/검은색(윤곽선)은 회색이라도 색을 입히면 안 됨(사용자
 ## 지시, 2026-09-03 - "하얀색이랑 검은색은 덮어씌우지마 회색계열만 해야돼") -
 ## 명도(v)가 min_value~max_value 범위 안인 픽셀만 대상으로 한다.
+## 검정/흰색/회색처럼 채도가 거의 없는 목표색은 입힐 색상(Hue) 자체가
+## 없어서, 아래 hue-injection 방식대로는 결과가 원본 회색조 그대로처럼
+## 보였다(사용자 리포트, 2026-09-05 - "까만 머리하려고하면 처음했던대로
+## 회색 머리가 되는거야"). 그런 무채색 목표에 한해서만 곱연산(명암비는
+## 유지한 채 전체 밝기를 목표 밝기 쪽으로 끌어내림 - 목표가 검정이면 전부
+## 0에 가까워져 진짜 까맣게 나옴) 방식으로 전환한다(사용자 지시 - "절충안으로
+## 해보자"). 채도가 있는 색은 기존 hue-injection 그대로(명암 대비가 더
+##또렷하게 유지됨).
 static func recolor_grayscale_to_hue(
 	image: Image, target_color: Color, saturation_threshold: float = 0.15,
 	min_value: float = 0.15, max_value: float = 0.9
 ) -> void:
 	var target_h := target_color.h
 	var target_s := target_color.s
+	var target_v := target_color.v
+	var use_multiply := target_s < saturation_threshold
 	for y in image.get_height():
 		for x in image.get_width():
 			var pixel := image.get_pixel(x, y)
@@ -88,7 +98,11 @@ static func recolor_grayscale_to_hue(
 				continue
 			if pixel.v < min_value or pixel.v > max_value:
 				continue
-			image.set_pixel(x, y, Color.from_hsv(target_h, target_s, pixel.v, pixel.a))
+			if use_multiply:
+				var shaded_v := pixel.v * target_v
+				image.set_pixel(x, y, Color(shaded_v, shaded_v, shaded_v, pixel.a))
+			else:
+				image.set_pixel(x, y, Color.from_hsv(target_h, target_s, pixel.v, pixel.a))
 
 
 ## 기준색 채널마다 delta를 더하고(0~1로 clamp) 밝음/어둠 톤을 만든다.
