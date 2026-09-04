@@ -18,6 +18,12 @@ signal status_close_requested
 ## 연다(main.gd만 UI 트리 전체에 접근할 수 있어서 - collection_interacted 등
 ## 다른 화면 열기 신호와 동일한 중계 패턴).
 signal book_open_requested(item_id: String)
+## status_screen.gd가 대신 띄워준다(아래 _show_tooltip()/_hide_tooltip() 주석
+## 참고 - ContentArea의 clip_contents 때문에 이 패널 안에서는 오른쪽 끝(탭
+## 아이콘 쪽) 근처 툴팁이 잘려서, 그 클립 바깥인 StatusScreen 쪽에서 대신
+## 그려야 한다).
+signal tooltip_requested(text: String, source: Control)
+signal tooltip_hide_requested
 
 const SlotScene := preload("res://scenes/ui/inventory_slot.tscn")
 ## storage_screen.gd의 BAG_SOURCE와 같은 값 - 같은 그리드 내 드래그 재정렬용
@@ -41,8 +47,6 @@ const SCROLLBAR_WIDTH := 4
 @onready var _sort_button: TextureButton = $VBox/TopRow/ButtonsVBox/SortButton
 @onready var _discard_button: TextureButton = $VBox/TopRow/ButtonsVBox/DiscardButton
 @onready var _message_label: Label = $MessageLabel
-@onready var _tooltip: PanelContainer = $Tooltip
-@onready var _tooltip_label: Label = $Tooltip/Label
 
 var _message_timer := 0.0
 var _selected_index := -1
@@ -98,27 +102,24 @@ func _style_scrollbar() -> void:
 ## 안 맞아서, 확대된 화면 기준으로 보면 커서와 동떨어진 자리에 뜬다(사용자
 ## 리포트, 2026-09-01 - "툴팁 뜨는 위치 이상하다") - 엔진 팝업은 이 캔버스
 ## 스케일을 모르는 별도 좌표계에서 위치를 계산하기 때문. 그래서 기본
-## tooltip_text 대신 이 화면 안에 있는 일반 Control(Tooltip)을 직접 켜고/끄고
-## 위치를 맞추는 방식으로 대체한다 - 같은 캔버스 안에 있으니 확대 배율이
-## 자동으로 맞는다. 슬롯 쪽은 `.tooltip_text`(엔진 팝업을 같이 띄움) 대신
-## `set_meta("tooltip_text", ...)`로 문구만 들고 있게 했다
-## (_refresh_inventory()/equipment_slot.gd 참고).
+## tooltip_text 대신 신호로 status_screen.gd에게 표시를 맡긴다. 슬롯 쪽은
+## `.tooltip_text`(엔진 팝업을 같이 띄움) 대신 `set_meta("tooltip_text", ...)`로
+## 문구만 들고 있게 했다(_refresh_inventory()/equipment_slot.gd 참고).
+## 원래는 이 패널 안에 Tooltip 노드를 직접 두고 켜고/껐었는데, 부모
+## ContentArea가 clip_contents=true(폭 170px)라 오른쪽 끝(탭 아이콘 쪽) 근처
+## 슬롯의 툴팁이 그 경계에서 잘려 보였다(사용자 리포트, 2026-09-05 - "우측에
+## 아이콘 범위에 들어가면 그렇게 되나봐"). z_index로는 clip_contents를
+## 못 넘어서므로, 그 클립 바깥(StatusScreen 루트)에 있는 Tooltip을
+## status_screen.gd가 대신 그리도록 신호로 위임했다.
 func _show_tooltip(source: Control) -> void:
 	var text := String(source.get_meta("tooltip_text", ""))
 	if text.is_empty():
 		return
-	_tooltip_label.text = text
-	_tooltip.visible = true
-	_tooltip.size = _tooltip.get_combined_minimum_size()
-	var viewport_size := get_viewport_rect().size
-	var target := source.get_global_rect().position + Vector2(0, source.get_global_rect().size.y + 2.0)
-	target.x = clampf(target.x, 0.0, viewport_size.x - _tooltip.size.x)
-	target.y = clampf(target.y, 0.0, viewport_size.y - _tooltip.size.y)
-	_tooltip.global_position = target
+	tooltip_requested.emit(text, source)
 
 
 func _hide_tooltip() -> void:
-	_tooltip.visible = false
+	tooltip_hide_requested.emit()
 
 
 func _process(delta: float) -> void:
@@ -150,13 +151,6 @@ func refresh() -> void:
 	_hand_slot.refresh()
 	_shoes_slot.refresh()
 	_refresh_inventory()
-	## Tooltip은 순전히 장식용(클릭이 통과해야 함)이라 .tscn에 mouse_filter=
-	## IGNORE로 지정해뒀는데, status_screen.gd가 TAB을 열 때 이 화면 서브트리
-	## 전체를 재귀로 STOP 처리하면서 이것도 덮어써진다 - CLAUDE.md의 UI 모달
-	## mouse_filter 체크리스트 3번과 동일한 패턴이라, 열릴 때마다 다시 IGNORE로
-	## 되돌린다.
-	_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_tooltip_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
 func _refresh_inventory() -> void:
@@ -270,3 +264,7 @@ func _use_slot(index: int) -> void:
 		# 소장품(inventory_manager.gd: category "book"은 discardable도 아님).
 		book_open_requested.emit(item_id)
 		status_close_requested.emit()
+	elif category == "perfume":
+		# 향수(마르가 준 perfume_somewhere_behind_you)도 book처럼 소비되지
+		# 않는다 - 우클릭할 때마다 다시 뿌릴 수 있다(사용자 지시).
+		InventoryManager.use_perfume(index)

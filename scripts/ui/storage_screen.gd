@@ -34,6 +34,8 @@ const OPEN_DELAY_SECONDS := 0.35
 @onready var _pickup_button: TextureButton = $Background/Margin/VBox/BottomRow/PickupButton
 @onready var _message_label: Label = $Background/Margin/VBox/BottomRow/MessageLabel
 @onready var _sort_button: TextureButton = $Background/Margin/VBox/HBox/BoxPanel/BoxLabelRow/SortButton
+@onready var _tooltip: PanelContainer = $Tooltip
+@onready var _tooltip_label: Label = $Tooltip/Label
 
 ## inventory_slot.gd의 DISABLED_TINT와 동일한 톤 - TextureButton은 Button과
 ## 달리 disabled여도 저절로 어두워지지 않아서 직접 modulate를 덮어써야 한다.
@@ -104,8 +106,15 @@ func _refresh_layout() -> void:
 func _set_open(is_open: bool) -> void:
 	if is_open:
 		_refresh_layout()
+	else:
+		_hide_tooltip()
 	modulate.a = 1.0 if is_open else 0.0
 	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
+	## Tooltip은 장식용(클릭이 통과해야 함)이라 위 재귀 호출이 STOP으로
+	## 덮어쓴 걸 다시 IGNORE로 되돌린다 - CLAUDE.md UI 모달 mouse_filter
+	## 체크리스트 3번과 동일한 패턴(equipment_panel.gd _refresh_inventory() 참고).
+	_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_tooltip_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
 func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
@@ -122,6 +131,10 @@ func current_cell() -> Vector2i:
 func _refresh() -> void:
 	if not _is_open():
 		return
+	## 그리드가 통째로 다시 만들어지므로, 지금 뜬 툴팁이 가리키던 슬롯도 같이
+	## 사라진다 - mouse_exited가 그 슬롯에서 안 올 수 있으니 여기서 미리 끈다
+	## (equipment_panel.gd _refresh_inventory()와 동일한 패턴).
+	_hide_tooltip()
 	_rebuild_grid(_bag_grid, InventoryManager.get_slots(), BAG_SOURCE)
 	_rebuild_grid(_box_grid, StorageBoxManager.get_box_slots(_map_id, _cell), BOX_SOURCE)
 	var box_empty := _is_box_empty()
@@ -145,8 +158,44 @@ func _rebuild_grid(grid: GridContainer, slots: Array, source_tag: String) -> voi
 		slot_instance.call("setup", i, slots[i])
 		slot_instance.source_tag = source_tag
 		slot_instance.accepts_drops = true
+		slot_instance.set_meta("tooltip_text", _tooltip_for(slots[i]))
+		slot_instance.mouse_entered.connect(_show_tooltip.bind(slot_instance))
+		slot_instance.mouse_exited.connect(_hide_tooltip)
 		slot_instance.connect("slot_drop_received", _on_slot_drop_received)
 		slot_instance.connect("slot_pressed", _on_slot_pressed.bind(source_tag))
+
+
+## equipment_panel.gd의 _tooltip_for()/_show_tooltip()/_hide_tooltip()와 동일한
+## 패턴 - 인벤토리 화면엔 있는 아이템 이름/설명 툴팁이 보관함 화면(가방/상자
+## 양쪽 슬롯)에는 아예 안 뜨던 것을 사용자가 발견(2026-09-05 - "보관함
+## 상자에서는 툴팁이 안떠"). 엔진 기본 tooltip_text 대신 화면 안의 Control을
+## 직접 켜고/끄는 이유는 equipment_panel.gd의 같은 주석 참고(4배 확대 캔버스
+## 배율 문제).
+func _tooltip_for(slot_data) -> String:
+	if slot_data == null:
+		return ""
+	var definition := InventoryManager.get_item_definition(String(slot_data.get("item_id", "")))
+	var name_text := String(definition.get("name", ""))
+	var description_text := String(definition.get("description", ""))
+	return "%s\n%s" % [name_text, description_text] if not description_text.is_empty() else name_text
+
+
+func _show_tooltip(source: Control) -> void:
+	var text := String(source.get_meta("tooltip_text", ""))
+	if text.is_empty():
+		return
+	_tooltip_label.text = text
+	_tooltip.visible = true
+	_tooltip.size = _tooltip.get_combined_minimum_size()
+	var viewport_size := get_viewport_rect().size
+	var target := source.get_global_rect().position + Vector2(0, source.get_global_rect().size.y + 2.0)
+	target.x = clampf(target.x, 0.0, viewport_size.x - _tooltip.size.x)
+	target.y = clampf(target.y, 0.0, viewport_size.y - _tooltip.size.y)
+	_tooltip.global_position = target
+
+
+func _hide_tooltip() -> void:
+	_tooltip.visible = false
 
 
 func _on_slot_drop_received(target_source: String, _target_index: int, data: Dictionary) -> void:

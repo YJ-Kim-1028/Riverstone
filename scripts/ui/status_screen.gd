@@ -18,6 +18,8 @@ extends Control
 @onready var _end_tab_button: TextureButton = $Background/Margin/HBox/TabButtons/EndTabButton
 @onready var _close_button: TextureButton = $Background/CloseButton
 @onready var _quit_confirm_popup: Control = $QuitConfirmPopup
+@onready var _tooltip: PanelContainer = $Tooltip
+@onready var _tooltip_label: Label = $Tooltip/Label
 
 ## equipment_panel.gd에서 책 우클릭 시 올라오는 요청을 main.gd까지 그대로
 ## 중계한다 - book_screen을 열 수 있는 건 UI 트리 전체에 접근하는 main.gd뿐이라
@@ -78,6 +80,8 @@ func _ready() -> void:
 	_close_button.pressed.connect(close)
 	_equipment_panel.status_close_requested.connect(close)
 	_equipment_panel.book_open_requested.connect(func(item_id: String) -> void: book_open_requested.emit(item_id))
+	_equipment_panel.tooltip_requested.connect(show_tooltip)
+	_equipment_panel.tooltip_hide_requested.connect(hide_tooltip)
 
 
 ## TAB만 여기서 따로 처리한다(_unhandled_input이 아니라 _input) - 이 창 안의
@@ -133,9 +137,40 @@ func close() -> void:
 func _set_open(is_open: bool) -> void:
 	if is_open:
 		set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_KEEP_SIZE)
+	else:
+		hide_tooltip()
 	_is_open = is_open
 	modulate.a = 1.0 if is_open else 0.0
 	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
+	## Tooltip은 장식용(클릭이 통과해야 함)이라 위 재귀 호출이 STOP으로 덮어쓴 걸
+	## 다시 IGNORE로 되돌린다 - CLAUDE.md UI 모달 mouse_filter 체크리스트 3번과
+	## 동일한 패턴(원래 equipment_panel.gd에 있던 처리를 Tooltip 자체를 여기로
+	## 옮기면서 같이 옮김 - ContentArea의 clip_contents 때문에 오른쪽 끝 근처
+	## 툴팁이 잘리는 문제 수정, 2026-09-05).
+	_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_tooltip_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+## equipment_panel.gd의 tooltip_requested를 대신 처리한다 - 그 패널의 부모인
+## ContentArea가 clip_contents=true(폭 170px)라 패널 안에 툴팁을 두면 오른쪽
+## 끝(탭 아이콘 쪽) 근처에서 잘려 보였다(사용자 리포트, 2026-09-05 - "우측에
+## 아이콘 범위에 들어가면 그렇게 되나봐"). 그 클립 바깥인 이 화면(StatusScreen)
+## 루트에 Tooltip을 두고 여기서 그리면 더 이상 안 잘린다.
+func show_tooltip(text: String, source: Control) -> void:
+	if text.is_empty():
+		return
+	_tooltip_label.text = text
+	_tooltip.visible = true
+	_tooltip.size = _tooltip.get_combined_minimum_size()
+	var viewport_size := get_viewport_rect().size
+	var target := source.get_global_rect().position + Vector2(0, source.get_global_rect().size.y + 2.0)
+	target.x = clampf(target.x, 0.0, viewport_size.x - _tooltip.size.x)
+	target.y = clampf(target.y, 0.0, viewport_size.y - _tooltip.size.y)
+	_tooltip.global_position = target
+
+
+func hide_tooltip() -> void:
+	_tooltip.visible = false
 
 
 ## QuitConfirmPopup은 자기 열고 닫기를 스스로 관리한다(자기 자신의 _set_open()
@@ -156,6 +191,10 @@ func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
 
 
 func _show_tab(index: int) -> void:
+	## Tooltip이 이제 이 화면 루트에 있어서(위 참고) 탭을 바꿔도 equipment_panel이
+	## 숨겨지는 것과 별개로 저절로 안 사라진다 - 탭 전환 시 마우스가 그대로 있어도
+	## 이전 탭의 툴팁이 남아있지 않게 직접 지운다.
+	hide_tooltip()
 	for i in _panels.size():
 		_panels[i].visible = i == index
 	if index == 0:

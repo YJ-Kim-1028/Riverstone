@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/ui/frame_inventory_9slice.png" id="1_frame"]
 [ext_resource type="Script" path="res://scripts/ui/status_screen.gd" id="2_script"]
@@ -15,6 +15,22 @@
 [ext_resource type="Texture2D" path="res://assets/ui/icon_end.png" id="13_end_icon"]
 [ext_resource type="Texture2D" path="res://assets/ui/icon_end_hover.png" id="14_end_hover"]
 [ext_resource type="PackedScene" path="res://scenes/ui/quit_confirm_popup.tscn" id="15_quit_popup"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tooltip"]
+bg_color = Color(0.98, 0.93, 0.82, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.42, 0.27, 0.15, 1)
+corner_radius_top_left = 1
+corner_radius_top_right = 1
+corner_radius_bottom_right = 1
+corner_radius_bottom_left = 1
+content_margin_left = 3.0
+content_margin_right = 3.0
+content_margin_top = 1.0
+content_margin_bottom = 1.0
 
 [node name="StatusScreen" type="Control"]
 anchor_left = 0.5
@@ -116,5 +132,16 @@ ignore_texture_size = true
 stretch_mode = 5
 texture_normal = ExtResource("13_end_icon")
 texture_hover = ExtResource("14_end_hover")
+
+[node name="Tooltip" type="PanelContainer" parent="."]
+visible = false
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_tooltip")
+
+[node name="Label" type="Label" parent="Tooltip"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 5
+theme_override_colors/font_color = Color(0.42, 0.27, 0.15, 1)
 
 [node name="QuitConfirmPopup" parent="." instance=ExtResource("15_quit_popup")]

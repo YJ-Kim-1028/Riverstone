@@ -135,7 +135,14 @@ func _set_active(control: Control, active: bool) -> void:
 	_apply_mouse_filter_recursive(control, Control.MOUSE_FILTER_STOP if active else Control.MOUSE_FILTER_IGNORE)
 
 
+## 온라인샵(_shop_window)이 자기 안에서 독립적으로 열고 닫는 색상 선택
+## 서브 팝업(online_shop_panel.gd._color_picker)은 이 재귀에서 건너뛴다 -
+## CLAUDE.md UI 모달 mouse_filter 체크리스트 4번, status_screen.gd의
+## _quit_confirm_popup 예외와 동일한 패턴. 안 건너뛰면 샵 창을 열고 닫을
+## 때마다 색상 선택 창의 열림 상태가 덮어써진다.
 func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
+	if node == _shop_window.get_color_picker_node():
+		return
 	if node is Control:
 		(node as Control).mouse_filter = filter
 	for child in node.get_children():

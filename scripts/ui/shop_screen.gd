@@ -267,6 +267,14 @@ func _build_row(listing: Dictionary) -> Control:
 	var display_name := item_id
 	var display_description := ""
 	var is_maxed := false
+	## legend_statue는 골드가 아니라 전설의 물고기 100개로 교환하는 특수
+	## 구매(ShopManager._buy_legend_statue() 참고, 사용자 지시 2026-09-05) -
+	## 가격 표시도 동전 아이콘+골드 대신 물고기 아이콘+개수로 바꾼다.
+	var price_icon_override: Texture2D = null
+	var price_text_override := ""
+	if item_id == ShopManager.LEGEND_STATUE_ITEM_ID:
+		price_icon_override = InventoryManager.get_item_icon_texture(FishingManager.LEGENDARY_FISH_ITEM_ID)
+		price_text_override = str(ShopManager.LEGEND_STATUE_FISH_COST)
 	if item_id.begins_with(LIVESTOCK_PREFIX):
 		var animal_type := item_id.trim_prefix(LIVESTOCK_PREFIX)
 		var animal_definition := LivestockManager.get_animal_definition(animal_type)
@@ -344,12 +352,17 @@ func _build_row(listing: Dictionary) -> Control:
 		price_icon.custom_minimum_size = Vector2(COIN_ICON_MAX_WIDTH, COIN_ICON_MAX_WIDTH)
 		price_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		price_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		price_icon.texture = COIN_ICON
+		price_icon.texture = price_icon_override if price_icon_override != null else COIN_ICON
 		price_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		price_row.add_child(price_icon)
 
 	var price_label := Label.new()
-	price_label.text = "최대" if is_maxed else EconomyManager.format_gold(price)
+	if is_maxed:
+		price_label.text = "최대"
+	elif not price_text_override.is_empty():
+		price_label.text = price_text_override
+	else:
+		price_label.text = EconomyManager.format_gold(price)
 	price_label.add_theme_font_size_override("font_size", DESCRIPTION_FONT_SIZE)
 	price_label.modulate = BUTTON_TEXT_COLOR
 	price_label.mouse_filter = Control.MOUSE_FILTER_IGNORE

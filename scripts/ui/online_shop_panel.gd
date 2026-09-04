@@ -51,10 +51,80 @@ const HD_HAIRSTYLE_LABELS := {
 const WARDROBE_UNLOCK_NPC_ID := "woody"
 const WARDROBE_UNLOCK_THRESHOLD := 50
 
+## shop_screen.gd와 동일한 값 - livestock/인벤토리 확장/집 확장 아이콘.
+const INVENTORY_EXPANSION_ICON_SHEET := "res://assets/icon/Tools.png"
+const INVENTORY_EXPANSION_ICON_INDEX := 13
+const INVENTORY_EXPANSION_ICON_GRID_SIZE := 16
+const HOUSE_UPGRADE_ICON := preload("res://assets/img/furniture/house_upgrade_icon.png")
+
+## shop_screen.gd의 색상 선택 창과 동일한 값(가구/바닥장식/벽장식 색 마커
+## 팔레트) - 우디(가구점 주인) 사망 후 온라인 전환된 가구점에는 이 창이
+## 아예 없어서 가구를 살 때 색을 못 골랐다(사용자 리포트, 2026-09-05 -
+## "가구 살 때 색상 고르는창이 안 떠. 온라인에서") - 오프라인 상점과
+## 완전히 같은 방식으로 포팅.
+const SWATCH_PALETTE: Array[Color] = [
+	Color("d94a38"), # Red
+	Color("e67e22"), # Orange
+	Color("f2c230"), # Yellow
+	Color("8bcf3f"), # Lime
+	Color("43b84f"), # Green
+	Color("3fcf9a"), # Mint
+	Color("4aa8f0"), # Sky Blue
+	Color("3f73e8"), # Blue
+	Color("8b57e6"), # Purple
+	Color("e65fae"), # Pink
+	Color("a8642a"), # Brown
+	Color("2d1e18"), # Black
+	Color("f08a84"), # Pastel Red
+	Color("f5b26b"), # Pastel Orange
+	Color("f5de7a"), # Pastel Yellow
+	Color("b7de72"), # Pastel Lime
+	Color("8fd38a"), # Pastel Green
+	Color("8fe0c5"), # Pastel Mint
+	Color("8ecdf2"), # Pastel Sky
+	Color("8faef2"), # Pastel Blue
+	Color("b59bf0"), # Pastel Purple
+	Color("f2a8d1"), # Pastel Pink
+	Color("c99a72"), # Pastel Brown
+	Color("f8f1dd"), # Cream
+	Color("4a3327"), # Dark Brown
+]
+const WOOD_PALETTE: Array[Color] = [
+	Color("472f1d"), # Dark Walnut
+	Color("8d562c"), # Classic Oak
+	Color("c97a22"), # Golden Oak
+	Color("d97f1f"), # Orange Oak
+	Color("e19328"), # Honey Wood
+	Color("e88a1a"), # Amber Wood
+	Color("c45a1e"), # Autumn Wood
+	Color("b63c2c"), # Cherry Wood
+	Color("922e24"), # Red Mahogany
+	Color("d96a18"), # Pumpkin Wood
+	Color("c85b19"), # Copper Wood
+	Color("f0a43a"), # Bright Maple
+]
+const SWATCH_BUTTON_SIZE := Vector2(14, 8)
+const SWATCH_GRID_COLUMNS := 6
+const SWATCH_BORDER_COLOR := Color(0.25, 0.15, 0.08)
+const COLOR_SLOT_LABELS := ["색 1", "색 2", "색 3"]
+const ABSENT_MARKER_PLACEHOLDER := Color("808080")
+
 @onready var _close_button: TextureButton = $CloseButton
 @onready var _rows_scroll: ScrollContainer = $ScaledContent/Margin/VBox/RowsScroll
 @onready var _rows: VBoxContainer = $ScaledContent/Margin/VBox/RowsScroll/RowsMargin/Rows
 @onready var _message_label: Label = $ScaledContent/Margin/VBox/MessageLabel
+@onready var _color_picker: Control = $ColorPicker
+@onready var _color_message_label: Label = $ColorPicker/Panel/Margin/VBox/MessageLabel
+@onready var _color_preview_rect: TextureRect = $ColorPicker/Panel/Margin/VBox/PreviewRect
+@onready var _color_slots_scroll: ScrollContainer = $ColorPicker/Panel/Margin/VBox/SlotsScroll
+@onready var _color_slots_container: VBoxContainer = $ColorPicker/Panel/Margin/VBox/SlotsScroll/SlotsMargin/SlotsContainer
+@onready var _color_buy_button: Button = $ColorPicker/Panel/Margin/VBox/ButtonRow/BuyButton
+@onready var _color_cancel_button: Button = $ColorPicker/Panel/Margin/VBox/ButtonRow/CancelButton
+
+var _pending_color_item_id := ""
+var _pending_color_world_sprite_path := ""
+var _pending_color_slots: Array[Color] = []
+var _pending_color_present: Array[bool] = [false, false, false]
 
 
 func _ready() -> void:
@@ -64,9 +134,35 @@ func _ready() -> void:
 	## 세로 스크롤바가 너무 못생겨서 상점하고 통일해주고... 겹치지 않게 해줘") -
 	## shop_screen.gd._style_scrollbar()와 같은 배색, RowsMargin(scene)이 겹침을 막는다.
 	_style_v_scrollbar(_rows_scroll)
+	_color_buy_button.pressed.connect(_on_color_buy_pressed)
+	_color_cancel_button.pressed.connect(_close_color_picker)
+	## shop_screen.gd의 같은 처리와 동일한 이유(PreviewRect custom_minimum_size
+	## 너비가 0이라 EXPAND_IGNORE_SIZE로 바꾸면 폭이 0으로 줄어 그림이 아예
+	## 안 보이는 버그가 있었음) - 기본 EXPAND_KEEP_SIZE 유지, stretch_mode만 지정.
+	_color_preview_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	## 구매/취소 버튼과 스크롤바가 기본 Godot 스타일 그대로라 다른 창들과
+	## 안 맞았다(사용자 리포트, 2026-09-05 - "구매 취소 버튼 개밤티야 기본
+	## 디자인 쓰고 있는데 내가 쓰는 디자인 맞춰줘") - 이 화면 다른 버튼들과
+	## 동일한 button.png 스타일/스크롤바 배색으로 통일.
+	for button in [_color_buy_button, _color_cancel_button]:
+		button.add_theme_stylebox_override("normal", _build_button_style(BUTTON_TEXTURE))
+		button.add_theme_stylebox_override("hover", _build_button_style(BUTTON_HOVER_TEXTURE))
+		button.add_theme_stylebox_override("pressed", _build_button_style(BUTTON_HOVER_TEXTURE))
+		button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	_style_v_scrollbar(_color_slots_scroll)
+	_set_color_picker_open(false)
 
 
 func refresh() -> void:
+	# 이 창의 자식 중 CloseButton만 오른쪽 기준(anchor_left/right = 1.0)이라,
+	# 부모 크기가 아직 0인 상태에서 앵커가 굳으면 왼쪽 위로 튀어나와 HUD
+	# 코인 표시와 겹쳐 보인다 - mail_app.gd의 open()과 완전히 같은 문제/같은
+	# 수정(사용자 리포트, 2026-09-05 - "닫기 버튼이 계속 컴퓨터 좌측이 아니라
+	# 코인이랑 겹쳐서 보여", 메일함은 멀쩡한데 온라인샵만 이 처리가 빠져있었음).
+	# 내보낸 빌드에서만 재현되고 에디터 Play에서는 안 나타난다. 이 루트는
+	# 부모를 꽉 채우는 0/0/1/1이라 PRESET_FULL_RECT다.
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_close_color_picker()
 	_message_label.text = ""
 	_refresh_rows()
 
@@ -125,6 +221,14 @@ func _build_row(shop_id: String, listing: Dictionary) -> Control:
 	margin.add_child(row)
 	var is_hd_outfit := ShopManager.is_hd_outfit_unlock_item(item_id)
 	var hd_outfit_style := item_id.trim_prefix(ShopManager.HD_OUTFIT_ITEM_PREFIX) if is_hd_outfit else ""
+	## shop_screen.gd와 동일 - legend_statue는 골드가 아니라 전설의 물고기
+	## 100개로 교환하므로 가격 표시도 동전+골드 대신 물고기 아이콘+개수로
+	## 바꾼다(사용자 지시, 2026-09-05 - 낚시가게도 온라인 전환될 수 있음).
+	var price_icon_override: Texture2D = null
+	var price_text_override := ""
+	if item_id == ShopManager.LEGEND_STATUE_ITEM_ID:
+		price_icon_override = InventoryManager.get_item_icon_texture(FishingManager.LEGENDARY_FISH_ITEM_ID)
+		price_text_override = str(ShopManager.LEGEND_STATUE_FISH_COST)
 
 	var icon_rect := TextureRect.new()
 	if is_hd_outfit:
@@ -133,7 +237,6 @@ func _build_row(shop_id: String, listing: Dictionary) -> Control:
 		icon_rect.custom_minimum_size = Vector2(12, 12)
 	icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon_rect.texture = _hd_outfit_preview_texture(hd_outfit_style) if is_hd_outfit else InventoryManager.get_item_icon_texture(item_id)
 	row.add_child(icon_rect)
 
 	## HD 아웃핏 해금 항목은 인벤토리 아이템이 아니라 items.json에 없다
@@ -146,21 +249,56 @@ func _build_row(shop_id: String, listing: Dictionary) -> Control:
 	text_column.add_theme_constant_override("separation", 0)
 	row.add_child(text_column)
 
+	## shop_screen.gd._build_row()와 동일한 특수 처리(livestock/인벤토리 확장/
+	## 집 확장) - 여기 빠져있어서 우디(가구점 주인) 사망 후 온라인 전환된
+	## 가구점에서 house_upgrade 아이콘/이름이 안 뜨는(items.json에 없는
+	## 항목이라 빈 값으로 나옴) 버그가 있었다(사용자 리포트, 2026-09-05 -
+	## "우디 죽으면 가구점에서 가구 살 때 홈 업그레이드 아이콘이 안보이고").
+	var display_name := item_id
+	var display_description := ""
+	var is_maxed := false
+	if item_id.begins_with(ShopManager.LIVESTOCK_PREFIX):
+		var animal_type := item_id.trim_prefix(ShopManager.LIVESTOCK_PREFIX)
+		var animal_definition := LivestockManager.get_animal_definition(animal_type)
+		display_name = String(animal_definition.get("name", item_id))
+		display_description = "외양간에 배치해 기를 수 있다."
+		icon_rect.texture = LivestockManager.get_animal_icon_texture(animal_type, false)
+	elif item_id == ShopManager.INVENTORY_EXPANSION_ITEM_ID:
+		display_name = "인벤토리 확장"
+		display_description = "소지 가능한 아이템 칸을 5개 늘린다."
+		icon_rect.texture = _inventory_expansion_icon_texture()
+		price = EconomyManager.get_inventory_expansion_cost()
+		is_maxed = price < 0
+	elif item_id == ShopManager.HOUSE_UPGRADE_ITEM_ID:
+		display_name = "집 확장"
+		display_description = "집 내부를 더 넓게 만든다."
+		icon_rect.texture = HOUSE_UPGRADE_ICON
+		price = EconomyManager.get_house_upgrade_cost()
+		is_maxed = price < 0
+	elif is_hd_outfit:
+		display_name = HD_OUTFIT_LABELS.get(hd_outfit_style, hd_outfit_style)
+		display_description = "옷장에서 착용할 수 있는 옷차림이다."
+		icon_rect.texture = _hd_outfit_preview_texture(hd_outfit_style)
+	else:
+		display_name = String(definition.get("name", item_id))
+		display_description = String(definition.get("description", ""))
+		icon_rect.texture = InventoryManager.get_item_icon_texture(item_id)
+
 	var name_label := Label.new()
-	name_label.text = HD_OUTFIT_LABELS.get(hd_outfit_style, hd_outfit_style) if is_hd_outfit else String(definition.get("name", item_id))
+	name_label.text = display_name
 	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	name_label.add_theme_font_size_override("font_size", ROW_FONT_SIZE)
 	name_label.add_theme_color_override("font_color", Color.BLACK)
 	text_column.add_child(name_label)
 
 	var description_label := Label.new()
-	description_label.text = "옷장에서 착용할 수 있는 옷차림이다." if is_hd_outfit else String(definition.get("description", ""))
+	description_label.text = display_description
 	description_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	description_label.add_theme_font_size_override("font_size", DESCRIPTION_FONT_SIZE)
 	description_label.add_theme_color_override("font_color", Color.BLACK)
 	text_column.add_child(description_label)
 
-	var buy_button := _build_buy_button(shop_id, item_id, price, is_hd_outfit and not _is_wardrobe_unlocked())
+	var buy_button := _build_buy_button(shop_id, item_id, price, is_maxed or (is_hd_outfit and not _is_wardrobe_unlocked()), is_maxed, price_icon_override, price_text_override)
 	# shop_screen.gd와 동일 - 설명이 여러 줄로 늘어나도 버튼은 1줄 크기로
 	# 고정하고 세로 중앙에 배치한다.
 	buy_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -339,7 +477,7 @@ func _build_hd_outfit_card(shop_id: String, listing: Dictionary) -> Control:
 
 ## _build_row()와 카드 뷰가 같이 쓰는 "가격 아이콘+가격이 가운데 얹힌 구매
 ## 버튼" - 중복 방지를 위해 공용화.
-func _build_buy_button(shop_id: String, item_id: String, price: int, disabled: bool) -> Button:
+func _build_buy_button(shop_id: String, item_id: String, price: int, disabled: bool, is_maxed: bool = false, price_icon_override: Texture2D = null, price_text_override: String = "") -> Button:
 	var buy_button := Button.new()
 	buy_button.custom_minimum_size = Vector2(45, 16)
 	buy_button.add_theme_stylebox_override("normal", _build_button_style(BUTTON_TEXTURE))
@@ -366,12 +504,17 @@ func _build_buy_button(shop_id: String, item_id: String, price: int, disabled: b
 	price_icon.custom_minimum_size = Vector2(COIN_ICON_MAX_WIDTH, COIN_ICON_MAX_WIDTH)
 	price_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	price_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	price_icon.texture = COIN_ICON
+	price_icon.texture = price_icon_override if price_icon_override != null else COIN_ICON
 	price_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	price_row.add_child(price_icon)
 
 	var price_label := Label.new()
-	price_label.text = EconomyManager.format_gold(price)
+	if is_maxed:
+		price_label.text = "최대"
+	elif not price_text_override.is_empty():
+		price_label.text = price_text_override
+	else:
+		price_label.text = EconomyManager.format_gold(price)
 	price_label.add_theme_font_size_override("font_size", DESCRIPTION_FONT_SIZE)
 	price_label.modulate = BUTTON_TEXT_COLOR
 	price_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -402,6 +545,21 @@ func _hd_outfit_preview_texture(style: String) -> Texture2D:
 	return atlas
 
 
+func _inventory_expansion_icon_texture() -> Texture2D:
+	if not ResourceLoader.exists(INVENTORY_EXPANSION_ICON_SHEET):
+		return _flat_color_icon_texture(Color(0.6, 0.5, 0.3))
+	var atlas := AtlasTexture.new()
+	atlas.atlas = load(INVENTORY_EXPANSION_ICON_SHEET)
+	atlas.region = Rect2(INVENTORY_EXPANSION_ICON_INDEX * INVENTORY_EXPANSION_ICON_GRID_SIZE, 0, INVENTORY_EXPANSION_ICON_GRID_SIZE, INVENTORY_EXPANSION_ICON_GRID_SIZE)
+	return atlas
+
+
+func _flat_color_icon_texture(color: Color) -> Texture2D:
+	var image := Image.create(12, 12, false, Image.FORMAT_RGBA8)
+	image.fill(color)
+	return ImageTexture.create_from_image(image)
+
+
 func _build_row_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0, 0, 0, 0.15)
@@ -421,11 +579,150 @@ func _build_button_style(texture: Texture2D) -> StyleBoxTexture:
 	return style
 
 
+## shop_screen.gd._on_buy_pressed()와 동일한 순서 - livestock/인벤토리 확장은
+## 이 화면에서 지원하지 않으므로(온라인 주문은 배송이라 어느 칸에 배치할지
+## 그 자리에서 고를 수 없음, 인벤토리 확장은 즉시 적용이라 배송 개념과
+## 안 맞음) 원래도 목록에 안 뜨거나 그대로 ShopManager.buy()로 넘긴다. 가구/
+## 바닥장식/벽장식처럼 그림에 색 마커가 있는 아이템만 색상 선택 창을 먼저
+## 연다.
 func _on_buy_pressed(shop_id: String, item_id: String) -> void:
+	if item_id != ShopManager.INVENTORY_EXPANSION_ITEM_ID and not item_id.begins_with(ShopManager.LIVESTOCK_PREFIX):
+		var world_sprite_path := String(InventoryManager.get_item_definition(item_id).get("world_sprite", ""))
+		var present := FurnitureAppearance.detect_present_markers(world_sprite_path)
+		if present.has(true):
+			_open_color_picker(shop_id, item_id, world_sprite_path, present)
+			return
 	var failure_reason := ShopManager.buy(shop_id, item_id)
 	if failure_reason.is_empty():
-		_message_label.text = "주문했습니다. 다음 날 오전 9시에 배송됩니다."
+		_message_label.text = "주문했습니다. 다음 날 배송 되오니 내일이 오기 전 인벤토리를 비워주세요."
 	else:
 		_message_label.text = failure_reason
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
 	_refresh_rows()
+
+
+## shop_screen.gd의 같은 이름 함수와 동일한 구조 - shop_id도 같이 들고 있어야
+## 하는 점만 다르다(이 화면은 상점이 여러 개 섞여 나오므로 구매 시점에
+## shop_id를 다시 알아야 함).
+var _pending_color_shop_id := ""
+
+
+func _open_color_picker(shop_id: String, item_id: String, world_sprite_path: String, present: Array[bool]) -> void:
+	_pending_color_shop_id = shop_id
+	_pending_color_item_id = item_id
+	_pending_color_world_sprite_path = world_sprite_path
+	_pending_color_present = present
+	var last_present_index := -1
+	for i in present.size():
+		if present[i]:
+			last_present_index = i
+	_pending_color_slots.clear()
+	for i in (last_present_index + 1):
+		if present[i]:
+			var palette := _palette_for_slot(i)
+			_pending_color_slots.append(palette[i % palette.size()])
+		else:
+			_pending_color_slots.append(ABSENT_MARKER_PLACEHOLDER)
+	var definition := InventoryManager.get_item_definition(item_id)
+	_color_message_label.text = "%s 색을 골라주세요" % String(definition.get("name", item_id))
+	_build_color_slot_rows()
+	_refresh_color_preview()
+	_set_color_picker_open(true)
+
+
+func _palette_for_slot(slot_index: int) -> Array[Color]:
+	return WOOD_PALETTE if slot_index == 0 else SWATCH_PALETTE
+
+
+func _build_color_slot_rows() -> void:
+	for child in _color_slots_container.get_children():
+		child.queue_free()
+	for slot_index in _pending_color_slots.size():
+		if not _pending_color_present[slot_index]:
+			continue
+		var label := Label.new()
+		label.text = COLOR_SLOT_LABELS[slot_index] if slot_index < COLOR_SLOT_LABELS.size() else "색 %d" % (slot_index + 1)
+		label.add_theme_font_size_override("font_size", DESCRIPTION_FONT_SIZE)
+		_color_slots_container.add_child(label)
+		var grid := GridContainer.new()
+		grid.columns = SWATCH_GRID_COLUMNS
+		grid.add_theme_constant_override("h_separation", 2)
+		grid.add_theme_constant_override("v_separation", 2)
+		_color_slots_container.add_child(grid)
+		for color in _palette_for_slot(slot_index):
+			var swatch := Button.new()
+			swatch.custom_minimum_size = SWATCH_BUTTON_SIZE
+			swatch.focus_mode = Control.FOCUS_NONE
+			_style_swatch_button(swatch, color, color.is_equal_approx(_pending_color_slots[slot_index]))
+			swatch.pressed.connect(_on_swatch_pressed.bind(slot_index, color))
+			grid.add_child(swatch)
+
+
+func _style_swatch_button(button: Button, color: Color, is_selected: bool) -> void:
+	var style := StyleBoxFlat.new()
+	style.bg_color = color
+	var border_width := 2 if is_selected else 1
+	style.border_width_left = border_width
+	style.border_width_top = border_width
+	style.border_width_right = border_width
+	style.border_width_bottom = border_width
+	style.border_color = SWATCH_BORDER_COLOR
+	button.add_theme_stylebox_override("normal", style)
+	button.add_theme_stylebox_override("hover", style)
+	button.add_theme_stylebox_override("pressed", style)
+	button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+
+
+func _on_swatch_pressed(slot_index: int, color: Color) -> void:
+	_pending_color_slots[slot_index] = color
+	_build_color_slot_rows()
+	_refresh_color_preview()
+
+
+func _refresh_color_preview() -> void:
+	var image := FurnitureAppearance.build_recolored_image(_pending_color_world_sprite_path, _pending_color_slots)
+	_color_preview_rect.texture = ImageTexture.create_from_image(image) if image != null else null
+
+
+func _on_color_buy_pressed() -> void:
+	var shop_id := _pending_color_shop_id
+	var item_id := _pending_color_item_id
+	var colors := _pending_color_slots.duplicate()
+	_close_color_picker()
+	var failure_reason := ShopManager.buy(shop_id, item_id, -1, colors)
+	if failure_reason.is_empty():
+		_message_label.text = "주문했습니다. 다음 날 배송 되오니 내일이 오기 전 인벤토리를 비워주세요."
+	else:
+		_message_label.text = failure_reason
+		AudioManager.play_sfx(AudioManager.SFX_BEEP)
+	_refresh_rows()
+
+
+func _close_color_picker() -> void:
+	_pending_color_shop_id = ""
+	_pending_color_item_id = ""
+	_pending_color_world_sprite_path = ""
+	_pending_color_slots.clear()
+	_pending_color_present = [false, false, false]
+	_set_color_picker_open(false)
+
+
+func _set_color_picker_open(is_open: bool) -> void:
+	_color_picker.modulate.a = 1.0 if is_open else 0.0
+	_apply_mouse_filter_recursive(_color_picker, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
+
+
+func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
+	if node is Control:
+		(node as Control).mouse_filter = filter
+	for child in node.get_children():
+		_apply_mouse_filter_recursive(child, filter)
+
+
+## computer_screen.gd가 ShopWindow(=이 화면)를 열고 닫을 때 서브트리 전체를
+## 재귀로 mouse_filter STOP/IGNORE 처리하는데, 이 색상 선택 창은 독립적으로
+## 열고 닫히므로 그 재귀에서 건너뛰어야 한다(CLAUDE.md UI 모달 mouse_filter
+## 체크리스트 4번, slot_picker_screen.gd와 동일한 패턴) - computer_screen.gd가
+## 이 함수로 그 노드를 얻어서 자기 재귀 안에서 skip한다.
+func get_color_picker_node() -> Control:
+	return _color_picker
