@@ -418,6 +418,7 @@ func _ready() -> void:
 	player.interact_pressed.connect(_on_interact_pressed)
 	player.set_world_map(world_map)
 	_load_furniture_descriptions()
+	_load_tutorial_dialogue()
 	if hud != null:
 		hud.set_player(player)
 	AudioManager.set_player(player)
@@ -512,6 +513,13 @@ func _on_item_used(item_id: String) -> void:
 		"energy_tonic":
 			player.clear_debuff()
 			AudioManager.play_sfx(AudioManager.SFX_DRINKING)
+		"perfume_somewhere_behind_you":
+			# 마르가 호감도 선물로 준 향수 - NPC에게는 선물할 수 없고(category
+			# "perfume", inventory_manager.gd), 우클릭으로 나에게 뿌린다(사용자
+			# 지시, 2026-09-05). 소모되지 않으므로 다시 뿌리면 지속 시간만 갱신.
+			player.apply_scent("gold")
+			AudioManager.play_sfx(AudioManager.SFX_PERFUME_SPRAY)
+			_show_temporary_message("좋은 향기가 나.")
 
 
 ## 레시피 아이템(만능 요리 레시피 포함)을 우클릭으로 써서 배웠을 때 플레이어
@@ -579,9 +587,17 @@ func _is_furniture_hammer_equipped() -> bool:
 ## 요일/호감도 로테이션 없이 woody.json의 furniture_hammer_gift_lines만 그대로
 ## 보여줌). 아직 대사가 안 채워져 있으면 dialogue_screen이 알아서 자리표시자로
 ## 대체한다.
+## 가게 주인이 이미 죽은 뒤(그래서 상점이 온라인으로 전환된 뒤) 온라인으로
+## 첫 가구를 사는 경우엔 죽은 NPC가 대사를 하며 나타나면 안 된다(사용자
+## 지시, 2026-09-05 - "죽은 우디 영혼이 주는건 좀 이상하지 않아?") - 이럴 땐
+## 대사 없이 조용히 망치만 받는다(아이템 자체는 가구 회수 기능에 필요하므로
+## 계속 지급).
 func _on_furniture_hammer_granted(npc_id: String) -> void:
 	if shop_screen != null:
 		shop_screen.close()
+	if not NPCManager.is_alive(npc_id):
+		_show_temporary_message("가구용 망치를 손에 넣었다.")
+		return
 	if dialogue_screen != null:
 		var lines: Array = NPCManager.get_definition(npc_id).get("furniture_hammer_gift_lines", [])
 		dialogue_screen.open_special(npc_id, lines)
@@ -757,27 +773,11 @@ const TUTORIAL_DECOY_WALK_TIMEOUT_SECONDS := 8.0
 const TUTORIAL_POLI_RESTAURANT_SPAWN := "poli_tutorial_entrance"
 const TUTORIAL_POLI_STATION_INDEX := 0
 const TUTORIAL_SIGN_INTERACTABLE := "restaurant_open"
-const TUTORIAL_POLI_GREETING_LINES: Array[String] = [
-	"어서오게, 청년.",
-	"이름이?",
-	"{player_name}. 좋아. 오늘 새로 왔다고 들었어.",
-	"우리 마을에 유일한 음식점이 생긴다 하여 다들 기대중이야.",
-	"괜찮다면 먼저 한 접시 대접해주겠나?",
-]
-const TUTORIAL_OPEN_HINT_LINES: Array[String] = [
-	"먼저 레스토랑을 열자.",
-]
-const TUTORIAL_POLI_SEATED_LINES: Array[String] = [
-	"기대가 되는군.",
-]
-const TUTORIAL_POLI_FAREWELL_LINES: Array[String] = [
-	"정말 맛있군. 앞으로도 자주 와야겠어.",
-	"마을 사람들에겐 내가 미리 말해두었다네. 아마 지금쯤이면 다들 환영 메일을 쓰고 있을 거야.",
-]
-const TUTORIAL_MAIL_HINT_LINES: Array[String] = [
-	"집 컴퓨터에서 메일을 확인 해보자.",
-	"또한, 메일로 하루에 한 명 음식점에 초대할 수 있다.",
-]
+## 튜토리얼 대사는 코드에 직접 안 쓰고 데이터 파일로 뺐다(사용자 지시,
+## 2026-09-05 - "언제든 내가 수정할 수 있게") - CLAUDE.md "NPC 대사를 코드에
+## 작성" 금지 원칙과도 맞춤. _load_tutorial_dialogue()가 채운다.
+const TUTORIAL_DIALOGUE_PATH := "res://data/tutorial/intro_dialogue.json"
+var _tutorial_dialogue: Dictionary = {}
 ## cooking_stations.json 확인 결과 냄비=potato->cooked_potato,
 ## 프라이팬=mackerel->cooked_mackerel, 15초 조리. cooked_mackerel+cooked_potato는
 ## recipes.json에 실제로 등록된 레시피(생선과 감자튀김을 곁들인 요리)라 서빙도
@@ -2472,6 +2472,28 @@ func _furniture_description_lines(entry: Variant) -> Array:
 
 ## .json은 원시 파일이라 FileAccess.file_exists() 규칙(day20 export 검증 참고,
 ## .png 등 import 리소스의 ResourceLoader.exists()와 반대)을 따른다.
+func _load_tutorial_dialogue() -> void:
+	if not FileAccess.file_exists(TUTORIAL_DIALOGUE_PATH):
+		return
+	var file := FileAccess.open(TUTORIAL_DIALOGUE_PATH, FileAccess.READ)
+	if file == null:
+		push_error("Tutorial dialogue could not be opened: %s" % TUTORIAL_DIALOGUE_PATH)
+		return
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	if parsed is Dictionary:
+		_tutorial_dialogue = parsed
+
+
+## data/tutorial/intro_dialogue.json에 키가 없으면(파일 손상 등) 빈 배열 -
+## dialogue_screen.open_special/open_description이 빈 배열이면 조용히
+## PLACEHOLDER_LINES로 대체하므로 크래시 없이 안전하게 넘어간다.
+func _tutorial_lines(key: String) -> Array[String]:
+	var lines: Array[String] = []
+	for line in (_tutorial_dialogue.get(key, []) as Array):
+		lines.append(String(line))
+	return lines
+
+
 func _load_furniture_descriptions() -> void:
 	if not FileAccess.file_exists(FURNITURE_DESCRIPTIONS_PATH):
 		return
@@ -3129,7 +3151,7 @@ func _maybe_play_tutorial_intro() -> void:
 	await _fade_in(HEART_EVENT_FADE_DURATION)
 	if decoy != null:
 		await _tutorial_walk_decoy_to_spawn(decoy, TUTORIAL_POLI_HOME_SPAWN)
-	dialogue_screen.open_special(TUTORIAL_POLI_ID, TUTORIAL_POLI_GREETING_LINES.duplicate(), false)
+	dialogue_screen.open_special(TUTORIAL_POLI_ID, _tutorial_lines("poli_greeting"), false)
 	await dialogue_screen.closed
 	## 플레이어 자유 이동이 아니라 컷신이 직접 문 앞까지 걸어가게 한다(사용자
 	## 지시, 2026-09-01 - "플레이어 자유 이동이 아니라 알아서 컷씬 이벤트로
@@ -3172,7 +3194,7 @@ func _maybe_play_tutorial_intro() -> void:
 	var entrance_position := world_map.get_spawn_position(TUTORIAL_POLI_RESTAURANT_SPAWN)
 	if entrance_position != Vector2.INF:
 		npc_world_manager.plant_npc_at(TUTORIAL_POLI_ID, RESTAURANT_SIGN_MAP_ID, entrance_position, true)
-	dialogue_screen.open_description(TUTORIAL_OPEN_HINT_LINES.duplicate())
+	dialogue_screen.open_description(_tutorial_lines("open_hint"))
 	await dialogue_screen.closed
 	## 게임이 09:00에 시작하는데 정식 영업시간(10시)까지 기다리게 하면 튜토리얼이
 	## 막힌다는 지적(사용자 지시, 2026-09-01) - 이 하이라이트가 켜져 있는 동안만
@@ -3193,9 +3215,19 @@ func _maybe_play_tutorial_intro() -> void:
 	## 개점 전까지 숨겨뒀던 걸 여기서 처음 보여준다.
 	npc_world_manager.set_npc_sprite_hidden(TUTORIAL_POLI_ID, false)
 	RestaurantManager.force_seat_npc(TUTORIAL_POLI_STATION_INDEX, TUTORIAL_POLI_ID)
+	## 평소 손님은 실제 크로스맵 이동(_complete_current_hop -> notify_npc_entered_map)이
+	## 문에 도착하는 순간 종을 울리는데, 폴리는 plant_npc_at()/force_seat_npc()로
+	## 직접 배치돼서 그 이동 경로를 안 타 종이 안 울렸다(사용자 리포트,
+	## 2026-09-05 - "튜토에서 폴리 들어올 때 띵동 소리 안나"). 방금 자리를
+	## 배정했으니 get_seated_station()이 바로 유효해서 여기서 직접 불러도 된다.
+	## notify_npc_entered_map() 자체가 좌석당 1회만 실제로 울리도록 막혀있어서
+	## (restaurant_manager.gd _seat_npc()/_station_entry_notified 참고) 이 호출과
+	## 스케줄 재조정이 우연히 만들어내는 자연 재진입이 겹쳐도 중복으로 울리지
+	## 않는다.
+	RestaurantManager.notify_npc_entered_map(TUTORIAL_POLI_ID)
 	while not RestaurantManager.is_station_npc_settled(TUTORIAL_POLI_STATION_INDEX):
 		await get_tree().create_timer(TUTORIAL_POLL_INTERVAL_SECONDS).timeout
-	dialogue_screen.open_special(TUTORIAL_POLI_ID, TUTORIAL_POLI_SEATED_LINES.duplicate(), false)
+	dialogue_screen.open_special(TUTORIAL_POLI_ID, _tutorial_lines("poli_seated"), false)
 	await dialogue_screen.closed
 	## 오직 튜토리얼에서만 지급하는 재료(사용자 지시) - 감자는 냄비(cooking_area1),
 	## 고등어는 프라이팬(cooking_area2)에서만 조리 가능하다(cooking_stations.json).
@@ -3236,13 +3268,20 @@ func _maybe_play_tutorial_intro() -> void:
 	if seat_position != Vector2.INF:
 		npc_world_manager.set_npc_sprite_hidden(TUTORIAL_POLI_ID, true)
 		eating_decoy = _spawn_npc_decoy(TUTORIAL_POLI_ID, seat_position)
+		## 정식 레스토랑 손님은 RestaurantManager.dish_served -> npc_world_manager.gd의
+		## start_eating() 연결로 자동으로 먹는 모션이 나오는데, 이 분신은 그
+		## 신호 체계 밖에서 직접 만든 별도 NPCSprite라 같은 신호를 못 받는다 -
+		## 여기서 직접 걸어줘야 한다(사용자 리포트, 2026-09-05 - "튜토에서
+		## 폴리가 먹는 행동도 안해").
+		if eating_decoy != null:
+			eating_decoy.call("start_eating")
 	while true:
 		await RestaurantManager.npc_departed
 		if RestaurantManager.get_station_npc(TUTORIAL_POLI_STATION_INDEX).is_empty():
 			break
-	dialogue_screen.open_special(TUTORIAL_POLI_ID, TUTORIAL_POLI_FAREWELL_LINES.duplicate(), false)
+	dialogue_screen.open_special(TUTORIAL_POLI_ID, _tutorial_lines("poli_farewell"), false)
 	await dialogue_screen.closed
-	dialogue_screen.open_description(TUTORIAL_MAIL_HINT_LINES.duplicate())
+	dialogue_screen.open_description(_tutorial_lines("mail_hint"))
 	await dialogue_screen.closed
 	## 여기서부터 실제 관리 스프라이트를 되돌린다 - 평소 스케줄로 복귀하며
 	## 걸어 나가는 모습이 그대로 "폴리가 나가는 애니메이션"이 된다.
