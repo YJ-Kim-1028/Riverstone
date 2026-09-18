@@ -25,8 +25,8 @@ const USE_FRAME := {
 const ICON_OFFSET := {
 	Vector2i(0, 1): Vector2(0, -12),
 	Vector2i(0, -1): Vector2(4, -20),
-	Vector2i(-1, 0): Vector2(-11, -16),
-	Vector2i(1, 0): Vector2(11, -16),
+	Vector2i(-1, 0): Vector2(-11, -19),
+	Vector2i(1, 0): Vector2(11, -19),
 }
 
 ## 정면(아래쪽)을 볼 때만 도구별로 위치를 따로 올릴 수 있게 하는 예외표 -
@@ -36,6 +36,14 @@ const ICON_OFFSET := {
 ## 볼 때 이 값으로 덮어쓴다.
 const FRONT_FACING_OFFSET_OVERRIDES := {
 	"hunting_rifle": Vector2(0, -16),
+}
+
+## 방향 상관없이 특정 도구 하나만 위치를 미세 조정하고 싶을 때 쓰는 가산값 -
+## 다른 도구는 그대로 두고 이 도구만 옮긴다(사용자 지시, 2026-09-16 - "물뿌리개
+## 아이콘만 조금 내릴 수 있어? 다른 소총이나 괭이 낚시대는 그대로 두고").
+const TOOL_OFFSET_ADJUSTMENT := {
+	"watering_can": Vector2(0, 3),
+	"golden_watering_can": Vector2(0, 3),
 }
 
 ## 인벤토리 아이콘(Tools.png 등)은 옆에서 본 사선 모양으로 그려져 있어서
@@ -54,7 +62,7 @@ const FRONT_FACING_OFFSET_OVERRIDES := {
 ## 맞는다. 물뿌리개는 반대로(주둥이가 왼쪽) 그려져 있어서 그 관례가 뒤집힌다 -
 ## 그대로 두면 오른쪽을 볼 때도 계속 손잡이 쪽을 쥔 것처럼 보인다(2026-08-12
 ## 사용자 리포트). 이런 tool_id는 여기 등록해서 반전 판정을 뒤집는다.
-const MIRRORED_ICON_TOOLS := ["watering_can"]
+const MIRRORED_ICON_TOOLS := ["watering_can", "golden_watering_can"]
 
 @onready var _icon_sprite: Sprite2D = $IconSprite
 
@@ -114,6 +122,7 @@ func update_position(facing_direction: Vector2i) -> void:
 		_icon_sprite.position = FRONT_FACING_OFFSET_OVERRIDES[_tool_id]
 	else:
 		_icon_sprite.position = ICON_OFFSET.get(facing_direction, Vector2.ZERO)
+	_icon_sprite.position += TOOL_OFFSET_ADJUSTMENT.get(_tool_id, Vector2.ZERO)
 	var facing_left := facing_direction == Vector2i(-1, 0)
 	_icon_sprite.flip_h = facing_left != MIRRORED_ICON_TOOLS.has(_tool_id)
 	var texture := _resolve_texture(facing_direction)
