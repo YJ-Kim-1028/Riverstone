@@ -298,4 +298,14 @@ func _load_json(path: String) -> Dictionary:
 	if not (parsed is Dictionary):
 		push_error("Horror data file is not valid JSON: %s" % path)
 		return {}
-	return parsed
+	## 다국어(2026-09-14) - stalker_emails.en.json 같은 언어별 형제 파일을
+	## 합친다(Localizer.merge_json 참고). npc_manager.gd의 동일 패턴과 이유 같음.
+	return Localizer.apply_language(parsed, path) as Dictionary
+
+
+## 언어 설정 화면에서 언어를 바꾸면 호출된다 - 매번 디스크에서 새로 읽는
+## 구조라 재호출만으로 안전하게 다시 합쳐진다(npc_manager.gd의
+## reload_for_language()와 동일 패턴).
+func reload_for_language() -> void:
+	_stalker_emails = _load_json(STALKER_EMAILS_PATH)
+	_impersonation_emails = _load_json(IMPERSONATION_EMAILS_PATH)

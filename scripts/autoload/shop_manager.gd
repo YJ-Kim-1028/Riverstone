@@ -40,7 +40,11 @@ const HOUSE_UPGRADE_ITEM_ID := "house_upgrade"
 ## 착용할 수 있는건 plain1,2 옷만 되고 나머지는 온라인 상점에서 구매해야
 ## 해금").
 const HD_OUTFIT_ITEM_PREFIX := "outfit_"
-const DEFAULT_UNLOCKED_HD_OUTFITS: Array[String] = ["plain", "plain2"]
+## "plain"은 도구 사용 포즈 그림을 도저히 못 그리겠다는 이유로 선택 목록에서
+## 뺐다(사용자 지시, 2026-09-16) - HD_OUTFITS에서는 안 지웠으니 이미 이 옷을
+## 입고 있던 기존 세이브는 그대로 보이고, 새로 고를 수만 없다. 상점에도
+## "outfit_plain" 항목이 없어서 구매로도 못 얻는다.
+const DEFAULT_UNLOCKED_HD_OUTFITS: Array[String] = ["plain2"]
 ## HD 헤어스타일(player.gd HD_HAIRSTYLES) 해금 구매 - HD_OUTFIT_ITEM_PREFIX와
 ## 완전히 같은 구조(_buy_hd_hairstyle_unlock() 참고). item_id는 이 접두사 뒤에
 ## PlayerController.HD_HAIRSTYLES의 스타일 이름을 그대로 붙인다(예:
@@ -534,4 +538,9 @@ func _load_shops() -> void:
 	if not (parsed is Dictionary):
 		push_error("Shop catalog is not valid JSON: %s" % SHOPS_PATH)
 		return
-	_shops = parsed
+	_shops = Localizer.apply_language(parsed, SHOPS_PATH) as Dictionary
+
+
+## 언어 변경 시 language_settings_screen.gd가 호출한다.
+func reload_for_language() -> void:
+	_load_shops()

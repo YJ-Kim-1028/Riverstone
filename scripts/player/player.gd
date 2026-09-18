@@ -20,6 +20,13 @@ const COLLISION_HALF_WIDTH := 7.0
 ## 지적(사용자 지시, 2026-08-29). 아래/옆으로 이동할 땐 기존과 동일하게
 ## 타일 경계까지 딱 붙어도 문제 없다고 확인되어 그대로 둔다.
 const NORTH_APPROACH_COLLISION_MARGIN := 3.0
+## 코너 슬라이드 어시스트(사용자 지시, 2026-09-05 - "충돌 구간 옆으로
+## 미끄러지듯 밀어내는 효과... 지금 우리가 그 효과가 없어서 맵을 다닐 때
+## 너무 많이 걸려") - 한 방향 키만 눌러서 벽 모서리/좁은 틈에 픽셀 단위로
+## 어긋나게 접근했을 때, 인접한 열린 칸 쪽으로 조금씩 밀어준다.
+## _apply_corner_slide_assist() 참고. 둘 다 임시값 - 실제로 걸어보고 조정.
+const CORNER_ASSIST_PROBE_DISTANCE := 8.0
+const CORNER_ASSIST_NUDGE_SPEED := 40.0
 ## 16x32 캐릭터 프레임 크기에 맞춘 값(NPCSprite와 동일).
 const SPRITE_HALF_WIDTH := 8.0
 const SPRITE_HEIGHT := 32.0
@@ -89,7 +96,15 @@ const HD_EYE_STYLES: Array[String] = ["anime_eyes", "droopy_eyes", "fox_eyes", "
 const HD_FRAME_WIDTH := 32
 const HD_FRAME_HEIGHT := 64
 const HD_WALK_FRAME_COUNT := 8
-const HD_GROUP_SIZE := 1 + HD_WALK_FRAME_COUNT
+## 방향당 프레임 구성: [정지 1] + [걷기 8] + [도구 사용 포즈 1](2026-09-15 추가 -
+## plain2 등 각 아웃핏/헤어/눈 시트 전부 이 순서로 폭을 늘려뒀다. 아직 전용
+## 포즈 그림이 없는 아웃핏은 정지 프레임을 그대로 복제해 채워뒀다). 도구별로
+## 전용 포즈(낚싯대 포함 등)를 따로 만들지 않고, 손 모은 범용 포즈 하나를
+## 모든 도구에 공용으로 쓰기로 함(사용자 지시, 2026-09-15 - "그냥 뭘 쥐고있는
+## 포즈로만 할거야", "손 모은거로") - 실제 도구 모양은 기존 아이콘 오버레이
+## (Tools.png)가 손 위치에 얹어서 보여준다.
+const HD_TOOL_FRAME_OFFSET := 1 + HD_WALK_FRAME_COUNT
+const HD_GROUP_SIZE := HD_TOOL_FRAME_OFFSET + 1
 const HD_DIRECTION_GROUP_INDEX := {
 	Vector2i(0, 1): 0, Vector2i(-1, 0): 1, Vector2i(1, 0): 2, Vector2i(0, -1): 3,
 }
@@ -102,8 +117,10 @@ const HD_WALK_FRAME_INTERVAL := 0.125
 ## 주변에 여백을 두고 나와서(예전 손그림은 캔버스를 꽉 채워 그림) 0.5로도
 ## 여전히 작아 보인다는 피드백(사용자 지시, 2026-09-02) - 1.3배로 키웠다가
 ## "생각보다 크다"는 피드백으로 1.2배로 낮춤(같은 날). npc_sprite.gd의
-## HD_VISUAL_BOOST와 같은 배율(플레이어/NPC 크기 통일).
-const HD_SCALE := 0.5 * 1.2
+## HD_VISUAL_BOOST와 같은 배율(플레이어/NPC 크기 통일). 플레이테스트에서
+## "캐릭터가 너무 크다"는 피드백으로 부스트를 1.2 → 1.0으로 낮췄다가, 실제로
+## 보니 "너무 작다"는 피드백으로 1.1로 재조정(사용자 지시, 2026-09-14).
+const HD_SCALE := 0.5 * 1.1
 ## 머리 위 이모지(npc_sprite.gd의 EMOTE_OFFSET/EMOTE_DISPLAY_DURATION과 동일한
 ## 값) - 첫 번째 살인 비명 반응("!" 뒤 나레이션, main.gd) 등 플레이어 쪽에서도
 ## 이모지가 필요해져서 추가(사용자 지시, 2026-08-26).
@@ -200,7 +217,7 @@ func _ready() -> void:
 	_sprite.texture = _atlas
 	if not Engine.is_editor_hint():
 		TimeManager.minute_passed.connect(_on_minute_passed)
-		TimeManager.day_changed.connect(_on_day_changed_clear_scent)
+		TimeManager.day_changed.connect(_on_day_changed_reset_effects)
 		GameManager.appearance_changed.connect(refresh_appearance)
 
 
@@ -322,6 +339,10 @@ func _hd_walk_index(direction: Vector2i, walk_frame: int) -> int:
 	return _hd_group_index(direction) * HD_GROUP_SIZE + 1 + (walk_frame % HD_WALK_FRAME_COUNT)
 
 
+func _hd_tool_index(direction: Vector2i) -> int:
+	return _hd_group_index(direction) * HD_GROUP_SIZE + HD_TOOL_FRAME_OFFSET
+
+
 ## 캐릭터 생성 화면에서 고른 외형(GameManager에 저장된 색/스타일)을 CharacterAppearance로
 ## 합성해 NPC 스프라이트와 같은 형식(192x32, 12프레임)의 한 장짜리 텍스처로 돌려준다.
 ## 몸 레이어를 못 만들면(에셋 파일 없음) TEMP_NPC_SPRITE로 폴백 - 캐릭터가 아예 안 보이는
@@ -394,7 +415,7 @@ func _physics_process(_delta: float) -> void:
 	var is_moving := move_direction != Vector2.ZERO
 	_is_moving = is_moving
 	if is_moving:
-		_move_with_collision(move_direction * SPEED * _speed_modifier * _delta)
+		_move_with_collision(move_direction * SPEED * _speed_modifier * _delta, _delta)
 		facing_direction = _direction_from_vector(move_direction)
 	_clamp_to_map_bounds()
 	_update_animation(_delta, is_moving)
@@ -453,17 +474,87 @@ func _on_minute_passed(_hour: int, _minute: int) -> void:
 ## 축(x/y)을 따로 검사해서, 대각선으로 이동하다 한쪽만 막혀도 나머지 축으로는
 ## 계속 미끄러지듯 움직일 수 있게 한다 (완전히 막힌 것처럼 뚝 멈추지 않게).
 ## world_map이 아직 없으면(에디터 프리뷰 등) 충돌 없이 그냥 이동한다.
-func _move_with_collision(delta_movement: Vector2) -> void:
+func _move_with_collision(delta_movement: Vector2, delta: float) -> void:
 	if _world_map == null:
 		position += delta_movement
 		return
 	var next_position := Vector2(position.x + delta_movement.x, position.y)
-	if not _is_blocked_at(next_position):
+	var x_blocked := _is_blocked_at(next_position)
+	if not x_blocked:
 		position.x = next_position.x
 	next_position = Vector2(position.x, position.y + delta_movement.y)
 	var north_margin := NORTH_APPROACH_COLLISION_MARGIN if delta_movement.y < 0.0 else 0.0
-	if not _is_blocked_at(next_position, north_margin):
+	var y_blocked := _is_blocked_at(next_position, north_margin)
+	if not y_blocked:
 		position.y = next_position.y
+	# 대각선 입력(위 축분리 슬라이드가 이미 처리)은 건드리지 않는다 - 단일
+	# 축 입력이 막혔을 때만 코너 어시스트가 개입한다.
+	var is_cardinal_input := (delta_movement.x == 0.0) != (delta_movement.y == 0.0)
+	if not is_cardinal_input:
+		return
+	if delta_movement.x != 0.0 and x_blocked:
+		_apply_corner_slide_assist(delta_movement.x, delta, true)
+	elif delta_movement.y != 0.0 and y_blocked:
+		_apply_corner_slide_assist(delta_movement.y, delta, false)
+
+
+## 한 방향 키만 눌러서 벽 모서리/좁은 틈(울타리 틈 등)에 픽셀 단위로 어긋나게
+## 접근했을 때, 인접한 열린 칸 쪽으로 조금씩 밀어준다(사용자 지시, 2026-09-05).
+## primary_delta는 막힌 축의 원래 이동량(부호 포함) - 밀어준 뒤 같은 프레임에
+## 원래 진행 방향도 다시 검사해서, 이미 틈을 통과했으면 끊김 없이 바로
+## 전진까지 이어지게 한다. 실제로 반영되는 위치는 전부 _is_blocked_at()을
+## 통과해야만 하므로, 진짜 막힌 벽/코너를 뚫고 지나가는 일은 없다.
+func _apply_corner_slide_assist(primary_delta: float, delta: float, primary_is_horizontal: bool) -> void:
+	var open_sign := _corner_assist_open_sign(primary_is_horizontal, primary_delta)
+	if open_sign == 0.0:
+		return
+	var nudge := open_sign * CORNER_ASSIST_NUDGE_SPEED * delta
+	var margin := NORTH_APPROACH_COLLISION_MARGIN if (primary_is_horizontal and nudge < 0.0) else 0.0
+	var nudged_position := Vector2(position.x, position.y + nudge) if primary_is_horizontal \
+		else Vector2(position.x + nudge, position.y)
+	if _is_blocked_at(nudged_position, margin):
+		return
+	position = nudged_position
+	var retry_position := Vector2(position.x + primary_delta, position.y) if primary_is_horizontal \
+		else Vector2(position.x, position.y + primary_delta)
+	if _is_blocked_at(retry_position):
+		return
+	if primary_is_horizontal:
+		position.x = retry_position.x
+	else:
+		position.y = retry_position.y
+
+
+## Phase A - 막힌 축과 수직인 두 방향 중 어느 쪽이 "돌아서 지나갈 수 있는"
+## 진짜 개구부인지 판단한다. 순수 옆 칸만 검사하면(수직 오프셋만) 넓은
+## 벽/오브젝트에 그냥 똑바로 부딪힌 경우에도 좌우 옆 칸은 원래 열려있는
+## 바닥이라 "둘 다 열림"으로 잘못 판정돼서, 평범하게 벽에 막힐 때마다 타일
+## 중심으로 계속 끌려가는 버그가 있었다(사용자 리포트, 2026-09-05 - "오히려
+## 중앙으로 몰아버리는데... 비어있는 길쪽으로 가야지"). 그래서 옆으로
+## 비켜본 지점이 아니라, "옆으로 비킨 뒤 실제로 더 전진할 수 있는지"(진행
+## 방향으로도 CORNER_ASSIST_PROBE_DISTANCE만큼 같이 옮긴 대각선 지점)를
+## 검사한다 - 벽이 옆으로도 계속 이어져 있으면 이 대각선 지점도 막힌 채라
+## 어시스트가 안 걸리고, 진짜 틈/모서리일 때만 뚫려서 걸린다.
+func _corner_assist_open_sign(primary_is_horizontal: bool, primary_delta: float) -> float:
+	var forward_sign := signf(primary_delta)
+	var positive_open: bool
+	var negative_open: bool
+	if primary_is_horizontal:
+		var forward_x := position.x + forward_sign * CORNER_ASSIST_PROBE_DISTANCE
+		positive_open = not _is_blocked_at(Vector2(forward_x, position.y + CORNER_ASSIST_PROBE_DISTANCE))
+		negative_open = not _is_blocked_at(Vector2(forward_x, position.y - CORNER_ASSIST_PROBE_DISTANCE), NORTH_APPROACH_COLLISION_MARGIN)
+	else:
+		var forward_y := position.y + forward_sign * CORNER_ASSIST_PROBE_DISTANCE
+		var margin := NORTH_APPROACH_COLLISION_MARGIN if forward_sign < 0.0 else 0.0
+		positive_open = not _is_blocked_at(Vector2(position.x + CORNER_ASSIST_PROBE_DISTANCE, forward_y), margin)
+		negative_open = not _is_blocked_at(Vector2(position.x - CORNER_ASSIST_PROBE_DISTANCE, forward_y), margin)
+	if positive_open == negative_open:
+		if not positive_open:
+			return 0.0
+		var axis_value := position.y if primary_is_horizontal else position.x
+		var tile_center: float = (floor(axis_value / WorldMap.TILE_SIZE) + 0.5) * WorldMap.TILE_SIZE
+		return -1.0 if tile_center < axis_value else 1.0
+	return 1.0 if positive_open else -1.0
 
 
 ## 발밑 좌표 한 점만 검사하면, 몸통 폭(16px)이 그 점보다 넓어서 발은 아직
@@ -528,7 +619,7 @@ func _clamp_to_map_bounds() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if Engine.is_editor_hint():
 		return
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_E:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == Keybinds.get_keycode(Keybinds.INTERACT_ACTION):
 		interact_pressed.emit()
 
 
@@ -557,10 +648,17 @@ func _update_animation(delta: float, is_moving: bool) -> void:
 		_set_frame(IDLE_FRAME[facing_direction])
 
 
-## _update_animation()의 HD 프로토타입 분기 - tool_overlay(도구 포즈)는 기존
-## 16x32 프레임 기준이라 아직 HD 시트와 안 맞는다. 프로토타입 단계라 도구
-## 포즈는 일단 무시하고 걷기/정지만 재현한다.
+## _update_animation()의 HD 분기. 도구 사용 중이면(tool_overlay.is_active())
+## 도구별 구분 없이 손 모은 범용 포즈 프레임(HD_TOOL_FRAME_OFFSET, 2026-09-15
+## 추가)을 보여주고, 실제 도구 모양은 기존 아이콘 오버레이(Tools.png)가
+## 손 위치에 얹어서 표시한다.
 func _update_hd_animation(delta: float, is_moving: bool) -> void:
+	if tool_overlay.is_active():
+		_walk_frame_timer = 0.0
+		_hd_walk_frame_index = 0
+		_set_frame(_hd_tool_index(facing_direction))
+		tool_overlay.update_position(facing_direction)
+		return
 	if is_moving:
 		_walk_frame_timer += delta
 		if _walk_frame_timer >= HD_WALK_FRAME_INTERVAL:
@@ -717,11 +815,15 @@ func apply_scent(color_name: String) -> void:
 ## 안 불려서, 자기 전에 남아있던 향이 자고 일어나도 그대로 남아있었다(사용자
 ## 리포트, 2026-09-05 - "자고 일어나도 향수가 그대로 있어 자고 일어나면
 ## 리셋 돼어야 돼"). 하루가 바뀌면 무조건 지운다.
-func _on_day_changed_clear_scent(_day: int, _weekday: String) -> void:
+## 같은 이유로 이동속도 디버프도 자고 일어나도 안 풀렸다(플레이테스트 피드백
+## #12, 2026-09-05 - "자고 일어났는데 디버프 남아있음") - clear_debuff()로
+## 같이 정리한다(버프는 하루가 지나도 유지되는 게 맞으므로 건드리지 않음).
+func _on_day_changed_reset_effects(_day: int, _weekday: String) -> void:
 	_has_scent = false
 	_scent_minutes_remaining = 0
 	for sprite in _scent_sprites:
 		sprite.visible = false
+	clear_debuff()
 
 
 func set_camera_bounds(map_size: Vector2i) -> void:

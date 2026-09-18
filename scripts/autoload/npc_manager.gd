@@ -8,6 +8,11 @@ extends Node
 signal affection_changed(npc_id: String, affection: int)
 signal affection_event_triggered(npc_id: String, threshold: int)
 signal memento_received(npc_id: String)
+## CatWorldManager/DogWorldManager가 이미 스폰된 동물의 이름표(NameLabel)를
+## 갱신하는 데 쓴다(사용자 지시, 2026-09-16).
+signal pet_name_changed(npc_id: String)
+## affection_panel.gd가 호감도 탭을 다시 그릴 때 쓴다.
+signal pet_affection_changed(npc_id: String)
 ## affection_events의 "gift" 타입(예: 모카가 호감도 임계값에서 커피를 선물) -
 ## memento_received와 같은 구조, item_id만 이벤트 데이터에서 그대로 넘긴다.
 signal npc_gift_item_triggered(npc_id: String, item_id: String)
@@ -50,13 +55,14 @@ const AFFECTION_TIER_HIGH := 100
 
 const AFFECTION_GAIN_TALK := 2
 const AFFECTION_GAIN_GIFT := 5
-const AFFECTION_GAIN_MEAL := 3
-const AFFECTION_GAIN_FAVORITE_MEAL := 5
+## 상승 폭 하향 조정(사용자 지시, 2026-09-05 - 플로라 호감도가 유독 너무
+## 빨리 오른다는 리포트로 전체 밸런스 재조정): 서빙 3→1, 선호 음식 서빙
+## 5→3, 메일 답장 3→2, 요청함 완료 3→1.
+const AFFECTION_GAIN_MEAL := 1
+const AFFECTION_GAIN_FAVORITE_MEAL := 3
 const AFFECTION_LOSS_DISLIKED_MEAL := -5
-const AFFECTION_GAIN_EMAIL := 3
-## 요청함 완료 보상(사용자 지시, 2026-08-25 - "퀘스트 완료하면... 호감도 3정도
-## 오르는게 좋지않을까") - 선물/메일 보낼 때와 같은 값으로 통일.
-const AFFECTION_GAIN_REQUEST_COMPLETE := 3
+const AFFECTION_GAIN_EMAIL := 2
+const AFFECTION_GAIN_REQUEST_COMPLETE := 1
 
 ## 이모지 스펙(2026-08-06 브레인스토밍, 2026-08-07 아트 반영) 8종 중 트리거가
 ## 확정된 5종만 여기서 문자열 상수로 노출한다 - 물음표/불편/부끄는 아직 배정된
@@ -93,6 +99,16 @@ const WEEKDAY_GROUPS := {
 var _definitions: Dictionary = {}
 var _affection: Dictionary = {}
 var _alive: Dictionary = {}
+## npc_id -> String - 그 NPC가 준 동물(고양이/강아지 등)에 플레이어가 지어준
+## 이름(사용자 지시, 2026-09-16 - "이름 지어주는 것도 만들 수 있어?"). 새
+## SaveData 구조를 따로 만들지 않고 기존 npc_states 블록에 필드 하나만
+## 추가하는 방식(get_save_data()/load_save_data() 참고).
+var _pet_names: Dictionary = {}
+## npc_id -> int - 그 NPC가 준 동물의 호감도(사용자 지시, 2026-09-16 -
+## "강아랑 고양도 호감도 있었으면 좋겠어"). 하루 한 번 클릭으로만 오른다
+## (_pet_clicked_today가 _talked_today와 동일한 패턴으로 매일 초기화).
+var _pet_affection: Dictionary = {}
+var _pet_clicked_today: Dictionary = {}
 var _completed_events: Dictionary = {}
 ## npc_id -> [int, ...] - completed_events와 달리 "실제로 화면에 뜬" 임계값만
 ## 기록한다(has_shown_event() 참고). affection_events의 "requires" 필드로 다른
@@ -450,6 +466,40 @@ func _find_gift_item_id(threshold: int, npc_id: String) -> String:
 
 func has_completed_event(npc_id: String, threshold: int) -> bool:
 	return (_completed_events.get(npc_id, []) as Array).has(threshold)
+
+
+## 이 NPC가 준 동물에 플레이어가 지어준 이름. 아직 안 지었으면 "".
+func get_pet_name(npc_id: String) -> String:
+	return String(_pet_names.get(npc_id, ""))
+
+
+func set_pet_name(npc_id: String, pet_name: String) -> void:
+	_pet_names[npc_id] = pet_name
+	pet_name_changed.emit(npc_id)
+
+
+func get_pet_affection(npc_id: String) -> int:
+	return int(_pet_affection.get(npc_id, 0))
+
+
+func has_pet_clicked_today(npc_id: String) -> bool:
+	return bool(_pet_clicked_today.get(npc_id, false))
+
+
+## 하루 한 번 클릭할 때 오르는 호감도 - 원래 1이었는데 "의미있게" 느껴지게
+## 5로 올림(사용자 지시, 2026-09-17 - "클릭하면 하루 호감도 +5는 되어야할듯").
+const PET_CLICK_AFFECTION_GAIN := 5
+
+## 하루 한 번만 호감도가 오르게(사용자 지시, 2026-09-16 - "하루 한 번
+## 클릭 횟수"). 반환값은 이번 클릭으로 실제 호감도가 올랐는지 - cat.gd/
+## dog.gd가 이걸로 하트 이모트를 띄울지 판단한다.
+func register_pet_click(npc_id: String) -> bool:
+	if has_pet_clicked_today(npc_id):
+		return false
+	_pet_clicked_today[npc_id] = true
+	_pet_affection[npc_id] = get_pet_affection(npc_id) + PET_CLICK_AFFECTION_GAIN
+	pet_affection_changed.emit(npc_id)
+	return true
 
 
 func get_affection_tier(npc_id: String) -> String:
@@ -1191,6 +1241,9 @@ func get_save_data() -> Dictionary:
 			"heart_event_30_shown": has_shown_heart_event(npc_id),
 			"memento_pending_since_day": int(_memento_pending_since_day.get(npc_id, -1)),
 			"memento_reminder_sent": bool(_memento_reminder_sent.get(npc_id, false)),
+			"pet_name": String(_pet_names.get(npc_id, "")),
+			"pet_affection": get_pet_affection(npc_id),
+			"pet_clicked_today": has_pet_clicked_today(npc_id),
 		}
 	return {
 		"npc_states": npc_states,
@@ -1215,6 +1268,9 @@ func load_save_data(data: Dictionary) -> void:
 		for threshold in (state.get("shown_events", []) as Array):
 			shown.append(int(threshold))
 		_shown_events[npc_id] = shown
+		_pet_names[npc_id] = String(state.get("pet_name", ""))
+		_pet_affection[npc_id] = int(state.get("pet_affection", 0))
+		_pet_clicked_today[npc_id] = bool(state.get("pet_clicked_today", false))
 		_shown_heart_events[npc_id] = bool(state.get("heart_event_30_shown", false))
 		_murder_candidate_flagged[npc_id] = bool(state.get("murder_candidate_flagged", false))
 		_partner_death_reaction_shown[npc_id] = bool(state.get("partner_death_reaction_shown", false))
@@ -1424,6 +1480,7 @@ func _on_day_changed(_day: int, _weekday: String) -> void:
 	_talked_today.clear()
 	_special_dialogue_shown_today.clear()
 	_daily_dialogue_cache.clear()
+	_pet_clicked_today.clear()
 	_active_scent = _pending_scent.duplicate()
 	_pending_scent.clear()
 	for npc_id in SELF_SCENT_NPC_IDS:
@@ -1464,6 +1521,17 @@ func _build_spawn_index() -> void:
 			_spawn_index[spawn_name] = {"map_id": map_id, "position": spawns[spawn_name]}
 
 
+## 다국어(2026-09-14) - data/npc/marin.en.json 같은 언어별 형제 파일은 각
+## 언어 코드가 파일명 끝에 붙어 있다(Localizer.load_language_sibling()이 만드는
+## 이름과 동일한 규칙) - marin.json을 로드할 때 그 형제 파일들을 번역으로
+## 합치는 것이지, 얘네 자체를 또 다른 NPC 정의로 중복 로드하면 안 된다.
+func _is_language_sibling_file(file_name: String) -> bool:
+	for language in Localizer.SUPPORTED_LANGUAGES:
+		if language != Localizer.DEFAULT_LANGUAGE and file_name.ends_with(".%s.json" % language):
+			return true
+	return false
+
+
 func _load_all_definitions() -> void:
 	var dir := DirAccess.open(DATA_DIR)
 	if dir == null:
@@ -1472,10 +1540,16 @@ func _load_all_definitions() -> void:
 	dir.list_dir_begin()
 	var file_name := dir.get_next()
 	while file_name != "":
-		if not dir.current_is_dir() and file_name.ends_with(".json"):
+		if not dir.current_is_dir() and file_name.ends_with(".json") and not _is_language_sibling_file(file_name):
 			_load_definition(DATA_DIR + file_name)
 		file_name = dir.get_next()
 	dir.list_dir_end()
+
+
+## 언어 설정 화면에서 언어를 바꾸면 호출된다(language_settings_screen.gd) -
+## 매번 디스크에서 새로 읽는 구조라 재호출만으로 안전하게 다시 합쳐진다.
+func reload_for_language() -> void:
+	_load_all_definitions()
 
 
 func _load_definition(path: String) -> void:
@@ -1487,7 +1561,7 @@ func _load_definition(path: String) -> void:
 	if not (parsed is Dictionary):
 		push_error("NPC data file is not valid JSON: %s" % path)
 		return
-	var definition: Dictionary = parsed
+	var definition: Dictionary = Localizer.apply_language(parsed, path) as Dictionary
 	var npc_id := String(definition.get("id", ""))
 	if npc_id.is_empty():
 		push_error("NPC data file is missing an id: %s" % path)

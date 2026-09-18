@@ -141,7 +141,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_handle_choice_input(event.keycode)
 		get_viewport().set_input_as_handled()
 		return
-	if event.keycode == KEY_E:
+	if event.keycode == Keybinds.get_keycode(Keybinds.INTERACT_ACTION):
 		if _is_typing:
 			_complete_typewriter()
 		else:
@@ -158,7 +158,7 @@ func _handle_choice_input(keycode: int) -> void:
 	elif keycode == KEY_DOWN:
 		_move_choice(1)
 	## 엔터로도 확정되면 좋겠다는 지적(사용자 지시, 2026-08-25) - E와 동일 취급.
-	elif keycode == KEY_E or keycode == KEY_ENTER or keycode == KEY_KP_ENTER:
+	elif keycode == Keybinds.get_keycode(Keybinds.INTERACT_ACTION) or keycode == KEY_ENTER or keycode == KEY_KP_ENTER:
 		_confirm_choice()
 	elif keycode == KEY_ESCAPE:
 		close()

@@ -40,7 +40,14 @@ const MARKER_PERIOD_SECONDS := {AnimalType.RABBIT: 0.6, AnimalType.BIRD: 0.6}
 ## 강조 구간(포획 성공 판정 범위)의 폭 - 0.0~1.0 비율. 토끼가 새보다 더
 ## 좁아짐(위 MARKER_PERIOD_SECONDS와 같은 이유).
 const SWEET_SPOT_WIDTH := {AnimalType.RABBIT: 0.15, AnimalType.BIRD: 0.2}
-const AIMING_TIME_LIMIT_SECONDS := 4.0
+## 한 번에 포획되던 걸 fishing_manager.gd의 get_required_hits()와 같은 방식으로
+## 여러 번 성공해야 하게 바꿨다(사용자 지시, 2026-09-16 - "한번만 성공해도
+## 바로 돼서... 3번 성공해야지만 포획할수있게"). 실패(스위트스팟 밖에서 시도)는
+## 예전처럼 그 즉시 전체 실패 처리 - 몇 번 성공했었는지는 리셋된다.
+const REQUIRED_SUCCESSES := 3
+## 원래 1번만 맞히면 됐을 때의 시간(4초)을 3번 기준으로 넉넉히 늘림 - 기획
+## 확정 전 임의 값, 실제로 해보고 너무 길거나 짧으면 조정.
+const AIMING_TIME_LIMIT_SECONDS := 10.0
 ## 사용자 지시, 2026-08-31 - "한 마리를 잡고 나면 무작위로 토끼나 새 둘 중
 ## 한 마리가 30초 뒤에 스폰 되지만, 헌팅 존 안에 이미 5마리의 동물이 있으면
 ## 더는 스폰 되지 않게" → "엥 놓쳐도 리스폰 되게 해야지....": 포획 성공/실패
@@ -57,6 +64,7 @@ var player: Node2D = null
 
 var _phase := Phase.IDLE
 var _aiming_elapsed := 0.0
+var _success_count := 0
 var _current_type := AnimalType.RABBIT
 var _current_animal: Node2D = null
 var _current_bar: Node2D = null
@@ -210,6 +218,7 @@ func try_catch(map_id: String) -> bool:
 	_current_type = int(animal.get("animal_type")) as AnimalType
 	_phase = Phase.AIMING
 	_aiming_elapsed = 0.0
+	_success_count = 0
 	_sweet_spot_start = randf() * (1.0 - float(SWEET_SPOT_WIDTH[_current_type]))
 	animal.call("set_paused", true)
 	_current_bar = CATCH_BAR_SCENE.instantiate()
@@ -258,18 +267,28 @@ func _has_rifle_equipped() -> bool:
 
 
 ## 조준 중(Phase.AIMING)에 E를 다시 누르면 여기로 온다 - 마커가 지금 강조
-## 구간 안에 있는지로 성공/실패를 가른다.
+## 구간 안에 있는지로 성공/실패를 가른다. 스위트스팟을 놓치면(실패) 그
+## 즉시 전체 실패로 끝나지만, 맞혀도(성공) REQUIRED_SUCCESSES번 채우기
+## 전까지는 조준을 계속 이어간다(사용자 지시, 2026-09-16) - fishing_manager.gd
+## register_hit()의 "필요 횟수 채우면 그때 끝" 패턴과 동일.
 func attempt_catch() -> void:
 	if _phase != Phase.AIMING:
 		return
 	var marker: float = get_marker_ratio()
 	var in_sweet_spot := marker >= _sweet_spot_start and marker <= _sweet_spot_start + float(SWEET_SPOT_WIDTH[_current_type])
 	if in_sweet_spot:
-		## 사용자 지시, 2026-08-31 - "실패하면 총소리 안나고 실패 소리만 나게
-		## 해줘": 총소리는 이제 성공했을 때만 재생한다.
-		AudioManager.play_sfx(AudioManager.SFX_HUNT_GUNSHOT)
-		AudioManager.play_sfx(AudioManager.SFX_HUNT_CATCH_SUCCESS)
-		_finish(_resolve_catch())
+		_success_count += 1
+		if _success_count >= REQUIRED_SUCCESSES:
+			## 사용자 지시, 2026-08-31 - "실패하면 총소리 안나고 실패 소리만 나게
+			## 해줘": 총소리는 이제 성공했을 때만 재생한다.
+			AudioManager.play_sfx(AudioManager.SFX_HUNT_GUNSHOT)
+			AudioManager.play_sfx(AudioManager.SFX_HUNT_CATCH_SUCCESS)
+			_finish(_resolve_catch())
+		else:
+			## 아직 다 안 채운 중간 성공 - 같은 스팟을 반복해서 맞히기만 하면
+			## 너무 쉬워지니 다음 판정용 스위트스팟을 새로 뽑는다.
+			AudioManager.play_sfx(AudioManager.SFX_HUNT_CATCH_SUCCESS)
+			_sweet_spot_start = randf() * (1.0 - float(SWEET_SPOT_WIDTH[_current_type]))
 	else:
 		AudioManager.play_sfx(AudioManager.SFX_HUNT_CATCH_FAIL)
 		_finish({"success": false, "item_id": ""})

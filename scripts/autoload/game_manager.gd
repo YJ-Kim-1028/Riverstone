@@ -108,6 +108,10 @@ var _play_timer_running := false
 ## 오토로드 목록 맨 앞이라 가장 먼저 실행되므로, 다른 어떤 랜덤 로직보다도
 ## 먼저 여기서 한 번 시드를 흩뿌린다.
 func _ready() -> void:
+	## 오토로드 순서상 최상단(project.godot)이라 NPCManager/HorrorEventManager가
+	## 데이터를 읽기 전에 언어가 먼저 정해져야 한다(다국어 지원 1단계,
+	## 2026-09-14 - 계획 파일: C:\Users\code1\.claude\plans\expressive-twirling-fern.md).
+	Localizer.load_saved_language()
 	randomize()
 	_apply_custom_cursor()
 

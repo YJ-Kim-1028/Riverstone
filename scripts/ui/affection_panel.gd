@@ -29,6 +29,17 @@ const HEART_EMPTY := preload("res://assets/ui/icon_heart_empty.png")
 ## 스크롤바(두껍고 회색)를 따로 스타일링하고 있어서 창마다 굵기/색이 달라
 ## 보인다는 피드백으로, 상점 것과 똑같이 맞춘다.
 const SCROLLBAR_WIDTH := 4
+## 고양이/강아지 호감도(사용자 지시, 2026-09-16 - "강아랑 고양도 호감도
+## 있었으면 좋겠어") - NPCManager 정식 NPC 목록에 얹지 않고(NPC 스케줄/사망
+## 등 다른 시스템과 얽히면 위험해서 cat_world_manager.gd 등과 동일하게 완전
+## 분리) 이 화면에서만 별도로 그린다. 그 동물을 실제로 받은 뒤에야 나타난다
+## (사용자 지시 - "얻고나서야 탭에서 보이는거지") - CatWorldManager/
+## DogWorldManager의 CAT_AFFECTION_THRESHOLD/DOG_AFFECTION_THRESHOLD(둘 다
+## 50)와 같은 값.
+const PETS := [
+	{"npc_id": "belje", "threshold": 50, "icon": "res://assets/npc/icon/icon_cat.png", "default_name": "고양이"},
+	{"npc_id": "shepherd", "threshold": 50, "icon": "res://assets/npc/icon/icon_dog.png", "default_name": "강아지"},
+]
 
 @onready var _rows_scroll: ScrollContainer = $RowsScroll
 @onready var _rows: VBoxContainer = $RowsScroll/RowsMargin/Rows
@@ -43,6 +54,9 @@ func refresh() -> void:
 		child.queue_free()
 	for npc_id in NPCManager.get_all_ids():
 		_rows.add_child(_build_row(npc_id))
+	for pet in PETS:
+		if NPCManager.has_shown_event(String(pet.npc_id), int(pet.threshold)):
+			_rows.add_child(_build_pet_row(pet))
 
 
 func _style_scrollbar() -> void:
@@ -101,6 +115,52 @@ func _build_row(npc_id: String) -> Control:
 	hearts_grid.add_theme_constant_override("h_separation", 1)
 	hearts_grid.add_theme_constant_override("v_separation", 1)
 	var affection := NPCManager.get_affection(npc_id)
+	for i in HEART_COUNT:
+		var heart := TextureRect.new()
+		heart.custom_minimum_size = HEART_SIZE
+		heart.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		heart.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		heart.texture = _heart_texture_for(affection, i)
+		hearts_grid.add_child(heart)
+	row.add_child(hearts_grid)
+
+	return row
+
+
+## _build_row()와 거의 같은 구조지만 NPCManager.get_affection() 대신
+## NPCManager.get_pet_affection()을 본다 - 고양이/강아지는 NPC가 아니라서
+## definition/사망 여부가 없다.
+func _build_pet_row(pet: Dictionary) -> Control:
+	var npc_id := String(pet.npc_id)
+	var row := VBoxContainer.new()
+	row.add_theme_constant_override("separation", 1)
+
+	var name_row := HBoxContainer.new()
+	name_row.add_theme_constant_override("separation", 4)
+	row.add_child(name_row)
+
+	var portrait := TextureRect.new()
+	portrait.custom_minimum_size = PORTRAIT_SIZE
+	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var icon_path := String(pet.icon)
+	if ResourceLoader.exists(icon_path):
+		portrait.texture = load(icon_path)
+	name_row.add_child(portrait)
+
+	var name_label := Label.new()
+	var pet_name := NPCManager.get_pet_name(npc_id)
+	name_label.text = pet_name if not pet_name.is_empty() else String(pet.default_name)
+	name_label.add_theme_font_size_override("font_size", ROW_FONT_SIZE)
+	name_label.add_theme_color_override("font_color", Color.BLACK)
+	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	name_row.add_child(name_label)
+
+	var hearts_grid := GridContainer.new()
+	hearts_grid.columns = HEART_ROW_COLUMNS
+	hearts_grid.add_theme_constant_override("h_separation", 1)
+	hearts_grid.add_theme_constant_override("v_separation", 1)
+	var affection := NPCManager.get_pet_affection(npc_id)
 	for i in HEART_COUNT:
 		var heart := TextureRect.new()
 		heart.custom_minimum_size = HEART_SIZE

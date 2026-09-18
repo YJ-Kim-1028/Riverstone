@@ -147,10 +147,10 @@ func _refresh() -> void:
 		var has_save := SaveManager.has_save(slot)
 		if has_save:
 			var summary := SaveManager.get_save_summary(slot)
-			var info := "%s - %d일차" % [String(summary.get("player_name", "")), int(summary.get("day", 1))]
-			button.text = "%d번 슬롯\n%s" % [slot, info]
+			var info := tr("%s - %d일차") % [String(summary.get("player_name", "")), int(summary.get("day", 1))]
+			button.text = tr("%d번 슬롯\n%s") % [slot, info]
 		else:
-			button.text = "%d번 슬롯\n(비어있음)" % slot
+			button.text = tr("%d번 슬롯\n(비어있음)") % slot
 		# 이어하기 모드: 빈 슬롯은 못 고름. 새 게임 모드: 이미 데이터가 있는
 		# 슬롯은 못 고름(위 클래스 주석 참고 - 덮어쓰기 대신 명시적 삭제).
 		button.disabled = (not has_save) if _mode == MODE_CONTINUE else has_save
@@ -163,7 +163,7 @@ func _on_slot_pressed(slot: int) -> void:
 
 func _on_delete_pressed(slot: int) -> void:
 	_pending_delete_slot = slot
-	_confirm_popup.open_with_message("%d번 슬롯을 삭제하시겠습니까?\n되돌릴 수 없습니다." % slot)
+	_confirm_popup.open_with_message(tr("%d번 슬롯을 삭제하시겠습니까?\n되돌릴 수 없습니다.") % slot)
 
 
 func _on_delete_confirmed() -> void:

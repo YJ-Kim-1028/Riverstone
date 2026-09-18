@@ -19,8 +19,10 @@ const FRAME_HEIGHT := 32
 ## 2026-09-02) - 고해상도 NPC(sprite_frame_width/height 지정된 NPC)만
 ## 더 키운다(_apply_npc_id() 참고). 1.3배로 했다가 "생각보다 크다"는
 ## 피드백으로 1.2배로 낮춤(같은 날). player.gd HD_SCALE과 같은 배율로
-## 플레이어/NPC 크기를 통일한다.
-const HD_VISUAL_BOOST := 1.2
+## 플레이어/NPC 크기를 통일한다. 플레이테스트에서 "캐릭터가 너무 크다"는
+## 피드백으로 1.2 → 1.0으로 낮췄다가, 실제로 보니 "너무 작다"는 피드백으로
+## 1.1로 재조정(사용자 지시, 2026-09-14).
+const HD_VISUAL_BOOST := 1.1
 enum Direction { DOWN, UP, LEFT, RIGHT }
 ## 시트 안에서 방향 그룹이 나열되는 순서(기존 12칸 배치 - 0=DOWN, 3=LEFT,
 ## 6=RIGHT, 9=UP - 와 동일하게 유지).

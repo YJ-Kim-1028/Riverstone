@@ -241,7 +241,10 @@ var _tilemap_door_layer: TileMapLayer = null
 ## "Grave"도 여기 포함 - Home.tmx에 사용자가 직접 그려둔 무덤 3기(아래
 ## GRAVE_CELL_GROUPS)를 사망한 NPC 수만큼만 드러내는 데 erase/restore를
 ## 재사용한다(_refresh_graves() 참고, 사용자 지시 2026-09-05).
-const TOGGLEABLE_TILE_LAYERS := {"Grass": true, "Grave": true}
+## "Furniture_empty"도 여기 포함 - cowshed_interior.tmx에 사용자가 그려둔 빈
+## 여물통 그림을 LivestockManager가 급여 상태에 맞춰 지우고/되돌린다
+## (사용자 지시, 2026-09-05).
+const TOGGLEABLE_TILE_LAYERS := {"Grass": true, "Grave": true, "Furniture_empty": true}
 var _toggleable_tile_cells: Dictionary = {}
 ## Home.tmx "Grave" 레이어에 사용자가 직접 그린 무덤 3기의 칸 좌표(각 무덤은
 ## 16x32px = 세로 2칸). 그룹 순서대로 첫 번째 죽은 NPC가 첫 무덤을 드러낸다.

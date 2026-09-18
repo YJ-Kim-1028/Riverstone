@@ -67,6 +67,15 @@ func get_weekday() -> String:
 	return WEEKDAY_NAMES[get_weekday_index()]
 
 
+## get_weekday()의 화면 표시 전용 버전(다국어 지원, 2026-09-14). get_weekday()
+## 자체는 NPCManager의 dialogue.daily.<요일> JSON 키 조회/MurderManager·
+## SaveManager의 내부 기록에 그대로 쓰이고 있어서(전부 한국어 "월"/"화" 문자열을
+## 그대로 비교/저장함) 건드리면 안 된다 - 화면에 실제로 보여주는 곳(HUD 시계
+## 등)만 이 함수로 갈아타서 tr()을 거친다.
+func get_weekday_display() -> String:
+	return tr(get_weekday())
+
+
 func is_restaurant_open() -> bool:
 	return current_hour >= RESTAURANT_OPEN_HOUR and current_hour < RESTAURANT_CLOSE_HOUR
 
