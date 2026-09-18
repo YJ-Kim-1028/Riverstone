@@ -294,6 +294,13 @@ func mark_request_read(request_id: String) -> void:
 	_read_requests[request_id] = true
 
 
+## jukebox_manager.gd가 "인벤토리에 한 번이라도 들어온 적 있는지"를 물을 때 쓴다
+## (2026-09-18 - 선물받은 음반이 _gift_unlocked_item_ids 도입 이전 기록이라
+## 인벤토리에서 사라지면 다시 잠기던 문제 수정).
+func get_lifetime_item_count(item_id: String) -> int:
+	return int(_lifetime_item_counts.get(item_id, 0))
+
+
 ## 목표를 실제로 달성했는지 매번 새로 확인한다(저장된 "진행 상태" 없음) - 새
 ## objective_type을 추가하려면 이 match에 분기만 늘리면 된다.
 func is_request_objective_met(request_id: String) -> bool:
@@ -357,8 +364,15 @@ func claim_request(request_id: String) -> bool:
 	var reward_item_id := String(definition.get("reward_item_id", ""))
 	if not reward_item_id.is_empty():
 		InventoryManager.add_item(reward_item_id, int(definition.get("reward_item_count", 1)))
-	## 부탁을 들어준 셈이니 발신자 호감도도 오른다(사용자 지시, 2026-08-25).
-	NPCManager.add_request_completion_affection(String(definition.get("npc_id", "")))
+	## 부탁을 들어준 셈이니 발신자 호감도도 오른다(사용자 지시, 2026-08-25) -
+	## 단, requests.json의 고정 초기 튜토리얼 요청("감자 한번 캐볼래?" 등,
+	## 반복 생성되는 recurring_templates.json 요청과 달리 스토리상 진짜
+	## 부탁이 아니라 안내에 가까움)은 제외한다(사용자 지시, 2026-09-05 -
+	## "초기 퀘스트는 완료해도 오르면 안될 거 같아") - 플로라가 이런 초기
+	## 요청을 4개나 갖고 있어서 다른 NPC보다 호감도가 유독 빨리 오르던
+	## 원인이었다.
+	if not _request_definitions.has(request_id):
+		NPCManager.add_request_completion_affection(String(definition.get("npc_id", "")))
 	_claimed_requests[request_id] = true
 	return true
 

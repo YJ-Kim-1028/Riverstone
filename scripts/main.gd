@@ -72,6 +72,9 @@ const ACCOMPLICE_CANNOT_LEAVE_MESSAGE := "왠지 지금은 밖에 나가면 안 
 ## 평범한 "잠이 안 온다" 톤으로 잡았다. 문구는 임시 - 기획 확정 시 교체 가능.
 const SLEEPLESS_NIGHT_MESSAGE := "잠이 오지 않아."
 const MESSAGE_DURATION := 2.0
+## 레스토랑 개점/마감/만석 안내는 놓치면 헷갈리는 정보라 기본보다 길게
+## 띄운다(플레이테스트 피드백 #9, 2026-09-05 - "너무 짧게 뜬다").
+const RESTAURANT_STATUS_MESSAGE_DURATION := 4.0
 const FURNITURE_DESCRIPTIONS_PATH := "res://data/furniture/descriptions.json"
 ## 16x16 그림 - 준비되면 이 경로에 파일만 넣으면 코드 수정 없이 자동으로
 ## 아이콘으로 바뀐다(player.gd의 show_interaction_icon() 참고).
@@ -228,6 +231,7 @@ const RESTAURANT_SIGN_CLOSE_TEXTURE := preload("res://assets/ui/sign_close.png")
 @onready var cooking_screen: Control = get_node_or_null("UI/CookingScreen") as Control
 @onready var computer_screen: Control = get_node_or_null("UI/ComputerScreen") as Control
 @onready var sleep_confirm_popup: Control = get_node_or_null("UI/SleepConfirmPopup") as Control
+@onready var pet_name_popup: Control = get_node_or_null("UI/PetNamePopup") as Control
 @onready var restaurant_confirm_popup: Control = get_node_or_null("UI/RestaurantConfirmPopup") as Control
 @onready var collection_screen: Control = get_node_or_null("UI/CollectionScreen") as Control
 @onready var dialogue_screen: Control = get_node_or_null("UI/DialogueScreen") as Control
@@ -437,6 +441,9 @@ func _ready() -> void:
 	if dialogue_screen != null:
 		npc_talk_interacted.connect(dialogue_screen.open_dialogue)
 		dialogue_screen.buff_requested.connect(_on_dialogue_buff_requested)
+		dialogue_screen.closed.connect(_on_dialogue_screen_closed_for_pet_naming)
+	if pet_name_popup != null:
+		pet_name_popup.name_confirmed.connect(_on_pet_name_confirmed)
 	if sleep_confirm_popup != null:
 		sleep_confirm_popup.slept.connect(_play_sleep_transition)
 	if restaurant_confirm_popup != null:
@@ -470,6 +477,7 @@ func _ready() -> void:
 	InventoryManager.item_used.connect(_on_item_used)
 	CookingManager.recipe_learned.connect(_on_recipe_learned)
 	NPCManager.memento_received.connect(_on_memento_received)
+	NPCManager.affection_event_triggered.connect(_on_affection_event_triggered_for_pet_naming)
 	TimeManager.player_collapsed.connect(_play_collapse_transition)
 	TimeManager.hour_changed.connect(_on_hour_changed)
 	FurnitureManager.furniture_changed.connect(_on_decor_changed)
@@ -530,7 +538,7 @@ func _on_recipe_learned(recipe_id: String, via_item: bool) -> void:
 	if not via_item:
 		return
 	var recipe_name := String(CookingManager.get_recipe_definition(recipe_id).get("name", recipe_id))
-	_show_temporary_message("%s 레시피를 획득했다!" % recipe_name)
+	_show_temporary_message(tr("%s 레시피를 획득했다!") % recipe_name)
 
 
 ## 인벤토리 화면을 안 열어도 어떤 추억의 물건을 받았는지 바로 보이도록 화면에
@@ -541,6 +549,54 @@ func _on_recipe_learned(recipe_id: String, via_item: bool) -> void:
 func _on_memento_received(npc_id: String) -> void:
 	if memento_toast != null:
 		memento_toast.show_memento(npc_id)
+
+
+## 호감도 이벤트로 동물(고양이/강아지)을 받는 임계값 -> {prompt, default_name}
+## (사용자 지시, 2026-09-16 - "이름 지어주는 것도 만들 수 있어? 고양이 받은
+## 순간에"). CatWorldManager/DogWorldManager가 스폰 여부를 판단하는 것과
+## 같은 npc_id/threshold 조합을 그대로 쓴다.
+const PET_GIFT_EVENTS := {
+	"belje": {50: {"prompt": "고양이 이름을 지어주세요!", "default_name": "고양이"}},
+	"shepherd": {50: {"prompt": "강아지 이름을 지어주세요!", "default_name": "강아지"}},
+}
+## consume_pending_milestone()이 dialogue_screen이 열리기도 전에 신호를
+## 쏘기 때문에(get_daily_dialogue() 내부에서 호출), 그 자리에서 바로 이름
+## 팝업을 띄우면 방금 연 대화창과 겹친다 - 여기 대기시켜뒀다가 그 대화창이
+## 실제로 닫힌 뒤(_on_dialogue_screen_closed_for_pet_naming) 띄운다.
+var _pending_pet_naming: Dictionary = {}
+
+
+func _on_affection_event_triggered_for_pet_naming(npc_id: String, threshold: int) -> void:
+	var per_npc: Dictionary = PET_GIFT_EVENTS.get(npc_id, {})
+	if per_npc.has(threshold):
+		_pending_pet_naming = {"npc_id": npc_id}
+		_pending_pet_naming.merge(per_npc[threshold] as Dictionary)
+
+
+func _on_dialogue_screen_closed_for_pet_naming() -> void:
+	if _pending_pet_naming.is_empty() or pet_name_popup == null:
+		return
+	var pending := _pending_pet_naming
+	_pending_pet_naming = {}
+	pet_name_popup.open(String(pending.get("prompt", "")), String(pending.get("default_name", "")))
+	_pending_pet_naming_npc_id = String(pending.get("npc_id", ""))
+
+
+## _on_dialogue_screen_closed_for_pet_naming()이 팝업을 띄우는 시점과
+## _on_pet_name_confirmed()가 결과를 받는 시점이 갈라져 있어서(팝업이 떠있는
+## 동안 대상 npc_id를 어딘가에 들고 있어야 함) 별도 변수로 넘긴다.
+var _pending_pet_naming_npc_id := ""
+
+
+func _on_pet_name_confirmed(pet_name: String) -> void:
+	if _pending_pet_naming_npc_id.is_empty():
+		return
+	NPCManager.set_pet_name(_pending_pet_naming_npc_id, pet_name)
+	_pending_pet_naming_npc_id = ""
+	## 어쨌든 선물(사용자 지시, 2026-09-16 - "추억의 물건 얻을 때 사운드가
+	## 나면 좋겠어 어쨌든 이것도 선물이잖아") - _play_memento_event()가 쓰는
+	## 것과 같은 효과음을 그대로 재사용.
+	AudioManager.play_sfx(AudioManager.SFX_MEMORY)
 
 
 ## dialogue_screen.gd의 "buff" 타입 대사 줄(세이지 운세 보기 전용)을 실제
@@ -1860,7 +1916,7 @@ func _on_revival_candidate_chosen(npc_id: String) -> void:
 		return
 	var npc_name := String(NPCManager.get_definition(npc_id).get("name", npc_id))
 	var confirm_text := RevivalManager.get_text("confirm_text")
-	confirm_text = (confirm_text if not confirm_text.is_empty() else "정말 {npc_name}을(를) 되살리시겠습니까?").replace("{npc_name}", npc_name)
+	confirm_text = (confirm_text if not confirm_text.is_empty() else tr("정말 {npc_name}을(를) 되살리시겠습니까?")).replace("{npc_name}", npc_name)
 	dialogue_screen.push_lines([
 		confirm_text,
 		{
@@ -1894,7 +1950,7 @@ func _on_revival_confirmed(npc_id: String) -> void:
 	var npc_name := String(NPCManager.get_definition(npc_id).get("name", npc_id))
 	var lines: Array = RevivalManager.get_narration("revival_success_narration")
 	if lines.is_empty():
-		lines = ["제단의 빛이 서서히 사그라들었다.", "%s, 다시 이 마을로 돌아왔다." % npc_name]
+		lines = ["제단의 빛이 서서히 사그라들었다.", tr("%s, 다시 이 마을로 돌아왔다.") % npc_name]
 	else:
 		lines = lines.duplicate()
 		for i in lines.size():
@@ -2238,14 +2294,21 @@ func _process(delta: float) -> void:
 		## 있거나 아직 조리 중) 프롬프트 자체를 안 띄워 상호작용이 안 된다는
 		## 걸 알린다.
 		if not RestaurantManager.is_open and not KitchenManager.is_ready(interactable_name):
-			player.hide_interaction_prompt()
+			## "먼저 레스토랑을 열자" 임시 메시지(_show_temporary_message())가
+			## player.show_interaction_prompt()로 그려지는데, 이 분기가
+			## _message_timer를 안 보고 매 프레임 무조건 hide 시켜버려서 메시지가
+			## 뜨자마자 바로 지워지고 있었다(사용자 리포트, 2026-09-05 - "레스토랑
+			## 닫혀있으면 아예 조리대랑 상호작용이 안되네") - 메시지 표시 중에는
+			## hide를 건너뛴다.
+			if _message_timer <= 0.0:
+				player.hide_interaction_prompt()
 			return
 		if _message_timer <= 0.0:
 			var tool_name := KitchenManager.get_tool_name(interactable_name)
 			if not RestaurantManager.is_open:
-				player.show_interaction_prompt("E %s에서 꺼내기" % tool_name if not tool_name.is_empty() else "E 꺼내기")
+				player.show_interaction_prompt(tr("E %s에서 꺼내기") % tool_name if not tool_name.is_empty() else tr("E 꺼내기"))
 			else:
-				player.show_interaction_prompt("E %s 사용" % tool_name if not tool_name.is_empty() else "E 조리하기")
+				player.show_interaction_prompt(tr("E %s 사용") % tool_name if not tool_name.is_empty() else tr("E 조리하기"))
 		return
 	if interactable_name.begins_with(SERVING_AREA_PREFIX):
 		var serving_index := interactable_name.trim_prefix(SERVING_AREA_PREFIX).to_int() - 1
@@ -2453,8 +2516,11 @@ func _on_restaurant_confirmed() -> void:
 		_show_temporary_message(RESTAURANT_HOURS_MESSAGE)
 
 
-func _show_temporary_message(text: String) -> void:
-	_message_timer = MESSAGE_DURATION
+## duration을 안 넘기면 기본 MESSAGE_DURATION(2초)을 쓴다 - 레스토랑 영업
+## 상태 안내처럼 놓치면 아쉬운 메시지는 개별적으로 더 길게 줄 수 있게
+## 파라미터로 뺐다(플레이테스트 피드백 #9, 2026-09-05 - "너무 짧게 뜬다").
+func _show_temporary_message(text: String, duration: float = MESSAGE_DURATION) -> void:
+	_message_timer = duration
 	player.show_interaction_prompt(text)
 
 
@@ -2481,7 +2547,7 @@ func _load_tutorial_dialogue() -> void:
 		return
 	var parsed: Variant = JSON.parse_string(file.get_as_text())
 	if parsed is Dictionary:
-		_tutorial_dialogue = parsed
+		_tutorial_dialogue = Localizer.apply_language(parsed, TUTORIAL_DIALOGUE_PATH) as Dictionary
 
 
 ## data/tutorial/intro_dialogue.json에 키가 없으면(파일 손상 등) 빈 배열 -
@@ -2503,7 +2569,7 @@ func _load_furniture_descriptions() -> void:
 		return
 	var parsed: Variant = JSON.parse_string(file.get_as_text())
 	if parsed is Dictionary:
-		_furniture_descriptions = parsed
+		_furniture_descriptions = Localizer.apply_language(parsed, FURNITURE_DESCRIPTIONS_PATH) as Dictionary
 
 
 func _is_any_modal_open() -> bool:
@@ -2513,6 +2579,7 @@ func _is_any_modal_open() -> bool:
 		or (collection_screen != null and collection_screen.modulate.a > 0.0) \
 		or (dialogue_screen != null and dialogue_screen.modulate.a > 0.0) \
 		or (sleep_confirm_popup != null and sleep_confirm_popup.modulate.a > 0.0) \
+		or (pet_name_popup != null and pet_name_popup.modulate.a > 0.0) \
 		or (status_screen != null and status_screen.modulate.a > 0.0) \
 		or (restaurant_confirm_popup != null and restaurant_confirm_popup.modulate.a > 0.0) \
 		or (kitchen_screen != null and kitchen_screen.modulate.a > 0.0) \
@@ -3076,7 +3143,7 @@ func _maybe_show_mail_reminder(map_id: String) -> void:
 ## 2026-08-27).
 func _on_restaurant_auto_closed() -> void:
 	if GameManager.current_map_id == RESTAURANT_SIGN_MAP_ID:
-		_show_temporary_message(RESTAURANT_AUTO_CLOSED_MESSAGE)
+		_show_temporary_message(RESTAURANT_AUTO_CLOSED_MESSAGE, RESTAURANT_STATUS_MESSAGE_DURATION)
 
 
 ## 오늘 배정된 손님(RestaurantManager.DAILY_VISITOR_COUNT명 한도)을 전부
@@ -3084,7 +3151,7 @@ func _on_restaurant_auto_closed() -> void:
 ## 불리지만, 다른 자동 메시지들과 동일하게 맵 확인은 방어적으로 남겨둔다.
 func _on_all_visitors_served() -> void:
 	if GameManager.current_map_id == RESTAURANT_SIGN_MAP_ID:
-		_show_temporary_message(RESTAURANT_ALL_VISITORS_SERVED_MESSAGE)
+		_show_temporary_message(RESTAURANT_ALL_VISITORS_SERVED_MESSAGE, RESTAURANT_STATUS_MESSAGE_DURATION)
 
 
 ## 영업 종료 시간(RestaurantManager.CLOSE_HOUR)이 지났는데 레스토랑 안에 있고
@@ -3096,7 +3163,7 @@ func _maybe_show_closing_time_reminder() -> void:
 	if not RestaurantManager.is_open or TimeManager.current_hour < RestaurantManager.CLOSE_HOUR:
 		return
 	_closing_time_reminder_shown_today = true
-	_show_temporary_message(RESTAURANT_CLOSING_TIME_MESSAGE)
+	_show_temporary_message(RESTAURANT_CLOSING_TIME_MESSAGE, RESTAURANT_STATUS_MESSAGE_DURATION)
 
 
 func _fade_out(duration: float = FADE_DURATION) -> void:
@@ -3138,7 +3205,7 @@ func _maybe_play_tutorial_intro() -> void:
 	## 동일한 구조(암전 -> N일차 표시 -> 대기 -> 숨김)를 튜토리얼 맨 앞으로
 	## 당겨서 넣는다.
 	if _day_label != null:
-		_day_label.text = "%d일차" % TimeManager.current_day
+		_day_label.text = tr("%d일차") % TimeManager.current_day
 		_day_label.modulate.a = 1.0
 		await get_tree().create_timer(DAY_LABEL_HOLD_DURATION).timeout
 		_day_label.modulate.a = 0.0
@@ -3374,7 +3441,7 @@ func _play_sleep_transition() -> void:
 		await _fade_out()
 	TimeManager.sleep_now()
 	if _day_label != null:
-		_day_label.text = "%d일차" % TimeManager.current_day
+		_day_label.text = tr("%d일차") % TimeManager.current_day
 		_day_label.modulate.a = 1.0
 	await get_tree().create_timer(DAY_LABEL_HOLD_DURATION).timeout
 	if _day_label != null:
@@ -3387,8 +3454,16 @@ func _play_sleep_transition() -> void:
 	if played_soul_crystal_cutscene and dialogue_screen != null:
 		dialogue_screen.open_special("", SOUL_CRYSTAL_WAKE_UP_MONOLOGUE.duplicate())
 		await dialogue_screen.closed
-		_maybe_show_mail_reminder("home_interior")
+	## 평소 취침(침대 상호작용)은 _load_map()을 안 부르고 제자리에서 시간만
+	## 넘기므로, _load_map() 끝에 붙어있는 _maybe_show_mail_reminder()가 한
+	## 번도 안 불려서 기상 시점엔 알림이 안 떴다 - 다음에 home_interior를
+	## 나갔다 들어와야만 뒤늦게 떴다(플레이테스트 피드백 #15, 2026-09-05 -
+	## "처음 일어날 때도 메일 왔다는 알림이 떠야 함"). 소울 크리스탈 컷신
+	## 유무와 무관하게 기상 직후 여기서 한 번 확인한다 - _maybe_show_mail_reminder()
+	## 자체가 _is_sleep_transition_playing 중엔 안 뜨게 막아뒀으므로(컷신과 겹침
+	## 방지), 이 플래그부터 내린 뒤에 불러야 한다.
 	_is_sleep_transition_playing = false
+	_maybe_show_mail_reminder("home_interior")
 
 
 ## 24:00까지 스스로 취침하지 않았을 때(TimeManager.player_collapsed) - 취침
@@ -3409,7 +3484,7 @@ func _play_collapse_transition() -> void:
 		await _play_soul_crystal_merge()
 		await _fade_out()
 	if _day_label != null:
-		_day_label.text = "%d일차" % TimeManager.current_day
+		_day_label.text = tr("%d일차") % TimeManager.current_day
 		_day_label.modulate.a = 1.0
 	await get_tree().create_timer(DAY_LABEL_HOLD_DURATION).timeout
 	if _day_label != null:
@@ -3580,7 +3655,10 @@ func _on_interact_pressed() -> void:
 			if _farm_action_active:
 				return
 			_farm_action_active = true
-			player.tool_overlay.start("watering_can", TOOL_USE_HOLD_SECONDS)
+			# 하드코딩된 "watering_can"이라 황금 물뿌리개를 쥐고 있어도 항상
+			# 일반 물뿌리개 아이콘이 나오던 버그(사용자 리포트, 2026-09-16) -
+			# 실제로 장착 중인 아이템 id를 그대로 넘긴다.
+			player.tool_overlay.start(EquipmentManager.get_equipped(EquipmentManager.HAND_SLOT), TOOL_USE_HOLD_SECONDS)
 			await get_tree().create_timer(TOOL_USE_HOLD_SECONDS).timeout
 			FarmingManager.perform_water(farm_position)
 			_farm_action_active = false
@@ -3747,8 +3825,14 @@ func _handle_interaction(interactable: Dictionary) -> void:
 				var cooked_id := KitchenManager.get_cooking_result(interactable_name)
 				if KitchenManager.collect(interactable_name):
 					var cooked_name: String = String(InventoryManager.get_item_definition(cooked_id).get("name", cooked_id))
-					_show_temporary_message("%s을(를) 꺼냈다." % cooked_name)
+					_show_temporary_message(tr("%s을(를) 꺼냈다.") % cooked_name)
 				else:
 					_show_temporary_message("인벤토리가 가득 찼다.")
+			else:
+				## 프롬프트는 안 뜨지만(2240번 줄) E는 여전히 눌러볼 수 있어서, 아무
+				## 반응도 없으면 조리대가 고장났다고 오해할 수 있다(플레이테스트
+				## 피드백 #3, 2026-09-05 - "조리대 사용 불가능할때 원래
+				## 떴잖아"). 서빙대(SERVING_AREA_PREFIX)와 동일한 안내로 복원.
+				_show_temporary_message(RESTAURANT_NOT_READY_MESSAGE)
 		else:
 			kitchen_station_interacted.emit(interactable_name)

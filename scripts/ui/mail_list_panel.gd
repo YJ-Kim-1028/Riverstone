@@ -34,6 +34,10 @@ const DIVIDER_HEIGHT := 1.0
 ## 2026-08-25) - affection_panel.gd/shop_screen.gd의 _style_scrollbar()와
 ## 완전히 같은 값으로 맞춘다.
 const SCROLLBAR_WIDTH := 4
+## 읽은 메일과 안 읽은 메일이 아이콘만으론 구분이 잘 안 된다는 지적(플레이테스트
+## 피드백 #4, 2026-09-05 - "우편 메일 읽으면 글자색이 연해지는 것도 좋을듯") -
+## 제목 글자색도 읽었으면 흐리게 뺀다.
+const READ_TITLE_COLOR := Color(0.5, 0.5, 0.5)
 
 @onready var _rows_scroll: ScrollContainer = $RowsScroll
 @onready var _rows: VBoxContainer = $RowsScroll/RowsMargin/Rows
@@ -249,10 +253,11 @@ func _build_row(entry: Dictionary, is_sent: bool) -> Control:
 	icon_rect.custom_minimum_size = ICON_SIZE
 	icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var is_read := bool(entry.get("read", true))
 	if is_sent:
 		icon_rect.texture = SENT_ICON
 	else:
-		icon_rect.texture = READ_ICON if bool(entry.get("read", true)) else UNREAD_ICON
+		icon_rect.texture = READ_ICON if is_read else UNREAD_ICON
 	row.add_child(icon_rect)
 
 	var text_column := VBoxContainer.new()
@@ -271,7 +276,7 @@ func _build_row(entry: Dictionary, is_sent: bool) -> Control:
 	# 목록에서도 치환하도록 맞춤 - 안 하면 목록에 자리표시자 글자가 그대로 보임.
 	title_label.text = String(entry.get("title", "")).replace("{player_name}", GameManager.player_name)
 	title_label.add_theme_font_size_override("font_size", ROW_FONT_SIZE)
-	title_label.add_theme_color_override("font_color", Color.BLACK)
+	title_label.add_theme_color_override("font_color", READ_TITLE_COLOR if (not is_sent and is_read) else Color.BLACK)
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_row.add_child(title_label)
 

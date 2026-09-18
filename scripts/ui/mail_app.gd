@@ -24,6 +24,7 @@ const NOTIFY_ICON_GAP := 1.0
 @onready var _sidebar_background: Control = $ScaledContent/Margin/HBox/Sidebar/SidebarBackground
 @onready var _nav_vbox: Control = $ScaledContent/Margin/HBox/Sidebar/NavVBox
 @onready var _inbox_button: Button = $ScaledContent/Margin/HBox/Sidebar/NavVBox/InboxButton
+@onready var _inbox_notify_icon: TextureRect = $ScaledContent/Margin/HBox/Sidebar/NavVBox/InboxButton/NotifyIcon
 @onready var _sent_button: Button = $ScaledContent/Margin/HBox/Sidebar/NavVBox/SentButton
 @onready var _invite_history_button: Button = $ScaledContent/Margin/HBox/Sidebar/NavVBox/InviteHistoryButton
 @onready var _request_button: Button = $ScaledContent/Margin/HBox/Sidebar/NavVBox/RequestButton
@@ -135,6 +136,9 @@ func _show_list(view: View) -> void:
 	## 요청함 탭에 완료된(미수령) 요청이 있다는 배지(사용자 지시,
 	## 2026-09-01, 플레이테스트 23번) - 이 창을 오갈 때마다 다시 확인한다.
 	_refresh_request_notify_icon()
+	## 수신함 탭에도 같은 방식으로(플레이테스트 피드백 #11, 2026-09-05 -
+	## "수신함에도 New 뜨면 좋을듯").
+	_refresh_inbox_notify_icon()
 	match view:
 		View.INBOX_LIST:
 			_list_panel.display(EmailManager.get_inbox())
@@ -170,6 +174,24 @@ func _refresh_request_notify_icon() -> void:
 	_request_notify_icon.position = Vector2(
 		text_left - _request_notify_icon.size.x - NOTIFY_ICON_GAP,
 		(_request_button.size.y - _request_notify_icon.size.y) / 2.0
+	)
+
+
+## 위 _refresh_request_notify_icon()과 완전히 같은 패턴 - "수신함" 글자 왼쪽에
+## 안 읽은 메일이 있을 때만 배지를 띄운다(플레이테스트 피드백 #11, 2026-09-05).
+func _refresh_inbox_notify_icon() -> void:
+	var unread := EmailManager.has_unread()
+	_inbox_notify_icon.visible = unread
+	_inbox_notify_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if not unread:
+		return
+	var font := _inbox_button.get_theme_font("font")
+	var font_size := _inbox_button.get_theme_font_size("font_size")
+	var text_width := font.get_string_size(_inbox_button.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	var text_left := (_inbox_button.size.x - text_width) / 2.0
+	_inbox_notify_icon.position = Vector2(
+		text_left - _inbox_notify_icon.size.x - NOTIFY_ICON_GAP,
+		(_inbox_button.size.y - _inbox_notify_icon.size.y) / 2.0
 	)
 
 

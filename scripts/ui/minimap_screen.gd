@@ -25,7 +25,7 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_M:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == Keybinds.get_keycode(Keybinds.MINIMAP_ACTION):
 		toggle()
 		get_viewport().set_input_as_handled()
 

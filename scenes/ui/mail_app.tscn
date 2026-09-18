@@ -86,6 +86,14 @@ theme_override_colors/font_color = Color(0.356863, 0.27451, 0.211765, 1)
 theme_override_font_sizes/font_size = 5
 text = "수신함"
 
+[node name="NotifyIcon" type="TextureRect" parent="ScaledContent/Margin/HBox/Sidebar/NavVBox/InboxButton"]
+visible = false
+mouse_filter = 2
+size = Vector2(4, 7)
+texture = ExtResource("10_notify")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="SentButton" type="Button" parent="ScaledContent/Margin/HBox/Sidebar/NavVBox"]
 custom_minimum_size = Vector2(0, 12)
 layout_mode = 2

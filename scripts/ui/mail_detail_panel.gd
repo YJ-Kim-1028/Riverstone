@@ -89,7 +89,7 @@ func show_request(entry: Dictionary, objective_met: bool) -> void:
 		body += "\n\n%s" % progress_line
 	var expired := bool(entry.get("expired", false))
 	if expired:
-		body += "\n\n(만료된 요청입니다.)"
+		body += tr("\n\n(만료된 요청입니다.)")
 	_content_label.text = body
 	_date_label.text = ""
 	_complete_button.visible = true
@@ -102,7 +102,7 @@ func _build_reward_line(entry: Dictionary) -> String:
 	var parts: Array[String] = []
 	var reward_gold := int(entry.get("reward_gold", 0))
 	if reward_gold > 0:
-		parts.append("%d원" % reward_gold)
+		parts.append(tr("%d원") % reward_gold)
 	var reward_item_id := String(entry.get("reward_item_id", ""))
 	var reward_item_count := int(entry.get("reward_item_count", 0))
 	if not reward_item_id.is_empty() and reward_item_count > 0:
@@ -110,7 +110,7 @@ func _build_reward_line(entry: Dictionary) -> String:
 		parts.append("%s x%d" % [item_name, reward_item_count])
 	if parts.is_empty():
 		return ""
-	return "보상: %s" % ", ".join(parts)
+	return tr("보상: %s") % ", ".join(parts)
 
 
 func show_email(entry: Dictionary, is_sent: bool) -> void:

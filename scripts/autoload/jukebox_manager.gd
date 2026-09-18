@@ -82,9 +82,16 @@ func is_unlocked(song_id: String) -> bool:
 	## 본다 - 이 수정 이전에 이미 선물받아 _gift_unlocked_item_ids에 없는
 	## 기존 세이브(예: 어셔의 "Be with you")도 지금 인벤토리에 들고 있는 동안은
 	## 계속 재생 가능해야 하기 때문(과거 지급분에 대한 하위 호환).
+	## EmailManager.get_lifetime_item_count()도 같이 본다(2026-09-18 추가) -
+	## _gift_unlocked_item_ids 도입 이전에 받은 선물은 인벤토리에서 사라지는
+	## 순간(보관함 이동, 소비 등) 위 세 조건이 전부 실패해 다시 잠기는 문제가
+	## 실제로 있었음(사용자 리포트 - "Be with you는 왜 안 들고 있으면
+	## 주크박스에서 못 틀어?"). 누적 획득 기록은 지워지지 않으므로 세이브를
+	## 직접 고치지 않아도 기존 세이브가 자동으로 복구된다.
 	return ShopManager.get_purchase_count(item_id) > 0 \
 		or bool(_gift_unlocked_item_ids.get(item_id, false)) \
-		or InventoryManager.has_item(item_id, 1)
+		or InventoryManager.has_item(item_id, 1) \
+		or EmailManager.get_lifetime_item_count(item_id) > 0
 
 
 func get_unlocked_song_ids() -> Array:

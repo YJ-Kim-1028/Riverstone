@@ -19,6 +19,9 @@ const SLOT_SIZE := 6
 const TOOLTIP_FONT_SIZE := 5
 ## 마우스 커서 바로 아래로(오른쪽 아래 살짝) - 이 화면 로컬 좌표 기준 오프셋.
 const TOOLTIP_OFFSET := Vector2(4, 4)
+## 이 화면 루트(80x48 로컬 크기)보다 충분히 좁게 - 긴 설명이 창 밖으로
+## 튀어나가지 않도록 자동 줄바꿈시키는 기준 너비.
+const TOOLTIP_MAX_WIDTH := 50.0
 
 const SLOT_ACQUIRED_TEXTURE := preload("res://assets/ui/slot_book.png")
 const SLOT_LOCKED_TEXTURE := preload("res://assets/ui/slot_book_unknown.png")
@@ -109,6 +112,12 @@ func _build_tooltip_panel() -> void:
 	_tooltip_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_tooltip_label.add_theme_font_size_override("font_size", TOOLTIP_FONT_SIZE)
 	_tooltip_label.add_theme_color_override("font_color", Color(0.42, 0.27, 0.15, 1))
+	## 너비 제한 없이 한 줄로 그리면 설명이 긴 항목은 팝업 창(로컬 80x48) 폭을
+	## 넘어서서 _update_tooltip()의 clampf()가 위치를 0으로 밀어도 오른쪽이
+	## 창 밖으로 잘려 보이는 문제가 있었다(사용자 리포트, 2026-09-18) - 최대
+	## 너비를 주고 자동 줄바꿈해서 항상 창 안에 들어오게 한다.
+	_tooltip_label.custom_minimum_size = Vector2(TOOLTIP_MAX_WIDTH, 0)
+	_tooltip_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_tooltip_panel.add_child(_tooltip_label)
 
 

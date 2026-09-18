@@ -40,6 +40,15 @@ signal info_requested(message: String)
 var _npc_ids: Array = []
 var _npc_index := 0
 var _mode := Mode.NONE
+## 제목(LineEdit)에 한글을 조합 중일 때 마우스로 바로 본문(TextEdit)을
+## 클릭해 넘어가면, 아직 커밋 안 된 마지막 조합 글자가 제목에서는 사라지고
+## 본문 쪽으로 새어 들어갔다(사용자 리포트, 2026-09-05 - "제목에 입력한
+## 마지막 글자가 본문까지 따라 내려가고 그래" - 스페이스바를 한 번 더 눌러
+## 조합을 먼저 끝내면 정상 동작한다는 것도 같은 원인을 가리킴). Godot의 IME
+## 조합 커밋이 포커스가 이미 새 필드로 넘어간 뒤에 도착해서 생기는 엔진
+## 타이밍 문제라 - 포커스가 들어오는 순간 한 프레임 놓았다 다시 잡아서, 그
+## 사이에 이전 필드로 향하던 커밋이 새 필드를 오염시키기 전에 정리되게 한다.
+var _ime_refocus_guard := false
 
 
 ## OptionButton의 드롭다운은 이 화면 전체를 감싼 축소 배율(mail_app.tscn의
@@ -53,10 +62,26 @@ func _ready() -> void:
 	_npc_prev_button.pressed.connect(func() -> void: _step_npc(-1))
 	_npc_next_button.pressed.connect(func() -> void: _step_npc(1))
 	_content_edit.text_changed.connect(_on_content_changed)
+	_title_edit.focus_entered.connect(_on_text_field_focus_entered.bind(_title_edit))
+	_content_edit.focus_entered.connect(_on_text_field_focus_entered.bind(_content_edit))
 	for button in [_greeting_mode_button, _invite_mode_button, _npc_prev_button, _npc_next_button]:
 		(button as Button).add_theme_stylebox_override("normal", _build_button_style())
 		(button as Button).add_theme_stylebox_override("hover", _build_button_style())
 		(button as Button).add_theme_stylebox_override("pressed", _build_button_style())
+
+
+## _ready()의 focus_entered 연결 참고 - 새 필드로 포커스가 넘어오는 순간
+## 한 프레임 놓았다 다시 잡아서, 이전 필드로 향하던 IME 조합 커밋이 새
+## 필드에 새는 것을 막는다.
+func _on_text_field_focus_entered(field: Control) -> void:
+	if _ime_refocus_guard:
+		return
+	_ime_refocus_guard = true
+	field.release_focus()
+	await get_tree().process_frame
+	_ime_refocus_guard = false
+	if is_instance_valid(field):
+		field.grab_focus()
 
 
 func _build_button_style() -> StyleBoxTexture:
@@ -126,9 +151,9 @@ func _set_mode(mode: Mode) -> void:
 			_content_edit.text = ""
 		Mode.INVITE:
 			_title_edit.editable = false
-			_title_edit.text = INVITE_TITLE_FORMAT % GameManager.restaurant_name
+			_title_edit.text = tr(INVITE_TITLE_FORMAT) % GameManager.restaurant_name
 			_content_edit.editable = false
-			_content_edit.text = "당신을 %s에 초대합니다! 맛있는 만찬을 즐기고 가세요~" % GameManager.restaurant_name
+			_content_edit.text = tr("당신을 %s에 초대합니다! 맛있는 만찬을 즐기고 가세요~") % GameManager.restaurant_name
 		_:
 			_title_edit.editable = false
 			_title_edit.text = ""
@@ -147,7 +172,19 @@ func _on_content_changed() -> void:
 ## mail_app.gd 산하 전송 버튼이 눌렸을 때 호출하는 진입점. 버튼 자체는 항상
 ## 눌러볼 수 있게 두고(비활성화로 헷갈리지 않게 - 사용자 지시), 필수값이
 ## 없으면 여기서 안내 팝업만 띄우고 실제 발송은 막는다.
+## 한글 마지막 글자를 조합 중인 상태로 바로 이 버튼을 누르면(텍스트 필드가
+## 아니라 버튼으로 포커스가 넘어가서 _on_text_field_focus_entered 가드가
+## 걸리지 않는다) 그 글자가 커밋되기 전에 .text를 읽어버려서 통째로
+## 누락됐다(사용자 리포트, 2026-09-18 - "입력이 완성되지 않아"). 43번 줄
+## 주석과 같은 원인(IME 커밋이 한 프레임 늦게 도착) - release_focus()로 커밋을
+## 유도한 뒤 한 프레임 기다렸다가 읽는다.
 func send() -> void:
+	if _title_edit.has_focus():
+		_title_edit.release_focus()
+		await get_tree().process_frame
+	elif _content_edit.has_focus():
+		_content_edit.release_focus()
+		await get_tree().process_frame
 	var npc_id := _selected_npc_id()
 	if npc_id.is_empty():
 		return

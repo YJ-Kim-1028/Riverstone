@@ -34,46 +34,19 @@ const MAP_LAYOUT := {
 	"plaza3": Rect2(1054, 866, 448, 384),
 }
 
-## 플레이어 위치 마커 - 빨간 점 대신 플레이어 얼굴 스프라이트를 그대로 오려서
-## 쓴다(사용자 지시, 2026-08-30). 정면(아래 방향) idle 프레임의 위쪽 절반(머리)만
-## 크롭한다. HD 헤어스타일 시트(player_hd_<style>.png)가 있으면 player.gd가 실제
-## 인게임 캐릭터를 그릴 때 쓰는 것과 같은 파일에서 바로 크롭해서 쓴다(사용자 지시,
-## 2026-09-03 - "인게임에서 픽셀 계산하고 잘라서 어쩌고 하는 게 있다면 그건
-## 지워줘" - 예전 CharacterAppearance 마커 리컬러 합성은 실제 헤어스타일과
-## 안 맞는 낡은 모습을 보여주고 있었다). HD 파일이 없는 방어적 상황에서만 그
-## 구형 합성으로 폴백한다. 테두리/원 없이 이미지만 그린다(사용자 지시 - "프레임
-## 안에 사진이 있으니까 이상해보여").
-const FACE_FRAME_SIZE := Vector2i(16, 16)
-## HD 시트(32x64)는 구형 프레임(16x32)의 정확히 2배 크기라 크롭 좌표도 그대로
-## 2배(위 여백 보정도 3px -> 6px).
-const HD_FACE_FRAME_SIZE := Vector2i(32, 32)
-const FACE_DISPLAY_SIZE := 5.0
+## 플레이어 위치 마커 - 원래는 플레이어 얼굴 스프라이트를 오려서 썼는데
+## (2026-08-30) 5px밖에 안 돼서 거의 안 보인다는 리포트(플레이테스트 피드백
+## #1, 2026-09-05 - "미니맵에 있는 내가 안 보임" → "너무 작아서 안보인다는
+## 거였어. 그냥 잘 보이는 노란색 마커로") - 초상화 크롭 대신 단순 노란 점으로
+## 교체. 어떤 배경색 위에서도 구분되게 어두운 테두리를 같이 그린다.
+const MARKER_RADIUS := 3.0
+const MARKER_COLOR := Color(1.0, 0.9, 0.1)
+const MARKER_OUTLINE_COLOR := Color(0.1, 0.1, 0.1)
+const MARKER_OUTLINE_WIDTH := 1.0
 
 var _background_texture: Texture2D = load(MINIMAP_TEXTURE_PATH) as Texture2D
-var _face_texture: Texture2D
 var _player_world_pos := Vector2.ZERO
 var _player_marker_visible := false
-
-
-func _get_face_texture() -> Texture2D:
-	if _face_texture != null:
-		return _face_texture
-	var hd_path := PlayerController.resolve_hd_sprite_path(GameManager.hd_hairstyle_id)
-	if ResourceLoader.exists(hd_path):
-		var hd_sheet := (load(hd_path) as Texture2D).get_image()
-		var face := hd_sheet.get_region(Rect2i(0, 6, HD_FACE_FRAME_SIZE.x, HD_FACE_FRAME_SIZE.y))
-		_face_texture = ImageTexture.create_from_image(face)
-		return _face_texture
-	var composite: Image = CharacterAppearance.build_current_composite_sheet()
-	if composite == null:
-		return null
-	## 프레임 맨 위 3px 정도는 머리 위 여백(투명)이라 그대로 크롭하면 얼굴이
-	## 박스 중앙보다 아래로 쳐져 보인다(사용자 리포트, 2026-08-30 - "실제보다
-	## 남쪽으로 찍히는 거 같아") - 그만큼 아래에서부터 크롭해서 얼굴 내용물이
-	## 박스 중앙에 오게 보정한다.
-	var face := composite.get_region(Rect2i(0, 3, FACE_FRAME_SIZE.x, FACE_FRAME_SIZE.y))
-	_face_texture = ImageTexture.create_from_image(face)
-	return _face_texture
 
 
 func refresh(current_map_id: String, player: Node2D) -> void:
@@ -121,11 +94,9 @@ func _draw() -> void:
 	var draw_offset := (size - image_size * scale_factor) / 2.0
 	draw_texture_rect(_background_texture, Rect2(draw_offset, image_size * scale_factor), false)
 	## 현재 위치 영역 틴트/테두리는 없앴다(사용자 지시, 2026-08-31 - "노랑색
-	## 뿌연색 강조효과... 너무 밤티야, 그냥 없애줭") - 플레이어 얼굴 마커만으로
-	## 위치를 표시한다.
+	## 뿌연색 강조효과... 너무 밤티야, 그냥 없애줭") - 플레이어 위치는 아래
+	## 점 마커 하나로만 표시한다.
 	if _player_marker_visible:
-		var face := _get_face_texture()
-		if face != null:
-			var marker_pos := draw_offset + _player_world_pos * scale_factor
-			var half := FACE_DISPLAY_SIZE / 2.0
-			draw_texture_rect(face, Rect2(marker_pos - Vector2(half, half), Vector2(FACE_DISPLAY_SIZE, FACE_DISPLAY_SIZE)), false)
+		var marker_pos := draw_offset + _player_world_pos * scale_factor
+		draw_circle(marker_pos, MARKER_RADIUS + MARKER_OUTLINE_WIDTH, MARKER_OUTLINE_COLOR)
+		draw_circle(marker_pos, MARKER_RADIUS, MARKER_COLOR)
