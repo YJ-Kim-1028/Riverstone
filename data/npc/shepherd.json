@@ -84,6 +84,17 @@
     },
     "affection_events": [
         {
+            "threshold": 50,
+            "type": "dialogue",
+            "description": "지인이 떠넘기고 간 사냥개를 플레이어에게 맡긴다.",
+            "lines": [
+                "아 맞다, 얼마 전에 아는 사람이 사냥개를 한 마리 주고 갔어.",
+                "사냥 다니다가 이제 못 키우겠다고 갑자기 떠넘기고 가더라고.",
+                {"text": "너한테 맡기면 훨씬 잘 돌봐줄 것 같은데, 어때?", "emotion": "happy"},
+                "이름도 네가 새로 지어줘."
+            ]
+        },
+        {
             "threshold": 70,
             "type": "dialogue",
             "description": "마르 혼자만 비싸게 파는 것에 불만을 터뜨린다.",
