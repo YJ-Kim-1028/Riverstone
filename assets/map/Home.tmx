@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="40" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="24" nextobjectid="78">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="40" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="24" nextobjectid="80">
  <tileset firstgid="1" source="gg.tsx"/>
  <tileset firstgid="257" source="tree.tsx"/>
  <tileset firstgid="513" source="buildings.tsx"/>
@@ -602,6 +602,8 @@
   <object id="71" name="shadow_figure_home" x="400" y="48"/>
   <object id="200" name="poli_tutorial_run_start" x="128" y="224"/>
   <object id="201" name="poli_tutorial_greet" x="304" y="216"/>
+  <object id="78" name="cat_home_spawn" x="160" y="272"/>
+  <object id="79" name="dog_home_spawn" x="256" y="320"/>
  </objectgroup>
  <objectgroup id="20" name="YSortAnchor" visible="0" locked="1">
   <object id="18" name="lamp1" x="32" y="144" width="16" height="64"/>

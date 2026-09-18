@@ -187,6 +187,10 @@ const SFX_FEEDING := "res://assets/audio/sfx/sfx_feeding.mp3"
 ## 재생한다(사용자 지시).
 const SFX_COW := "res://assets/audio/sfx/sfx_cow.mp3"
 const SFX_PIG := "res://assets/audio/sfx/sfx_pig.mp3"
+## 고양이/강아지(벨제/셰퍼드 호감도 50 선물) 클릭 시 울음소리 - cat.gd/dog.gd
+## _unhandled_input() 참고.
+const SFX_CAT := "res://assets/audio/sfx/sfx_cat.mp3"
+const SFX_DOG := "res://assets/audio/sfx/sfx_dog.mp3"
 ## 손님이 식사를 마치고 떠나며 실제로 돈을 낼 때(RestaurantManager.npc_departed,
 ## paid_amount > 0) - 서빙 전에 쫓겨난 손님(paid_amount == 0)에는 재생하지 않는다.
 const SFX_COIN := "res://assets/audio/sfx/sfx_coin.mp3"

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="21" height="13" tilewidth="16" tileheight="16" infinite="0" nextlayerid="12" nextobjectid="16">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="21" height="13" tilewidth="16" tileheight="16" infinite="0" nextlayerid="13" nextobjectid="16">
  <tileset firstgid="1" source="UI_Component.tsx"/>
  <tileset firstgid="257" source="cowshed.tsx"/>
  <tileset firstgid="513" source="restaurant.tsx"/>
@@ -86,6 +86,23 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,596,0,0,0,0,0,0,0,0,0,0,0,0,0,842,843,810,811,596,0,
 0,612,0,0,0,0,0,0,0,0,0,0,0,0,0,858,859,826,827,612,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <layer id="12" name="Furniture_empty" width="21" height="13" visible="0" locked="1">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,277,0,0,0,0,277,0,0,0,0,277,0,0,0,0,277,0,
+0,0,0,0,293,0,0,0,0,293,0,0,0,0,293,0,0,0,0,293,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>

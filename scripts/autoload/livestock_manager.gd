@@ -55,10 +55,22 @@ var _stalls: Array = [{}, {}, {}, {}]
 
 var _world_map: WorldMap = null
 var _sprites: Array = [null, null, null, null]
+## 여물통 표시 전담(사용자 지시, 2026-09-05) - livestock_trough.gd 참고.
+var _trough := LivestockTrough.new()
 
 
 func _ready() -> void:
 	_load_animals()
+	TimeManager.day_changed.connect(_on_day_changed)
+
+
+## Home에 계속 서서 밤을 넘기는 경우의 무덤(Grave)과 같은 이유 - 외양간에 계속
+## 있다가 자정을 넘기는 드문 경우에도 여물통이 바로 반영되게 한다. 평소에는
+## set_world_map()이 재입장할 때마다 fed_day를 새 날짜와 비교해 알아서 다시
+## 맞춰지므로 이 훅이 없어도 다음 방문 때는 정상 동작한다.
+func _on_day_changed(_day: int, _weekday: String) -> void:
+	if _world_map != null and GameManager.current_map_id == COWSHED_MAP_ID:
+		_trough.apply_state(_world_map, STALL_COUNT, _stalls)
 
 
 func get_animal_definition(animal_type: String) -> Dictionary:
@@ -166,6 +178,7 @@ func perform_feed(stall_index: int) -> String:
 	stall["fed_count"] = int(stall.get("fed_count", 0)) + 1
 	EquipmentManager.consume_equipped(EquipmentManager.HAND_SLOT)
 	_spawn_sprite(stall_index)
+	_trough.set_fed(_world_map, stall_index, true)
 	stalls_changed.emit()
 	AudioManager.play_sfx(AudioManager.SFX_FEEDING)
 	match String(stall.get("type", "")):
@@ -255,6 +268,7 @@ func set_world_map(world_map: WorldMap, map_id: String) -> void:
 	for i in STALL_COUNT:
 		if not is_stall_empty(i):
 			_spawn_sprite(i)
+	_trough.refresh_for_map(world_map, map_id, STALL_SPAWN_NAMES, STALL_COUNT, _stalls)
 
 
 ## 외양간 안에서 플레이어 위치 기준 상호작용 가능한(동물이 있는) 가장 가까운
@@ -355,4 +369,9 @@ func _load_animals() -> void:
 	if not (parsed is Dictionary):
 		push_error("Animal catalog is not valid JSON: %s" % ANIMALS_PATH)
 		return
-	_animals = parsed
+	_animals = Localizer.apply_language(parsed, ANIMALS_PATH) as Dictionary
+
+
+## 언어 변경 시 language_settings_screen.gd가 호출한다.
+func reload_for_language() -> void:
+	_load_animals()
