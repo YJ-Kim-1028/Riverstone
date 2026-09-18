@@ -93,3 +93,37 @@ theme_override_font_sizes/font_size = 5
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 horizontal_alignment = 2
 text = "100%"
+
+[node name="InteractRow" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="NameLabel" type="Label" parent="VBox/InteractRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(32, 0)
+theme_override_font_sizes/font_size = 5
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "행동키"
+
+[node name="KeyButton" type="Button" parent="VBox/InteractRow"]
+custom_minimum_size = Vector2(40, 12)
+layout_mode = 2
+theme_override_font_sizes/font_size = 5
+text = "E"
+
+[node name="MinimapRow" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="NameLabel" type="Label" parent="VBox/MinimapRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(32, 0)
+theme_override_font_sizes/font_size = 5
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "미니맵"
+
+[node name="KeyButton" type="Button" parent="VBox/MinimapRow"]
+custom_minimum_size = Vector2(40, 12)
+layout_mode = 2
+theme_override_font_sizes/font_size = 5
+text = "M"
