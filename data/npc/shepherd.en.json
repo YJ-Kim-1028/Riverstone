@@ -1,0 +1,325 @@
+{
+    "id": "shepherd",
+    "name": "Shepherd",
+    "name_en": "Shepherd",
+    "gender": "남성",
+    "age": "20대",
+    "job": "목장 관리 (벨제의 목장)",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "다정하다.",
+        "사람을 잘 챙긴다.",
+        "사랑 표현이 풍부하다.",
+        "죄책감을 회피하는 경향이 있다.",
+        "자기합리화에 능하다.",
+        "자신보다 동물을 더 사랑하는 벨제 때문에 외로움을 느낀다."
+    ],
+    "preferred_food": ["오징어"],
+    "disliked_food": ["옥수수"],
+    "special_notes": [
+        "마을에서 대표적인 사랑꾼으로 알려져 있으나, 실제로는 모카와 불륜 관계이다.",
+        "절을 자주 방문하며, 기도로 자신의 죄가 사해진다고 믿는다.",
+        "가난 때문에 벨제와 상의 없이 소 '맑음이'를 팔아버린 과거가 있다."
+    ],
+    "memento_item": {
+        "name": "Ring",
+        "description": "A ring he and Belze had made together back when they were a couple. The inside is faintly engraved with the words 'Together, always.'",
+        "lore_lines": [
+            "참 이상하지.",
+            "이 때는 뭐든 영원할 거 같았는데."
+        ]
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/shep_port.png",
+        "happy": "res://assets/npc/portrait/shep_happy.png",
+        "sad": "res://assets/npc/portrait/shep_sad.png",
+        "angry": "res://assets/npc/portrait/shep_angry.png"
+    },
+    "sprite": "res://assets/npc/sprite/shepSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "pasture_looking"},
+                {"time": "12:00", "state": "cafe_looking"},
+                {"time": "16:00", "state": "plaza3_standing"},
+                {"time": "18:00", "state": "pasture_looking"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "pasture_looking"},
+                {"time": "12:00", "state": "cafe_sitting"},
+                {"time": "16:00", "state": "fish_standing"},
+                {"time": "21:00", "state": "pasture_looking"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "pasture_looking"},
+                {"time": "12:00", "state": "pasture_working"},
+                {"time": "18:00", "state": "book_standing"},
+                {"time": "21:00", "state": "pasture_looking"}
+            ]
+        }
+    },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "pasture_looking",
+        "npc_spawn": "shepherd_heart_npc",
+        "player_spawn": "shepherd_heart_player",
+        "lines": [
+            "Hey, {player_name}. How's the restaurant been lately?",
+            "I've been wanting to learn to cook something.",
+            "I'm not good at it, but I'd like to make at least one dish properly.",
+            {"text": "Later on... I want to be able to make it for someone I love, with my own hands.", "emotion": "happy"}
+        ]
+    },
+    "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "description": "Passes off a hunting dog an acquaintance dumped on him to the player.",
+            "lines": [
+                "Oh right, a while back an acquaintance of mine gave me a hunting dog.",
+                "Said he couldn't keep it up with all his hunting trips anymore and just handed it off to me out of nowhere.",
+                {"text": "I think it'd be way better off with you. What do you say?", "emotion": "happy"},
+                "You should pick a new name for it too."
+            ]
+        },
+        {
+            "threshold": 70,
+            "type": "dialogue",
+            "description": "마르 혼자만 비싸게 파는 것에 불만을 터뜨린다.",
+            "lines": [
+                {"text": "Why does that guy Marr charge so much more than everyone else?", "emotion": "angry"},
+                {"text": "People usually buy that kind of thing when they're trying to win someone's favor, right?", "emotion": "angry"},
+                {"text": "That merchant has no heart. Lining his pockets by using people's feelings.", "emotion": "angry"},
+                "Still, there's nowhere else to buy it, so... what can you do."
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "벨제와 함께 끼던 반지를 건네준다.",
+            "lines": [
+                "{player_name}. Don't you feel like we've gotten a lot closer?",
+                "You know it too — that there's a special closeness between us.",
+                "Well, I'm married, but I don't think that makes this a bad thing.",
+                "I've always wished I had someone close to me.",
+                {"text": "I want to give you something precious of mine.", "emotion": "happy"},
+                {"text": "I don't feel anything for this ring anymore. You matter more to me now.", "emotion": "happy"}
+            ]
+        },
+        {
+            "threshold": 105,
+            "type": "dialogue",
+            "description": "인기척을 죄책감 탓으로 돌리며 기도로 넘기려 한다.",
+            "lines": [
+                "Lately, every night when I finish up at the pasture, I get this chill down my back like someone's watching.",
+                "Maybe it's just because I haven't been at ease lately. I should've lived without doing wrong.",
+                {"text": "Ha, just kidding. Don't take it too seriously.", "emotion": "happy"}
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "murder_grief": [
+            "It's a horrible thing. Really.",
+            "But if I keep dwelling on it, I feel like I'll fall apart first, so I try not to.",
+            "Guess all I can do is pray hard."
+        ],
+        "murder_grief_2": [
+            "Once, maybe I could accept. But twice...",
+            "Praying doesn't dull it anymore.",
+            "I'm scared of what's actually happening in this town."
+        ],
+        "suspicion_talk_2": {
+            "requires_alive": "marr",
+            "lines": [
+                "Mocha suspects Marr. I think there's something off about him too.",
+                "Can't we just lock him up first and think it through later? People's safety matters more.",
+                "Poli said a body was found right in front of your house.",
+                "He doesn't have any friends, so he might be more likely to fixate on someone kind to him, like you. Just saying."
+            ]
+        },
+        "partner_death_reaction": [
+            {"text": "Why did it have to be Mocha. Do you know what she meant to me.", "emotion": "sad"},
+            {"text": "If it had been Belze instead... no, I shouldn't think that. But I can't stop thinking it.", "emotion": "sad"},
+            {"text": "She was the only one who ever gave me any warmth. If there's a god, isn't this just cruel?", "emotion": "sad"},
+            {"text": "...Sorry. I'm not myself right now.", "emotion": "sad"}
+        ]
+    },
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    {"lines": ["Hey, {player_name}. Good to see you. What'd you do today?", "I spent the morning helping out at Belze's pasture."], "requires_alive": "belje", "fallback_lines": ["Hey, {player_name}. Good to see you. What'd you do today?", "I spent the morning working at the pasture."]},
+                    ["You can't get anything done moping around just because it's Monday. Gotta keep your spirits up!"],
+                    ["Ventilation's important in the barn. Keeps the smell down."]
+                ],
+                "mid": [
+                    {"lines": ["Belze doesn't seem to have many close friends in town. If not me, who else would look out for her?"], "requires_alive": "belje", "fallback_lines": ["Would she have been less lonely if she'd had more friends while she was alive?", "No... maybe if I just hadn't kept my distance from her..."]},
+                    {"lines": ["Sometimes I miss the times we used to cook together.", "Now?", "We don't even eat together anymore. Ha."], "requires_alive": "belje", "fallback_lines": ["Sometimes I miss the times we used to cook together."]},
+                    ["{player_name}. You've made someone close in town by now too, right?", "Who is it?"]
+                ],
+                "high": [
+                    {"lines": ["Sometimes Belze feels so distant to me.", "Family's supposed to be able to lean on each other, in the end..."], "requires_alive": "belje", "fallback_lines": ["Even when I was with Belze, she felt so distant to me.", "But now... I even miss that distance."]},
+                    {"lines": [{"text": "Roshi gave me some fish today. It's a good day.", "emotion": "happy"}], "requires_alive": "roshi", "fallback_lines": ["I miss the fish Roshi used to give me.", "He really was a good man."]},
+                    {"lines": ["I texted Belze this morning to ask if she'd slept well, while I was out buying feed.", "But she took forever to reply.", "Said she was busy tending to the cows."], "requires_alive": "belje", "fallback_lines": ["Belze's gone now, so I'm the one who has to look after the animals she left behind."]}
+                ]
+            },
+            "화": {
+                "low": [
+                    ["Ugh, so sleepy. I want to smell some fragrant coffee beans."],
+                    ["Ever been to the café? The little chick doll in the middle is so cute.", "You should go sometime."]
+                ],
+                "mid": [
+                    ["I love squid dishes. I ate so much of it from Roshi that it became my favorite."],
+                    {"lines": ["I wish I could see Roshi more often.", "I only ever run into him on rainy days."], "requires_alive": "roshi", "fallback_lines": ["Roshi was only ever around on rainy days.", "I should've made the most of those times while I could."]},
+                    {"lines": ["Whenever an animal gets sick, Belze stays by its side all night.", "I worry she's going to run herself into the ground."], "requires_alive": "belje", "fallback_lines": ["Whenever an animal got sick, Belze used to stay by its side all night.", "I could never go that far myself, but... well, I still care a lot."]},
+                    {"lines": ["Mocha said you come to the café a lot.", "If you see me there, say hi.", "I just go a lot because I love the coffee."], "requires_alive": "mocha", "fallback_lines": ["I miss the coffee Mocha used to make.", "No... maybe it's her I miss, not the coffee."]}
+                ],
+                "high": [
+                    ["How much longer do I have to live like this?", "Thinking about it sometimes just leaves me feeling lost."],
+                    {"lines": ["Belze actually seemed worried about me today, for once.", {"text": "Days like that just make me feel good.", "emotion": "happy"}], "requires_alive": "belje", "fallback_lines": ["I'm in an oddly good mood today. Must be the nice weather.", "Need something?"]},
+                    ["If you ever hear strange rumors about me, don't believe all of them.", "The smaller the town, the more people love to gossip about each other."]
+                ]
+            },
+            "수": {
+                "low": [
+                    {"lines": ["Middle of the week already. Belze must be worn out too.", "Maybe I should ask her to grab coffee together."], "requires_alive": "belje", "fallback_lines": ["Middle of the week already. I'm worn out. Maybe I'll go grab some coffee."]},
+                    ["Good to see your face.", "Let's see each other often, {player_name}"],
+                    ["Was the restaurant busy today?", "Get some rest, have a good day."]
+                ],
+                "mid": [
+                    ["My birthday came and went again this year without anyone noticing.", "It's not like I wanted much...", "Guess that's just how it goes when you're busy making a living."],
+                    ["I went to the temple. It lightened my heart a little.", "Having a place to atone is a real blessing for someone as flawed as me."],
+                    ["Why would someone with a face like Lama's become a monk... hmm.."]
+                ],
+                "high": [
+                    {"lines": ["Honestly, Belze and I aren't that close.", "It happens sometimes, with married couples.", "I wish someone would be a good friend to her."], "requires_alive": "belje", "fallback_lines": ["Honestly, Belze and I were never that close.", "I always hoped someone other than me would keep her from being lonely.", "Looking back, that was a pretty awful thing to want.", "I'm sorry for it."]},
+                    ["I don't care about ranch work at all. It's not like I do it because I want to.", "I have my own dreams too, you know.", "Not that anyone ever notices."],
+                    ["Someday I'll get out of this tiny town."]
+                ]
+            },
+            "목": {
+                "low": [
+                    {"lines": ["Helped out at the pasture again today. Belze spent the whole day just watching the cows."], "requires_alive": "belje", "fallback_lines": ["Helped out at the pasture again today. Raising animals takes more work than you'd think."]},
+                    {"lines": ["There's always so much pasture work on Thursdays. Sometimes it's hard to watch Belze handle it all alone."], "requires_alive": "belje", "fallback_lines": ["Ugh, it's only Thursday? I wish the weekend would hurry up."]},
+                    ["Still, keeping my body busy puts my mind at ease. I don't have to think about anything."]
+                ],
+                "mid": [
+                    {"lines": ["Whenever I say looking after Belze is what I enjoy, everyone just calls me kind.", "But is it weird that sometimes I want to be looked after too?"], "requires_alive": "belje", "fallback_lines": ["Belze was the scatterbrained type, so I used to look after her a lot.", "Even now, when those memories come back to me, I go visit."]},
+                    {"lines": ["Roshi tried to teach me how to clean fish.", "He kept teasing me for being clumsy but kept showing me anyway. I'm grateful for that."], "requires_alive": "roshi", "fallback_lines": ["Roshi taught me how to clean squid.", "Probably because he knew I liked it.", "He was a thoughtful old man."]},
+                    {"lines": ["Belze spent the whole time singing a lullaby to a sick calf today.", "...I tried to remember if she'd ever done that for me. I couldn't."], "requires_alive": "belje", "fallback_lines": ["Whenever a calf was sick, I remember Belze singing lullabies beside it.", "Those animals had it better than people did."]}
+                ],
+                "high": [
+                    ["I thought everything would be easy when I grew up.", "Turns out every day feels like homework. Even though there's no one grading it."],
+                    {"lines": ["I helped Mocha carry some coffee beans today.", "It's nothing much, but it's been a while since I got thanked for something small like that. Felt really good."], "requires_alive": "mocha", "fallback_lines": ["Mocha was someone who never held back a thank-you, even for small things.", "I felt proudest whenever I was with her."]},
+                    {"lines": ["Sometimes I get confused about who I'm even working this hard for.", "Saying it's for Belze... honestly, these days I'm not so sure."], "requires_alive": "belje", "fallback_lines": ["Sometimes I get confused about who I'm even working this hard for."]}
+                ]
+            },
+            "금": {
+                "low": [
+                    {"lines": ["Another week gone. I said I'd rest up with Belze this weekend... but she'll be glued to the pasture anyway."], "requires_alive": "belje", "fallback_lines": ["Another week gone. Guess I'll go rest at the café later..."]},
+                    ["I sell the pasture's goods at the market on Fridays. It's hard on the body, but strangely, this is the time I feel most at ease."],
+                    ["Something about the weekend coming up puts my mind at ease. Even though I'm not really going to rest."]
+                ],
+                "mid": [
+                    [
+                        "Do you understand the feeling of wanting to be loved?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "Of course, everyone does.", "affection": 1, "response": ["Right? I hope I'm not the only one."]},
+                                {"label": "I'm not sure.", "affection": 0, "response": ["Guess that's possible too."]},
+                                {"label": "Isn't there more to it than that?", "affection": 0, "response": ["...Maybe."]}
+                            ]
+                        }
+                    ],
+                    {"lines": ["I bought Belze flowers for her birthday and forgot she has a pollen allergy.", "I apologized, but she just laughed it off. She should've gotten mad at me."], "requires_alive": "belje", "fallback_lines": ["Belze's pollen allergy was so bad I could never give her a bouquet.", "And she couldn't even wear perfume, raising animals.", "In a way, I guess she lived a pretty joyless life.", "That's a shame."]},
+                    ["I can't really explain to myself why I stop by the café so often.", "Maybe it's just... easier to breathe there, or something."]
+                ],
+                "high": [
+                    ["I've been going to the temple a lot more lately.", "...No particular reason.", "Don't press me too hard about it."],
+                    {"lines": [{"text": "I tried some cheese Belze made today, it was really good. Nice to have a good moment again after a while.", "emotion": "happy"}], "requires_alive": "belje", "fallback_lines": ["Belze really had a gift for making cheese.", "Her pasta was the best I've ever had in my life."]},
+                    {"lines": ["Everyone asks about Belze first the moment they see me.", "Turns out not many people are actually curious about me."], "requires_alive": "belje", "fallback_lines": ["People actually ask how I'm feeling now.", "Guess they're worried about me."]}
+                ]
+            },
+            "토": {
+                "low": [
+                    ["Pasture work is a bit more relaxed on weekends. It's the one day I get to breathe."],
+                    {"lines": ["I go grocery shopping with Belze on Saturdays. Though we barely talk."], "requires_alive": "belje", "fallback_lines": ["Hmm. What am I supposed to do on Saturdays now.", "Guess I'll go to the beach by the café, like always."]},
+                    ["When the weather's nice, letting the cows out and watching them isn't so bad. At least they never seem annoyed with me."]
+                ],
+                "mid": [
+                    {"lines": ["I try to spend time with Belze, but the animals always come first for her.", "I've just come to accept it by now."], "requires_alive": "belje", "fallback_lines": ["I'm the one spending as much time with the animals as Belze used to now.", "I used to think it sounded boring, but maybe it's not such a bad life."]},
+                    {"lines": ["Belze looked busy again today, trying to name the new pig."], "requires_alive": "belje", "fallback_lines": ["What should I name the new pig?", "Got any good ideas?"]}
+                ],
+                "high": [
+                    ["I get lonely sometimes. I just don't show it.", "Showing it wouldn't change anything anyway."],
+                    {"lines": ["Belze actually asked me to have dinner together today, for once.", "It made me happy, but part of me wonders why that's even become something special."], "requires_alive": "belje", "fallback_lines": ["I eat dinner alone now, unless there's something special going on.", "Quieter than before. Lonelier too.", "Still, I guess I have to get used to it."]}
+                ]
+            },
+            "일": {
+                "low": [
+                    ["I stayed at the pasture late on Sunday. Not like there's much to do at home anyway."],
+                    {"lines": ["I have breakfast with Belze on Sunday mornings. Even then it's just cow talk."], "requires_alive": "belje", "fallback_lines": ["I eat meat. They're animals I raise myself, but people need to eat meat to live.", "That's not a bad thing, is it?", "It'd be weirder if Lama ate meat than if I did."]},
+                    ["Even on my day off, I get restless and end up going to the pasture. Have I forgotten how to rest?"]
+                ],
+                "mid": [
+                    ["God will understand me... that's what I want to believe.", "If He doesn't, well, nothing I can do about it."],
+                    ["Lama seems to have free time on Sundays too, so our talks run long.", "I lose track of time listening to him."],
+                    ["Sometimes I go somewhere no one is and sort out my thoughts alone.", "Not that I'm sure they ever actually get sorted."]
+                ],
+                "high": [
+                    ["I feel strangely honest around you.", "I don't even know why."],
+                    {"lines": [{"text": "Belze and I actually laughed and talked today, for the first time in a while. It was a good day.", "emotion": "happy"}], "requires_alive": "belje", "fallback_lines": ["With no one to talk to, I've come to rely on messages.", "Write me a lot of emails."]},
+                    ["I want to be good at everything, but I can't be.", "Guess I need somewhere to lean on too.", "...I don't usually say things like this to just anyone."]
+                ]
+            }
+        },
+        "rain_conversation": [
+            ["Rainy days keep me even busier looking after the animals."],
+            ["Got an umbrella? I'll give you one if you don't."],
+            ["Rainy days settle my mind a bit."]
+        ],
+        "mail_reaction": [
+            [{"text": "'{player_mail_content}'! Getting something like this puts me in a good mood all day. Send me more.", "emotion": "happy"}],
+            [{"text": "'{player_mail_content}' — I've been grinning to myself all day. Getting mail turns out to be fun.", "emotion": "happy"}]
+        ],
+        "horror_conversation": [
+            ["I try not to bring up {victim_name} much these days.", "But sometimes it hits me out of nowhere while I'm working at the pasture. It's hard, every time."],
+            ["I say {victim_name}'s name in my prayers too.", "There's not much else I can do."]
+        ]
+    },
+    "emails": {
+        "greeting": [
+            {"title": "Wanted: {player_name} to come to the café with me.", "lines": ["It's too boring going for coffee alone.", "Get in touch when you have time. Let's go to the café together."]},
+            {"title": "Marin stopped by today", "lines": ["Why would he come help out at the pasture when it's not even his job?", "Something about that guy's face just rubs me the wrong way."], "requires_alive": "marin"},
+            {"title": "A letter that's really just talking to myself", "lines": ["I don't really have anything to say, but writing letters has been comforting lately.", "Things I can't say out loud feel a little easier once I've written them down."]}
+        ],
+        "event_invite": [
+            {"title": "That warmed my heart", "lines": ["Thanks for inviting me.", "That was the first meal I've eaten with an easy mind in a while.", "I think I'm going to grow fond of your restaurant."]},
+            {"title": "That squid dish was the best", "requires_favorite_food": true, "lines": ["That squid dish yesterday was really delicious.", "Something that small was enough to really lift my mood. Thanks."]}
+        ],
+        "alibi_reminder": {"title": "I haven't been able to relax", "lines": ["I've been on edge ever since I heard it happened right outside your house. Are you okay?", "{player_name}, I have something to say — stop by when you have time."]},
+        "gift_thanks": [
+            {"title": "You even thought of something like this", "lines": ["I was really grateful for the gift.", "It's been so long since someone looked out for me, it felt strange."]},
+            {"title": "I'm glad you're here", "lines": ["I feel bad always being the one receiving.", "It really means a lot having someone like you around."]}
+        ],
+        "memento_reminder": {"title": "I missed you", "lines": ["Why haven't I seen you around lately? I missed you.", "I've got something set aside for you too, so come by soon."]},
+        "story_progress": {
+            "player_arrival_day_2": {"title": "Welcome to town", "lines": ["I heard you just moved here.", "If anything feels unfamiliar or hard, just say so anytime. I'm pretty good at looking out for people.", "Glad you're here, {player_name}."]},
+            "affection_100_reached": {"title": "I'll tell you everything now", "lines": ["Ever since I gave you that ring, I guess I've wanted to tell you everything anyway.", "I'll be honest. Mocha and I... we're involved.", "But it's partly because of Belze too. If she'd taken better care of me, it never would've gone this far.", "She knew I lost my mother young. She knew that made me lonely. And she did nothing about it.", "Malgeumi, Malgeumi. How long is she going to keep carrying around a cow I sold ages ago?", "Isn't she basically a crazy woman who fell in love with animals instead of a person?", "Mocha is like a mother to me. She gives me the kind of warmth I never had growing up.", "I'm not saying I did nothing wrong... but you understand me, don't you?"]}
+        },
+        "special_day": {}
+    }
+}

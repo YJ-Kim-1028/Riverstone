@@ -49,8 +49,8 @@ func _process(_delta: float) -> void:
 		return
 	var percent := float(info.get("percent", 0.0))
 	var minutes := int(info.get("minutes_remaining", 0))
-	var label := "디버프" if bool(info.get("is_debuff", false)) else "버프"
-	_buff_icon.tooltip_text = "%s: 이동속도 %+d%%, %d:%02d" % [label, int(round(percent * 100.0)), minutes / 60, minutes % 60]
+	var label := tr("디버프") if bool(info.get("is_debuff", false)) else tr("버프")
+	_buff_icon.tooltip_text = tr("%s: 이동속도 %+d%%, %d:%02d") % [label, int(round(percent * 100.0)), minutes / 60, minutes % 60]
 
 
 ## collection_screen.gd의 _build_tooltip_theme()와 동일한 기법 - "TooltipPanel"/
@@ -89,7 +89,7 @@ func _on_gold_changed(_gold: int) -> void:
 
 
 func _update_time_label() -> void:
-	_time_label.text = "%d일차 (%s) %s" % [TimeManager.current_day, TimeManager.get_weekday(), TimeManager.get_time_string()]
+	_time_label.text = tr("%d일차 (%s) %s") % [TimeManager.current_day, TimeManager.get_weekday_display(), TimeManager.get_time_string()]
 
 
 func _update_weather_icon() -> void:

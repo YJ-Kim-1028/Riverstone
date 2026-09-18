@@ -1,0 +1,25 @@
+{
+    "poli_greeting": [
+        "Welcome, young one.",
+        "I'm Poli, the police officer of this village.",
+        "And your name is?",
+        "{player_name}. Good. I heard you just arrived today.",
+        "Everyone's been looking forward to the village finally getting its one and only restaurant.",
+        "If it's alright, would you serve me a dish first?"
+    ],
+    "open_hint": [
+        "Let's open the restaurant first."
+    ],
+    "poli_seated": [
+        "I'm looking forward to this."
+    ],
+    "poli_farewell": [
+        "That was really delicious. I'll have to come by often from now on.",
+        "I already let the villagers know about you. They're probably writing you welcome emails right about now."
+    ],
+    "mail_hint": [
+        "Let's check the mail on the computer at home.",
+        "Also, you can invite one person to the restaurant per day by email.",
+        "As you get closer to the villagers, remember to keep an inventory slot open - you never know when or where they might hand you a gift."
+    ]
+}

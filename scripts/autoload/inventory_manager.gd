@@ -667,4 +667,15 @@ func _load_item_catalog() -> void:
 	if not (parsed is Dictionary):
 		push_error("Item catalog is not valid JSON: %s" % ITEMS_PATH)
 		return
-	_item_catalog = parsed
+	_item_catalog = Localizer.apply_language(parsed, ITEMS_PATH) as Dictionary
+
+
+## 언어 변경 시 language_settings_screen.gd가 호출한다(NPCManager/
+## HorrorEventManager의 reload_for_language()와 동일 패턴). 카탈로그를
+## 다시 불러오면 런타임에 등록된 memento_* 항목이 날아가므로 같이 재등록한다 -
+## 이때 NPCManager.reload_for_language()가 먼저 호출돼 있어야 새 언어의
+## memento_item.name/description을 가져온다(호출 순서는
+## language_settings_screen.gd가 보장).
+func reload_for_language() -> void:
+	_load_item_catalog()
+	_register_memento_items()

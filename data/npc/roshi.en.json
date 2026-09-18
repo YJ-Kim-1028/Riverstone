@@ -1,0 +1,311 @@
+{
+    "id": "roshi",
+    "name": "Roshi",
+    "name_en": "Roshi",
+    "gender": "남성",
+    "age": "40대",
+    "job": "낚시꾼",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "친절하다.",
+        "감정 기복이 적다.",
+        "갈등을 싫어한다.",
+        "타인의 사정을 함부로 판단하지 않는다.",
+        "가족을 무엇보다 소중하게 생각한다."
+    ],
+    "preferred_food": ["옥수수"],
+    "disliked_food": ["고등어"],
+    "special_notes": [
+        "낚시 관련 NPC. 아들 마린과 단둘이 산다.",
+        "비가 오는 날에는 바다에 나가지 않는다 (맑은 날엔 출항해 맵에서 만날 수 없음, 비 오는 날에만 등장).",
+        "셰퍼드와 모카의 불륜 관계를 알고 있지만 개입하지 않는다."
+    ],
+    "alibi_speech": {
+        "known": "I was at %s that day around 6 PM.",
+        "unknown": "Where I was that night... I don't quite remember, myself.",
+        "witness_seen": "Ah, now that I think about it, I believe I saw %s at %s that day.",
+        "witness_none": "Ah, but I don't think I saw anyone in particular that day."
+    },
+    "memento_item": {
+        "name": "Rabbit Doll",
+        "description": "A rabbit doll Marin loved most as a child. One ear is worn thin from being hugged to sleep for so long.",
+        "lore_lines": [
+            "이 녀석이 이 인형 없으면 잠도 못 잤었거든.",
+            "이제는 자기가 어른이라나 뭐라나.",
+            "그래도 내겐 아직 어린애야."
+        ]
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/roshi_port.png",
+        "happy": "res://assets/npc/portrait/roshi_happy.png",
+        "sad": "res://assets/npc/portrait/roshi_sad.png",
+        "angry": "res://assets/npc/portrait/roshi_port.png"
+    },
+    "sprite": "res://assets/npc/sprite/roshiSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": true,
+            "entries": [
+                {"time": "09:00", "state": "fish_sitting"},
+                {"time": "21:00", "state": "fish_sitting"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": true,
+            "entries": [
+                {"time": "09:00", "state": "fish_sitting"},
+                {"time": "21:00", "state": "fish_sitting"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "fish_working"},
+                {"time": "21:00", "state": "fish_sitting"}
+            ]
+        }
+    },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "fish_sitting",
+        "npc_spawn": "fish_standing",
+        "player_spawn": "roshi_heart_player",
+        "lines": [
+            "Caught some squid today, real fresh.",
+            "Come to think of it, you're the only other person in this town who fishes.",
+            {"text": "Not bad, having someone in town who shares the hobby.", "emotion": "happy"},
+            "Looking forward to more of it.",
+            {"type": "gift", "item_id": "squid"}
+        ]
+    },
+    "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "requires_not_shown": {"npc_id": "marin", "threshold": 50},
+            "description": "오래 아껴온 황금 낚싯대를 건넨다.",
+            "lines": [
+                "Come here a moment, would you.",
+                {"text": "This is a rod I've treasured since I was young. My hands aren't what they used to be, so I hardly use it anymore.", "emotion": "happy"},
+                {"type": "gift", "item_id": "golden_fishing_rod"},
+                "I thought about passing it to Marin, but he's more interested in other things than fishing.",
+                {"text": "Figured you'd put it to proper use.", "emotion": "happy"},
+                {"text": "Maybe because it's been used so long, but every once in a while it might catch something other than an ordinary fish.", "emotion": "happy"}
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "토끼 인형을 건네준다.",
+            "lines": [
+                "This is the doll Marin treasured most as a kid.",
+                "He said he didn't need it anymore once he grew up.",
+                {"text": "But strangely, I still can't bring myself to throw it out.", "emotion": "happy"},
+                {"text": "Ha ha... I suppose this is just what being a parent is like.", "emotion": "happy"},
+                "Did you like something like this as a kid too?",
+                "Marin looks tough, but he's a lonely kid underneath. Please, no matter what happens, don't forget about him."
+            ]
+        },
+        {
+            "threshold": 105,
+            "type": "dialogue",
+            "description": "선착장의 인기척을 대수롭지 않게 넘기려 한다.",
+            "lines": [
+                "Lately I've been sensing someone around the dock where I moor the boat. Late at night.",
+                "Figured it's probably one of the fishermen... but nobody's out at that hour these days.",
+                "Well, no good comes from dwelling on it. Just let it go in one ear and out the other."
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "murder_grief": [
+            {"text": "I don't know if it's right to be out here fishing when something like this has happened.", "emotion": "sad"},
+            {"text": "I told Marin not to wander around alone for a while.", "emotion": "sad"},
+            {"text": "As for me, I don't care much... as long as he's safe.", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            "For something like this to happen twice.",
+            {"text": "I can't sleep at night, worrying about my family.", "emotion": "sad"},
+            "I thought fear would dull with age, but I guess that's not how it works."
+        ],
+        "suspicion_talk_2": {
+            "requires_alive": "marr",
+            "lines": [
+                "There was a whole debate over who the culprit is at the café this morning. Everyone's pointing at Marr.",
+                "I don't think it's right to judge someone carelessly. There's no proof it was Marr, after all.",
+                "If anything, the ones pushing so hard to pin it on Marr seem more suspicious to me. Shepherd, for one."
+            ]
+        }
+    },
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    ["Went out to sea again today."],
+                    ["The sea was unusually calm this Monday morning. Days like this put my mind at ease."],
+                    ["Thought I'd caught something in the net, turned out to be a clump of seaweed. Quite a letdown."]
+                ],
+                "mid": [
+                    {"lines": ["Wonder if that Marin's been eating properly."], "requires_alive": "marin", "fallback_lines": ["That Marin, I hope he's doing well, wherever he is now."]},
+                    {"lines": ["Found an unfamiliar talisman hanging on the boat. Seems like Marin put it there, but I didn't ask why."], "requires_alive": "marin", "fallback_lines": ["Seeing the talisman he stuck on the boat still breaks my heart.", "I suppose that's just what being a father is."]},
+                    {"lines": ["Some days my back aches, but I don't let it show in front of Marin. He'd only worry."], "requires_alive": "marin", "fallback_lines": ["My back's especially stiff today. Rain coming soon, maybe."]}
+                ],
+                "high": [
+                    {"lines": ["I'm truly grateful you're close with Marin."], "requires_alive": "marin", "fallback_lines": ["Even now, when I wake up, I half expect to find Marin lying next to me.", "It's just too hard on the heart."]},
+                    {"lines": [{"text": "That kid originally wanted to play soccer. He's stuck handling nets now, but he never once let it show.", "emotion": "sad"}], "requires_alive": "marin", "fallback_lines": ["If I'd known things would turn out this way... I'd have let him play soccer to his heart's content.", "I regret it more than I can say."]},
+                    ["Coming back safe, that's the one thing that matters. Everything else is fine."]
+                ]
+            },
+            "화": {
+                "low": [
+                    ["The current was a bit rough today. Not big waves, though."],
+                    ["My hand slipped while mending the net, almost got poked by a hook. Gotta be careful."]
+                ],
+                "mid": [
+                    ["Corn dishes are always good, no matter when I eat them."],
+                    ["I catch mackerel every day, and yet it doesn't even suit my own taste. Ironic, isn't it."],
+                    ["Lama the monk told me being alone on the wide sea makes your mind wander. He's not wrong."],
+                    {"lines": ["Looks like Marin went to see Sage again. Wonder what he's got going there so often."], "requires_alive": "marin", "fallback_lines": ["These days just seeing Sage's face reminds me of Marin.", "Ah..."]},
+                    {"lines": ["There was a soccer match on TV, and I watched to see what Marin would say, but he just switched the channel without a word.", "...I pretended not to notice, I guess.", {"text": "The words \"I'm sorry\" just wouldn't come out.", "emotion": "sad"}], "requires_alive": "marin", "fallback_lines": ["Because of me, Marin was a kid who couldn't even watch a soccer match with an easy heart.", "What kind of burden did I put on that child..."]}
+                ],
+                "high": [
+                    ["The people in this town are all good people. But in the end, they're still outsiders."],
+                    {"lines": ["I know about the thing with Shepherd and Mocha. But I don't know that I have any right to step into that.", "The only one I'm concerned with is Marin."], "requires_alive": ["shepherd", "mocha"], "fallback_lines": ["I know about the thing with Shepherd and Mocha. But I don't know that I have any right to step into that.", "The only one I'm concerned with is Marin."]},
+                    {"lines": ["I keep thinking about asking Isha to take a look at my back, but then I just tell myself it's probably nothing."], "requires_alive": "isha", "fallback_lines": ["Whenever I pass by the clinic Isha used to run, something in my chest twists."]}
+                ]
+            },
+            "수": {
+                "low": [
+                    ["Middle of the week. Made it back safe again today."],
+                    ["Good sun today, the nets dried in no time."],
+                    ["The seagulls were especially noisy today."]
+                ],
+                "mid": [
+                    {"lines": ["Every time I head out on the boat, I think of Marin. What if I don't make it back today, that kind of thing."], "requires_alive": "marin", "fallback_lines": ["I used to be scared of leaving him behind and heading out to sea alone.", "Now... I go out just to force myself to forget."]},
+                    {"lines": [{"text": "When Marin was little he never put down his soccer ball, and now all he touches is nets. Sometimes I wonder if that's because of me.", "emotion": "sad"}], "requires_alive": "marin", "fallback_lines": ["If I'd helped him chase his dream, things might have turned out differently.", "Thinking about it keeps me up at night with guilt."]},
+                    ["My shoulders ache after work, but a good soak in hot water fixes that."]
+                ],
+                "high": [
+                    ["I wonder if this is just what being a parent is. Nothing but worry, every day."],
+                    {"lines": ["Not sure what Marin's real reason is for going to the shrine so often, but, well, it's probably nothing bad."], "requires_alive": "marin", "fallback_lines": ["Since he left, I find myself stopping by the shrine.", "I just want to pray for his soul."]},
+                    ["Sometimes just pretending not to notice might be easier for everyone."]
+                ]
+            },
+            "목": {
+                "low": [
+                    ["Busy mending nets again today."],
+                    ["Everything I caught today was tiny fry. Some days are like that."],
+                    ["The fish smell soaked into my clothes today, a bit bothersome."]
+                ],
+                "mid": [
+                    {"lines": ["They say Marin's all grown up, but to my eyes he still looks like a small child."], "requires_alive": "marin", "fallback_lines": ["No matter how grown a son gets, he still looks like a little child to his father.", "I wonder if he's scared under the ground, if he's lonely..."]},
+                    {"lines": [{"text": "That kid's gotten pretty good at tying net knots lately. I never even taught him.", "emotion": "happy"}], "requires_alive": "marin", "fallback_lines": ["Marin was always good at figuring out things I never taught him.", "He didn't deserve to grow up under a useless father like me."]},
+                    {"lines": ["My back's still the same as ever, but that's a secret from Marin."], "requires_alive": "marin", "fallback_lines": ["My back's still the same as ever.", "I miss when Marin used to nag me to go to the clinic."]}
+                ],
+                "high": [
+                    {"lines": ["Marin — that kid's lonelier than he lets on. Please look out for him."], "requires_alive": "marin", "fallback_lines": ["How that lonely child is sleeping all alone six feet under, I can't bear to think.", "My chest hurts so much I can barely breathe."]},
+                    {"lines": [{"text": "Marin never said much about why he quit soccer, but I know. It was because of me.", "emotion": "sad"}], "requires_alive": "marin", "fallback_lines": ["I'm not even fit to be called a father....", "I want to be alone today, just leave me be."]},
+                    {"lines": ["I can't bring myself to say sorry to Marin. Instead, I work hard enough for the both of us to make up for it."], "requires_alive": "marin", "fallback_lines": ["I'm sorry... I really was. Sorry for being such an unworthy father..."]}
+                ]
+            },
+            "금": {
+                "low": [
+                    ["Another week's gone. Nothing much happened, thankfully."],
+                    ["The net felt especially heavy on Fridays. Guess it's my age."],
+                    {"lines": ["Weather was clear today so I didn't catch Marin's face. Some days are like that."], "requires_alive": "marin", "fallback_lines": ["It'd be nice if I could take Marin out somewhere on a day like this."]}
+                ],
+                "mid": [
+                    [
+                        "Are you the type who worries a lot?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "I guess I am too.", "affection": 1, "response": ["Is that so. Guess it's not just me, then."]},
+                                {"label": "Not really.", "affection": 0, "response": ["That's something to envy."]},
+                                {"label": "When it's about family, I worry.", "affection": 1, "response": ["Right, that's exactly it."]}
+                            ]
+                        }
+                    ],
+                    {"lines": ["Saw Marin fidgeting with a soccer ball. He said he quit, but seems like there's still some attachment there."], "requires_alive": "marin", "fallback_lines": ["I wonder what Marin was thinking, fidgeting with that soccer ball.", "I can barely stand how sorry I am for all the time I looked the other way."]},
+                    {"lines": ["About my back — Isha's actually noticed too, I think. Grateful she never said anything."], "requires_alive": "isha", "fallback_lines": ["This town feels a little emptier without Isha."]}
+                ],
+                "high": [
+                    ["I don't think anyone has the right to meddle carelessly in someone else's affairs. So I tend to just watch quietly."],
+                    {"lines": [{"text": "Neither Shepherd nor Mocha are bad people. That's exactly why I couldn't say anything.", "emotion": "sad"}, "They each just have their own story."], "requires_alive": ["shepherd", "mocha"], "fallback_lines": [{"text": "Neither Shepherd nor Mocha were bad people. That's exactly why I couldn't say anything.", "emotion": "sad"}, "They each just had their own story."]},
+                    ["Sometimes I'm not even sure myself if I'm living right."]
+                ]
+            },
+            "토": {
+                "low": [
+                    {"lines": ["I spend weekends with Marin."], "requires_alive": "marin", "fallback_lines": ["I used to spend weekends with Marin.", "Fond memories."]},
+                    {"lines": ["Saturday mornings I start with cleaning the boat. Goes quick when Marin helps."], "requires_alive": "marin", "fallback_lines": ["Saturday mornings I start with cleaning the boat. It used to go quick when Marin helped.", "Doing it alone now is a lot harder."]},
+                    {"lines": [{"text": "The water splashed a lot today, both Marin and I got soaked through. Made me laugh.", "emotion": "happy"}], "requires_alive": "marin", "fallback_lines": ["I hate the damp now. Guess retirement's creeping closer."]}
+                ],
+                "mid": [
+                    ["Fish weren't biting much today. Some days are like that."],
+                    {"lines": ["When Marin talks about soccer, I find myself listening closely without meaning to. Seems like he never forgot what he loved."], "requires_alive": "marin", "fallback_lines": ["I miss my son chattering away about soccer beside me."]},
+                    {"lines": ["There's no better son than one who grew up strong and steady."], "requires_alive": "marin", "fallback_lines": ["...I'd like to be alone.", "I'm sorry."]}
+                ],
+                "high": [
+                    ["Family matters most. That much I'm sure of."],
+                    {"lines": [{"text": "When Marin gave up his dream of being a soccer player, honestly, I was the one who felt sorrier.", "emotion": "sad"}, {"text": "Still, looking at his face now, I think he's living a life that's not so bad.", "emotion": "happy"}], "requires_alive": "marin", "fallback_lines": ["I'm not in the mood to talk today.", "Get home safe."]}
+                ]
+            },
+            "일": {
+                "low": [
+                    ["Set the boat out a bit later on Sunday."],
+                    {"lines": ["Went fishing with Marin this morning. Just the two of us, for the first time in a while."], "requires_alive": "marin", "fallback_lines": ["I think of the fishing trips we used to take together, just the two of us.", "He was good at soccer, good at fishing too.", "I was happy to have lived as Marin's father."]},
+                    ["The sky was especially clear on Sunday, the water looked lovely."],
+                    {"lines": ["On Sundays I find myself checking the net over one more time for no real reason.", "...Maybe it's because Marin used to have matches around this time."], "requires_alive": "marin", "fallback_lines": ["I really just want to rest now.", "Life doesn't feel like it means much anymore."]}
+                ],
+                "mid": [
+                    {"lines": ["I think of Marin as a little kid often. Hard to believe he's grown up this much already."], "requires_alive": "marin", "fallback_lines": ["I thought he'd grown up so much, and then this kind of goodbye came.", "Still, that child brought me so many good memories. He was my precious angel."]},
+                    {"lines": [{"text": "That kid's really got the form down holding a fishing rod now. Might even be better than me.", "emotion": "happy"}], "requires_alive": "marin", "fallback_lines": ["I don't even have the strength to hold a rod anymore.", "Guess I'll be joining him before long, too."]},
+                    {"lines": ["My body feels a bit heavy today, but being with Marin makes me forget all that."], "requires_alive": "marin", "fallback_lines": ["My body feels a bit heavy today.", "On days like this I just want to rest.", "Without thinking about anything..."]}
+                ],
+                "high": [
+                    ["Making it home safe every day, that's all I ask for."],
+                    {"lines": ["Marin's the reason I go out even when the sea scares me. Someone's got to put food in front of him."], "requires_alive": "marin", "fallback_lines": ["There's no reason to fish anymore now.", "There's no life left for me to be responsible for...", "I don't even know why I keep doing this work."]},
+                    {"lines": [{"text": "Someday Marin will captain his own boat. Until then, I've got to hold up my end.", "emotion": "happy"}], "requires_alive": "marin", "fallback_lines": ["I promised that once he grew up, I'd pass my boat on to Marin.", "But now that's a promise I can never keep."]}
+                ]
+            }
+        },
+        "rain_conversation": [
+            {"lines": ["I don't go out to sea on rainy days. Actually nice, being able to spend time with Marin."], "requires_alive": "marin", "fallback_lines": ["It's raining.", "Damn it."]},
+            ["I don't push it on days when the waves are rough."],
+            ["Been a while. Nice getting to see your face thanks to the rain."]
+        ],
+        "mail_reaction": [
+            ["'{player_mail_content}', huh — it's been a while since I got a letter, so it feels a bit nostalgic. Thank you.", "I didn't know how to write back, so I'm telling you this in person instead."]
+        ],
+        "horror_conversation": [
+            ["Looking at the sea, I thought of {victim_name} out of nowhere.", "The sea's like that.", "A place that makes you think of the people you miss all the more."],
+            ["{victim_name} used to help me dock the boat sometimes, but these days it's just me."]
+        ]
+    },
+    "emails": {
+        "greeting": [
+            {"title": "Word That I Made It Back Safe", "lines": ["Just wanted to write a few lines to say I made it back without incident again today.", "You might think it's out of character for me to write something like this.", "But every once in a while, this isn't so bad either."]},
+            {"title": "A Story About Corn", "lines": ["Boiled some corn to eat today, it was really good.", "Catching mackerel every day, I end up selling something that doesn't even suit my own taste.", "Isn't that funny."]},
+            {"title": "While Mending the Net", "lines": ["Mending the net, all sorts of thoughts come to mind.", "Wondering how you're doing.", "It's not much of a greeting, but I figured I should ask once in a while."]}
+        ],
+        "event_invite": [
+            {"title": "That Corn Dish Was Great", "requires_favorite_food": true, "lines": ["That corn dish yesterday was really good.", "Felt good eating something that actually suited my taste for once.", "I'd appreciate another invite sometime."]},
+            {"title": "Thanks for Having Me", "lines": ["Thanks for the invitation.", "It was all the better since occasions like this aren't common.", "Invite me again next time, if you can."]}
+        ],
+        "gift_thanks": [
+            {"title": "Thanks for the Gift", "lines": ["Gladly received the gift, thank you.", "Bragged about it to Poli, a little sheepishly. That man was awfully envious.", "I won't forget this thoughtfulness."]},
+            {"title": "Found a Spot on the Boat", "lines": ["Spent a good while thinking about where to put what you gave me.", "Ended up placing it somewhere visible on the boat.", "I suppose I'll see it every time I head out."]}
+        ],
+        "memento_reminder": {"title": "Haven't Seen You Around Lately", "lines": ["Haven't seen you around at all lately.", "I've got something to give you, come by the fishing shop when you have time."]},
+        "story_progress": {
+            "player_arrival_day_4": {"title": "How Do You Do.", "lines": ["Heard from Marin that you just moved in.", "Take care of yourself. Come by the fishing shop if you need anything."]}
+        },
+        "special_day": {}
+    }
+}

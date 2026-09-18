@@ -187,4 +187,9 @@ func _load_recipes() -> void:
 	if not (parsed is Dictionary):
 		push_error("Recipe catalog is not valid JSON: %s" % RECIPES_PATH)
 		return
-	_recipes = parsed
+	_recipes = Localizer.apply_language(parsed, RECIPES_PATH) as Dictionary
+
+
+## 언어 변경 시 language_settings_screen.gd가 호출한다.
+func reload_for_language() -> void:
+	_load_recipes()

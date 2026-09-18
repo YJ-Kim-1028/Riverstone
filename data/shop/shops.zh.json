@@ -1,0 +1,12 @@
+{
+    "marr_shop": { "name": "杂货店" },
+    "flora_shop": { "name": "农场商店" },
+    "belje_shop": { "name": "牧场商店" },
+    "roshi_shop": { "name": "渔具店" },
+    "woody_shop": { "name": "家具店" },
+    "usher_shop": { "name": "书店" },
+    "isha_shop": { "name": "医院" },
+    "mocha_shop": { "name": "咖啡厅" },
+    "kira_clothing_shop": { "name": "♥ 琪拉的服装店" },
+    "para_hair_shop": { "name": "♥ 帕拉的美发沙龙" }
+}

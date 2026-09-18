@@ -1,0 +1,12 @@
+{
+    "marr_shop": { "name": "雑貨屋" },
+    "flora_shop": { "name": "農場ショップ" },
+    "belje_shop": { "name": "牧場ショップ" },
+    "roshi_shop": { "name": "釣具屋" },
+    "woody_shop": { "name": "家具屋" },
+    "usher_shop": { "name": "本屋" },
+    "isha_shop": { "name": "病院" },
+    "mocha_shop": { "name": "カフェ" },
+    "kira_clothing_shop": { "name": "♥ キラの洋服店" },
+    "para_hair_shop": { "name": "♥ パラの美容室" }
+}

@@ -1,0 +1,370 @@
+{
+    "id": "marin",
+    "name": "马林",
+    "name_en": "Marin",
+    "gender": "남성",
+    "age": "10대 후반",
+    "job": "없음",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "精力充沛。",
+        "很爱动。",
+        "喜欢运动。",
+        "想法很简单。"
+    ],
+    "preferred_food": ["고등어"],
+    "disliked_food": ["상추"],
+    "special_notes": [
+        "罗西的儿子。放弃了成为足球运动员的梦想,决定继承父亲的家业(渔业)。",
+        "常去神社是因为觉得赛姬姐姐漂亮,但其实是为了祈求父亲平安。",
+        "喜欢下雨天,因为那样就能和父亲待在一起。",
+        "从小就喜欢贝尔泽,但贝尔泽身边有谢泼德,所以他把这份心意藏了起来。"
+    ],
+    "memento_item": {
+        "name": "足球",
+        "description": "从小用到大的旧足球。上面有好几处缝补的痕迹,颜色也有些地方已经褪色了。",
+        "lore_lines": []
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/marin_port.png",
+        "happy": "res://assets/npc/portrait/marin_happy.png",
+        "sad": "res://assets/npc/portrait/marin_sad.png",
+        "angry": "res://assets/npc/portrait/marin_port.png"
+    },
+    "sprite": "res://assets/npc/sprite/marinSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "fish_working"},
+                {"time": "18:00", "state": "plaza5_standing"},
+                {"time": "21:00", "state": "fish_working"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "fish_working"},
+                {"time": "18:00", "state": "plaza5_standing"},
+                {"time": "21:00", "state": "fish_working"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "cafe_standing"},
+                {"time": "12:00", "state": "general_looking"},
+                {"time": "18:00", "state": "shrine_standing"},
+                {"time": "21:00", "state": "fish_working"}
+            ]
+        }
+    },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "fish_working",
+        "scene_map_id": "plaza3",
+        "lead_out_lines": [
+            "咦?是{player_name}啊。你来了?",
+            "啊,我手里拿的这个?",
+            "这是我小时候玩过的足球。",
+            "你知道我以前很喜欢踢足球吧。",
+            "对了,{player_name}。你会踢足球吗?",
+            "要不要轻松踢一下?现在没客人正是机会。"
+        ],
+        "entry_spawn": "fish_exit",
+        "npc_spawn": "marin_heart_npc",
+        "player_spawn": "marin_heart_player",
+        "player_facing": "left",
+        "lines": [
+            {"text": "好久没这样流着汗跑动了,感觉真的很爽。", "emotion": "happy"},
+            {"text": "是吧?", "emotion": "happy"},
+            {"text": "感觉我们能成为很好的朋友。下次再一起踢吧!", "emotion": "happy"}
+        ]
+    },
+    "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "requires_not_shown": {"npc_id": "roshi", "threshold": 50},
+            "description": "把特意收拾好的黄金钓竿,代替父亲那根旧钓竿送给了玩家。",
+            "lines": [
+                "{player_name},过来一下!有东西想给你看。",
+                {"text": "你看看这个,是不是超酷?我在我爸的仓库里翻到的,亮得不得了。", "emotion": "happy"},
+                {"type": "gift", "item_id": "golden_fishing_rod"},
+                "听说原本是爷爷用过的。我爸早就不用了,我也不怎么用,就一直堆在仓库里。",
+                {"text": "不过看你钓鱼的样子,我觉得这个应该是你的才对。", "emotion": "happy"},
+                {"text": "说不定用这个,能钓到传说中的大鱼呢。", "emotion": "happy"}
+            ]
+        },
+        {
+            "threshold": 65,
+            "type": "dialogue",
+            "description": "看到标题就冲动买下的唱片,送给了玩家。",
+            "lines": [
+                "{player_name}!正好遇到你,我一直带着这个想给你呢。",
+                {"text": "这是张唱片。其实我以前跟厄舍学过怎么作曲。", "emotion": "happy"},
+                {"type": "gift", "item_id": "record_the_day_after_you_came"},
+                "《The day after you came》。嗯,我也没什么灵感对象,跟我要好的就只有你,所以是为你写的。",
+                {"text": "真拿出来送人还挺害羞的。早知道就偷偷夹在信里给你了。", "emotion": "happy"},
+                {"text": "写得没有厄舍好,你别太期待。", "emotion": "happy"}
+            ]
+        },
+        {
+            "threshold": 80,
+            "type": "dialogue",
+            "description": "向玩家坦白了对父亲的不安。",
+            "lines": [
+                "其实啊。",
+                "每次爸爸出海,我都会害怕。",
+                "总有一天……说不定就回不来了。"
+            ]
+        },
+        {
+            "threshold": 85,
+            "type": "dialogue",
+            "requires": {"npc_id": "lama", "threshold": 60},
+            "description": "在不知道真相的情况下,思念着母亲。",
+            "lines": [
+                "其实我已经记不太清妈妈的脸了。",
+                "但奇怪的是,她牵着我手的感觉我还记得,还有她喜欢的那首歌。",
+                {"text": "偶尔听到那首歌,会没来由地掉眼泪。真不像我。", "emotion": "sad"},
+                "在爸爸面前我绝对不哭。总觉得那样他会更难过。",
+                "因为我得是个坚强的儿子啊。"
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "把旧足球送给了玩家。",
+            "lines": [
+                "对了,{player_name}。其实我以前的梦想是当足球运动员。",
+                "但如果不是我,还有谁能继承爸爸的家业呢?",
+                {"text": "反正我足球也没踢得多好……这个就当作回忆留下来吧。", "emotion": "sad"},
+                {"text": "咦?我没事啦!你不用露出那种表情看我。", "emotion": "happy"},
+                {"text": "你对我来说也是很美好的回忆,所以想把我的回忆送给你。", "emotion": "happy"},
+                "你愿意收下这个吗?"
+            ]
+        },
+        {
+            "threshold": 105,
+            "type": "dialogue",
+            "description": "用逞强的语气,掩饰了家门口传来的动静。",
+            "lines": [
+                "最近晚上家门口总有窸窸窣窣的声音。",
+                "一开始以为是猫,但感觉好像有点大。",
+                {"text": "哎,应该没什么大不了的!我踢足球身体也练得挺壮的,才不会被那种东西吓到呢!", "emotion": "happy"}
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "murder_grief": [
+            {"text": "那个人……希望他去了个好地方。", "emotion": "sad"},
+            {"text": "那么好的人,本不应该遇到这种事的。", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            "又发生这种事了……这次是真的害怕。",
+            {"text": "现在感觉谁都不安全了。", "emotion": "sad"}
+        ]
+    },
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    ["今天也带着足球出来了!", "晚上要不要一起踢会儿球?", "说没兴趣?……切。"],
+                    ["星期一也没什么不一样的。", "我大概又要在这儿等客人了吧。", "啊啊,真想出去玩。"],
+                    {"lines": ["星期一得先修渔网。是爸爸交代的。", "唉,真无聊。"], "requires_alive": "roshi", "fallback_lines": ["以前都是和爸爸一起修渔网的……", "……。"]}
+                ],
+                "mid": [
+                    ["最近感觉进球手感有点生疏了。得每天踢才行啊。", "像我这样的人才居然就这么被埋没了!"],
+                    ["只要有鲭鱼当菜,我能轻松吃两碗饭。", "天天闻着鱼腥味,为什么还是觉得好吃呢?"],
+                    {
+                        "lines": ["最近喜欢去伊莎姐姐的医院玩。", "嗯?不是哪里不舒服啦。", "姐姐人又好又有意思嘛。"],
+                        "requires_alive": "isha",
+                        "fallback_lines": ["好想念又善良又有趣的伊莎姐姐啊……", "以前还经常去医院找她玩呢。"]
+                    },
+                    [
+                        "你最喜欢的足球选手是谁?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "梅西", "affection": 1, "response": ["哦,认同!", {"text": "我也是他的铁杆粉丝,他简直外挂级别的吧?", "emotion": "happy"}]},
+                                {"label": "C罗", "affection": 1, "response": ["嗯?C罗?", "也不差啦,不过我是梅西派的。", "不过嘛,尊重你的喜好!"]},
+                                {"label": "朴基峰", "affection": 0, "response": ["那是谁啊?我第一次听说。", "……你说是晨练足球会的会长?", {"text": "喂,那不是选手,根本就是街坊大叔吧!", "emotion": "happy"}]}
+                            ]
+                        }
+                    ]
+                ],
+                "high": [
+                    ["你看得懂足球比赛吗?", "有比赛的日子一起叫炸鸡看比赛,肯定很有意思。"],
+                    {"lines": ["爸爸一个人出海,会不会觉得无聊啊?", "会担心的,毕竟是我爸嘛。"], "requires_alive": "roshi", "fallback_lines": ["总是想起独自出海的爸爸。", "早知道会这样,那时候就该陪着他一起去了。"]},
+                    ["人们站在大海前面都在想些什么呢?", "就是……我其实不喜欢大海,但大家都爱来这儿,所以有点好奇。"]
+                ]
+            },
+            "화": {
+                "low": [
+                    ["嘿,餐厅老板!", "见到你真高兴。"],
+                    ["今天的鱼特别新鲜。", "刚是凌晨才捕回来的。"],
+                    ["喇嘛师父说我总去神社却不来寺庙。", "那他干脆女装打扮一下好了。"]
+                ],
+                "mid": [
+                    ["只要是鲭鱼料理,什么都行。最棒了!"],
+                    {"lines": ["从赛姬姐姐那儿求了张护身符,要挂在爸爸船上。"], "requires_alive": "roshi", "fallback_lines": ["爸爸的船上现在还挂着赛姬姐姐给的护身符。", "……看来求神也没用的事,终究还是没用啊。"]},
+                    ["足球现在只是我的爱好了。", "光靠梦想活着,我已经太大了。", "……20岁?还没到呢。"]
+                ],
+                "high": [
+                    {"lines": ["爸爸又开始担心我了。我都已经长大了呢。"], "requires_alive": "roshi", "fallback_lines": ["偶尔会想念爸爸唠叨我的样子。", "那时候觉得被当成小孩子看,特别讨厌,现在却……"]},
+                    {"lines": [{"text": "真希望多下点雨。那样就能和爸爸一起待着了!", "emotion": "happy"}], "requires_alive": "roshi", "fallback_lines": ["好怀念下雨天和爸爸一起度过的时光。"]},
+                    ["嘿,{player_name}。你来啦?", "我早上一个人练习切生鱼片来着。", "现在都能拿出去卖了。", {"text": "超有成就感的。", "emotion": "happy"}]
+                ]
+            },
+            "수": {
+                "low": [
+                    ["好无聊……要看店看到什么时候啊。"],
+                    ["你也觉得我身上有鱼腥味吗?", "啊啊。新买的除味剂根本没用。"],
+                    ["吹着海风跑步,感觉真的超爽。"],
+                    {"lines": ["爸爸今天回来得挺晚啊。", "……嗯,大概是鱼上钩得多吧。"], "requires_alive": "roshi", "fallback_lines": ["没有爸爸的大海感觉好陌生,对吧?", "……真的好难受啊。"]}
+                ],
+                "mid": [
+                    ["去神社了一趟,去看赛姬姐姐。"],
+                    ["最近发现了在树荫下睡午觉的乐趣。"]
+                ],
+                "high": [
+                    {"lines": ["其实我去神社真正的理由是另有其事。", {"text": "我每次都在祈求爸爸能平安回来。说不定赛姬姐姐已经察觉了。", "emotion": "sad"}, "啊,刚才说的别告诉任何人啊,有点丢脸。"], "requires_alive": "roshi", "fallback_lines": ["这个时节我总是常去神社,祈求爸爸身体健康。", "现在这已经是没用的事了……"]},
+                    ["逛店的时候小心鱼钩,超级锋利的。"],
+                    ["啊啊啊。差不多一个星期没踢球了。", "浑身都痒痒的,难受死了。"]
+                ]
+            },
+            "목": {
+                "low": [
+                    {"lines": ["爸爸出去钓鱼了,今天就我一个人。"], "requires_alive": "roshi", "fallback_lines": ["你好,需要帮忙吗?"]},
+                    ["星期四大多是自己一个人吃饭。不过也还好啦。"],
+                    ["昨天电视上在播足球,就看了一会儿……", "喂,那种水平我以前也做得到啊?真的。"]
+                ],
+                "mid": [
+                    {
+                        "lines": ["你认识贝尔泽姐姐吗?", "姐姐很喜欢动物嘛。", "那她会不会也喜欢鱼呢?"],
+                        "requires_alive": "belje",
+                        "fallback_lines": ["可能是因为贝尔泽姐姐喜欢动物的关系吧。", "我现在也变得喜欢牛了。", "虽然姐姐已经不在了……"]
+                    },
+                    ["最近打渔网结的速度也变快了不少。", "我成长了呢。"]
+                ],
+                "high": [
+                    ["以前我喜欢过贝尔泽姐姐。现在……嗯,已经不在意了。都是过去的事了。"],
+                    {
+                        "lines": ["偶尔路过贝尔泽姐姐的牧场,就打个招呼。那样就够了。"],
+                        "requires_alive": "belje",
+                        "fallback_lines": ["好怀念偶尔路过牧场时能看到的贝尔泽姐姐。"]
+                    },
+                    ["虽然没能当上足球选手,但至少能当渔夫啊。这样就够了。", "反正不管做什么,我都很帅!"]
+                ]
+            },
+            "금": {
+                "low": [
+                    ["这周也快过完了!周末得好好玩一场。"],
+                    ["星期五一整天都在外面,晒黑了不少。"],
+                    ["鲭鱼捕得多的日子,心情就特别好。"]
+                ],
+                "mid": [
+                    ["以前的梦想是当足球运动员,不过最近已经不怎么想了。"],
+                    ["别想着喂我吃草。", "呕,太讨厌了。"],
+                    {"lines": ["爸爸最近腰好像不太好。虽然他嘴上不说。"], "requires_alive": "roshi", "fallback_lines": ["爸爸生前腰一直不太好。", "早知道会这样,当初就该让他好好休息的。"]},
+                    ["我现在已经长大了嘛,不会再像以前那样撒娇了。", "……不过偶尔还是会怀念啦。"]
+                ],
+                "high": [
+                    [
+                        "你觉得我去当足球选手怎么样?现在重新开始会不会太晚?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "去试试看!我支持你", "affection": 1, "response": ["真的吗?谢谢,一下子有劲了。"]},
+                                {"label": "现在的生活看起来也不错", "affection": 1, "response": ["是吗……说的也是啊。"]},
+                                {"label": "这个嘛,我也说不好", "affection": 0, "response": ["说的也是,我自己也说不好呢。"]}
+                            ]
+                        }
+                    ],
+                    {"lines": ["一聊起足球,我就不自觉地认真起来。挺搞笑的吧。", "不过现在这份工作也不错。至少能待在爸爸身边。"], "requires_alive": "roshi", "fallback_lines": ["我放弃足球,完全是为了爸爸做出的决定。", "可现在爸爸也不在了……", "只剩下失去梦想的我了。"]}
+                ]
+            },
+            "토": {
+                "low": [
+                    ["周末到了!得出去踢会儿球才行。"],
+                    ["{player_name}。跟村里人处熟了吗?", "你要最喜欢我才行,知道吧?"],
+                    ["今天又得洗船了……", "好不想干啊……", "要不你替我干?", "开玩笑的。"]
+                ],
+                "mid": [
+                    {
+                        "lines": ["厄舍到底为什么想当作家呢?", "写东西有什么好玩的。"],
+                        "requires_alive": "usher",
+                        "fallback_lines": ["我虽然不怎么看书,但家里还留着几本厄舍写的书。", "那时候不知道,这会成为最后的回忆。"]
+                    },
+                    ["和朋友们一起踢球,会想起以前的事。"],
+                    {"lines": ["赛姬姐姐给的护身符,现在还挂在爸爸的船上。"], "requires_alive": "roshi", "fallback_lines": ["船上贴的护身符,要不要干脆摘掉算了?", "……反正也没起到任何作用啊。"]}
+                ],
+                "high": [
+                    {"lines": ["我喜欢下雨天。因为爸爸不用出海,会待在家里。"], "requires_alive": "roshi", "fallback_lines": ["一到下雨天就格外孤单。", "没想到一个人生活会这么难熬。"]},
+                    ["今天洗船的时候被泼了好大一盆水!", {"text": "笑死我了。", "emotion": "happy"}],
+                    ["周末总算有点时间,能多踢几脚球。", {"text": "太爽了。", "emotion": "happy"}]
+                ]
+            },
+            "일": {
+                "low": [
+                    ["星期天多睡了会儿懒觉。"],
+                    {"lines": ["星期天早上会和爸爸一起吃饭。"], "requires_alive": "roshi", "fallback_lines": []},
+                    ["就算是休息日,身体也闲不住,最后还是会出去跑一跑。"]
+                ],
+                "mid": [
+                    ["明天开始又会无聊了吧,反正也没什么事做。"],
+                    ["偶尔会想起以前足球队的朋友们。"],
+                    ["赛姬姐姐说,下次让我也来帮忙打扫神社。", "说我都来得这么勤了,总该做点什么。", "嗯,姐姐叫我做什么都行。"]
+                ],
+                "high": [
+                    ["以后长大要做什么,我到现在还是不太清楚。不过现在这样过日子也不错。"],
+                    {"lines": ["今天早上起了个大早,和爸爸一起去钓鱼了。", {"text": "感觉超清爽的!", "emotion": "happy"}], "requires_alive": "roshi", "fallback_lines": ["以前每个星期天早上都会和爸爸一起去钓鱼。", "感觉现在还是靠着那份回忆活着。"]},
+                    {"lines": ["像爸爸那样活着,似乎也不是坏事。"], "requires_alive": "roshi", "fallback_lines": ["虽然放弃了足球运动员的梦想,但做着这份工作还能想起爸爸,感觉也挺好的。"]}
+                ]
+            }
+        },
+        "rain_conversation": [
+            {
+                "lines": ["我喜欢下雨天!因为爸爸会待在家里。"],
+                "requires_alive": "roshi",
+                "fallback_lines": ["一到下雨天,就特别想念爸爸。"]
+            },
+            ["虽然不能踢球,不过下雨天也还不错。"],
+            ["你带伞了吗?我都是直接淋着走的,哈哈。"]
+        ],
+        "mail_reaction": [
+            ["喂,你给我发邮件了吧!写的'{player_mail_content}',太好笑了!"],
+            [{"text": "我看到你发的邮件了!写着'{player_mail_content}',真是太肉麻了!不过心情还挺好的。", "emotion": "happy"}]
+        ],
+        "horror_conversation": [
+            ["以前跟{victim_name}见面也就是打个招呼的关系,最近却很怀念那句招呼。", {"text": "明明没什么大不了的,为什么会这么惦记呢。", "emotion": "sad"}],
+            ["踢球踢到一半,突然想起了{victim_name}。我自己也不知道为什么。"]
+        ]
+    },
+    "emails": {
+        "greeting": [
+            {"title": "今天真的超厉害", "lines": ["今天网里捞到一条超大的鲭鱼!", "太爽了。", "你下次来的时候我炫耀给你看!"]},
+            {"title": "无聊死了", "lines": ["最近没什么特别的事做,就一直在踢球。", "你什么时候来玩啊?", "真的很无聊啦!"]},
+            {"title": "随便写写", "lines": ["其实也没什么特别想说的,只是第一次写信觉得挺好玩就写了。", "写得奇怪的话你多包涵。", "那就先这样啦!"]}
+        ],
+        "event_invite": [
+            {"title": "吃得太爽了!", "lines": ["昨天真的吃到撑。", "我可是吃了两碗饭呢!", "下次一定还要叫我啊!"]},
+            {"title": "鲭鱼料理,太棒了", "requires_favorite_food": true, "lines": ["昨天做的鲭鱼料理完全合我口味!", "我还跟我爸炫耀了呢。", "真的谢谢你!"]}
+        ],
+        "gift_thanks": [
+            {"title": "哇,这是要给我的吗?", "lines": ["收到礼物太开心了!", "谢谢你,真的!"]},
+            {"title": "到处炫耀了一番", "lines": ["把收到的东西跟朋友们炫耀了一番。", "他们都羡慕得不行。", "谢谢你!"]}
+        ],
+        "memento_reminder": {"title": "喂!最近怎么都不来了?!", "lines": ["喂,{player_name}!最近怎么都不来了?", "我有东西要给你,快点过来一下!"]},
+        "story_progress": {
+            "player_arrival_day_4": {"title": "喂!听说你是新来的?", "lines": ["听说村里来了个新人!", "我是马林,鱼铺老板的儿子。", "无聊的话就来码头找我玩吧!"]}
+        },
+        "special_day": {}
+    }
+}

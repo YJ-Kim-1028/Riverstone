@@ -1,0 +1,385 @@
+{
+    "potato": {
+        "name": "ジャガイモ",
+        "description": "畑で収穫したジャガイモ。料理の材料として使う。"
+    },
+    "corn": {
+        "name": "とうもろこし",
+        "description": "畑で収穫したとうもろこし。料理の材料として使う。"
+    },
+    "lettuce": {
+        "name": "レタス",
+        "description": "畑で収穫したレタス。料理の材料として使う。"
+    },
+    "potato_seed": {
+        "name": "ジャガイモの種",
+        "description": "畑に植えるとジャガイモが育つ。"
+    },
+    "corn_seed": {
+        "name": "とうもろこしの種",
+        "description": "畑に植えるととうもろこしが育つ。"
+    },
+    "lettuce_seed": {
+        "name": "レタスの種",
+        "description": "畑に植えるとレタスが育つ。"
+    },
+    "pork": {
+        "name": "豚肉",
+        "description": "牧場で得られる豚肉。料理の材料として使う。"
+    },
+    "beef": {
+        "name": "牛肉",
+        "description": "牧場で得られる牛肉。料理の材料として使う。"
+    },
+    "milk": {
+        "name": "牛乳",
+        "description": "牧場で得られる牛乳。料理の材料として使う。"
+    },
+    "salmon": {
+        "name": "サケ",
+        "description": "釣りで手に入れたサケ。料理の材料として使う。"
+    },
+    "mackerel": {
+        "name": "サバ",
+        "description": "釣りで手に入れたサバ。料理の材料として使う。"
+    },
+    "squid": {
+        "name": "イカ",
+        "description": "釣りで手に入れたイカ。料理の材料として使う。"
+    },
+    "legendary_fish": {
+        "name": "伝説の魚",
+        "description": "黄金の釣り竿でしか現れないと言われる伝説の魚。実際に見た者はほとんどいない。"
+    },
+    "berry": {
+        "name": "ベリー",
+        "description": "採集で手に入れたベリー。料理の材料として使う。"
+    },
+    "rabbit_meat": {
+        "name": "ウサギの肉",
+        "description": "狩りで得たウサギの肉。料理の材料として使う。"
+    },
+    "bird_meat": {
+        "name": "鳥の肉",
+        "description": "狩りで得た鳥の肉。料理の材料として使う。"
+    },
+    "fishing_rod": {
+        "name": "釣り竿",
+        "description": "釣りに使う道具。"
+    },
+    "golden_fishing_rod": {
+        "name": "黄金の釣り竿",
+        "description": "まばゆく輝く黄金の釣り竿。釣具店前の海で使うと何が起きるのだろう…?"
+    },
+    "legend_statue": {
+        "name": "伝説の像",
+        "description": "伝説の魚100匹と交換できる像。"
+    },
+    "furniture_hammer": {
+        "name": "家具ハンマー",
+        "description": "家具や装飾品を持ち上げられるようになる。持っている間だけ使える。"
+    },
+    "watering_can": {
+        "name": "じょうろ",
+        "description": "作物に水をやる道具。"
+    },
+    "golden_watering_can": {
+        "name": "黄金のじょうろ",
+        "description": "柔らかく輝く黄金のじょうろ。周囲3x3マスに一度に水をやれる。"
+    },
+    "hoe": {
+        "name": "くわ",
+        "description": "土を耕して畑にする道具。"
+    },
+    "hunting_rifle": {
+        "name": "狩猟銃",
+        "description": "狩りに使う道具。"
+    },
+    "bucket": {
+        "name": "バケツ",
+        "description": "牛の乳搾りをして牛乳を得られる。"
+    },
+    "chair": { "name": "椅子" },
+    "sofa": { "name": "ソファ" },
+    "display_table": { "name": "陳列テーブル" },
+    "bookshelf_33": { "name": "本棚(大)" },
+    "bookshelf_23": { "name": "本棚(中)" },
+    "bookshelf_22": { "name": "本棚(小)" },
+    "cabinet_23": { "name": "キャビネット" },
+    "kitchen_cabinet": { "name": "キッチンキャビネット" },
+    "jukebox": { "name": "ジュークボックス" },
+    "glass_display_shelf": { "name": "ガラス陳列棚" },
+    "blinder": { "name": "グラインダー" },
+    "drink_fridge": { "name": "ドリンク冷蔵庫" },
+    "stove": { "name": "ストーブ" },
+    "desk": { "name": "机" },
+    "vase_1": { "name": "花瓶1" },
+    "vase_2": { "name": "花瓶2" },
+    "vase_3": { "name": "花瓶3" },
+    "vase_4": { "name": "花瓶4" },
+    "bed": { "name": "ベッド" },
+    "iron_cabinet": { "name": "鉄製キャビネット" },
+    "light": { "name": "ランプ" },
+    "standing_light": { "name": "スタンドランプ" },
+    "candle": { "name": "ろうそく" },
+    "shrine_light": { "name": "神社の灯籠" },
+    "temple_light": { "name": "寺院の灯籠" },
+    "flowerpot": { "name": "植木鉢" },
+    "round_carpet": { "name": "丸いカーペット" },
+    "rect_carpet": { "name": "長方形のカーペット" },
+    "rect_carpet_2": { "name": "長方形のカーペット(2)" },
+    "welcome_carpet": { "name": "ウェルカムマット" },
+    "memo": { "name": "メモ" },
+    "rat_poison": {
+        "name": "殺鼠剤",
+        "description": "致死性の毒を含んでいる。"
+    },
+    "soul_crystal": {
+        "name": "魂の結晶",
+        "description": "正体不明の結晶。かすかに温かい。セイジなら何か知っているかもしれない。"
+    },
+    "recipe_grilled_fish": {
+        "name": "レシピ:焼き魚",
+        "description": "右クリックで習得すると焼き魚が作れるようになる。習得したレシピは図鑑で確認できる。"
+    },
+    "recipe_salmon_salad": {
+        "name": "レシピ:サーモンサラダ",
+        "description": "右クリックで習得するとサーモンサラダが作れるようになる。習得したレシピは図鑑で確認できる。"
+    },
+    "recipe_grilled_squid": {
+        "name": "レシピ:焼きイカ",
+        "description": "右クリックで習得すると焼きイカが作れるようになる。習得したレシピは図鑑で確認できる。"
+    },
+    "recipe_fish_and_chips": {
+        "name": "レシピ:フィッシュ&チップス",
+        "description": "右クリックで習得するとフィッシュ&チップスが作れるようになる。習得したレシピは図鑑で確認できる。"
+    },
+    "recipe_grilled_vegetables": {
+        "name": "レシピ:焼き野菜",
+        "description": "右クリックで習得すると焼き野菜が作れるようになる。習得したレシピは図鑑で確認できる。"
+    },
+    "recipe_potato_salad": {
+        "name": "レシピ:ポテトサラダ",
+        "description": "右クリックで習得するとポテトサラダが作れるようになる。習得したレシピは図鑑で確認できる。"
+    },
+    "recipe_chop_steak": {
+        "name": "レシピ:チョップステーキ",
+        "description": "右クリックで習得するとチョップステーキが作れるようになる。習得したレシピは図鑑で確認できる。"
+    },
+    "recipe_barbecue": {
+        "name": "レシピ:バーベキュー",
+        "description": "右クリックで習得するとバーベキューが作れるようになる。習得したレシピは図鑑で確認できる。"
+    },
+    "recipe_grilled_pork_belly": {
+        "name": "レシピ:豚バラ焼き",
+        "description": "右クリックで習得すると豚バラ焼きが作れるようになる。習得したレシピは図鑑で確認できる。"
+    },
+    "recipe_seafood_set": {
+        "name": "レシピ:シーフードセット",
+        "description": "右クリックで習得するとシーフードセットが作れるようになる。"
+    },
+    "recipe_meat_salad": {
+        "name": "レシピ:ミートサラダ",
+        "description": "右クリックで習得するとミートサラダが作れるようになる。習得したレシピは図鑑で確認できる。"
+    },
+    "recipe_yogurt_smoothie": {
+        "name": "レシピ:ヨーグルトスムージー",
+        "description": "右クリックで習得するとヨーグルトスムージーが作れるようになる。習得したレシピは図鑑で確認できる。"
+    },
+    "recipe_strawberry_smoothie": {
+        "name": "レシピ:ストロベリースムージー",
+        "description": "右クリックで習得するとストロベリースムージーが作れるようになる。習得したレシピは図鑑で確認できる。"
+    },
+    "teddy_bear": {
+        "name": "くまのぬいぐるみ",
+        "description": "心地よいくまのぬいぐるみ。"
+    },
+    "wildflower_bouquet": {
+        "name": "野花の花束",
+        "description": "野原で摘んだ素朴な花束。"
+    },
+    "rose_bouquet": {
+        "name": "バラの花束",
+        "description": "豪華なバラの花束。"
+    },
+    "perfume_blue_de_ocean": {
+        "name": "ブルー・ド・オーシャン",
+        "description": "海の香りの香水。青い花の香りを残す。"
+    },
+    "perfume_mr_lilac": {
+        "name": "ミスター・ライラック",
+        "description": "ライラックの香りの香水。紫の花の香りを残す。"
+    },
+    "perfume_pale_light": {
+        "name": "ペール・ライト",
+        "description": "ほのかな香りの香水。白い花の香りを残す。"
+    },
+    "perfume_somewhere_behind_you": {
+        "name": "サムホエア・ビハインド・ユー",
+        "description": "マールが贈ってくれた香水。右クリックで使用できる。"
+    },
+    "animal_feed": {
+        "name": "飼料",
+        "description": "牛や豚のえさ。"
+    },
+    "small_knife": {
+        "name": "小型ナイフ",
+        "description": "牛や豚を解体して肉を得られる。"
+    },
+    "bait": {
+        "name": "釣り餌",
+        "description": "持っていると釣りの際に自動で使用される。イカが釣れる確率が上がる。"
+    },
+    "americano": {
+        "name": "アメリカーノ",
+        "description": "右クリックで使用すると一時的に移動速度が上がる。"
+    },
+    "energy_tonic": {
+        "name": "エナジー剤",
+        "description": "飲むとエネルギーが湧いてくる!(右クリックで使用してデバフを解除)"
+    },
+    "recipe_random": {
+        "name": "万能レシピ",
+        "description": "右クリックで使用するとランダムな料理のレシピを習得できる。習得したレシピは図鑑で確認できる。"
+    },
+    "book_beyond_the_door": {
+        "name": "扉の向こうに",
+        "description": "著者:アッシャー(インベントリで右クリックすると読める)"
+    },
+    "book_perfect_alibi": {
+        "name": "完璧なアリバイ",
+        "description": "著者:アッシャー(インベントリで右クリックすると読める)"
+    },
+    "book_life_as_a_cat": {
+        "name": "猫としての人生",
+        "description": "著者:アッシャー(インベントリで右クリックすると読める)"
+    },
+    "book_culprit_is_here": {
+        "name": "犯人はこの中にいる",
+        "description": "著者:アッシャー(インベントリで右クリックすると読める)"
+    },
+    "book_love_in_three_seconds": {
+        "name": "恋に落ちるのに3秒あれば十分",
+        "description": "著者:アッシャー(インベントリで右クリックすると読める)"
+    },
+    "book_resolve_before_death": {
+        "name": "死の前の決意",
+        "description": "著者:アッシャー(インベントリで右クリックすると読める)"
+    },
+    "book_last_summer": {
+        "name": "あの夏、君がしたこと",
+        "description": "著者:アッシャー(インベントリで右クリックすると読める)"
+    },
+    "book_detectives_last_trace": {
+        "name": "探偵最後の痕跡",
+        "description": "著者:アッシャー(インベントリで右クリックすると読める)"
+    },
+    "book_unsent_letter": {
+        "name": "送られなかった手紙",
+        "description": "著者:アッシャー(インベントリで右クリックすると読める)"
+    },
+    "book_girl_in_the_alley": {
+        "name": "いつもあの路地に立っていた少女",
+        "description": "著者:アッシャー(インベントリで右クリックすると読める)"
+    },
+    "record_chiptune": {
+        "name": "チップチューン",
+        "description": "ジュークボックスで再生できるレコード。"
+    },
+    "record_city_pop": {
+        "name": "シティポップ",
+        "description": "ジュークボックスで再生できるレコード。"
+    },
+    "record_lofi": {
+        "name": "ローファイ",
+        "description": "ジュークボックスで再生できるレコード。"
+    },
+    "record_bossa_nova": {
+        "name": "ボサノヴァ",
+        "description": "ジュークボックスで再生できるレコード。"
+    },
+    "record_acoustic_folk": {
+        "name": "アコースティックフォーク",
+        "description": "ジュークボックスで再生できるレコード。"
+    },
+    "record_acoustic_pop": {
+        "name": "アコースティックポップ",
+        "description": "ジュークボックスで再生できるレコード。"
+    },
+    "record_be_with_you": {
+        "name": "ビー・ウィズ・ユー",
+        "description": "ジュークボックスで再生できるレコード。"
+    },
+    "record_the_day_after_you_came": {
+        "name": "ザ・デイ・アフター・ユー・ケイム",
+        "description": "ジュークボックスで再生できるレコード。"
+    },
+    "record_the_heart_sutra_remix": {
+        "name": "般若心経(リミックス)",
+        "description": "ジュークボックスで再生できるレコード。"
+    },
+    "record_we_are_all_christmas": {
+        "name": "ウィー・アー・オール・クリスマス",
+        "description": "ジュークボックスで再生できるレコード。"
+    },
+    "storage_box": {
+        "name": "保管箱",
+        "description": "アイテムを収納できる箱。"
+    },
+    "test_hat": {
+        "name": "テスト用帽子",
+        "description": "装備システムのテスト用アイテム - 実際のアイテムができ次第削除。"
+    },
+    "test_shoes": {
+        "name": "テスト用靴",
+        "description": "装備システムのテスト用アイテム - 実際のアイテムができ次第削除。"
+    },
+    "cooked_corn": {
+        "name": "蒸しとうもろこし",
+        "description": "鍋で蒸したとうもろこし。"
+    },
+    "cooked_potato": {
+        "name": "蒸しジャガイモ",
+        "description": "鍋で蒸したジャガイモ。"
+    },
+    "cooked_pork": {
+        "name": "焼き豚肉",
+        "description": "フライパンで焼いた豚肉。"
+    },
+    "cooked_beef": {
+        "name": "焼き牛肉",
+        "description": "フライパンで焼いた牛肉。"
+    },
+    "cooked_salmon": {
+        "name": "焼きサケ",
+        "description": "フライパンで焼いたサケ。"
+    },
+    "cooked_mackerel": {
+        "name": "焼きサバ",
+        "description": "フライパンで焼いたサバ。"
+    },
+    "cooked_squid": {
+        "name": "焼きイカ",
+        "description": "フライパンで焼いたイカ。"
+    },
+    "salad_greens": {
+        "name": "サラダ菜",
+        "description": "まな板で下処理したレタス。"
+    },
+    "mashed_berry": {
+        "name": "つぶしたベリー",
+        "description": "ミキサーでつぶしたベリー。"
+    },
+    "smoothie": {
+        "name": "スムージーのベース",
+        "description": "ミキサーで混ぜた牛乳。"
+    },
+    "cooked_rabbit_meat": {
+        "name": "茹でウサギ肉",
+        "description": "鍋で茹でたウサギの肉。"
+    },
+    "cooked_bird_meat": {
+        "name": "焼き鳥肉",
+        "description": "フライパンで焼いた鳥の肉。"
+    }
+}

@@ -1,7 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/language_settings_screen.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/ui/frame_9slice.png" id="2_frame"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_language"]
 
 [node name="LanguageSettingsScreen" type="Control"]
 anchor_right = 1.0
@@ -18,10 +20,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -60.0
-offset_top = -30.0
-offset_right = 60.0
-offset_bottom = 30.0
+offset_left = -85.0
+offset_top = -35.0
+offset_right = 85.0
+offset_bottom = 35.0
 texture = ExtResource("2_frame")
 patch_margin_left = 16
 patch_margin_top = 16
@@ -47,15 +49,43 @@ theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
 horizontal_alignment = 1
 text = "언어 설정"
 
-[node name="MessageLabel" type="Label" parent="Panel/Margin/VBox"]
+[node name="LanguageRow" type="HBoxContainer" parent="Panel/Margin/VBox"]
 layout_mode = 2
-size_flags_vertical = 3
-autowrap_mode = 3
-horizontal_alignment = 1
-vertical_alignment = 1
+alignment = 1
+theme_override_constants/separation = 6
+
+[node name="KoButton" type="Button" parent="Panel/Margin/VBox/LanguageRow"]
+custom_minimum_size = Vector2(30, 16)
+layout_mode = 2
+toggle_mode = true
+button_pressed = true
+button_group = SubResource("ButtonGroup_language")
 theme_override_font_sizes/font_size = 5
-theme_override_colors/font_color = Color(0.25, 0.15, 0.08, 1)
-text = "준비 중입니다."
+text = "한국어"
+
+[node name="EnButton" type="Button" parent="Panel/Margin/VBox/LanguageRow"]
+custom_minimum_size = Vector2(30, 16)
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_language")
+theme_override_font_sizes/font_size = 5
+text = "English"
+
+[node name="JaButton" type="Button" parent="Panel/Margin/VBox/LanguageRow"]
+custom_minimum_size = Vector2(30, 16)
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_language")
+theme_override_font_sizes/font_size = 5
+text = "日本語"
+
+[node name="ZhButton" type="Button" parent="Panel/Margin/VBox/LanguageRow"]
+custom_minimum_size = Vector2(30, 16)
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_language")
+theme_override_font_sizes/font_size = 5
+text = "中文"
 
 [node name="BackButton" type="Button" parent="Panel/Margin/VBox"]
 custom_minimum_size = Vector2(0, 16)

@@ -1,0 +1,42 @@
+{
+    "second_murder_sack": {"title": "Did you get it?", "lines": ["I prepared a gift for you — did you get it?", "You weren't surprised, were you? I told you it was coming.", "I really hope you opened the sack.", "Because you need to see with your own eyes what happens when you don't listen to me."]},
+    "early": [
+        {"title": "Nice to meet you~!", "lines": ["Hi, this is the first time I've sent an email like this. Guess who I am? ^___^"]},
+        {"title": "Why send this anonymously?", "lines": ["Honestly, I only just found out this mail system existed. Everyone in town shares their mail with each other, but...", "I secretly made myself another account.", "Don't you think a friend like this could be fun?"]},
+        {"title": "Curious who I am?", "lines": ["Are you enjoying my emails too? Aren't you curious who I could be?", "I've always wanted a friend like this — someone you can only imagine.", "I'll be your imaginary friend.", "Think about me a lot, okay? Yay."]},
+        {"title": "You'll never know who I am.", "lines": ["Have you been asking people in town who I might be?", "You'll never know me.", "Not until I decide to change my mind.", "Because I won't let you find out."]},
+        {"title": "Is this really me?", "lines": ["Is this really how I actually talk, in the emails I send you?", "Or maybe, in real life, I'm actually speaking to you politely?", "Am I really this talkative?", "Do I really think about you this much?", "It's a frustrating day, not being able to tell you the answer."]},
+        {"title": "Hello hello hello hello.", "lines": ["What are you doing today?", "Prepping ingredients for the restaurant?", "I'm curious.", "I want to know more about you."]},
+        {"title": "I watched your farm last night.", "lines": ["You don't know this, but I walked in front of your house for a long time.", "Walking and walking, wondering what you'd do here.", "Tell me, someday, when we finally meet..."]},
+        {"title": "Doesn't the same day, every day, get tiring?", "lines": ["Without my emails, you'd just be farming, fishing, cooking, serving,", "farming, fishing, cooking, serving,", "farming, fishing, cooking, serving,", "Isn't it me who makes your day feel special?"]},
+        {"title": "Do you ever think about writing back?", "lines": ["Do you ever think about being my secret friend too, the way I am to you?", "I wonder what you're thinking right now... I want to know."]},
+        {"title": "I saw you buy seeds today.", "lines": ["I saw everything — the seeds you bought today. What are you going to plant?", "When you harvest it, cook it for me.", "How wonderful it would be if only I could eat your cooking."]},
+        {"title": "Business seems to be going well lately.", "lines": ["The restaurant's been busy a lot.", "It must be exhausting, dealing with customers.", "People who make things hard for you annoy me.", "...Want me to get rid of them?", "Just kidding. ^__^"]},
+        {"title": "Should we walk together on a nice day?", "lines": ["On a day this nice, we should walk together.", "Could you come to where I am?", "I'll be waiting..."]},
+        {"title": "The less you know, the more you'll think of me.", "lines": ["No matter who in town you meet, you'll wonder if that person could be me.", "Whoever you meet, I'll be the first thing on your mind.", "How could I possibly give up my anonymity, when it works this well?", "Don't be too upset. I'm thinking of you just as much.", "Always..."]},
+        {"title": "Don't spend too much time with other people.", "lines": ["You're my one and only best friend. My friend. My lover. My person.", "So why are you getting close to other people too?", "That's not allowed.", "No."]},
+        {"title": "When you open your eyes in the morning", "lines": ["Come to me. I don't like it when you see someone else first.", "Stop.Stop.Stop.Stop.Stop.Stop.Stop.Stop.Stop.Stop.Stop.Stop.Stop.Stop.Stop.Stop.Stop."]},
+        {"title": "Food made with your care.", "lines": ["I wish only I could eat it.", "I want to kill every customer who comes to your restaurant."]},
+        {"title": "Should I just buy up everything?", "lines": ["You've been busy running around buying this and that lately. Maybe I should just buy up every shop in town.", "All of them....."]},
+        {"title": "Give gifts only to me", "lines": ["Who did you give a gift to today?", "Stop handing out gifts to people.", "Everyone starts paying attention to you.", "Doesn't that future worry you?"]},
+        {"title": "Invite me too.", "lines": ["Please don't be so cruel.", "You know I'm waiting!!!!", "Can't you.... can't you wait for me too? Please wait for me."]},
+        {"title": "I'm not in your day", "lines": ["Who were you thinking about all day today?", "I wish it were me.", "If it wasn't... I'll make sure you think of me again."]},
+        {"title": "You'll find out soon", "lines": ["I'm watching, one by one, the people you care about.", "I'm curious too, about who matters most to you.", "You'll find out soon."]}
+    ],
+    "mid": [
+        {"title": "Do you know why {victim_name} ended up like that?", "lines": ["{victim_name} got too close to you.", "That's the reason. That's all there is to it.", "Simple, right?", "I warned you. I told you in advance. If only you'd actually listened..."]},
+        {"title": "I guess you two really were close.", "lines": ["They kept calling out for you, right to the end.", "They died slowly, calling your name.", "I watched until the light went out of their eyes.", "It made me angry. Even while dying? You?", "I thought about tearing the body apart too, but out of one last bit of mercy, I threw it into the sea."]},
+        {"title": "If only you hadn't been so kind to them.", "lines": ["It's your fault. It's your fault. If you hadn't been so kind, {victim_name} would still be alive.", "It's because you ignored what I told you.", "I hope you don't make this mistake again."]},
+        {"title": "Let me make you a promise..", "lines": ["Whoever gets too close to you", "will end up exactly like {victim_name}.", "This isn't a warning....", "It's a promise."]},
+        {"title": "Fate is something you carve out yourself.", "lines": ["{victim_name}, who died for you. Think of them, and don't make another foolish choice."]},
+        {"title": "Petal fortune-telling.", "lines": ["The person near you who bothers me — kill them, don't kill them. Kill. Don't kill. Kill. Don't kill. Kill. Don't kill.... Kill."]},
+        {"title": "I wish you'd stop", "lines": ["You, laughing and chatting with other people — that's such cruel violence against me.", "Please stop..."]}
+    ],
+    "late": [
+        {"title": "So it happened again, in the end.", "lines": ["The future I didn't want has arrived.", "I can't stop.", "Staining my hands with blood has become second nature.", "Killing someone for you doesn't scare me anymore.", "Poli, that bastard, is just useless.", "I've killed two people in a town this small. And they still can't catch me?"]},
+        {"title": "Haha, I sharpened my knife for you again today.", "lines": ["I'll kill every single person who makes things hard for you. I promise!", "- From your very own dark hero -"]},
+        {"title": "It started out as something I did for you.", "lines": ["But now I'm addicted to the thrill of it.", "It's not just you — now everyone is thinking about me.", "Not knowing who the culprit is, people are pulling away from each other.", "The more they suspect, badmouth, and distance themselves from each other, the more isolated they become,", "and the more their chances of dying by my hand only grow.", "One piece of advice, for your sake: don't walk around alone."]},
+        {"title": "Be careful, {player_name}", "lines": ["You could die at any time too. Always watch your back when you walk. Look up at the sky — see which way the clouds are moving.", "Sage? Lama? Tell those useless idiots to get lost.", "Do they really think their gods can stop me?"]},
+        {"title": "Trust me", "lines": ["I found a way for us to be together forever.", "We will never be apart.", "Trust my method."]}
+    ]
+}

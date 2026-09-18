@@ -1,0 +1,353 @@
+{
+    "id": "woody",
+    "name": "Woody",
+    "name_en": "Woody",
+    "gender": "여성",
+    "age": "20대",
+    "job": "목수",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "밝고 털털하다.",
+        "정이 많다.",
+        "거짓말을 잘 못한다.",
+        "사람을 잘 믿는다.",
+        "의외로 사람 보는 눈이 좋다.",
+        "부끄러움을 많이 탄다.",
+        "낯가림이 없어서 플레이어와 처음부터 반말을 사용한다."
+    ],
+    "preferred_food": ["토끼고기"],
+    "disliked_food": ["새고기"],
+    "special_notes": [
+        "가구점 운영 NPC로 인테리어 아이템을 판매한다.",
+        "십자수가 취미지만 여성적인 취미를 들키는 것을 매우 부끄러워한다. 벨제와 이샤만 이 사실을 안다.",
+        "마을 사람들 사이에서 '아들처럼 자란 아이'로 인식된다."
+    ],
+    "memento_item": {
+        "name": "Cross-Stitch",
+        "description": "The first cross-stitch piece Woody ever finished. Clumsy, but stitched with a small wildflower. She's never shown it to anyone.",
+        "lore_lines": [
+            "진짜 안 웃을 거지?",
+            "약속해.",
+            "...웃으면 망치로 때려버린다."
+        ]
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/woody_port.png",
+        "happy": "res://assets/npc/portrait/woody_happy.png",
+        "sad": "res://assets/npc/portrait/woody_sad.png",
+        "angry": "res://assets/npc/portrait/woody_angry.png"
+    },
+    "sprite": "res://assets/npc/sprite/woodySprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "furniture_working"},
+                {"time": "18:00", "state": "shrine_standing"},
+                {"time": "21:00", "state": "furniture_working"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "furniture_working"},
+                {"time": "14:00", "state": "pasture_looking"},
+                {"time": "18:00", "state": "general_looking"},
+                {"time": "21:00", "state": "furniture_working"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "furniture_working"},
+                {"time": "12:00", "state": "furniture_looking"},
+                {"time": "14:00", "state": "plaza4_pond_sitting"},
+                {"time": "18:00", "state": "farm_looking"},
+                {"time": "21:00", "state": "furniture_working"}
+            ]
+        }
+    },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "furniture_working",
+        "npc_spawn": "woody_heart_npc",
+        "player_spawn": "woody_heart_player",
+        "lines": [
+            "Oh? {player_name}, I've been seeing you around a lot lately.",
+            "Just wanted to say hi since I'm glad to see you!",
+            {"text": "Oh right, I made this as practice recently... it's yours. No returns!", "emotion": "happy"},
+            {"type": "gift", "item_id": "vase_1"},
+            "Water it every single day and think of me."
+        ]
+    },
+    "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "description": "낡은 옷장을 발견하고 고쳐주겠다고 한다.",
+            "lines": [
+                "Oh, right. Isn't the wardrobe at your place, {player_name}, totally worn out?",
+                {"text": "I'll fix it for you! If you're okay with that.", "emotion": "happy"},
+                {"text": "Aw, come on. What are friends for! I can do at least this much for you.", "emotion": "happy"},
+                {"type": "sfx"}
+            ]
+        },
+        {
+            "threshold": 60,
+            "type": "confession",
+            "description": "사실은 귀여운 것을 좋아한다고 털어놓는다.",
+            "lines": [
+                "Sometimes.",
+                "There are times I want to wear a skirt too.",
+                "Weird, right? I know. It probably wouldn't suit me."
+            ]
+        },
+        {
+            "threshold": 75,
+            "type": "confession",
+            "requires_alive": "shepherd",
+            "description": "셰퍼드를 처음부터 좋아하지 않았다고 이야기한다.",
+            "lines": [
+                "Shepherd came by the furniture shop today and asked if there was anything he could help with.",
+                "I appreciate the kindness, but... something about it feels off.",
+                "Isn't it, though? Being that kind to me when he's already got someone he's married to feels a little too...",
+                "It's a lot.",
+                "So I'm sorry, but I'd rather Shepherd stopped visiting my shop for personal reasons.",
+                "I'm not a fan of him."
+            ]
+        },
+        {
+            "threshold": 85,
+            "type": "dialogue",
+            "description": "'아들처럼 자란 아이'라는 인식에 억눌러온 반감을 잠깐 드러낸다.",
+            "lines": [
+                "Sometimes people tell me I'm 'easygoing.'",
+                {"text": "They usually mean it as a compliment, but sometimes it feels like it's boxing me in.", "emotion": "sad"},
+                {"text": "Honestly, I like delicate, cute little things too. But if I say that out loud... people look at me like it's some big surprise. That's really hard to carry.", "emotion": "sad"},
+                {"text": "When will I be able to just live as myself. Thinking about that makes me want to disappear.", "emotion": "sad"},
+                {"text": "Ah, sorry. Guess things have been hard lately and I said something too extreme. Forget I said that.", "emotion": "sad"}
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "직접 만든 십자수를 건네준다.",
+            "lines": [
+                "I made this myself.",
+                "What do you think? Not weird, right?",
+                "It's kind of awkward for me to have a hobby like this... something like this suits someone like Flora better.",
+                {"text": "But I'm giving it to you because it's you!", "emotion": "happy"},
+                {"text": "Because I like you!", "emotion": "happy"}
+            ]
+        },
+        {
+            "threshold": 105,
+            "type": "dialogue",
+            "description": "가구점 마감길에 느끼는 낯선 감을 일 탓으로 돌린다.",
+            "lines": [
+                "Have you been getting any strange emails lately, by chance?",
+                "I sometimes get emails from someone I can't identify.",
+                "Nothing important. Probably just spam.",
+                "Still, it keeps coming back just when I forget about it, so it's a little unsettling."
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "murder_grief": [
+            {"text": "I tried to work like normal again today.", "emotion": "sad"},
+            {"text": "My hands keep shaking, I can't do it.", "emotion": "sad"},
+            {"text": "Sorry, this isn't like me, but I feel like I'm about to cry.", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            "This time I can't even pretend to be okay.",
+            {"text": "I'm just scared. That's all I'll say.", "emotion": "sad"}
+        ],
+        "suspicion_talk_2": {
+            "requires_alive": "marr",
+            "lines": [
+                "I hope they catch the culprit soon. I don't want to watch everyone suspecting each other.",
+                "Mocha told me she suspects Marr, but I don't think that's it.",
+                "We shouldn't just jump to suspecting someone without even knowing who the real culprit is. Don't you think?"
+            ]
+        }
+    },
+    "furniture_hammer_gift_lines": ["{player_name}! You finally bought a piece of furniture I made.",
+        "Hope you like it.",
+        "To celebrate your first furniture purchase, I'll give you this as a gift. It's a furniture hammer.",
+        "You'll need it for moving furniture around!",
+        {"text": "Repairs are free, so come find me anytime something breaks~", "emotion": "happy"}
+    ],
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    ["Planing wood first thing Monday morning really wakes me up!"],
+                    ["You came again today? Great to see you!", "Got lots of good stuff, take a look around."],
+                    ["Rest well over the weekend? I worked on some wood.", "Making one piece of furniture takes forever.", {"text": "I only want to give the townspeople good stuff, after all.", "emotion": "happy"}]
+                ],
+                "mid": [
+                    ["Orders have been piling up lately. Busy right from Monday.", "Got time to help out?", {"text": "Hehe, just kidding. You've got your own stuff, go on!", "emotion": "happy"}],
+                    ["Here to look at furniture? Take your time.", "The sofa and bed?", "Feel free to sit on them~"],
+                    ["Had black tea this morning to get ready for work again.", "Without caffeine, fighting off morning sleepiness is way too hard~"]
+                ],
+                "high": [
+                    ["Hey, {player_name}! So glad to see you!", "Nobody's a better customer than you these days."],
+                    [{"text": "A customer said the chair I made was pretty today and I got kind of full of myself.", "emotion": "happy"}],
+                    ["Feels like my hands have gotten better lately.", {"text": "Maybe it's just the job?", "emotion": "happy"}]
+                ]
+            },
+            "화": {
+                "low": [
+                    ["The shop's floor tiles look pretty worn.", "Guess I should fix them up soon."],
+                    ["Here to drop something off?", "I'm working on a chair Poli left with me right now.", "If you've got something to fix, just leave it!"],
+                    ["Orders always come in on Tuesdays for some reason. It's not like everyone planned it.", "Funny how days like this happen."]
+                ],
+                "mid": [
+                    {"lines": ["Belze brought me some wool.", "It's so soft and fluffy just to touch.", "This sweater's knit from wool she gave me too."], "requires_alive": "belje", "fallback_lines": ["This sweater's knit from wool Belze gave me.", "I miss her so much. How did something like this even happen..."]},
+                    ["Tell me if you need any furniture. I'll make it extra nice for you.", "Feel free to email me too!"],
+                    ["I made the lantern at Sage's shrine too.", {"text": "Pretty cool, right?", "emotion": "happy"}]
+                ],
+                "high": [
+                    {"lines": ["Belze and I are really close. I genuinely hope she's happy.", "Do you have someone close to you?", {"text": "Could it be... me? Hehe.", "emotion": "happy"}], "requires_alive": "belje", "fallback_lines": ["I go visit Belze at your yard sometimes.", "I really hope she's happy there."]},
+                    ["Hey, {player_name}. What do you think of a girl who planes wood for a living?", "If you're into it...", {"text": "Hehe.", "emotion": "happy"}],
+                    {"lines": ["Shepherd's so kind it actually makes me distrust him a little.", "Like, he's smiling even in situations that would upset anyone.", "Am I being too harsh?"], "requires_alive": "shepherd", "fallback_lines": ["The gap he left behind is bigger than I expected.", "I'm fine, but Belze's the one I worry about.", "I've been trying to check in on her often."]}
+                ]
+            },
+            "수": {
+                "low": [
+                    ["Halfway through the week already. Time flies."],
+                    ["Come by because you need something today?"],
+                    ["Wednesday's when the lumber shipment comes in, so it's chaos.", "Still, let me know if you need anything."]
+                ],
+                "mid": [
+                    [{"text": "I love it when rabbit meat dishes come out!", "emotion": "happy"}, "That tenderness is exactly my kind of thing."],
+                    {"lines": ["I made Isha a coaster, and she says she still uses it because it's pretty. Hehe."], "requires_alive": "isha", "fallback_lines": ["My coaster set was a friendship gift Isha and I matched together.", "It feels strange every time I have tea now."]},
+                    ["The smell of wood puts my mind at ease. Weird?"],
+                    ["I've picked up one more hands-on hobby lately.", "What is it, you ask? ...I'll tell you once we're closer."]
+                ],
+                "high": [
+                    ["Ugh. Sometimes I just feel down for no reason like this.", "A real adult wouldn't let it show, though."],
+                    [{"text": "The dresser I put together today turned out great, even by my own standards!", "emotion": "happy"}],
+                    ["Sometimes I just linger outside shops selling pretty little trinkets, for no reason.", "Doesn't really suit me, does it?"]
+                ]
+            },
+            "목": {
+                "low": [
+                    ["You worked hard today too."],
+                    {"lines": ["Hey. I'm heading over to fix Roshi's boat later,", "so tell me now if you need anything!"], "requires_alive": "roshi", "fallback_lines": ["I used to be the one who fixed Roshi's boat.", "Talking with him so often, we got pretty close.", "He really was a good man."]},
+                    ["Thursday's material-organizing day. Takes more work than you'd think."],
+                    ["Bird meat's just... not something I reach for.", "I don't like how dry and chewy it is."]
+                ],
+                "mid": [
+                    ["Some days I think about my dad. He's the one who taught me carpentry.", "He passed away a good while back, but I still miss him so much..."],
+                    [
+                        "Should I carve the chair legs curved, or straight? Which would you pick?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "I think curved would look nice.", "affection": 1, "response": ["Right? It'll take more work, but I'll give it a shot."]},
+                                {"label": "Straight looks sturdier.", "affection": 1, "response": ["Now that you mention it, that's true too."]},
+                                {"label": "Make both.", "affection": 0, "response": ["Can't, I've only got one set of materials. Shame."]}
+                            ]
+                        }
+                    ],
+                    {"lines": ["Isha still uses that coaster, and it just makes me smile."], "requires_alive": "isha", "fallback_lines": ["Ugh. I just want to clock out early today, for some reason.", "Maybe I'll lie down on the display bed for a bit when there's no customers.", "...Probably shouldn't."]}
+                ],
+                "high": [
+                    ["I've got a pretty good eye for people, you know? You seemed trustworthy from the moment I first saw you."],
+                    [{"text": "A customer tried to haggle with me today, but I won in the end!", "emotion": "happy"}, "Asking for half price is just too much~"],
+                    ["Sometimes I think my name sounds way too much like a boy's.", "But well, it's a bit late to change it now.", "This is fine too, I guess."]
+                ]
+            },
+            "금": {
+                "low": [
+                    ["Another week's almost over. What are you doing this weekend?"],
+                    ["Fridays get a bit busy with customers."],
+                    ["Guess everyone's out having fun since it's Friday night. I'm the only one working."]
+                ],
+                "mid": [
+                    ["Ack! I forgot to order lumber.", "Seeing your face just reminded me!"],
+                    ["Actually, I'm a bit shy around strangers. But you felt comfortable from the start.", "Maybe because we're around the same age?", "It's an enviable trait, being able to put someone at ease even on a first meeting."],
+                    {"lines": ["Thinking of going to the next town over this weekend to buy something.", {"text": "What am I buying, you ask? That's... ask Belze. Hehe.", "emotion": "happy"}], "requires_alive": "belje", "fallback_lines": ["Thinking of going to the next town over this weekend to buy something.", "Guess I'll just people-watch while I'm there."]}
+                ],
+                "high": [
+                    ["{player_name}. What do you do when you're worried about something?", "You just... forget about it?", "How does that even work...?", "Sounds like you should be the one at the temple, not Lama."],
+                    ["A customer asked for something especially pretty today, so I really put effort into weaving it.", {"text": "The reaction was great, I'm so pumped!", "emotion": "happy"}],
+                    {"lines": ["Shepherd's always kind to me too.", "But honestly... something about that makes me uncomfortable.", "I'd rather have someone who's only kind to the people who matter to them, over someone who's kind to everyone."], "requires_alive": "shepherd", "fallback_lines": ["Good to see you, {player_name}.", "I've got a lot to ask you, but you looked busy.", "Write me emails often! Let's stay in touch~"]}
+                ]
+            },
+            "토": {
+                "low": [
+                    ["The furniture shop's open on weekends too! If there's no customers, I just work with wood."],
+                    ["Took a short break by the pond."],
+                    ["I go out on Saturdays just for the fun of browsing the market."]
+                ],
+                "mid": [
+                    ["My mind feels more relaxed on weekends. Makes me want to try making all sorts of things."],
+                    ["Nice weather today. You should go have some fun too."],
+                    ["Sage gave me a talisman to thank me for supplying the shrine's furniture.", "Not sure what it does, but I figure just having it brings good energy?"]
+                ],
+                "high": [
+                    ["Weekends like this, talking with you, are my favorite."],
+                    [{"text": "A customer even took a photo of the furniture I made today!", "emotion": "happy"}, "Isn't that just so satisfying."],
+                    ["Sometimes I catch my reflection and it feels unfamiliar.", "Even though I'm used to seeing myself with short hair and work clothes... it happens sometimes.", "Doesn't look very girly, does it."]
+                ]
+            },
+            "일": {
+                "low": [
+                    ["Came out a bit late on Sunday. Sorry!"],
+                    {"lines": ["Went to check out the farm. Flora's vegetables looked so fresh."], "requires_alive": "flora", "fallback_lines": ["The flowers Flora used to grow were really pretty.", "I bet she's been reborn as one of them for sure."]},
+                    ["Sleeping in on Sunday mornings is the best."]
+                ],
+                "mid": [
+                    ["Guess I'll get busy again starting tomorrow. Better rest up today."],
+                    ["I like some alone time now and then too. Not that I get bored, though."],
+                    ["What do I do when I'm alone, you ask?", "...Just this and that. Nothing much."]
+                ],
+                "high": [
+                    ["I think I'd get kind of bored without you. You don't have to come every day, but stop by sometimes."],
+                    [{"text": "Finished a drawer today, just like Dad taught me!", "emotion": "happy"}, "Wonder what he'd say if he could see it."],
+                    ["Sometimes I want to go out wearing something pretty too.", "But when it actually comes to buying it, I just can't bring myself to.", {"text": "Ugh... it's just awkward!", "emotion": "happy"}]
+                ]
+            }
+        },
+        "rain_conversation": [
+            ["When it rains, the wood gets damp and the work doesn't go well."],
+            ["If you don't have an umbrella, come rest at the furniture shop for a bit."],
+            ["Planing wood while listening to the rain isn't so bad either."]
+        ],
+        "mail_reaction": [
+            ["You sent me an email! '{player_mail_content}' — I was grinning like an idiot. Was it obvious?"],
+            ["'{player_mail_content}'... huh? No, I don't mean it's weird! Just... it made me happy."]
+        ],
+        "horror_conversation": [
+            [{"text": "I still have the sketch for the furniture {victim_name} ordered.", "emotion": "sad"}, "Can't bring myself to throw it away. Just keeping it."],
+            ["While I'm working, {victim_name}'s smile just comes to mind out of nowhere.", "...Sorry, I suddenly feel like I'm about to cry."]
+        ]
+    },
+    "emails": {
+        "greeting": [
+            {"title": "How've you been?", "lines": ["Haven't seen you around at all lately, so figured I'd write a few lines.", "I'm working hard, so come by anytime you need something.", "See you soon!"]},
+            {"title": "Bragging about today's work", "lines": ["Finished a desk today, and even I think it turned out great.", "I'll show it off next time you come by the shop."]},
+            {"title": "Writing letters feels weird", "lines": ["First time writing something like this, so I don't know where to start.", "Just... wondering how you're doing.", "You don't have to write back!"]}
+        ],
+        "event_invite": [
+            {"title": "That was a great meal!", "lines": ["Really enjoyed the food yesterday.", "Sitting as a guest isn't so bad either.", "Invite me again!"]},
+            {"title": "Ate my fill", "lines": ["Ate until I was full yesterday, and work went a lot smoother today because of it.", "Thanks, really."]},
+            {"title": "That rabbit-meat dish was exactly my taste", "requires_favorite_food": true, "lines": ["I got so excited when the rabbit-meat dish came out yesterday.", "So tender, just perfect.", "Make it again, promise me!"]}
+        ],
+        "gift_thanks": [
+            {"title": "Why'd you go and get me something like this!", "lines": ["Hehe, you know that means thanks, right? I was so thrilled to get a gift!", "Thank you, really.", "I'll use it for a long time to come!"]}
+        ],
+        "memento_reminder": {"title": "Why haven't you come by lately?", "lines": ["{player_name}, why haven't you been coming by lately?", "I've got something set aside for you! Come by soon."]},
+        "story_progress": {
+            "player_arrival_day_3": {"title": "Heard you're new? Nice to meet you!", "lines": ["Heard you just moved to town.", "I'm Woody, I run the furniture shop.", "If you see a short-haired girl walking around, say hi!"]}
+        },
+        "special_day": {}
+    }
+}

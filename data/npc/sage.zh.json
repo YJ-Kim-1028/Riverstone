@@ -1,0 +1,267 @@
+{
+    "id": "sage",
+    "name": "赛吉",
+    "name_en": "Sage",
+    "gender": "여성",
+    "age": "20대",
+    "job": "무녀",
+    "npc_type": "story",
+    "can_die": false,
+    "is_stalker": false,
+    "personality": [
+        "说话直接。",
+        "沉默寡言,很少表达情绪。",
+        "给人一种冷淡的印象。"
+    ],
+    "preferred_food": ["우유"],
+    "disliked_food": ["베리"],
+    "special_notes": [
+        "为玩家占卜运势,管理神社。",
+        "能看见灵体,并在命案发生前间接发出预兆警告。",
+        "和玩家熟悉之后话会变多。",
+        "第一起命案之后,开始看到玩家身边有个来历不明的灵体。"
+    ],
+    "memento_item": {
+        "name": "护身符",
+        "description": "赛吉亲手制作的护身符。她从不把这个送给别人,却把一个交给了玩家。",
+        "lore_lines": []
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/sage_port.png",
+        "happy": "res://assets/npc/portrait/sage_port.png",
+        "sad": "res://assets/npc/portrait/sage_sad.png",
+        "angry": "res://assets/npc/portrait/sage_sad.png"
+    },
+    "sprite": "res://assets/npc/sprite/sageSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "plaza5_standing"},
+                {"time": "16:00", "state": "shrine_sitting"},
+                {"time": "21:00", "state": "shrine_standing"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "shrine_standing_next"},
+                {"time": "16:00", "state": "shrine_sitting"},
+                {"time": "21:00", "state": "shrine_standing"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "shrine_sitting"},
+                {"time": "12:00", "state": "furniture_sitting"},
+                {"time": "16:00", "state": "furniture_looking"},
+                {"time": "18:00", "state": "plaza1_flower_standing"},
+                {"time": "21:00", "state": "shrine_sitting"}
+            ]
+        }
+    },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "shrine_sitting",
+        "npc_spawn": "shrine_sitting",
+        "player_spawn": "sage_heart_player",
+        "emote": "excited",
+        "lines": [
+            {"text": "来算命的?", "emotion": "happy"},
+            "好奇今天的运势吗?",
+            "……卦象显示,你今天绝对不该到外面乱走。",
+            {"text": "相当不妙。{player_name},这段时间要小心点。", "emotion": "sad"},
+            {"text": "开玩笑的。抱歉,这个玩笑可能有点过头了。", "emotion": "happy"},
+            {"text": "嗯……今天的运势是满分呢。是不是因为你来见我了?", "emotion": "happy"}
+        ]
+    },
+    "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "description": "직접 고른 음반을 건넨다.",
+            "lines": [
+                "{player_name}。拿着这个。",
+                {"type": "gift", "item_id": "record_we_are_all_christmas"},
+                "来这个镇子之前,我住在北海道。那里雪下得很大,大家都很喜欢过冬季祭典。",
+                "这是我住在那个镇子时,冬季祭典的录音。",
+                "这对我来说是非常珍贵的回忆。请好好保管。"
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "액막이 부적을 건네준다.",
+            "lines": [
+                "{player_name}。在这个镇上生活得怎么样?",
+                "心里还好吗?",
+                "我们关系变近了,所以我总是担心你是否安好。",
+                "{player_name}。护身符不能挡住一切,",
+                "但至少这是我希望你平安的一点心意。"
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "post_first_murder_soul_sight": [
+            "自从那件事之后,我就能看到你身边有个灵体。",
+            {"text": "你问是谁?……我自己也问过很多次,但从来没有得到过回答。", "emotion": "sad"},
+            {"text": "大概是和你有很深牵绊的人吧。", "emotion": "sad"},
+            {"text": "如果早知道会发生这种事……我应该也警告一下镇上的人。", "emotion": "sad"}
+        ],
+        "murder_warning_examples": [
+            ["今天早点回家吧。", "不要没事在外面乱逛。", "气场不太好。"],
+            ["今天的卦象不太好。", "我总觉得会发生什么事。"]
+        ],
+        "player_poisoned_innocent_npc": [
+            "你做了不该做的事。",
+            "现在你身边的灵体正在暴怒。"
+        ],
+        "murder_grief": [
+            {"text": "……那股气息还没有消散。", "emotion": "sad"},
+            {"text": "很难用言语表达。", "emotion": "sad"},
+            {"text": "小心点。", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            "……这是第二次了。",
+            {"text": "明明已经警告过了,还是发生了。", "emotion": "sad"},
+            {"text": "如果我有更大的力量,就不用像这样只能眼睁睁地看着了。", "emotion": "sad"},
+            "对不起。"
+        ]
+    },
+    "fortune": {
+        "offer_line": "要我帮你算算今天的运势吗?",
+        "accept_label": "好啊",
+        "decline_label": "不用了",
+        "decline_response": ["好的,想算的时候随时说一声。"],
+        "good_lines": [
+            "嗯……今天的气场不错。你的脚步会很轻快。",
+            "是个好日子。做什么都会很顺利。"
+        ],
+        "bad_lines": [
+            "嗯……今天的气场比较沉重。在外面要小心点。",
+            "不是很好的一天。身体可能会比平时觉得沉重。"
+        ]
+    },
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    ["你来了?", "有什么事吗?"],
+                    ["我是巫女,想算命的话随时可以来找我。"]
+                ],
+                "mid": [
+                    ["今天天空的气场不错。"],
+                    ["光看表情我大概就能猜到对方在想什么。", "但不多管闲事是我的原则。"]
+                ],
+                "high": [
+                    ["今天感觉不错。"],
+                    ["运势不太好。还是早点回家吧。"]
+                ]
+            },
+            "화": {
+                "low": [
+                    ["安静的神社真是件很有魅力的事。", "希望不要有太多人来打扰。"],
+                    {"lines": ["马林每逢星期二必定会来一趟。以他那副样子,信仰倒是很虔诚。"], "requires_alive": "marin", "fallback_lines": ["马林以前每逢星期二必定会来一趟。以他那副样子,信仰倒是很虔诚。", "有点怀念呢。"]}
+                ],
+                "mid": [
+                    ["晴朗的日子最适合喝奶昔了。", "不过草莓味的对我来说太甜了。"],
+                    ["拉玛到底为什么会来这里?", "宗教都不一样,神明大概也不太高兴吧。"]
+                ],
+                "high": [
+                    {"lines": ["伍迪不会说谎。这种人很少见。"], "requires_alive": "woody", "fallback_lines": ["伍迪的心灵真的很纯净。", "真希望能和他多相处一段时间。"]},
+                    ["安静有时候也会让人觉得奇怪。", "但这不代表我讨厌它。"]
+                ]
+            },
+            "수": {
+                "low": [
+                    ["今天也是平平淡淡的一天。", "这种日子才是真正的幸福,不是吗?"],
+                    ["心里觉得沉重的时候,随时可以来神社。"]
+                ],
+                "mid": [
+                    {"lines": ["摩卡煮的咖啡还不错。我每天早上都喝。"], "requires_alive": "mocha", "fallback_lines": ["我很想念摩卡以前煮给我的咖啡。", "比镇上卖的好喝多了。"]},
+                    {"lines": ["这里大部分家具都是伍迪做的。", "手艺挺不错的吧?"], "requires_alive": "woody", "fallback_lines": ["神社里大部分家具都是伍迪做的。", "我一直很感激他。"]}
+                ],
+                "high": [
+                    ["今天早上的钟声格外清亮。", "是个好兆头。"],
+                    ["人们一旦知道我能看见什么,就会渐渐疏远我。", "敏锐的感知有时候也挺累人的。"]
+                ]
+            },
+            "목": {
+                "low": [
+                    ["是来参拜的?还是路过?"],
+                    ["有需要的话尽管说。"]
+                ],
+                "mid": [
+                    ["做护身符需要驱鬼纸和朱砂墨。", "不太好弄到,得定期去镇上一趟。"]
+                ],
+                "high": [
+                    ["每天又工作又做饭——不累吗?", "别太习惯那么忙碌的生活。我会担心的。"]
+                ]
+            },
+            "금": {
+                "low": [
+                    ["这周也要结束了。"],
+                    ["怎么过来了?无聊吗?"]
+                ],
+                "mid": [
+                    ["我不怎么出门。", "这里就是我的归属。"]
+                ],
+                "high": [
+                    ["晚上不要一个人到处乱走。", "如果太晚了,也可以在这里睡。"]
+                ]
+            },
+            "토": {
+                "low": [
+                    ["周末总是会轻松一些。", "你也知道,这里也不算是个多好玩的地方。"]
+                ],
+                "mid": [
+                    ["你来了?", "比以前更常出现了呢。"]
+                ],
+                "high": [
+                    ["要不要也给你做一个护身符?", "可以挂在餐厅里。", "会不会有点多此一举?"],
+                    ["以前我常为别人祈祷,不过最近开始把一切交给命运了。", "太过努力也不是件好事。"]
+                ]
+            },
+            "일": {
+                "low": [
+                    ["星期天我一早先做晨祷。", "你说这听起来像基督教?", "说话小心点,神明在听着呢。"]
+                ],
+                "mid": [
+                    ["嗯,刚才还挺安静的……怎么了?"]
+                ],
+                "high": [
+                    ["谢谢你,这么常过来看我。"]
+                ]
+            }
+        },
+        "rain_conversation": [
+            ["下雨天我的心情会平静下来。不算坏事。"],
+            ["这种阴沉的天气,灵体容易到处游荡。", "小心点。"],
+            ["我并不讨厌雨声。"]
+        ],
+        "mail_reaction": [
+            ["我看到你的邮件了。「{player_mail_content}」。", "虽然不能说完全理解,但我会记在心里的。"]
+        ],
+        "horror_conversation": [
+            [{"text": "那股气息还没有完全消散。", "emotion": "sad"}, "感觉还在这附近某处徘徊。"],
+            ["有时候我的视线会不自觉飘向{victim_name}以前坐过的地方。", {"text": "看来那股气息还留着一点痕迹。", "emotion": "sad"}]
+        ]
+    },
+    "emails": {
+        "greeting": [],
+        "event_invite": [
+            {"title": "还不错", "lines": ["谢谢你邀请我。", "偶尔这样的聚会也不坏。"]},
+            {"title": "牛奶料理不错", "requires_favorite_food": true, "lines": ["昨天的牛奶料理真的很好吃。", "很合我的口味。下次再做给我吃吧。"]}
+        ],
+        "gift_thanks": [],
+        "memento_reminder": {"title": "我有东西要给你。", "lines": ["你最近不太常来神社。", "我有东西要给你,有空的时候过来一趟。"]},
+        "story_progress": {
+            "player_arrival_day_1": {"title": "听说你刚搬来镇上", "lines": ["听说你最近才搬到这个镇上。", "神社一直都开着,有需要就过来。", "算命我也免费帮你算。"]}
+        },
+        "special_day": {}
+    }
+}

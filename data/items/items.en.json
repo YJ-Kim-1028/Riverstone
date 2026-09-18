@@ -1,0 +1,385 @@
+{
+    "potato": {
+        "name": "Potato",
+        "description": "A potato harvested from the field. Used as a cooking ingredient."
+    },
+    "corn": {
+        "name": "Corn",
+        "description": "Corn harvested from the field. Used as a cooking ingredient."
+    },
+    "lettuce": {
+        "name": "Lettuce",
+        "description": "Lettuce harvested from the field. Used as a cooking ingredient."
+    },
+    "potato_seed": {
+        "name": "Potato Seeds",
+        "description": "Plant in a field to grow potatoes."
+    },
+    "corn_seed": {
+        "name": "Corn Seeds",
+        "description": "Plant in a field to grow corn."
+    },
+    "lettuce_seed": {
+        "name": "Lettuce Seeds",
+        "description": "Plant in a field to grow lettuce."
+    },
+    "pork": {
+        "name": "Pork",
+        "description": "Pork from the ranch. Used as a cooking ingredient."
+    },
+    "beef": {
+        "name": "Beef",
+        "description": "Beef from the ranch. Used as a cooking ingredient."
+    },
+    "milk": {
+        "name": "Milk",
+        "description": "Milk from the ranch. Used as a cooking ingredient."
+    },
+    "salmon": {
+        "name": "Salmon",
+        "description": "Salmon caught while fishing. Used as a cooking ingredient."
+    },
+    "mackerel": {
+        "name": "Mackerel",
+        "description": "Mackerel caught while fishing. Used as a cooking ingredient."
+    },
+    "squid": {
+        "name": "Squid",
+        "description": "Squid caught while fishing. Used as a cooking ingredient."
+    },
+    "legendary_fish": {
+        "name": "Legendary Fish",
+        "description": "A legendary fish said to appear only with the golden fishing rod. Almost no one has actually seen one."
+    },
+    "berry": {
+        "name": "Berry",
+        "description": "A berry gathered while foraging. Used as a cooking ingredient."
+    },
+    "rabbit_meat": {
+        "name": "Rabbit Meat",
+        "description": "Rabbit meat caught while hunting. Used as a cooking ingredient."
+    },
+    "bird_meat": {
+        "name": "Bird Meat",
+        "description": "Bird meat caught while hunting. Used as a cooking ingredient."
+    },
+    "fishing_rod": {
+        "name": "Fishing Rod",
+        "description": "A tool used for fishing."
+    },
+    "golden_fishing_rod": {
+        "name": "Golden Fishing Rod",
+        "description": "A shining golden fishing rod. What happens if you use it in the sea in front of the fishing shop...?"
+    },
+    "legend_statue": {
+        "name": "Legendary Statue",
+        "description": "A statue that can be exchanged for 100 legendary fish."
+    },
+    "furniture_hammer": {
+        "name": "Furniture Hammer",
+        "description": "Lets you pick up furniture and decorations, but only while holding it."
+    },
+    "watering_can": {
+        "name": "Watering Can",
+        "description": "A tool used to water crops."
+    },
+    "golden_watering_can": {
+        "name": "Golden Watering Can",
+        "description": "A softly glowing golden watering can. Waters a 3x3 area around you all at once."
+    },
+    "hoe": {
+        "name": "Hoe",
+        "description": "A tool used to till soil into farmland."
+    },
+    "hunting_rifle": {
+        "name": "Hunting Rifle",
+        "description": "A tool used for hunting."
+    },
+    "bucket": {
+        "name": "Bucket",
+        "description": "Lets you milk a cow to get milk."
+    },
+    "chair": { "name": "Chair" },
+    "sofa": { "name": "Sofa" },
+    "display_table": { "name": "Display Table" },
+    "bookshelf_33": { "name": "Bookshelf (Large)" },
+    "bookshelf_23": { "name": "Bookshelf (Medium)" },
+    "bookshelf_22": { "name": "Bookshelf (Small)" },
+    "cabinet_23": { "name": "Cabinet" },
+    "kitchen_cabinet": { "name": "Kitchen Cabinet" },
+    "jukebox": { "name": "Jukebox" },
+    "glass_display_shelf": { "name": "Glass Display Shelf" },
+    "blinder": { "name": "Grinder" },
+    "drink_fridge": { "name": "Drink Fridge" },
+    "stove": { "name": "Stove" },
+    "desk": { "name": "Desk" },
+    "vase_1": { "name": "Vase 1" },
+    "vase_2": { "name": "Vase 2" },
+    "vase_3": { "name": "Vase 3" },
+    "vase_4": { "name": "Vase 4" },
+    "bed": { "name": "Bed" },
+    "iron_cabinet": { "name": "Iron Cabinet" },
+    "light": { "name": "Lamp" },
+    "standing_light": { "name": "Standing Lamp" },
+    "candle": { "name": "Candle" },
+    "shrine_light": { "name": "Shrine Lantern" },
+    "temple_light": { "name": "Temple Lantern" },
+    "flowerpot": { "name": "Flowerpot" },
+    "round_carpet": { "name": "Round Carpet" },
+    "rect_carpet": { "name": "Rectangular Carpet" },
+    "rect_carpet_2": { "name": "Rectangular Carpet (2)" },
+    "welcome_carpet": { "name": "Welcome Mat" },
+    "memo": { "name": "Memo" },
+    "rat_poison": {
+        "name": "Rat Poison",
+        "description": "Contains a lethal poison."
+    },
+    "soul_crystal": {
+        "name": "Soul Crystal",
+        "description": "An unidentifiable crystal. It gives off a faint warmth. Sage might know something about it."
+    },
+    "recipe_grilled_fish": {
+        "name": "Recipe: Grilled Fish",
+        "description": "Right-click to learn it and you'll be able to cook Grilled Fish. Learned recipes can be checked in the collection book."
+    },
+    "recipe_salmon_salad": {
+        "name": "Recipe: Salmon Salad",
+        "description": "Right-click to learn it and you'll be able to cook Salmon Salad. Learned recipes can be checked in the collection book."
+    },
+    "recipe_grilled_squid": {
+        "name": "Recipe: Grilled Squid",
+        "description": "Right-click to learn it and you'll be able to cook Grilled Squid. Learned recipes can be checked in the collection book."
+    },
+    "recipe_fish_and_chips": {
+        "name": "Recipe: Fish and Chips",
+        "description": "Right-click to learn it and you'll be able to cook Fish and Chips. Learned recipes can be checked in the collection book."
+    },
+    "recipe_grilled_vegetables": {
+        "name": "Recipe: Grilled Vegetables",
+        "description": "Right-click to learn it and you'll be able to cook Grilled Vegetables. Learned recipes can be checked in the collection book."
+    },
+    "recipe_potato_salad": {
+        "name": "Recipe: Potato Salad",
+        "description": "Right-click to learn it and you'll be able to cook Potato Salad. Learned recipes can be checked in the collection book."
+    },
+    "recipe_chop_steak": {
+        "name": "Recipe: Chopped Steak",
+        "description": "Right-click to learn it and you'll be able to cook Chopped Steak. Learned recipes can be checked in the collection book."
+    },
+    "recipe_barbecue": {
+        "name": "Recipe: Barbecue",
+        "description": "Right-click to learn it and you'll be able to cook Barbecue. Learned recipes can be checked in the collection book."
+    },
+    "recipe_grilled_pork_belly": {
+        "name": "Recipe: Grilled Pork Belly",
+        "description": "Right-click to learn it and you'll be able to cook Grilled Pork Belly. Learned recipes can be checked in the collection book."
+    },
+    "recipe_seafood_set": {
+        "name": "Recipe: Seafood Set",
+        "description": "Right-click to learn it and you'll be able to cook Seafood Set."
+    },
+    "recipe_meat_salad": {
+        "name": "Recipe: Meat Salad",
+        "description": "Right-click to learn it and you'll be able to cook Meat Salad. Learned recipes can be checked in the collection book."
+    },
+    "recipe_yogurt_smoothie": {
+        "name": "Recipe: Yogurt Smoothie",
+        "description": "Right-click to learn it and you'll be able to cook Yogurt Smoothie. Learned recipes can be checked in the collection book."
+    },
+    "recipe_strawberry_smoothie": {
+        "name": "Recipe: Strawberry Smoothie",
+        "description": "Right-click to learn it and you'll be able to cook Strawberry Smoothie. Learned recipes can be checked in the collection book."
+    },
+    "teddy_bear": {
+        "name": "Teddy Bear",
+        "description": "A cozy teddy bear."
+    },
+    "wildflower_bouquet": {
+        "name": "Wildflower Bouquet",
+        "description": "A simple bouquet of flowers picked from the fields."
+    },
+    "rose_bouquet": {
+        "name": "Rose Bouquet",
+        "description": "A gorgeous bouquet of roses."
+    },
+    "perfume_blue_de_ocean": {
+        "name": "Blue de Ocean",
+        "description": "A perfume with an ocean scent. Leaves a trail of blue floral fragrance."
+    },
+    "perfume_mr_lilac": {
+        "name": "Mr. Lilac",
+        "description": "A perfume with a lilac scent. Leaves a trail of purple floral fragrance."
+    },
+    "perfume_pale_light": {
+        "name": "Pale Light",
+        "description": "A softly scented perfume. Leaves a trail of white floral fragrance."
+    },
+    "perfume_somewhere_behind_you": {
+        "name": "Somewhere behind you",
+        "description": "A perfume Marr gave as a gift. Can be used with right-click."
+    },
+    "animal_feed": {
+        "name": "Feed",
+        "description": "Food for cows and pigs."
+    },
+    "small_knife": {
+        "name": "Small Knife",
+        "description": "Lets you butcher a cow or pig for meat."
+    },
+    "bait": {
+        "name": "Bait",
+        "description": "Automatically used while fishing if it's in your inventory. Increases the chance of catching squid."
+    },
+    "americano": {
+        "name": "Americano",
+        "description": "Right-click to use it and temporarily increase your move speed."
+    },
+    "energy_tonic": {
+        "name": "Energy Tonic",
+        "description": "Drink it and feel the energy surge! (Right-click to use and clear a debuff)"
+    },
+    "recipe_random": {
+        "name": "All-Purpose Recipe",
+        "description": "Right-click to use it and learn a random dish's recipe. Learned recipes can be checked in the collection book."
+    },
+    "book_beyond_the_door": {
+        "name": "Beyond the Door",
+        "description": "Author: Usher (Right-click in your inventory to read it)"
+    },
+    "book_perfect_alibi": {
+        "name": "The Perfect Alibi",
+        "description": "Author: Usher (Right-click in your inventory to read it)"
+    },
+    "book_life_as_a_cat": {
+        "name": "Life as a Cat",
+        "description": "Author: Usher (Right-click in your inventory to read it)"
+    },
+    "book_culprit_is_here": {
+        "name": "The Culprit Is In Here",
+        "description": "Author: Usher (Right-click in your inventory to read it)"
+    },
+    "book_love_in_three_seconds": {
+        "name": "Falling in Love Takes Only Three Seconds",
+        "description": "Author: Usher (Right-click in your inventory to read it)"
+    },
+    "book_resolve_before_death": {
+        "name": "A Resolve Before Death",
+        "description": "Author: Usher (Right-click in your inventory to read it)"
+    },
+    "book_last_summer": {
+        "name": "I Know What You Did Last Summer",
+        "description": "Author: Usher (Right-click in your inventory to read it)"
+    },
+    "book_detectives_last_trace": {
+        "name": "The Detective's Last Trace",
+        "description": "Author: Usher (Right-click in your inventory to read it)"
+    },
+    "book_unsent_letter": {
+        "name": "The Unsent Letter",
+        "description": "Author: Usher (Right-click in your inventory to read it)"
+    },
+    "book_girl_in_the_alley": {
+        "name": "The Girl Who Always Stood in That Alley",
+        "description": "Author: Usher (Right-click in your inventory to read it)"
+    },
+    "record_chiptune": {
+        "name": "Chip tune",
+        "description": "A record that can be played on the jukebox."
+    },
+    "record_city_pop": {
+        "name": "City pop",
+        "description": "A record that can be played on the jukebox."
+    },
+    "record_lofi": {
+        "name": "Lo-fi",
+        "description": "A record that can be played on the jukebox."
+    },
+    "record_bossa_nova": {
+        "name": "Bossa Nova",
+        "description": "A record that can be played on the jukebox."
+    },
+    "record_acoustic_folk": {
+        "name": "Acoustic Folk",
+        "description": "A record that can be played on the jukebox."
+    },
+    "record_acoustic_pop": {
+        "name": "Acoustic Pop",
+        "description": "A record that can be played on the jukebox."
+    },
+    "record_be_with_you": {
+        "name": "Be with you",
+        "description": "A record that can be played on the jukebox."
+    },
+    "record_the_day_after_you_came": {
+        "name": "The day after you came",
+        "description": "A record that can be played on the jukebox."
+    },
+    "record_the_heart_sutra_remix": {
+        "name": "The heart sutra (remix)",
+        "description": "A record that can be played on the jukebox."
+    },
+    "record_we_are_all_christmas": {
+        "name": "We are all christmas",
+        "description": "A record that can be played on the jukebox."
+    },
+    "storage_box": {
+        "name": "Storage Box",
+        "description": "A box that can hold inventory items."
+    },
+    "test_hat": {
+        "name": "Test Hat",
+        "description": "A temporary item for testing the equipment system - delete once a real item exists."
+    },
+    "test_shoes": {
+        "name": "Test Shoes",
+        "description": "A temporary item for testing the equipment system - delete once a real item exists."
+    },
+    "cooked_corn": {
+        "name": "Steamed Corn",
+        "description": "Corn steamed in a pot."
+    },
+    "cooked_potato": {
+        "name": "Steamed Potato",
+        "description": "Potato steamed in a pot."
+    },
+    "cooked_pork": {
+        "name": "Grilled Pork",
+        "description": "Pork grilled in a pan."
+    },
+    "cooked_beef": {
+        "name": "Grilled Beef",
+        "description": "Beef grilled in a pan."
+    },
+    "cooked_salmon": {
+        "name": "Grilled Salmon",
+        "description": "Salmon grilled in a pan."
+    },
+    "cooked_mackerel": {
+        "name": "Grilled Mackerel",
+        "description": "Mackerel grilled in a pan."
+    },
+    "cooked_squid": {
+        "name": "Grilled Squid",
+        "description": "Squid grilled in a pan."
+    },
+    "salad_greens": {
+        "name": "Salad Greens",
+        "description": "Lettuce prepped on a cutting board."
+    },
+    "mashed_berry": {
+        "name": "Mashed Berry",
+        "description": "Berry mashed in a blender."
+    },
+    "smoothie": {
+        "name": "Smoothie Base",
+        "description": "Milk blended in a blender."
+    },
+    "cooked_rabbit_meat": {
+        "name": "Boiled Rabbit Meat",
+        "description": "Rabbit meat boiled in a pot."
+    },
+    "cooked_bird_meat": {
+        "name": "Grilled Bird Meat",
+        "description": "Bird meat grilled in a pan."
+    }
+}

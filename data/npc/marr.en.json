@@ -1,0 +1,349 @@
+{
+    "id": "marr",
+    "name": "Marr",
+    "name_en": "Mar",
+    "gender": "남성",
+    "age": "30대",
+    "job": "잡화점 주인",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "Struggles to feel emotion.",
+        "Extremely rational.",
+        "Enjoys observing people.",
+        "Prefers time alone.",
+        "Keeps his distance from the townspeople.",
+        "Never lies."
+    ],
+    "preferred_food": ["연어"],
+    "disliked_food": ["베리"],
+    "special_notes": [
+        "Sells gift items and rat poison.",
+        "Loves the sea, and sometimes stands by the shore for hours without saying a word.",
+        "Notices the player has been poisoning someone from the fact that there are no rats in town, but doesn't report it to the police — he just stops selling to them."
+    ],
+    "alibi_speech": {
+        "known": "That day at 6 PM, I was at %s.",
+        "unknown": "Where I was that night... I honestly don't remember well.",
+        "witness_seen": "Ah, now that you mention it, I think I saw %s at %s that day.",
+        "witness_none": "Ah, but I don't think I saw anyone in particular that day."
+    },
+    "memento_item": {
+        "name": "Hand Mirror",
+        "description": "An old hand mirror. The handle is worn down, showing signs of long use.",
+        "lore_lines": [
+            "I even practiced smiling.",
+            "But the person in the mirror always looked like someone else."
+        ]
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/marr_port.png",
+        "happy": "res://assets/npc/portrait/marr_port.png",
+        "sad": "res://assets/npc/portrait/marr_sad.png",
+        "angry": "res://assets/npc/portrait/marr_port.png"
+    },
+    "sprite": "res://assets/npc/sprite/marrSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "general_working"},
+                {"time": "18:00", "state": "plaza3_sitting"},
+                {"time": "21:00", "state": "general_room_enterance"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "general_working"},
+                {"time": "18:00", "state": "plaza3_sitting"},
+                {"time": "21:00", "state": "general_room_enterance"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "general_room_enterance"},
+                {"time": "16:00", "state": "plaza3_sitting"},
+                {"time": "21:00", "state": "general_room_enterance"}
+            ]
+        }
+    },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "general_working",
+        "npc_spawn": "marr_heart_npc",
+        "player_spawn": "marr_heart_player",
+        "lines": [
+            "{player_name}, it's been {days_since_arrival} days since you came to this town.",
+            "Thank you for treating me to good food, and for visiting so often, this whole time.",
+            "I feel like we've become a little bit of friends.",
+            "Here, this is on the house.",
+            {"type": "gift", "item_id": "wildflower_bouquet"},
+            "If this feeling had a name, I wonder what it would be called."
+        ]
+    },
+    "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "description": "가게에서 파는 향수 중 하나를 별다른 설명 없이 건넨다.",
+            "lines": [
+                "{player_name}. Do you have a moment?",
+                "I have something for you.",
+                {"type": "gift", "item_id": "perfume_somewhere_behind_you"},
+                "It's a perfume I made while thinking of you, {player_name}. It's called 'Somewhere behind you.'",
+                "They say a scent lingers behind you even after you've passed by. Even if you're no longer there.",
+                "You're the kind of person who stays in my memory, {player_name}, just like a scent.",
+                "Please... don't share it with anyone else."
+            ]
+        },
+        {
+            "threshold": 70,
+            "type": "dialogue",
+            "description": "세이지의 점사 이후로 그녀를 신뢰하지 않게 된 이유를 설명한다.",
+            "lines": [
+                "Sage once read my fortune, a while back.",
+                {"text": "I still don't quite understand how people can entrust themselves to something they can't even see.", "emotion": "sad"},
+                "In any case, since that day, I haven't put much trust in what she says."
+            ]
+        },
+        {
+            "threshold": 85,
+            "type": "dialogue",
+            "description": "이 세계에 뭔가 이상함을 느낀다고 한다.",
+            "lines": [
+                "{player_name}. You're here.",
+                "I'd like to share something strange I've been feeling lately.",
+                "Sometimes I get the sense that all of us are just acting out something already decided.",
+                "The way Marin visits our shop the same day, the same time, every single week, for instance.",
+                "Or how the faces I run into, coming and going, are always the same people.",
+                {"text": "I'm trying, right now, to say something to you,", "emotion": "sad"},
+                {"text": "something I", "emotion": "sad"},
+                {"text": "want to", "emotion": "sad"},
+                {"text": "say", "emotion": "sad"},
+                {"text": "to you,", "emotion": "sad"},
+                {"text": "                                ", "emotion": "sad"},
+                {"text": "putting into words whatever comes to mind...", "emotion": "sad"},
+                {"text": "and it's a genuinely strange thing.", "emotion": "sad"},
+                "You're the only one outside the predictable range, so I decided to bring this worry to you.",
+                "Have you been thinking the same thing?"
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "손거울을 건네준다.",
+            "lines": [
+                "Hello, {player_name}. Actually, I have something for you.",
+                "This is a hand mirror I've had for a long time.",
+                "For a long while, I was trying to find something human in myself through it.",
+                "But recently, I've started thinking something.",
+                "Do I really need to be human?",
+                {"text": "I showed you my true self, and you didn't recoil from it.", "emotion": "sad"},
+                "That's enough for me."
+            ]
+        },
+        {
+            "threshold": 105,
+            "type": "dialogue",
+            "description": "처음 느껴보는 낯선 감각을 관찰자 시점으로 보고한다.",
+            "lines": [
+                "Lately, when I close up the shop at night, I get the feeling someone's watching.",
+                "It's not that I saw or heard anything specific. It's just... a feeling."
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "murder_grief": [
+            {"text": "The townspeople are acting differently than usual.", "emotion": "sad"},
+            {"text": "Crying, or speaking less.", "emotion": "sad"},
+            {"text": "It doesn't affect me as much as it does them, but even so, I can't say I'm entirely fine.", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            {"text": "Something like this has happened again.", "emotion": "sad"},
+            {"text": "There's an unease in me somewhere.", "emotion": "sad"}
+        ],
+        "suspicion_talk_2": {
+            "lines": [
+                "My alibi? I was at the shop at that time. I have no way to prove it, though.",
+                "Everyone seems to think it was me. ...Well, I understand. People already tell me I don't seem human, often enough.",
+                "Do you think that too?"
+            ]
+        }
+    },
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    ["Hello. Is there something you need?"],
+                    ["Monday again."],
+                    ["If there's something you need, let me know."]
+                ],
+                "mid": [
+                    ["I went to the sea. The sound of the waves settles my mind."],
+                    ["Lama drops by sometimes to talk to me. He's not much of a talker, so conversation's hard, but I don't mind it."],
+                    {
+                        "lines": ["Belze says I'm easy to be around because I'm quiet. Hearing that puts me in a fairly good mood."],
+                        "requires_alive": "belje",
+                        "fallback_lines": ["Belze was someone who was kind to me back when I was alone.", "There probably aren't many people as good as her, in this world."]
+                    }
+                ],
+                "high": [
+                    ["We've known each other a while now.", "I feel fairly at ease when you're around."],
+                    ["{player_name}, you smile a lot.", "I've actually tried practicing smiling myself, before,", "but after one or two tries, I never did it again.", "...Don't ask why."],
+                    ["Thinking someone's good just because they feed you good food,", "is that too much like a dog's way of thinking?"]
+                ]
+            },
+            "화": {
+                "low": [
+                    ["It's a general store, but don't expect too much.", "It's hard to stock a wide selection in such a small town."],
+                    ["I have gift items too. Would you like to see?"],
+                    ["We meet again."]
+                ],
+                "mid": [
+                    ["I'm used to people keeping their distance from me.", "You don't, though."],
+                    ["You come by often.", "I don't have much to say, but feel free to rest here a while."],
+                    ["Is there anything you'd like me to add to the shop?"]
+                ],
+                "high": [
+                    ["You're a good person. You feed me often, after all."],
+                    ["If there's anyone I can speak honestly to,", "it would be you."],
+                    ["Thanks to how often you buy things, my pockets have gotten a bit fuller.", "If I have more to spare, I'll pass it back as a tip."]
+                ]
+            },
+            "수": {
+                "low": [
+                    ["Not many customers today."],
+                    ["If you don't need anything, feel free to just look around."],
+                    ["I have to restock at 3, so come before or after that."]
+                ],
+                "mid": [
+                    ["I have plans today."],
+                    ["I'm comfortable spending time alone."],
+                    ["Lama drops by sometimes to talk to me. He doesn't answer much, but I don't mind it."]
+                ],
+                "high": [
+                    ["I've tried practicing smiles. It didn't really work."],
+                    ["Sometimes I stand at the shore for hours. Without thinking of anything."],
+                    ["The dishes you sell aren't something you can find anywhere else."]
+                ]
+            },
+            "목": {
+                "low": [
+                    ["Feel free to just browse."],
+                    ["If there's something you're looking for, let me know."],
+                    ["Nothing particularly different about Thursday."]
+                ],
+                "mid": [
+                    ["I don't care much for berries.", "No particular reason. They just don't suit my taste."],
+                    ["Not many customers today, really."],
+                    ["I finished tidying up the shop, more or less."],
+                    ["Gift items sell decently enough."]
+                ],
+                "high": [
+                    [
+                        "Watching customers, I can tell just from their expressions who's actually here to buy and who's just browsing.",
+                        "But I'm not even sure what my own mood is, right now.",
+                        "How do I look to you, right now?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "You look about the same as usual", "affection": 1, "response": ["That's about the safest answer there is."]},
+                                {"label": "You look a bit bored", "affection": 2, "response": [{"text": "...That's close enough.", "emotion": "happy"}]},
+                                {"label": "I'm not sure either", "affection": 1, "response": ["Same here. We're in the same boat, then."]}
+                            ]
+                        }
+                    ],
+                    ["I think it should be fine to be honest with you.", "If the chance comes up someday, I'd like us to spend some time getting to know each other better."],
+                    ["I don't know what you like, but I think I have some idea of what you dislike."]
+                ]
+            },
+            "금": {
+                "low": [
+                    ["This week's wrapping up too."],
+                    ["Nothing particularly different about Friday."],
+                    ["Welcome."]
+                ],
+                "mid": [
+                    ["Customers are sparse today."],
+                    ["I fixed the steps out front. They'd been a bit wobbly for a while."],
+                    ["I sometimes read the books Usher writes.", "His writing isn't polished, but there's an odd honesty to it.", "That's a rare quality."]
+                ],
+                "high": [
+                    ["I always charge a fair price for my goods."],
+                    ["Seeing the ingredients you buy, I find myself a little curious what you'll make with them today."],
+                    ["Thanks to you, gift items have been selling a bit better lately."]
+                ]
+            },
+            "토": {
+                "low": [
+                    ["The shop gets a bit more crowded on weekends."],
+                    ["If you're curious about anything, feel free to ask."],
+                    ["Take your time looking around."]
+                ],
+                "mid": [
+                    ["I'm comfortable spending time alone. Though you... seem to be an exception."],
+                    ["The sea breeze is pleasant."],
+                    ["I close the shop early once night falls."]
+                ],
+                "high": [
+                    ["Just standing still, doing nothing, is oddly comfortable for me."],
+                    ["I used to stand in front of a mirror for hours, every time I felt different from everyone else.", "I don't do that anymore. I realized it was meaningless."],
+                    ["Having somewhere I can go alone isn't a bad thing."]
+                ]
+            },
+            "일": {
+                "low": [
+                    ["I opened the shop late today."],
+                    ["The shop's open on Sundays too. I'm not sure why anyone would need to rest."],
+                    ["Feel free to browse at your leisure."]
+                ],
+                "mid": [
+                    ["Not many customers today."],
+                    ["Nothing particularly noteworthy happened this week."],
+                    ["Sometimes I go somewhere with no one else around."]
+                ],
+                "high": [
+                    ["You're here again today."],
+                    ["The time I spend talking with you isn't bad. I'm not sure exactly what to call it, though."],
+                    ["The reason I think you're a good person is simple. You treat me well."]
+                ]
+            }
+        },
+        "rain_conversation": [
+            ["The shop has no customers on rainy days."],
+            ["Listening to the sound of rain is quite calming."],
+            ["Do you have an umbrella? Take one if you don't."]
+        ],
+        "mail_reaction": [
+            ["I see you sent '{player_mail_content}'.", "When I get something like this, it's hard to know how to reply."]
+        ],
+        "horror_conversation": [
+            [{"text": "Lately, while tidying the shop, my hands sometimes just stop.", "emotion": "sad"}, "It happens near the spot where {victim_name} used to buy things, often. It's hard to explain why."],
+            ["People often use the word 'miss.'", {"text": "I think I've been feeling something similar myself, lately.", "emotion": "sad"}]
+        ]
+    },
+    "emails": {
+        "greeting": [
+        ],
+        "event_invite": [
+            {"title": "It was a good meal", "lines": ["Thank you for the invitation.", "Hard to describe exactly how it tasted, but it wasn't bad.", "Please invite me again sometime."]},
+            {"title": "Being treated as a guest", "lines": ["Sitting in a restaurant as a guest felt unfamiliar.", "Usually I'm the one receiving customers.", "Still, it was comfortable."]},
+            {"title": "The salmon dish wasn't bad", "requires_favorite_food": true, "lines": ["The salmon dish yesterday was good.", "It's one of the few foods that suits my taste.", "Could I have it again sometime?", "Thank you."]}
+        ],
+        "gift_thanks": [
+            {"title": "Thank you for the gift", "lines": ["I'm not used to receiving gifts, so I wasn't sure how to respond.", "Still, I know it made me glad.", "Thank you."]},
+            {"title": "In return", "lines": ["I feel unsettled if I don't return something when I receive it.", "Next time you come by the shop, I'll set something good aside for you."]}
+        ],
+        "memento_reminder": {"title": "I have something to give you.", "lines": ["You've been scarce lately.", "I have something to give you, so please come by the shop when you have time."]},
+        "story_progress": {
+            "player_arrival_day_3": {"title": "I heard you're new here", "lines": ["I heard you recently moved to this town.", "If you need anything, come by the general store.", "The store is by the fountain next to the sea."]}
+        },
+        "special_day": {}
+    }
+}

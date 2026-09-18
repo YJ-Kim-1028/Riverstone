@@ -104,7 +104,7 @@ func _show_result(result: Dictionary) -> void:
 	if not bool(result.get("added_to_inventory", true)):
 		_result_icon.visible = false
 		var item_name := String(InventoryManager.get_item_definition(item_id).get("name", item_id))
-		_result_label.text = "%s를 낚았지만 인벤토리가 가득 찼다." % item_name
+		_result_label.text = tr("%s를 낚았지만 인벤토리가 가득 찼다.") % item_name
 		return
 	_result_icon.visible = true
 	_result_icon.texture = InventoryManager.get_item_icon_texture(item_id)

@@ -26,7 +26,7 @@ func show_item(item_id: String) -> void:
 	if item_name.is_empty():
 		return
 	_icon.texture = InventoryManager.get_item_icon_texture(item_id)
-	_label.text = "%s을(를) 얻었다." % item_name
+	_label.text = tr("%s을(를) 얻었다.") % item_name
 	if _tween != null and _tween.is_valid():
 		_tween.kill()
 	modulate.a = 0.0

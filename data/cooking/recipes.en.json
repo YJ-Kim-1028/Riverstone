@@ -1,0 +1,70 @@
+{
+    "grilled_fish": {
+        "name": "Grilled Fish",
+        "description": "A simple grilled dish made from mackerel or salmon."
+    },
+    "salmon_salad": {
+        "name": "Salmon Salad",
+        "description": "A salad made with salmon and lettuce."
+    },
+    "grilled_squid": {
+        "name": "Grilled Squid",
+        "description": "A dish of grilled squid."
+    },
+    "fish_and_chips": {
+        "name": "Fish and Chips",
+        "description": "A dish of fish served with fried potatoes."
+    },
+    "grilled_vegetables": {
+        "name": "Grilled Vegetables",
+        "description": "A simple dish of grilled potato and corn."
+    },
+    "potato_salad": {
+        "name": "Potato Salad",
+        "description": "A salad made with potato and lettuce."
+    },
+    "chop_steak": {
+        "name": "Chopped Steak",
+        "description": "A steak made with beef and vegetables."
+    },
+    "barbecue": {
+        "name": "Barbecue",
+        "description": "A dish of beef and pork grilled together."
+    },
+    "grilled_pork_belly": {
+        "name": "Grilled Pork Belly",
+        "description": "A dish of grilled pork."
+    },
+    "seafood_set": {
+        "name": "Seafood Set",
+        "description": "A set meal served with squid and fish."
+    },
+    "meat_salad": {
+        "name": "Meat Salad",
+        "description": "A salad made with meat and lettuce."
+    },
+    "yogurt_smoothie": {
+        "name": "Yogurt Smoothie",
+        "description": "A smoothie made with milk."
+    },
+    "strawberry_smoothie": {
+        "name": "Strawberry Smoothie",
+        "description": "A smoothie made with berries and milk."
+    },
+    "weird_dish": {
+        "name": "Weird Dish",
+        "description": "An unidentifiable dish made from a combination that isn't in any recipe. NPCs don't like this dish."
+    },
+    "hunter_stew": {
+        "name": "Hunter's Stew",
+        "description": "A stew of hunted rabbit meat simmered in a pot with vegetables."
+    },
+    "roast_bird": {
+        "name": "Chicken",
+        "description": "A dish of hunted bird meat, grilled."
+    },
+    "chicken_salad": {
+        "name": "Chicken Salad",
+        "description": "A salad made with chicken and lettuce."
+    }
+}

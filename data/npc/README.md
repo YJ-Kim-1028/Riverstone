@@ -3,6 +3,35 @@
 `NPCManager` (scripts/autoload/npc_manager.gd)가 이 폴더의 `*.json`을 전부 읽어 NPC 정의로 사용한다.
 `game_design/01_systems/npc.md`, `game_design/03_npcs/*.md`, `game_design/03_npcs/schedule.md`를 기반으로 이미 채워져 있는 필드와, 스토리 작성 시 채워야 할 필드가 섞여 있다.
 
+## 다국어 번역 형제 파일 (`marin.en.json` 등)
+
+다국어 지원 1단계(2026-09-14, 계획 파일: `C:\Users\code1\.claude\plans\expressive-twirling-fern.md`)부터
+각 NPC 파일 옆에 언어별 번역 형제 파일을 둘 수 있다 - 예: `marin.json` 옆에
+`marin.en.json`/`marin.ja.json`/`marin.zh.json`. **기존 `marin.json`(한국어
+원본)은 절대 건드리지 않는다** - 형제 파일은 원본과 완전히 동일한 중첩 구조를
+가지되 번역 대상 문자열 값만 채운 새 파일이다.
+
+`Localizer.merge_json()`(scripts/autoload/localization.gd)이 로드 시점에
+한국어 구조를 기준으로 형제 파일의 같은 경로 값을 재귀적으로 덮어쓴다:
+* 배열은 **길이가 정확히 같아야** 병합된다 - 다르면 그 배열 전체가 한국어로
+  폴백된다(부분 병합 안 함 - `dialogue.daily`의 랜덤 풀, `stalker_emails.json`의
+  `early`/`mid`/`late`처럼 인덱스로만 대응되는 구조가 많아서, 길이가 어긋나면
+  조용히 엉뚱한 자리에 엉뚱한 번역이 들어갈 수 있다).
+* 아래 키는 **절대 번역하면 안 된다**(GDScript 로직이 식별자/enum/숫자로 직접
+  소비함 - 번역 파일에 값이 있어도 무시됨, `Localizer.DENYLIST_KEYS`):
+  `type`, `item_id`, `emotion`, `requires_alive`, `affection`, `id`, `threshold`.
+  특히 `requires_alive`는 다른 NPC의 `id`(예: `"roshi"`, `"belje"`) 문자열이라,
+  실수로 번역하면 그 NPC의 생사 여부를 영원히 못 알아보게 되어 죽은 NPC
+  분기(`fallback_lines`)가 깨진다.
+* 그 외 사람이 읽는 문자열 리프(`personality`, `special_notes`,
+  `memento_item.description`, `heart_event_30`/`affection_events`/
+  `story_dialogue`/`dialogue.*`의 대사 텍스트, `emails.*`의 `title`/`lines`
+  등)는 전부 번역 대상이다.
+* `{player_name}`/`{victim_name}`/`{player_mail_content}` 같은 플레이스홀더는
+  토큰 그대로 유지하고, 한국어 전용인 조사 괄호 표기(`{player_name}(이)다`)는
+  다른 언어 파일에 절대 옮기지 않는다 - 각 언어가 자연스러운 문법으로 직접
+  쓴다.
+
 ## 이미 채워진 필드 (기획 문서 그대로)
 
 * `id`, `name`, `name_en`, `gender`, `age`, `job`, `npc_type`(`normal`/`story`/`stalker`), `can_die`, `is_stalker`

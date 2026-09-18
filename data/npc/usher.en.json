@@ -1,0 +1,347 @@
+{
+    "id": "usher",
+    "name": "Usher",
+    "name_en": "Usher",
+    "gender": "남성",
+    "age": "20대",
+    "job": "소설가",
+    "npc_type": "stalker",
+    "can_die": true,
+    "is_stalker": true,
+    "personality": [
+        "밝지만 잔잔한 또라이 느낌.",
+        "엉뚱한 말을 자주 한다.",
+        "낭만적인 성향이 있다.",
+        "포기하는 법을 잘 모른다."
+    ],
+    "preferred_food": ["새고기"],
+    "disliked_food": ["토끼고기"],
+    "special_notes": [
+        "서점을 운영하며 자신의 소설을 판매한다. 위대한 소설가가 되는 것이 꿈이지만 글은 잘 못 쓴다.",
+        "플로라를 좋아하며, 집 주변에 꽃나무를 심는 것이 취미이다 (벨제의 꽃가루 알레르기 원인).",
+        "정체는 마을의 스토커. 사망은 진실 엔딩 조건을 충족했을 때만 가능하다."
+    ],
+    "memento_item": {
+        "name": "Script",
+        "description": "The first play Usher ever finished. Clumsily written with a messy structure, but he still can't bring himself to throw it away.",
+        "lore_lines": [
+            "언젠가 모두가 내 이야기를 읽게 될 것이다."
+        ]
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/usher_port.png",
+        "happy": "res://assets/npc/portrait/usher_happy.png",
+        "sad": "res://assets/npc/portrait/usher_sad.png",
+        "angry": "res://assets/npc/portrait/usher_angry.png"
+    },
+    "sprite": "res://assets/npc/sprite/usherSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "book_working"},
+                {"time": "12:00", "state": "book_standing"},
+                {"time": "16:00", "state": "plaza1_pond_sitting"},
+                {"time": "21:00", "state": "book_working"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "book_working"},
+                {"time": "12:00", "state": "farm_looking"},
+                {"time": "18:00", "state": "farm_standing"},
+                {"time": "21:00", "state": "book_working"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "book_working"},
+                {"time": "16:00", "state": "cafe_sitting"},
+                {"time": "18:00", "state": "cafe_standing"},
+                {"time": "21:00", "state": "book_working"}
+            ]
+        }
+    },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "book_working",
+        "npc_spawn": "usher_heart_npc",
+        "player_spawn": "usher_heart_player",
+        "lines": [
+            "Hey, {player_name}. Here to buy a book?",
+            "Reading anything good lately? I could use some inspiration.",
+            "Listening to you talk, you seem like a pretty interesting person.",
+            "I've never once left this town in my whole life.",
+            "If you don't mind, could I write a novel based on your story?",
+            {"text": "Royalties? How about 200 won per copy? ...Too stingy, you say?", "emotion": "happy"}
+        ]
+    },
+    "murder_alibi_lie": {
+        "location_label": "Shrine",
+        "corroboration_line": "Now that I think about it, Sage said she's been sensing some bad energy lately. Did you hear about that too?"
+    },
+    "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "description": "직접 작곡한 음반을 건넨다.",
+            "lines": [
+                "{player_name}! Perfect timing. Just the person I wanted to see.",
+                "Actually, I make music as a hobby too.",
+                {"text": "Not sure if you knew, but all the records here — I made every one of them.", "emotion": "happy"},
+                "I've been happy getting closer to you lately, so I wrote a short piece thinking of you.",
+                {"type": "gift", "item_id": "record_be_with_you"},
+                "Don't feel obligated. I'm giving it to you because I want to.",
+                {"text": "I don't have much talent for music, so don't expect too much.", "emotion": "happy"},
+                "Play it on the jukebox and listen sometimes. Think of me a little, while you do."
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "오래된 대본을 건네준다.",
+            "lines": [
+                "{player_name}. There's something I want to give you.",
+                "We've really become close friends, after all.",
+                "This is the first script I ever finished.",
+                "It's really good... but for some reason, it never caught on.",
+                "If you're up for it, want to put on a play with this sometime?",
+                "Ha... just kidding. Relax your face.",
+                {"text": "You'll hold onto it instead of throwing it away, right?", "emotion": "happy"}
+            ]
+        },
+        {
+            "threshold": 105,
+            "type": "dialogue",
+            "description": "창밖 시선을 느끼지만 농담으로 넘긴다.",
+            "lines": [
+                "Lately, every late night, I keep hearing rustling in the bushes.",
+                "Must just be strong wind, right? No way it's...",
+                {"text": "Guess I've been so deep in writing my imagination's gone into overdrive. Ha, feel free to ignore me.", "emotion": "happy"}
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "murder_grief": [
+            {"text": "I can't believe something like this happened in this town.", "emotion": "sad"},
+            {"text": "Everyone says they're scared... me too. Of course I am.", "emotion": "sad"},
+            {"text": "I hope they catch them soon.", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            {"text": "A second one — I really can't believe it.", "emotion": "sad"},
+            "This time I'm genuinely scared too. Not joking.",
+            "I really hope they get caught soon. I mean it."
+        ],
+        "suspicion_talk_2": {
+            "requires_alive": "marr",
+            "lines": [
+                {"text": "Everyone's suspecting each other now. The days when we all got along are ancient history.", "emotion": "sad"},
+                {"text": "Seems like Marr's getting suspected the most. Well... can't say it's unreasonable.", "emotion": "sad"},
+                "Did you know he only ever bought psychology and mystery books from me?",
+                "That's made me a little uneasy too. Though it could just be his taste."
+            ]
+        },
+        "accomplice_testimony": [
+            {"text": "Just a moment. I'd like to testify.", "emotion": "sad"},
+            {"text": "{player_name}, it is true that you purchased rat poison from Marr's shop.", "emotion": "angry"},
+            {"text": "But they run a restaurant, and have long spoken of how much stress the rats have caused them.", "emotion": "angry"},
+            {"text": "They bought the poison only to exterminate rats, never to use on a person.", "emotion": "angry"},
+            {"text": "Also, Marr's records are handwritten, so there are bound to be sales that went unrecorded.", "emotion": "angry"},
+            {"text": "A single sales record isn't enough evidence to call {player_name} the culprit.", "emotion": "angry"},
+            {"text": "{victim_name} — it's possible they were the culprit, and bought the rat poison themselves out of guilt, to end their own life.", "emotion": "sad"}
+        ],
+        "accomplice_move_in": [
+            {"text": "Finally, it's just the two of us.", "emotion": "happy"},
+            {"text": "I'm glad.", "emotion": "happy"},
+            {"text": "If I'd known you were someone like me, I would have shown my true self sooner.", "emotion": "happy"}
+        ],
+        "arrest_scene_final_words": [
+            "...",
+            "Heh, well, this is quite the predicament.",
+            {"text": "{player_name}, I didn't want you to see me like this.", "emotion": "angry"},
+            {"text": "Hey, Poli. Family, whatever — screw all that.", "emotion": "angry"},
+            {"text": "{player_name} was the only one who ever came to me with real sincerity.", "emotion": "sad"},
+            {"text": "That's why I wanted you so badly.", "emotion": "sad"},
+            "{player_name}.",
+            {"text": "If you're willing, why don't we be together?", "emotion": "happy"}
+        ],
+        "arrest_scene_last_breath": [
+            {"text": "...", "emotion": "sad"},
+            {"text": "Ha... ha...", "emotion": "sad"},
+            {"text": "{player_name}, I wanted to be happy with you.", "emotion": "sad"},
+            {"text": "Even a wish this small, I couldn't...", "emotion": "sad"}
+        ]
+    },
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    ["Couldn't write a single sentence again today.", "A slump, you ask?", {"text": "If most days are like this, it's not a slump. The lucky days are the ones I actually write!", "emotion": "happy"}],
+                    ["Come to check out the bookstore? Take a look around."],
+                    ["There's exactly one copy of 'Beyond the Door' left. Isn't that basically a steady seller?", "Want to grab the last one?"]
+                ],
+                "mid": [
+                    ["They say everyone has their own story.", {"text": "Isn't that fascinating?", "emotion": "happy"}, "Someday I'll figure out how to write mine too."],
+                    {"lines": ["Marr bought 'How to Live as a Cat' today.", "That makes it my biggest hit yet.", "A grand total of three copies sold."], "requires_alive": "marr", "fallback_lines": ["A customer bought 'How to Live as a Cat' today.", "Who it was is a secret."]},
+                    ["When the writing won't come, I just start with the title. Weirdly enough, the rest follows after that."]
+                ],
+                "high": [
+                    ["Somehow, the writing goes better whenever you show up. Isn't that strange?", "Guess seeing you gives me a lot to say."],
+                    [{"text": "I had a totally new novel idea today! Curious about the title?", "emotion": "happy"}, "Come buy it once it's out~"],
+                    ["Sometimes I get scared that literally no one will ever read my novels.", "Still, guess I just have to keep writing.", "I'm used to waiting, after all."]
+                ]
+            },
+            "화": {
+                "low": [
+                    ["Had a bird-meat dish and I feel full of energy today.", "I like all meat dishes, but bird meat's my favorite."],
+                    ["I go by the farm shop a lot on Tuesdays. To look at the flowers.", "They're just so pretty."],
+                    ["Hey. What's on the menu at your restaurant today?", "As long as it's not rabbit meat, I'm fine."]
+                ],
+                "mid": [
+                    ["Mind if I come eat at your restaurant sometime?", "But if you feed me rabbit meat, I swear I won't let it slide."],
+                    ["I wrote a novel called 'Falling in Love Takes Only 3 Seconds,' and honestly, half of it is how I really feel.", "Who is it about, you ask?...", "Hey, how am I supposed to say that."],
+                    {"lines": ["Flora's lettuce is growing so well. Went to see it again today.", "Is it growing like that because she pours so much care into it?"], "requires_alive": "flora", "fallback_lines": ["With Flora gone, the field is so quiet.", "I liked it when she used to grow such pretty flowers."]}
+                ],
+                "high": [
+                    {"lines": ["Flora is beautiful. Sometimes I think, if spring were born as a person, maybe it'd look like her.", "Even her name fits, doesn't it?"], "requires_alive": "flora", "fallback_lines": ["Flora really was beautiful. I used to think if spring were born as a person, it'd look like her.", "Even now, whenever spring comes, I think of her."]},
+                    {"lines": ["If I get the chance next time, Woody said she'd draw a cover for my novel.", "Her work looks rough, but there's real art in it, don't you think?"], "requires_alive": "woody", "fallback_lines": ["A while back, Woody said she'd draw a cover for my novel if the chance came up.", "I should've taken her up on it instead of putting it off.", "...how was I supposed to know something like this would happen."]},
+                    {"lines": ["I can't count how many times I thought about confessing my feelings to Flora.", "But every time, my courage would just vanish."], "requires_alive": "flora", "fallback_lines": ["I let her go without ever telling Flora how I felt.", "Next life... I want to be a little braver."]},
+                    {"lines": [{"text": "I saw Marr reading my book! And not just once — twice!", "emotion": "happy"}, "He might be the customer who reads my work most seriously."], "requires_alive": "marr", "fallback_lines": ["Marr was my bookstore's best regular.", "With him gone, it feels really empty."]}
+                ]
+            },
+            "수": {
+                "low": [
+                    ["Watered the flowering trees again today. They're growing well."],
+                    ["Wednesday's the day I tidy up the bookstore. The dust is unreal."],
+                    ["Read back over what I wrote today, it was so off I deleted all of it.", "Ended up scrapping an entire book that way."]
+                ],
+                "mid": [
+                    ["Writing well matters less than writing consistently. Probably.", "Keep at it long enough and a masterpiece will show up eventually. No need to rush!"],
+                    ["Monk Lama suggested I try copying out sutras.", "Thought it might help my writing, so I tried it. Just gave me a sore hand."],
+                    ["I wrote a novel called 'A Resolve in the Face of Death,' and a lot of people say the ending feels hollow.", "But isn't that just what life is like?"]
+                ],
+                "high": [
+                    {"lines": ["Ah, Belze got upset again? Tell her I'm sorry. But I already planted them all...", "Couldn't the wind just not blow that way?"], "requires_alive": "belje", "fallback_lines": ["If I'd known Belze would go like this, I would've planted a lot fewer trees.", "Sorry I couldn't be more considerate of her."]},
+                    [{"text": "The flowering tree got its first bud today! I'm so moved.", "emotion": "happy"}],
+                    ["People sometimes tell me I seem to live in my own world.", "I'm sure they don't mean it badly. Probably."]
+                ]
+            },
+            "목": {
+                "low": [
+                    ["Not a single customer today. Guess I'll just read."],
+                    ["Thursdays are especially quiet. Perfect for writing."],
+                    ["Rewrote the draft of my new novel three times today."]
+                ],
+                "mid": [
+                    [
+                        "What do you think would make a good title for my novel? I still haven't decided.",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "I'm sure a great title will come to you.", "affection": 1, "response": [{"text": "Right? That's what I believe too!", "emotion": "happy"}]},
+                                {"label": "Why not figure out the content first?", "affection": 1, "response": ["Oh... that makes sense too."]},
+                                {"label": "I'm not sure.", "affection": 0, "response": ["That's fine, neither do I."]}
+                            ]
+                        }
+                    ],
+                    ["I wrote a mystery novel called 'The Culprit Is Among Us,' but everyone says the twist feels kind of underwhelming."],
+                    {"lines": [{"text": "Writing at Mocha's café actually helps me focus. Nice and quiet.", "emotion": "happy"}], "requires_alive": "mocha", "fallback_lines": ["Writing at Mocha's café used to be one of my life's little joys.", "Feels a lot more boring now."]}
+                ],
+                "high": [
+                    ["Sometimes I wonder what I'm even living for.", {"text": "I guess it's just a pain you can't avoid, once you're born human.", "emotion": "sad"}],
+                    ["A customer I'd never seen before bought three of my books today!", {"text": "Isn't that basically a fan?", "emotion": "happy"}],
+                    ["Sometimes I can't tell if never giving up is a talent or just stubbornness.", {"text": "Still, this is the only thing I know how to do.", "emotion": "sad"}]
+                ]
+            },
+            "금": {
+                "low": [
+                    ["Another week gone. How many sentences did I even write this week..."],
+                    ["The bookstore gets a few more customers on Fridays. Good thing."],
+                    ["Never wrote a single one of the chapters I was aiming for this week. Next week I'm really seeing it through."]
+                ],
+                "mid": [
+                    ["I don't really know how to give up. Not sure if that's a strength or a flaw.", "I just keep writing, even if no one reads it."],
+                    ["I wrote a novel called 'The Detective's Last Footsteps,' but honestly I couldn't settle on an ending so I just wrapped it up.", "I'll fix it later if I think of something."],
+                    ["On days when the writing won't come, I just tend to the flowering trees instead. It puts my mind at ease."]
+                ],
+                "high": [
+                    ["Talking with you gives me all kinds of story ideas. Thanks!", "You've got so much experience, I feel like you hand me all sorts of stories."],
+                    [{"text": "Finally finished a whole chapter today! Had a little celebration for myself.", "emotion": "happy"}],
+                    ["Everyone says my novels aren't interesting, but I don't let that get to me.", "I'm going to keep writing anyway."]
+                ]
+            },
+            "토": {
+                "low": [
+                    ["A few more people come to the bookstore on weekends."],
+                    ["Set up a new-releases corner on Saturday.", "Did a new release come out, you ask?", "Nope!"],
+                    ["Writing at the café is my little pleasure on weekends."]
+                ],
+                "mid": [
+                    ["I love sitting at the café to write. The atmosphere just fits.", "Want to come along next time?"],
+                    ["I wrote a novel called 'The Letter I Never Sent' — honestly, I've got a few letters like that myself."],
+                    {"lines": ["Stopped by Flora's shop today to look at seeds. Didn't really need to buy anything."], "requires_alive": "flora", "fallback_lines": ["What should I do today?", "Want to go somewhere nice together if you know a good spot?", "...Never mind. Better go sell some books."]}
+                ],
+                "high": [
+                    ["Someday, everyone's going to read my story. For real."],
+                    ["Poli bought my book today and then asked me to sign it!", {"text": "First time anyone's ever asked me for that in my life.", "emotion": "happy"}],
+                    ["Everyone calls me a dreamer with no sense, but it beats having no dream at all.", "At least, that's what I think."]
+                ]
+            },
+            "일": {
+                "low": [
+                    ["Opened the bookstore at a leisurely pace on Sunday."],
+                    ["Just like Newton made his great discovery under an apple tree, I'll probably write my masterpiece under a flowering tree someday."],
+                    ["Somehow the writing's just flowing today. Days like this are rare."]
+                ],
+                "mid": [
+                    ["Didn't sell many books today.", "Though honestly, that's pretty much always the case...", "Well, just because I haven't done well so far doesn't mean it's a real problem."],
+                    ["I also wrote a short story called 'He Who Always Stood in That Alley,' but not many people know about it."],
+                    ["I just rest at home on Sundays, tidying up my potted plants.", "A regular break helps good inspiration come to me."]
+                ],
+                "high": [
+                    ["Want to try reading one of my novels sometime? ...Or maybe it's better if I don't show you yet."],
+                    [{"text": "Even I'm pretty happy with the short story I finished today!", "emotion": "happy"}],
+                    ["Someday I want to write a truly great story.", "I don't know when that'll be, but I'm sure it'll happen if I keep writing."]
+                ]
+            }
+        },
+        "rain_conversation": [
+            ["Strangely, the writing flows well on rainy days."],
+            ["When it rains, I don't have to water the pots. Makes things easy."]
+        ],
+        "mail_reaction": [
+            ["'{player_mail_content}' — I could totally use this as a line in a novel. I'm being serious."],
+            [{"text": "Saw your mail. '{player_mail_content}' — that's so romantic. You know I love this stuff, right?", "emotion": "happy"}]
+        ],
+        "horror_conversation": [
+            [{"text": "{victim_name} keeps seeping into my novel. I don't even mean for it to happen.", "emotion": "sad"}, "It's strange — even when I try not to, my hand just goes there."],
+            ["The book {victim_name} bought is still sitting in the bookstore's stock.", {"text": "For some reason, I just can't bring myself to touch that shelf.", "emotion": "sad"}]
+        ]
+    },
+    "emails": {
+        "greeting": [
+            {"title": "Prologue", "lines": ["New work's prologue: 'One day, a stranger appeared in the unfamiliar town.'", "Okay, it's really just a check-in letter. Starting with a prologue just sounds more impressive.", "What have you been up to? I'm still wrestling with a single sentence."]},
+            {"title": "Doing inventory", "lines": ["I was counting stock of 'Beyond the Door' and thought of you.", "I don't even know why. It just happened.", "Come by the bookstore if you're bored. New releases... not yet."]},
+            {"title": "Flowering-tree update", "lines": ["The flowering tree finally sprouted new buds. Isn't that amazing?", "Wasn't sure this was even worth writing about, but I wrote it anyway.", "Anyway, you doing well?"]}
+        ],
+        "event_invite": [
+            {"title": "That bird-meat dish, I mean it", "requires_favorite_food": true, "lines": ["That bird-meat dish yesterday was seriously delicious.", "Story ideas kept popping into my head while I ate. But I forgot them all.", "Invite me again. I'll try to remember next time."]},
+            {"title": "Thanks for the invite", "lines": ["Thanks for inviting me yesterday.", "Got to take a break from writing and just enjoy myself for once.", "Turns out this kind of thing isn't bad every now and then."]}
+        ],
+        "alibi_reminder": {"title": "Doing okay?", "lines": ["Right in front of your house — that genuinely gave me chills. Are you all right?", "{player_name}, come by the bookstore sometime to clear your head."]},
+        "gift_thanks": [
+            {"title": "Mind if I sneak this into my next novel?", "lines": ["Thanks for the gift. Seriously, exactly my taste.", "Mind if it makes a cameo in my next novel? I'll change the name, of course.", "Well, nobody reads it anyway, so maybe it doesn't matter."]},
+            {"title": "Thank you", "lines": ["I was so thrilled to get the gift.", "Put it right on my desk. I'll glance at it whenever I get stuck writing.", "Really, thank you."]}
+        ],
+        "memento_reminder": {"title": "The story won't end without you", "lines": ["My story keeps staying unfinished because you haven't come by.", "There's something I want to give you. Would you come to the bookstore?"]},
+        "story_progress": {
+            "player_arrival_day_3": {"title": "Come visit the bookstore", "lines": ["Heard you just moved here! I'm Usher, this town's bookstore owner and novelist.", "There's exactly one copy of my book left in stock — doesn't that feel like fate?", "Come by if you're bored. Even just browsing is fine."]}
+        },
+        "special_day": {}
+    }
+}

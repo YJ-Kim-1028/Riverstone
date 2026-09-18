@@ -1,0 +1,311 @@
+{
+    "id": "roshi",
+    "name": "罗西",
+    "name_en": "Roshi",
+    "gender": "남성",
+    "age": "40대",
+    "job": "낚시꾼",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "친절하다.",
+        "감정 기복이 적다.",
+        "갈등을 싫어한다.",
+        "타인의 사정을 함부로 판단하지 않는다.",
+        "가족을 무엇보다 소중하게 생각한다."
+    ],
+    "preferred_food": ["옥수수"],
+    "disliked_food": ["고등어"],
+    "special_notes": [
+        "낚시 관련 NPC. 아들 마린과 단둘이 산다.",
+        "비가 오는 날에는 바다에 나가지 않는다 (맑은 날엔 출항해 맵에서 만날 수 없음, 비 오는 날에만 등장).",
+        "셰퍼드와 모카의 불륜 관계를 알고 있지만 개입하지 않는다."
+    ],
+    "alibi_speech": {
+        "known": "那天下午六点左右我在%s。",
+        "unknown": "那天晚上我在哪儿……自己也记不太清了。",
+        "witness_seen": "啊,这么一说,那天我好像在%s见过%s。",
+        "witness_none": "啊,那天倒是没特别注意到谁。"
+    },
+    "memento_item": {
+        "name": "兔子玩偶",
+        "description": "马林小时候最珍视的兔子玩偶。因为抱着睡了太多年,一只耳朵都磨薄了。",
+        "lore_lines": [
+            "이 녀석이 이 인형 없으면 잠도 못 잤었거든.",
+            "이제는 자기가 어른이라나 뭐라나.",
+            "그래도 내겐 아직 어린애야."
+        ]
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/roshi_port.png",
+        "happy": "res://assets/npc/portrait/roshi_happy.png",
+        "sad": "res://assets/npc/portrait/roshi_sad.png",
+        "angry": "res://assets/npc/portrait/roshi_port.png"
+    },
+    "sprite": "res://assets/npc/sprite/roshiSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": true,
+            "entries": [
+                {"time": "09:00", "state": "fish_sitting"},
+                {"time": "21:00", "state": "fish_sitting"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": true,
+            "entries": [
+                {"time": "09:00", "state": "fish_sitting"},
+                {"time": "21:00", "state": "fish_sitting"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "fish_working"},
+                {"time": "21:00", "state": "fish_sitting"}
+            ]
+        }
+    },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "fish_sitting",
+        "npc_spawn": "fish_standing",
+        "player_spawn": "roshi_heart_player",
+        "lines": [
+            "今天钓到了鱿鱼,很新鲜。",
+            "说起来,这镇上会钓鱼的,也就你一个了。",
+            {"text": "镇上能有个人跟自己有一样的爱好,感觉也不错。", "emotion": "happy"},
+            "以后还要多钓点。",
+            {"type": "gift", "item_id": "squid"}
+        ]
+    },
+    "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "requires_not_shown": {"npc_id": "marin", "threshold": 50},
+            "description": "오래 아껴온 황금 낚싯대를 건넨다.",
+            "lines": [
+                "过来一下。",
+                {"text": "这是我年轻时就一直珍藏的鱼竿。手脚不比从前了,现在也很少用了。", "emotion": "happy"},
+                {"type": "gift", "item_id": "golden_fishing_rod"},
+                "本想传给马林,可他对钓鱼没什么兴趣,倒是对别的事更上心。",
+                {"text": "我想你应该会好好用它。", "emotion": "happy"},
+                {"text": "也许是用了太久的缘故,偶尔说不定能钓到不是普通鱼的东西。", "emotion": "happy"}
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "토끼 인형을 건네준다.",
+            "lines": [
+                "这是马林小时候最珍视的玩偶。",
+                "他说长大了就不需要了。",
+                {"text": "可奇怪的是,我怎么也舍不得扔掉。", "emotion": "happy"},
+                {"text": "哈哈……这大概就是当父母的滋味吧。", "emotion": "happy"},
+                "你小时候也喜欢过这种东西吗?",
+                "马林看着坚强,其实心里挺孤单的。不管发生什么,请你千万别忘了他。"
+            ]
+        },
+        {
+            "threshold": 105,
+            "type": "dialogue",
+            "description": "선착장의 인기척을 대수롭지 않게 넘기려 한다.",
+            "lines": [
+                "最近总感觉停船的码头那边有人的动静。深更半夜的。",
+                "本以为是哪个渔夫,可这段时间那个点根本没人出海。",
+                "算了,想再多也没用。左耳进右耳出就行了。"
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "murder_grief": [
+            {"text": "出了这种事,也不知道自己该不该还有心思出海钓鱼。", "emotion": "sad"},
+            {"text": "我跟马林说了,这阵子别一个人到处乱跑。", "emotion": "sad"},
+            {"text": "我自己倒是无所谓……只要他平安就行。", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            "这种事竟然发生了两次。",
+            {"text": "一想到家人,晚上根本睡不着。", "emotion": "sad"},
+            "原以为年纪大了,恐惧感会淡一些,看来不是这么回事。"
+        ],
+        "suspicion_talk_2": {
+            "requires_alive": "marr",
+            "lines": [
+                "今早咖啡馆里大家还在争论凶手是谁,都在怀疑马尔。",
+                "我觉得随便给人定罪不太好。也没证据说一定是马尔。",
+                "要我说,那些拼命想把罪名扣在马尔头上的人,反倒更可疑。比如谢泼德。"
+            ]
+        }
+    },
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    ["今天又出海了。"],
+                    ["周一早上海面难得这么平静。这种日子让人心里也踏实。"],
+                    ["还以为网里捞到了什么,结果是一团海藻。真让人失望。"]
+                ],
+                "mid": [
+                    {"lines": ["不知道马林有没有好好吃饭。"], "requires_alive": "marin", "fallback_lines": ["希望马林那小子,不管现在在哪儿都过得好。"]},
+                    {"lines": ["船上挂了个没见过的护身符。看着像是马林挂的,不过我也没多问。"], "requires_alive": "marin", "fallback_lines": ["每次看到他挂在船上的那个护身符,心里都会一阵酸。", "大概这就是当父亲的滋味吧。"]},
+                    {"lines": ["有时候腰会疼,但我尽量不在马林面前表现出来,免得他担心。"], "requires_alive": "marin", "fallback_lines": ["今天腰特别僵。看来快要下雨了。"]}
+                ],
+                "high": [
+                    {"lines": ["你能跟马林处得这么好,我真的很感激。"], "requires_alive": "marin", "fallback_lines": ["现在醒来的时候,还会下意识觉得马林就睡在旁边。", "心里真的很难受。"]},
+                    {"lines": [{"text": "那孩子本来是想踢足球的。现在天天摆弄渔网,却从没在我面前表现出来过。", "emotion": "sad"}], "requires_alive": "marin", "fallback_lines": ["早知道会是这样……当初真该让他痛痛快快地去踢足球。", "后悔得没法用语言形容。"]},
+                    ["平安回来,这才是最重要的。别的都无所谓。"]
+                ]
+            },
+            "화": {
+                "low": [
+                    ["今天水流有点急,不过浪倒不算大。"],
+                    ["补网的时候手一滑,差点被钩子扎到。得小心点才行。"]
+                ],
+                "mid": [
+                    ["玉米做的菜,不管什么时候吃都好吃。"],
+                    ["天天钓鲭鱼,自己却怎么都吃不惯,想想也挺讽刺的。"],
+                    ["喇嘛法师说过,一个人在辽阔的大海上待久了,思绪就容易乱飘。这话说得没错。"],
+                    {"lines": ["马林好像又去找赛姬了。也不知道他俩老往一块儿凑,是在忙活什么。"], "requires_alive": "marin", "fallback_lines": ["现在只要看到赛姬,就会想起马林。", "唉……"]},
+                    {"lines": ["电视上正播足球比赛,我看马林会说什么,他却一句话不说就换了台。", "……我也就假装没注意到了。", {"text": "那句“对不起”,怎么也说不出口。", "emotion": "sad"}], "requires_alive": "marin", "fallback_lines": ["因为我,马林连看场足球赛都没法安心。", "我到底给那孩子压上了多重的担子啊……"]}
+                ],
+                "high": [
+                    ["这镇上的人都是好人。可说到底,外人终究是外人。"],
+                    {"lines": ["谢泼德和摩卡的事,我知道。可我不觉得自己有资格去插手。", "我唯一在意的,只有马林。"], "requires_alive": ["shepherd", "mocha"], "fallback_lines": ["谢泼德和摩卡的事,我知道。可我不觉得自己有资格去插手。", "我唯一在意的,只有马林。"]},
+                    {"lines": ["总想着让伊莎帮我看看腰,可到最后又跟自己说,大概没什么大事。"], "requires_alive": "isha", "fallback_lines": ["每次路过伊莎以前开的诊所,心里都一阵抽痛。"]}
+                ]
+            },
+            "수": {
+                "low": [
+                    ["到周三了。今天也平安回来了。"],
+                    ["今天太阳挺好,网一下子就晒干了。"],
+                    ["今天海鸥叫得特别吵。"]
+                ],
+                "mid": [
+                    {"lines": ["每次出海都会想到马林。要是今天回不去了怎么办,老想这些。"], "requires_alive": "marin", "fallback_lines": ["以前很怕把他一个人留下,自己出海。", "现在……出海不过是为了强迫自己忘掉罢了。"]},
+                    {"lines": [{"text": "马林小时候一刻都离不开足球,现在成天摆弄渔网。有时候会想,是不是因为我。", "emotion": "sad"}], "requires_alive": "marin", "fallback_lines": ["要是当初支持他追梦,结果说不定会不一样。", "一想到这个,愧疚得整宿睡不着。"]},
+                    ["干完活肩膀酸得很,不过泡个热水就好多了。"]
+                ],
+                "high": [
+                    ["也许这就是当父母的滋味吧。每天除了担心还是担心。"],
+                    {"lines": ["也不知道马林最近老往神社跑到底是为了什么,不过应该不是什么坏事。"], "requires_alive": "marin", "fallback_lines": ["自从他走了,我也开始常去神社。", "只是想为他的灵魂祈福罢了。"]},
+                    ["有时候,大家都装作没看见,反倒对谁都轻松些。"]
+                ]
+            },
+            "목": {
+                "low": [
+                    ["今天又忙着补网了。"],
+                    ["今天钓上来的全是小鱼苗。有些日子就是这样。"],
+                    ["今天衣服上沾满了鱼腥味,有点烦人。"]
+                ],
+                "mid": [
+                    {"lines": ["都说马林长大了,可在我眼里他还是个小孩子。"], "requires_alive": "marin", "fallback_lines": ["不管儿子长多大,在父亲眼里始终是个孩子。", "不知道他在地底下会不会害怕,会不会孤单……"]},
+                    {"lines": [{"text": "那孩子最近打渔网结打得越来越熟练了。我根本没教过他。", "emotion": "happy"}], "requires_alive": "marin", "fallback_lines": ["马林一直很擅长自己琢磨那些没人教过他的事。", "他不该在我这种没用的父亲手底下长大的。"]},
+                    {"lines": ["我的腰还是老样子,不过这事儿瞒着马林。"], "requires_alive": "marin", "fallback_lines": ["我的腰还是老样子。", "真怀念马林老是唠叨让我去诊所的日子。"]}
+                ],
+                "high": [
+                    {"lines": ["马林——那孩子比看上去要孤单得多。请你多照顾照顾他。"], "requires_alive": "marin", "fallback_lines": ["想到那么孤单的孩子独自一人长眠地下,我就受不了。", "胸口疼得几乎喘不过气。"]},
+                    {"lines": [{"text": "马林没怎么说过为什么不踢足球了,可我心里清楚。是因为我。", "emotion": "sad"}], "requires_alive": "marin", "fallback_lines": ["我根本没资格被叫做父亲……", "今天想一个人待着,别管我。"]},
+                    {"lines": ["我没法当面跟马林说抱歉,只能加倍努力干活,替我们俩一起弥补。"], "requires_alive": "marin", "fallback_lines": ["对不起……真的对不起。当了这么不称职的父亲,对不起……"]}
+                ]
+            },
+            "금": {
+                "low": [
+                    ["又一周过去了。没出什么事,谢天谢地。"],
+                    ["周五的网感觉格外沉。大概是年纪大了吧。"],
+                    {"lines": ["今天天气晴朗,没能看见马林的脸。有些日子就是这样。"], "requires_alive": "marin", "fallback_lines": ["要是这种日子能带马林出去走走就好了。"]}
+                ],
+                "mid": [
+                    [
+                        "你是那种爱操心的人吗?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "我大概也是吧。", "affection": 1, "response": ["是嘛,看来不止我一个人这样。"]},
+                                {"label": "倒也没有。", "affection": 0, "response": ["那还真叫人羡慕。"]},
+                                {"label": "一涉及家人就会担心。", "affection": 1, "response": ["没错,就是这个意思。"]}
+                            ]
+                        }
+                    ],
+                    {"lines": ["看到马林在摆弄足球。说是不踢了,可看样子还是有点舍不得。"], "requires_alive": "marin", "fallback_lines": ["不知道马林摆弄那个足球的时候在想什么。", "一想到自己那些年一直视而不见,愧疚得受不了。"]},
+                    {"lines": ["关于我的腰,伊莎其实也发现了吧。她一直没说什么,我很感激。"], "requires_alive": "isha", "fallback_lines": ["伊莎不在了,这镇上感觉都空了一块。"]}
+                ],
+                "high": [
+                    ["我觉得谁都没资格随便插手别人的事。所以我一般都是静静看着。"],
+                    {"lines": [{"text": "谢泼德和摩卡都不是坏人。正因如此,我才什么都说不出口。", "emotion": "sad"}, "每个人都有自己的难处。"], "requires_alive": ["shepherd", "mocha"], "fallback_lines": [{"text": "谢泼德和摩卡都不是坏人。正因如此,我才什么都说不出口。", "emotion": "sad"}, "每个人都曾有过自己的难处。"]},
+                    ["有时候连我自己都不确定,自己是不是活得对。"]
+                ]
+            },
+            "토": {
+                "low": [
+                    {"lines": ["周末我都和马林一起过。"], "requires_alive": "marin", "fallback_lines": ["以前周末常和马林一起过。", "都是些美好的回忆。"]},
+                    {"lines": ["周六早上先从洗船开始。有马林帮忙的话很快就弄完了。"], "requires_alive": "marin", "fallback_lines": ["周六早上先从洗船开始。以前马林帮忙的时候很快就弄完了。", "现在一个人干,难多了。"]},
+                    {"lines": [{"text": "今天水花溅得到处都是,马林和我都湿透了。笑死我了。", "emotion": "happy"}], "requires_alive": "marin", "fallback_lines": ["现在越来越怕潮湿了。看来退休也快了。"]}
+                ],
+                "mid": [
+                    ["今天鱼不怎么上钩。有些日子就是这样。"],
+                    {"lines": ["马林聊起足球的时候,我总会不自觉地认真听。看来他从没忘记过自己喜欢的东西。"], "requires_alive": "marin", "fallback_lines": ["真怀念儿子在旁边叽叽喳喳聊足球的样子。"]},
+                    {"lines": ["没有比健康茁壮长大的儿子更让人满足的了。"], "requires_alive": "marin", "fallback_lines": ["……我想一个人待着。", "抱歉。"]}
+                ],
+                "high": [
+                    ["家人最重要。这点我很确定。"],
+                    {"lines": [{"text": "马林放弃足球运动员梦想的时候,说实话,我心里比他还难受。", "emotion": "sad"}, {"text": "不过看看他现在的样子,我觉得他过得也不算差。", "emotion": "happy"}], "requires_alive": "marin", "fallback_lines": ["今天没什么心情说话。", "回去路上小心点。"]}
+                ]
+            },
+            "일": {
+                "low": [
+                    ["周日出船稍微晚了一点。"],
+                    {"lines": ["今天早上和马林一起去钓鱼了。好久没有就我们两个人了。"], "requires_alive": "marin", "fallback_lines": ["总会想起我们以前一起去钓鱼的日子,就我们两个人。", "他足球踢得好,钓鱼也很在行。", "能当马林的父亲,我很幸福。"]},
+                    ["周日天特别晴,水面看着格外美。"],
+                    {"lines": ["每到周日,总会没来由地想再检查一遍网。", "……大概是因为马林以前这个时候常有比赛吧。"], "requires_alive": "marin", "fallback_lines": ["现在真的只想休息。", "总觉得活着好像也没什么意义了。"]}
+                ],
+                "mid": [
+                    {"lines": ["经常会想起马林还是小孩子的样子。真不敢相信他已经长这么大了。"], "requires_alive": "marin", "fallback_lines": ["还以为他已经长大成人了,没想到却是这样的告别。", "不过那孩子给了我很多美好的回忆。他是我珍贵的小天使。"]},
+                    {"lines": [{"text": "那孩子握鱼竿的姿势现在真的有模有样了。说不定比我还厉害。", "emotion": "happy"}], "requires_alive": "marin", "fallback_lines": ["我现在连握竿的力气都没有了。", "看来用不了多久,也要去陪他了。"]},
+                    {"lines": ["今天身体有点沉,不过和马林在一起就什么都忘了。"], "requires_alive": "marin", "fallback_lines": ["今天身体有点沉。", "这种日子就想好好休息。", "什么都不去想……"]}
+                ],
+                "high": [
+                    ["每天都能平安回家,这就是我唯一的心愿。"],
+                    {"lines": ["就算怕海,我还是会出海,都是为了马林。总得有人给他弄口饭吃。"], "requires_alive": "marin", "fallback_lines": ["现在已经没有理由再钓鱼了。", "也没有什么人生是需要我负责的了……", "自己都不知道为什么还在干这份活。"]},
+                    {"lines": [{"text": "总有一天马林会成为自己船的船长。在那之前,我也得撑住自己这一份。", "emotion": "happy"}], "requires_alive": "marin", "fallback_lines": ["我答应过等他长大就把船传给他。", "可现在,这个承诺再也无法兑现了。"]}
+                ]
+            }
+        },
+        "rain_conversation": [
+            {"lines": ["下雨天不出海。反倒能和马林待在一起,也不错。"], "requires_alive": "marin", "fallback_lines": ["下雨了。", "该死。"]},
+            ["浪大的日子我不会硬撑着出海。"],
+            ["好久不见。多亏这场雨,能看到你的脸真好。"]
+        ],
+        "mail_reaction": [
+            ["「{player_mail_content}」啊——好久没收到信了,感觉有点怀念。谢谢你。", "不知道该怎么回信,干脆当面跟你说了。"]
+        ],
+        "horror_conversation": [
+            ["看着大海,突然就想起了{victim_name}。", "大海就是这样。", "越是这种地方,越会让人想念那些思念的人。"],
+            ["{victim_name}以前经常帮我系船,现在就只剩我一个人了。"]
+        ]
+    },
+    "emails": {
+        "greeting": [
+            {"title": "报个平安", "lines": ["就想写几句,告诉你今天也平安回来了。", "你可能觉得这不像我的作风。", "不过偶尔这样,倒也不坏。"]},
+            {"title": "关于玉米的事", "lines": ["今天煮了点玉米吃,真的很好吃。", "天天钓鲭鱼,卖的却是自己吃不惯的东西。", "是不是挺好笑的。"]},
+            {"title": "补网的时候", "lines": ["补网的时候,总会想起各种各样的事。", "想着你过得怎么样。", "算不上什么正经问候,不过想着偶尔该问一句。"]}
+        ],
+        "event_invite": [
+            {"title": "那道玉米菜真不错", "requires_favorite_food": true, "lines": ["昨天那道玉米菜真的很好吃。", "难得吃到合自己口味的东西,心情很好。", "希望以后还能再邀请我。"]},
+            {"title": "谢谢你的邀请", "lines": ["谢谢你邀请我。", "这种机会不多,所以更觉得难得。", "下次有机会再叫上我。"]}
+        ],
+        "gift_thanks": [
+            {"title": "谢谢你的礼物", "lines": ["高兴地收下了,谢谢你。", "跟波利小小炫耀了一下。那家伙羡慕得不行。", "这份心意我不会忘的。"]},
+            {"title": "在船上找到了地方", "lines": ["为了把你送的东西放哪儿,想了好一阵子。", "最后决定放在船上显眼的地方。", "看来以后每次出海都能看到它了。"]}
+        ],
+        "memento_reminder": {"title": "最近都没见到你", "lines": ["最近一直没见到你。", "我有东西要给你,有空的时候来渔具店一趟吧。"]},
+        "story_progress": {
+            "player_arrival_day_4": {"title": "你好啊。", "lines": ["听马林说你刚搬来。", "照顾好自己。需要什么就来渔具店找我。"]}
+        },
+        "special_day": {}
+    }
+}

@@ -1,0 +1,385 @@
+{
+    "id": "isha",
+    "name": "Isha",
+    "name_en": "Isha",
+    "gender": "여성",
+    "age": "30대",
+    "job": "의사",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "성실하다.",
+        "완벽주의 성향이 있다.",
+        "공부에 대한 강박이 있다.",
+        "열등감이 심하다."
+    ],
+    "preferred_food": ["소고기"],
+    "disliked_food": ["감자"],
+    "special_notes": [
+        "병원 운영 NPC로 디버프 해제 아이템을 판매한다.",
+        "기분이 좋지 않을 때 절을 찾는다.",
+        "플로라를 가장 친한 친구라 여기지만, 속으로는 그녀를 질투하고 열등감을 느낀다.",
+        "플로라의 과거 스토킹 사건이 조작되었다고 의심하고 있다."
+    ],
+    "memento_item": {
+        "name": "Worn Fountain Pen",
+        "description": "A pen she used back in school. From her exam-prep years all the way to becoming a doctor, it's the item Isha has kept the longest.",
+        "lore_lines": [
+            "이 펜으로 얼마나 많은 문제를 풀었는지 기억도 안 나.",
+            "그때는... 열심히 하면 뭐든 될 수 있다고 생각했어."
+        ]
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/isha_port.png",
+        "happy": "res://assets/npc/portrait/isha_happy.png",
+        "sad": "res://assets/npc/portrait/isha_sad.png",
+        "angry": "res://assets/npc/portrait/isha_angry.png"
+    },
+    "sprite": "res://assets/npc/sprite/ishaSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "hospital_working"},
+                {"time": "16:00", "state": "temple_standing"},
+                {"time": "21:00", "state": "hospital_working"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "hospital_working"},
+                {"time": "14:00", "state": "furniture_looking"},
+                {"time": "18:00", "state": "plaza1_flower_standing"},
+                {"time": "21:00", "state": "hospital_working"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "hospital_working"},
+                {"time": "12:00", "state": "farm_looking"},
+                {"time": "16:00", "state": "book_looking"},
+                {"time": "19:00", "state": "plaza1_pond_sitting"},
+                {"time": "21:00", "state": "hospital_working"}
+            ]
+        }
+    },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "hospital_working",
+        "npc_spawn": "isha_heart_npc",
+        "player_spawn": "isha_heart_player",
+        "lines": [
+            "Hey, {player_name}.",
+            "You don't look so good. The restaurant must be keeping you busy.",
+            "Seems like you've been pushing yourself too hard lately.",
+            "Of course I can tell, this is a clinic. I can see it just from the way you walk.",
+            "Sorry if that was overstepping. I just couldn't help worrying.",
+            {"text": "Here, drink this and get your strength back.", "emotion": "happy"},
+            {"type": "gift", "item_id": "energy_tonic"}
+        ]
+    },
+    "affection_events": [
+        {
+            "threshold": 80,
+            "type": "dialogue",
+            "requires_alive": "flora",
+            "description": "플로라에 대한 열등감을 드러낸다.",
+            "lines": [
+                "Flora came by here this morning.",
+                "She was bragging about getting a new perm.",
+                {"text": "My hair's too thin, I can't even get a perm.", "emotion": "angry"},
+                {"text": "And she knew that, and still came to brag about it.", "emotion": "angry"},
+                {"text": "It genuinely creeps me out every time she does that. Awful woman.", "emotion": "angry"}
+            ]
+        },
+        {
+            "threshold": 60,
+            "type": "dialogue",
+            "requires": {"npc_id": "poli", "threshold": 60},
+            "requires_alive": "flora",
+            "description": "플로라의 스토킹 사건에 대한 의구심을 내비쳤다가 스스로를 자책한다.",
+            "lines": [
+                "Do you have any idea how creepy Flora actually is?",
+                "You might've already heard, but she had an affair with Mocha's husband.",
+                {"text": "Poor Mocha. She just had the bad luck of crossing paths with a woman who goes crazy without a man.", "emotion": "sad"},
+                "But get this — Flora actually reported Mocha's husband as a stalker instead. I guess she thought doing that would erase what she'd done.",
+                "That man ended up losing his life trying to prove his love.",
+                {"text": "I don't know how someone that shameless can just walk around this town with a straight face.", "emotion": "angry"}
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "낡은 만년필을 건네준다.",
+            "lines": [
+                "{player_name}. Can I get serious for a moment, even though it's not like me?",
+                "Actually, there's a memory of mine I want to give you.",
+                "A fountain pen.",
+                "My whole life, I believed that if I just worked hard enough, I'd be happy.",
+                "But you know.",
+                "There really are people who are happy without even trying.",
+                {"text": "Watching you, I've realized a lot. If you don't mind, will you take the shackles that used to bind me?", "emotion": "happy"}
+            ]
+        },
+        {
+            "threshold": 105,
+            "type": "dialogue",
+            "description": "퇴근길에 느끼는 서늘함을 과로 탓으로 돌린다.",
+            "lines": [
+                "Lately, on my way home from the clinic, I get this strange chill down my spine.",
+                "It's probably just overwork making me on edge.",
+                "That's why I've been going to the temple a lot more lately. It feels strange being this cautious over nothing, but I just want to feel at ease."
+            ]
+        },
+        {
+            "threshold": 110,
+            "type": "dialogue",
+            "requires_alive": "flora",
+            "description": "플로라에 대한 질투심이 폭발한다.",
+            "lines": [
+                "Flora showed up today wearing the exact outfit I said I wanted.",
+                "I mentioned it so many times, but I guess she doesn't even remember things like that.",
+                {"text": "She's always like that. Must have nothing in that head of hers.", "emotion": "angry"},
+                {"text": "I want to grab a pair of scissors and rip that woman's clothes to shreds.", "emotion": "angry"}
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "murder_grief": [
+            {"text": "The body... I was the one who confirmed it.", "emotion": "sad"},
+            {"text": "It's not the first time I've seen something like that as a doctor, but this time my hands were shaking.", "emotion": "sad"},
+            {"text": "I keep thinking about what more I could have done.", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            "I had to confirm it again.",
+            {"text": "This time my hands didn't shake.", "emotion": "sad"},
+            {"text": "...That's not really a good sign, is it?", "emotion": "sad"}
+        ],
+        "suspicion_talk_2": {
+            "requires_alive": ["flora", "usher"],
+            "lines": [
+                "You're asking who I think the culprit is?",
+                {"text": "Flora and Usher.", "emotion": "angry"},
+                {"text": "You know it too, right? Flora's just insane with need.", "emotion": "angry"},
+                {"text": "It's because you've been so kind to her that she's lost all sense of restraint. Out of jealousy toward you, she's killing people in town and putting them on display right in front of your house.", "emotion": "angry"},
+                "If handling the bodies was too much, she probably got Usher to help.",
+                "She's the type to exploit someone's feelings for her without a second thought."
+            ]
+        }
+    },
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    ["My appointments are fully booked starting Monday.", "Sigh...."],
+                    ["You're not feeling unwell anywhere today, are you?", "I'm tired, but I should pay extra attention to someone new in town."],
+                    ["Monday mornings are especially hectic.", "I already miss Sunday evening."]
+                ],
+                "mid": [
+                    ["I'm reading a newly published medical book these days. The more I know, the better I can treat people.", "As you know, I'm the only doctor in this town."],
+                    ["Whenever I eat beef, I somehow feel energized that day.", "Maybe it's because I was born in the Year of the Tiger?"],
+                    {
+                        "lines": ["The medicine cabinet Woody made, I'm still using it at the clinic.", "If you ever need furniture, go see Woody.", {"text": "All of us only use furniture he made.", "emotion": "happy"}],
+                        "requires_alive": "woody",
+                        "fallback_lines": ["The medicine cabinet Woody made, I'm still using it at the clinic.", "There's no one left now who can craft nice new furniture like that.", "...It's just too sad to think about."]
+                    }
+                ],
+                "high": [
+                    {
+                        "lines": ["I scheduled an appointment for Woody this morning.", "Turns out he actually gets sick more often than you'd think."],
+                        "requires_alive": "woody",
+                        "fallback_lines": ["You know what's awful about being a doctor?", "Remembering the last moments of a patient who died.", {"text": "Woody, he always had such a bright smile. Ah...", "emotion": "sad"}]
+                    },
+                    [{"text": "Everyone says I'm perfect, but honestly I'm anxious every single day.", "emotion": "sad"}],
+                    ["Even a doctor can't treat herself, you know.", "My body's so tense I really need to get some medicine, but I can't find the time.", "Guess I just have to grit my teeth and bear it."]
+                ]
+            },
+            "화": {
+                "low": [
+                    ["Running the clinic isn't just about seeing patients.", "I really wish I had a nurse on staff."],
+                    ["Hey.", "If running the restaurant's got you worn out, come buy an energy tonic."],
+                    ["When was your last vaccination?", "Getting them early helps you avoid worse illnesses down the line."]
+                ],
+                "mid": [
+                    ["Beef dishes are always good, any time. Potatoes, though...", "Only good as a side, like mashed potatoes."],
+                    ["I'm an internist, but sometimes I feel like I end up playing therapist too.", "Every now and then people just come rest at my clinic when they're feeling troubled."],
+                    ["I keep telling Officer Poli to cut back on his patrols, but he never listens."]
+                ],
+                "high": [
+                    {
+                        "lines": ["Have you met Woody? He's such a kind, good kid. I haven't seen anyone quite like him in this town."],
+                        "requires_alive": "woody",
+                        "fallback_lines": ["There was never anyone in this town as kind and good as Woody.", "I miss him."]
+                    },
+                    [{"text": "I used to think you had to be perfect to be loved, but lately I'm not even sure about that.", "emotion": "sad"}, "It always feels like I'm the only one trying so hard."],
+                    ["I stayed up all night lately researching new medications.", "Still, it felt satisfying."]
+                ]
+            },
+            "수": {
+                "low": [
+                    ["It's only midweek and I'm already exhausted.", "I'm going to end up sick myself from curing everyone else."],
+                    ["*yaaawn*—", "Could you not stare while I'm yawning?"],
+                    ["Did you book an appointment? Today's completely full."]
+                ],
+                "mid": [
+                    ["This job requires a lot of responsibility. Saving lives always has to come first.", "I can't turn away a sick person just because they don't have money."],
+                    ["{player_name}, if I come by, please spare me the potato dish, okay?", "I really can't stand it. The texture alone puts me off."],
+                    ["If my desk isn't organized, I can't focus on work. Is this some kind of obsession too?"]
+                ],
+                "high": [
+                    ["When things get hard, I go to the temple and talk to Monk Lama. It always helps a little."],
+                    ["Monk Lama just listens even if I don't say anything. That's comforting."],
+                    [{"text": "I can never bring myself to tell anyone when things are hard. I'm afraid it'll make me look weak.", "emotion": "sad"}]
+                ]
+            },
+            "목": {
+                "low": [
+                    ["I hope today passes without any incidents too."],
+                    ["The number of patients has gone up a bit. Everyone should take care of themselves."],
+                    ["Wear a mask during the change of seasons. Got it?"]
+                ],
+                "mid": [
+                    ["Did you know I'm a perfectionist? If I don't do something properly, it bugs me.", "So sometimes I end up not even starting.", "I can't stand myself when I fail to do something perfectly."],
+                    {
+                        "lines": ["Have you ever talked with Flora?", "She's just so full of energy....", "So simple-minded. How does she do it?"],
+                        "requires_alive": "flora",
+                        "fallback_lines": ["Sometimes I miss Flora's simple, overflowing energy."]
+                    },
+                    {
+                        "lines": ["Don't get too close with Marr. That's my medical opinion."],
+                        "requires_alive": "marr",
+                        "fallback_lines": ["I wonder if I pushed Marr away too much just because he couldn't feel emotions.", "It's not like he ever actually did anything wrong..."]
+                    }
+                ],
+                "high": [
+                    [
+                        "Are you used to resting? I always feel anxious like I should be doing something.",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "It's okay to just rest sometimes", "affection": 1, "response": ["Is that so... I'll try."]},
+                                {"label": "I'm similar", "affection": 1, "response": ["I see, so it's not just me."]},
+                                {"label": "I'm not sure", "affection": 0, "response": ["Right, everyone's different."]}
+                            ]
+                        }
+                    ],
+                    {
+                        "lines": [{"text": "Being next to Flora makes me feel small without even realizing it.", "emotion": "sad"}, "She's my best friend. Why do I feel this way?"],
+                        "requires_alive": "flora",
+                        "fallback_lines": ["I wonder if Flora's doing well, wherever she is now.", "I hope she's found eternal peace."]
+                    }
+                ]
+            },
+            "금": {
+                "low": [
+                    ["Another week's gone. What a relief."],
+                    ["Fridays have fewer appointments at least. Does everyone go out and have fun even when they're sick?"],
+                    ["I close up a bit early on Friday evenings, at least."]
+                ],
+                "mid": [
+                    ["Lately I feel like I need some time to just walk without thinking about anything."],
+                    ["When cold season hits, masks run out fast. I should stock up in advance."],
+                    {
+                        "lines": ["I stopped by Marr's to buy a bouquet, and sure enough, he barely said a word."],
+                        "requires_alive": "marr",
+                        "fallback_lines": ["Whenever Flora grew pretty flowers, Marr used to turn them into lovely bouquets.", "I really loved that flower scent."]
+                    }
+                ],
+                "high": [
+                    ["I find myself talking to you so casually. Not sure why."],
+                    [
+                        "Have you ever agonized over your own existence?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "Of course I have.", "affection": 2, "response": ["Tell me about it in a letter sometime, if you get the chance. I'm curious about you."]},
+                                {"label": "Hmm, not really", "affection": 0, "response": ["Fair enough, it's a heavy topic after all."]}
+                            ]
+                        }
+                    ],
+                    ["Sage stopped by while passing through, and no matter what I asked, her answers were short.", "That has its own charm, though."]
+                ]
+            },
+            "토": {
+                "low": [
+                    ["Even on weekends, I have to come in if there's an emergency patient."],
+                    ["Having to work on weekends too is the worst."],
+                    ["Saturdays are at least a little easier to come in for."]
+                ],
+                "mid": [
+                    ["Sometimes I just want to rest without thinking about anything."],
+                    {
+                        "lines": ["The fish Old Man Roshi catches is supposed to be really good for your health."],
+                        "requires_alive": "roshi",
+                        "fallback_lines": ["I miss the mackerel Old Man Roshi used to catch.", "I remember how he'd go out to sea even after coming in for treatment on his aching back.", "I wonder if I could ever become that responsible an adult... I'm not sure."]
+                    },
+                    ["I don't really know how to rest, so even when I do, it doesn't feel like it."]
+                ],
+                "high": [
+                    ["I'm thinking about visiting Monk Lama this weekend."],
+                    [{"text": "That feeling like everything will fall apart if you're not perfect — you wouldn't know that, would you?", "emotion": "sad"}],
+                    ["Sometimes I wonder what it's like to live the way you do."]
+                ]
+            },
+            "일": {
+                "low": [
+                    ["Maybe it's because it's Sunday, but I feel a bit lighter."],
+                    ["Gotta open the clinic again tomorrow."],
+                    ["I sleep in on Sunday mornings. ...Sometimes."]
+                ],
+                "mid": [
+                    ["I believe you should be rewarded in proportion to your effort. At least, that's how I feel."],
+                    ["I actually kept one of Sage's charms too. Not that I believe in it or anything."],
+                    ["It's not like me to say this, but sometimes I just want to do nothing at all."]
+                ],
+                "high": [
+                    ["Sundays sometimes make me think back to my school days.", "I wonder if that snack shop I used to go to is still around."],
+                    ["I sometimes wonder what it'd feel like to live a life where you don't have to try so hard."],
+                    {
+                        "lines": ["That kid Marin, she's totally fine every time she comes to the clinic, but she still shows up.", "I guess she's just bored."],
+                        "requires_alive": "marin",
+                        "fallback_lines": ["When Marin was alive, the clinic was never quiet.", "She'd come by and chat even when she was perfectly fine.", "Now that she's gone, it's quiet."]
+                    }
+                ]
+            }
+        },
+        "rain_conversation": [
+            ["Rainy days bring in more patients with joint pain."],
+            ["Watch out for colds. Dress warmly."],
+            ["The clinic's quiet on rainy days, so it's a good time to read."]
+        ],
+        "mail_reaction": [
+            ["'{player_mail_content}'... I've never really exchanged letters like this before.", "I was always too busy studying to ever date anyone.", "It feels new. Thank you."]
+        ],
+        "horror_conversation": [
+            ["I was organizing medical records today and came across {victim_name}'s chart.", {"text": "There's nothing to treat anymore at this point, but I couldn't bring myself to move it.", "emotion": "sad"}],
+            [{"text": "Sometimes, right around closing time, I get the feeling {victim_name} might still walk in late.", "emotion": "sad"}, "Of course, no one ever does."]
+        ]
+    },
+    "emails": {
+        "greeting": [
+            {"title": "Just checking in", "lines": ["There weren't many patients today, so I had some free time.", "Feels like it's been a while since I saw you,", "You doing well?", "Being healthy is what matters most."]},
+            {"title": "Sorry for writing this late", "lines": ["Sorry for writing at this hour.", "I've felt like nothing I do is enough today, so I'm leaving a few lines.", "It's nothing serious, don't worry about it."]},
+            {"title": "Book recommendation", "lines": ["The book I'm reading these days is pretty good, I'll lend it to you later.", "Not sure you even have time to read, though."]}
+        ],
+        "event_invite": [
+            {"title": "That was a nice break", "lines": ["Thanks for inviting me.", "It's been a while since I ate without thinking about work.", "Invite me again next time."]},
+            {"title": "That was a good meal", "requires_favorite_food": true, "lines": ["The restaurant yesterday, I felt comfortable there for once.", "The beef dish was really delicious.", "Thanks, {player_name}."]}
+        ],
+        "gift_thanks": [
+            {"title": "Thank you", "lines": ["Thank you for the gift.", "Receiving something like this actually feels a bit awkward for me... but it made me happy.", "Thanks."]},
+            {"title": "Thanks for thinking of me", "lines": ["I'm usually not great at this kind of thing myself, so it's a little embarrassing that you thought of me.", "Still... thank you, sincerely."]}
+        ],
+        "memento_reminder": {"title": "Could you stop by when you have time?", "lines": ["I've been busy with clinic work, so I'm a bit late reaching out.", "I have something to give you — could you stop by sometime when you're free?"]},
+        "story_progress": {
+            "player_arrival_day_2": {"title": "To the newcomer", "lines": ["Hello, I'm Isha, I run the clinic.", "If you're ever feeling unwell, please feel free to stop by anytime.", "...Ah, I'm not sure if this is the right way to introduce myself. Anyway, nice to meet you."]}
+        },
+        "special_day": {}
+    }
+}

@@ -1,0 +1,370 @@
+{
+    "id": "marin",
+    "name": "Marin",
+    "name_en": "Marin",
+    "gender": "남성",
+    "age": "10대 후반",
+    "job": "없음",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "Spirited.",
+        "Active.",
+        "Loves sports.",
+        "Simple-minded."
+    ],
+    "preferred_food": ["고등어"],
+    "disliked_food": ["상추"],
+    "special_notes": [
+        "Roshi's son. Gave up his dream of becoming a soccer player to take over the family fishing business.",
+        "Visits the shrine often because Sage is pretty, but really it's to pray for his father's safety.",
+        "Likes rainy days because his father stays home.",
+        "Had a crush on Belze since childhood, but let it go since she has Shepherd."
+    ],
+    "memento_item": {
+        "name": "Soccer Ball",
+        "description": "A worn soccer ball he's used since he was little. It has been patched many times and the color has faded in places.",
+        "lore_lines": []
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/marin_port.png",
+        "happy": "res://assets/npc/portrait/marin_happy.png",
+        "sad": "res://assets/npc/portrait/marin_sad.png",
+        "angry": "res://assets/npc/portrait/marin_port.png"
+    },
+    "sprite": "res://assets/npc/sprite/marinSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "fish_working"},
+                {"time": "18:00", "state": "plaza5_standing"},
+                {"time": "21:00", "state": "fish_working"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "fish_working"},
+                {"time": "18:00", "state": "plaza5_standing"},
+                {"time": "21:00", "state": "fish_working"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "cafe_standing"},
+                {"time": "12:00", "state": "general_looking"},
+                {"time": "18:00", "state": "shrine_standing"},
+                {"time": "21:00", "state": "fish_working"}
+            ]
+        }
+    },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "fish_working",
+        "scene_map_id": "plaza3",
+        "lead_out_lines": [
+            "Oh? It's {player_name}. You came?",
+            "Ah, this thing I'm holding?",
+            "It's a soccer ball I used to play with as a kid.",
+            "You know I used to love soccer.",
+            "Right, {player_name}. Do you know how to play at all?",
+            "Wanna kick it around a bit? No customers right now, so it's the perfect chance."
+        ],
+        "entry_spawn": "fish_exit",
+        "npc_spawn": "marin_heart_npc",
+        "player_spawn": "marin_heart_player",
+        "player_facing": "left",
+        "lines": [
+            {"text": "Man, it feels so good to run and work up a sweat again.", "emotion": "happy"},
+            {"text": "Right?", "emotion": "happy"},
+            {"text": "I think we could be good friends. Let's do this again sometime!", "emotion": "happy"}
+        ]
+    },
+    "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "requires_not_shown": {"npc_id": "roshi", "threshold": 50},
+            "description": "Hands over a golden fishing rod he specially fixed up, instead of his father's old one.",
+            "lines": [
+                "{player_name}, come here for a sec! I've got something to show you.",
+                {"text": "Check this out, isn't it awesome? I dug it up in Dad's shed and it was totally sparkling.", "emotion": "happy"},
+                {"type": "gift", "item_id": "golden_fishing_rod"},
+                "It was Grandpa's, apparently. Dad hasn't touched fishing in ages, and I don't use it much either, so it was just sitting in the shed.",
+                {"text": "But watching you fish, I figured this really belongs with you.", "emotion": "happy"},
+                {"text": "Who knows? Fish with this and you might even catch a real sea serpent.", "emotion": "happy"}
+            ]
+        },
+        {
+            "threshold": 65,
+            "type": "dialogue",
+            "description": "Hands over a record he bought on impulse because of the title.",
+            "lines": [
+                "{player_name}! Good timing, I've been carrying this around to give you.",
+                {"text": "It's a record. I actually learned how to write songs from Usher a while back.", "emotion": "happy"},
+                {"type": "gift", "item_id": "record_the_day_after_you_came"},
+                "'The day after you came.' I mean, I don't really have a muse or anything. You're basically the only one I'm close to. So I wrote it for you.",
+                {"text": "Kinda embarrassing now that I'm actually giving it to you. Maybe I should've just mailed it secretly.", "emotion": "happy"},
+                {"text": "It's not as good as Usher's stuff, so don't expect too much.", "emotion": "happy"}
+            ]
+        },
+        {
+            "threshold": 80,
+            "type": "dialogue",
+            "description": "Confesses his anxiety about his father.",
+            "lines": [
+                "Actually, you know what.",
+                "I get scared every time Dad goes out to sea.",
+                "Someday... he might just not come back."
+            ]
+        },
+        {
+            "threshold": 85,
+            "type": "dialogue",
+            "requires": {"npc_id": "lama", "threshold": 60},
+            "description": "Misses his mother without knowing the truth.",
+            "lines": [
+                "I honestly don't remember my mom's face that well.",
+                "But weirdly, I remember what it felt like when she held my hand. And the song she used to like, too.",
+                {"text": "Sometimes I hear that song and just tear up for no reason. Not like me at all.", "emotion": "sad"},
+                "I never cry in front of Dad, though. I think it'd just make him sadder.",
+                "I've gotta be the tough son, you know."
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "Hands over the old soccer ball.",
+            "lines": [
+                "Hey, {player_name}. Honestly, I used to dream of becoming a soccer player.",
+                "But if not me, who's gonna take over Dad's business?",
+                {"text": "I wasn't even that good at soccer anyway... so I guess this just has to stay a memory now.", "emotion": "sad"},
+                {"text": "Whoa, hey, I'm fine! You don't need to look at me like that.", "emotion": "happy"},
+                {"text": "You're a good memory to me too, so I want to give you this piece of mine.", "emotion": "happy"},
+                "Will you take it?"
+            ]
+        },
+        {
+            "threshold": 105,
+            "type": "dialogue",
+            "description": "Brushes off a strange presence outside his house with bravado.",
+            "lines": [
+                "Lately there's been this rustling sound outside my house at night.",
+                "At first I thought it was a cat, but it kinda seemed bigger than that.",
+                {"text": "Nah, it's probably nothing! I've bulked up a ton from soccer, you know. I'm not the type to get spooked by that.", "emotion": "happy"}
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "murder_grief": [
+            {"text": "I hope that person... went somewhere good.", "emotion": "sad"},
+            {"text": "Something like that shouldn't have happened to someone like them.", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            "Not again... this time I'm actually scared.",
+            {"text": "I don't feel like anyone's safe anymore.", "emotion": "sad"}
+        ]
+    },
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    ["Brought my soccer ball out again today!", "Wanna kick it around tonight?", "Not interested, huh?... Ugh."],
+                    ["Being Monday doesn't really change anything.", "Guess I'll just be waiting around here for people again.", "Ugh, I wanna go out."],
+                    {"lines": ["Gotta mend the nets first on Mondays. Dad's orders.", "Ugh. So boring."], "requires_alive": "roshi", "fallback_lines": ["I used to mend the nets together with Dad...", "...."]}
+                ],
+                "mid": [
+                    ["Feels like my scoring touch's been off lately. I need to be kicking every day.", "A talent like me going to waste like this!"],
+                    ["Whenever mackerel's on the menu I eat two whole bowls of rice.", "I smell fish every single day and it's still delicious somehow."],
+                    {
+                        "lines": ["It's been fun stopping by Isha's clinic lately.", "Huh? No, I'm not sick or anything.", "She's just nice and fun to be around."],
+                        "requires_alive": "isha",
+                        "fallback_lines": ["I miss Isha, she was so kind and fun...", "I used to stop by the clinic all the time."]
+                    },
+                    [
+                        "Who's your favorite soccer player?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "Messi", "affection": 1, "response": ["Oh, respect!", {"text": "I'm a total fan too, isn't he just broken good?", "emotion": "happy"}]},
+                                {"label": "Ronaldo", "affection": 1, "response": ["Huh, Ronaldo?", "Not bad, but I'm more of a Messi guy.", "Still, hey, respecting the taste!"]},
+                                {"label": "Bak Gi-bong", "affection": 0, "response": ["Who's that? Never heard of him.", "...he's the president of some early-morning soccer club?", {"text": "Dude, that's not a player, that's just some local guy!", "emotion": "happy"}]}
+                            ]
+                        }
+                    ]
+                ],
+                "high": [
+                    ["Do you know how to watch soccer?", "It'd be fun to order chicken together on match days."],
+                    {"lines": ["I wonder if Dad ever gets lonely going out to sea alone.", "Course I worry, he's my dad."], "requires_alive": "roshi", "fallback_lines": ["I keep thinking about Dad going out to sea alone.", "If I'd known he'd go like that, I would've gone with him."]},
+                    ["I wonder what people think about, standing in front of the sea.", "I mean... I don't even like the sea, but everyone comes here, so I'm curious."]
+                ]
+            },
+            "화": {
+                "low": [
+                    ["Hey, restaurant!", "Good to see you."],
+                    ["The fish is super fresh today.", "Caught fresh this morning."],
+                    ["Monk Lama told me I go to the shrine all the time but never show up at the temple.", "Well maybe he should dress up as a shrine maiden then."]
+                ],
+                "mid": [
+                    ["Any mackerel dish is fine by me. The best!"],
+                    {"lines": ["Got a charm from Sage. Gonna hang it on Dad's boat."], "requires_alive": "roshi", "fallback_lines": ["Sage's charm is still hanging on Dad's boat.", "...guess praying to the gods doesn't fix everything after all."]},
+                    ["Soccer's just a hobby for me now.", "I'm too old to keep chasing the dream, you know.", "...20 years old? Not quite there yet."]
+                ],
+                "high": [
+                    {"lines": ["Dad was worrying about me again. I'm all grown up now, you know."], "requires_alive": "roshi", "fallback_lines": ["Sometimes I miss Dad's nagging.", "Back then it just felt like he was treating me like a kid, and I hated it so much."]},
+                    {"lines": [{"text": "I wish it rained more often. Then I could spend more time with Dad!", "emotion": "happy"}], "requires_alive": "roshi", "fallback_lines": ["I miss the time I used to spend with Dad on rainy days."]},
+                    ["Hey, {player_name}. You came?", "I practiced filleting fish alone this morning.", "I'm good enough to sell it now, honestly.", {"text": "Feeling pretty proud of myself.", "emotion": "happy"}]
+                ]
+            },
+            "수": {
+                "low": [
+                    ["So boring... how long do I have to watch this shop."],
+                    ["Do I smell like fish to you too?", "Ugh. Bought a new deodorant and it's not even working."],
+                    ["Running with the sea breeze in my face feels amazing."],
+                    {"lines": ["Dad's coming home late today.", "...guess the fish are biting well."], "requires_alive": "roshi", "fallback_lines": ["The sea feels so strange without Dad. You know?", "...it's really hard."]}
+                ],
+                "mid": [
+                    ["Went to the shrine. To see Sage."],
+                    ["Recently discovered how nice napping in the shade is."]
+                ],
+                "high": [
+                    {"lines": ["Honestly there's another reason I go to the shrine.", {"text": "I pray every time for Dad to come home safe. Sage might've noticed by now.", "emotion": "sad"}, "Ah, don't tell anyone what I just said. It's kinda embarrassing."], "requires_alive": "roshi", "fallback_lines": ["Around this time I used to visit the shrine often to pray for Dad's health.", "It ended up being pointless in the end, though."]},
+                    ["Watch out for the fish hooks when you're looking around the shop. They're really sharp."],
+                    ["Ugh. Haven't been able to play soccer in about a week now.", "I'm totally restless."]
+                ]
+            },
+            "목": {
+                "low": [
+                    {"lines": ["Dad went out fishing. It's just me today."], "requires_alive": "roshi", "fallback_lines": ["Hey. Need any help?"]},
+                    ["Thursdays I usually eat alone. It's fine though."],
+                    ["Caught a bit of soccer on TV yesterday...", "Hey, I used to play at that level too, you know? I'm serious."]
+                ],
+                "mid": [
+                    {
+                        "lines": ["You know Belze?", "She loves animals, right.", "So maybe she'd like fish too?"],
+                        "requires_alive": "belje",
+                        "fallback_lines": ["Maybe it's because Belze loved animals so much.", "I ended up growing fond of cows too.", "She's not around anymore, though..."]
+                    },
+                    ["I've gotten pretty quick at tying net knots these days.", "Growing up."]
+                ],
+                "high": [
+                    ["I used to have a crush on Belze, back in the day. Now... eh, doesn't matter. Old news."],
+                    {
+                        "lines": ["Sometimes I just wave hello passing by Belze's ranch. That's enough for me."],
+                        "requires_alive": "belje",
+                        "fallback_lines": ["I miss seeing Belze whenever I passed by the ranch."]
+                    },
+                    ["Didn't become a soccer player, but I get to be a fisherman instead. That's good enough.", "I'm cool no matter what I do anyway!"]
+                ]
+            },
+            "금": {
+                "low": [
+                    ["Another week done! Gotta play hard all weekend."],
+                    ["I was out all day Friday and got a bit of a tan."],
+                    ["Feels good on the days we catch a lot of mackerel."]
+                ],
+                "mid": [
+                    ["Used to dream of being a soccer player. Barely think about it these days."],
+                    ["Don't even think about making me eat rabbit food.", "Ugh. Hate it so much."],
+                    {"lines": ["Dad's back seems to be bothering him lately. He doesn't show it, though."], "requires_alive": "roshi", "fallback_lines": ["Dad's back used to bother him a lot when he was alive.", "If I'd known it'd end up like this, I would've let him rest more."]},
+                    ["I'm all grown up now, I don't whine like I used to.", "...though I do miss it sometimes."]
+                ],
+                "high": [
+                    [
+                        "What do you think about me becoming a soccer player? Should I try again, even now?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "Go for it! I'll cheer you on", "affection": 1, "response": ["Really? Thanks, that gives me energy."]},
+                                {"label": "Your life now looks fine too", "affection": 1, "response": ["Guess so... that's fair too."]},
+                                {"label": "Hmm, not sure", "affection": 0, "response": ["Yeah, honestly, me neither."]}
+                            ]
+                        }
+                    ],
+                    {"lines": ["I get weirdly serious whenever soccer comes up. Funny, right.", "Still, this job isn't bad either. I get to be by Dad's side."], "requires_alive": "roshi", "fallback_lines": ["Giving up soccer was a decision I made purely for Dad.", "But now Dad's gone too...", "And all that's left is me, without my dream."]}
+                ]
+            },
+            "토": {
+                "low": [
+                    ["It's the weekend! Gotta go kick the ball around."],
+                    ["{player_name}. Getting friendly with the villagers a bit?", "You gotta like me best, though. Got it?"],
+                    ["Gotta clean the boat again today....", "Don't wanna....", "Wanna do it for me?", "Kidding."]
+                ],
+                "mid": [
+                    {
+                        "lines": ["Why does Usher even want to be a writer?", "What's fun about writing anyway."],
+                        "requires_alive": "usher",
+                        "fallback_lines": ["I don't really read, but I've got a few of Usher's books at home.", "Didn't know back then this would end up being the last memory of him."]
+                    },
+                    ["Playing soccer with friends brings back old memories."],
+                    {"lines": ["Sage's charm's still hanging on Dad's boat."], "requires_alive": "roshi", "fallback_lines": ["Should I just take that charm off the boat?", "...it never did anything anyway."]}
+                ],
+                "high": [
+                    {"lines": ["I like rainy days. Dad stays home instead of going out on the boat."], "requires_alive": "roshi", "fallback_lines": ["Rainy days make me especially lonely.", "Didn't know living alone would be this hard."]},
+                    ["Got completely drenched cleaning the boat today!", {"text": "It was hilarious.", "emotion": "happy"}],
+                    ["At least there's time on weekends to kick the ball around a bit more.", {"text": "The best.", "emotion": "happy"}]
+                ]
+            },
+            "일": {
+                "low": [
+                    ["Slept in a bit on Sunday."],
+                    {"lines": ["I eat breakfast with Dad on Sunday mornings."], "requires_alive": "roshi", "fallback_lines": []},
+                    ["Even on days off my body gets restless, so I end up going out to run."]
+                ],
+                "mid": [
+                    ["Gonna be bored again starting tomorrow. Not much to do anyway."],
+                    ["Sometimes I think about my old soccer club friends."],
+                    ["Sage said I should help clean the shrine next time.", "Guess coming this often means I gotta pitch in.", "Well, whatever she asks, I'm happy to do it."]
+                ],
+                "high": [
+                    ["Still not sure what I'll end up being. But living like this now isn't bad either."],
+                    {"lines": ["Woke up early this morning and went fishing with Dad.", {"text": "It was so refreshing!", "emotion": "happy"}], "requires_alive": "roshi", "fallback_lines": ["Sunday mornings I always used to go fishing with Dad.", "Feels like I'm still living off that memory."]},
+                    {"lines": ["Turning out like Dad wouldn't be such a bad life either."], "requires_alive": "roshi", "fallback_lines": ["I gave up soccer, but at least this job lets me think of Dad. That's a good thing, I think."]}
+                ]
+            }
+        },
+        "rain_conversation": [
+            {
+                "lines": ["I like rainy days! Dad stays home."],
+                "requires_alive": "roshi",
+                "fallback_lines": ["Rainy days make me think of Dad so much."]
+            },
+            ["Can't play soccer, but rainy days aren't bad either."],
+            ["Got your umbrella? I just walk around soaked, haha."]
+        ],
+        "mail_reaction": [
+            ["Hey, you sent me a mail! '{player_mail_content}', that's hilarious!"],
+            [{"text": "Saw the mail you sent! '{player_mail_content}', so cheesy! But it made me happy.", "emotion": "happy"}]
+        ],
+        "horror_conversation": [
+            ["I used to just say hi in passing to {victim_name}, but lately I miss even that.", {"text": "It wasn't even a big deal, so why do I keep thinking about it.", "emotion": "sad"}],
+            ["Was kicking the ball around and suddenly thought of {victim_name}. Not even sure why."]
+        ]
+    },
+    "emails": {
+        "greeting": [
+            {"title": "Today was seriously amazing", "lines": ["Caught a massive mackerel in the net today!", "I was so pumped.", "I'll brag about it next time you come by!"]},
+            {"title": "So bored I could die", "lines": ["Nothing much to do lately, just kicking the ball around.", "When are you coming to hang out?", "I'm bored, I said!"]},
+            {"title": "Just writing for no reason", "lines": ["Not much to say really, just thought writing a letter for the first time seemed fun so I did.", "Bear with me if it's weird.", "Anyway, bye!"]}
+        ],
+        "event_invite": [
+            {"title": "That was so good!", "lines": ["I seriously stuffed myself full yesterday.", "Ate two whole bowls of rice, me!", "Invite me again, for sure!"]},
+            {"title": "That mackerel dish was the best", "requires_favorite_food": true, "lines": ["That mackerel dish yesterday was totally my thing!", "I even bragged about it to Dad.", "Seriously, thank you!"]}
+        ],
+        "gift_thanks": [
+            {"title": "Whoa, this is for me?", "lines": ["I was so pumped getting that gift!", "Thanks, seriously!"]},
+            {"title": "I bragged about it to everyone", "lines": ["Showed off what I got to my friends.", "They were all so jealous.", "Thank you!"]}
+        ],
+        "memento_reminder": {"title": "Hey! Why haven't you come by lately?!", "lines": ["Hey, {player_name}! Why haven't you come by lately?", "I've got something for you, so hurry up and come see me!"]},
+        "story_progress": {
+            "player_arrival_day_4": {"title": "Hey! Heard you're new here?", "lines": ["Heard someone new showed up in the village!", "I'm Marin, the fish shop's son.", "Come hang out by the docks if you're bored!"]}
+        },
+        "special_day": {}
+    }
+}

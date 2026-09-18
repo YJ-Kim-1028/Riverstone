@@ -1,0 +1,70 @@
+{
+    "grilled_fish": {
+        "name": "烤鱼",
+        "description": "用鲭鱼或三文鱼做的简单烤制料理。"
+    },
+    "salmon_salad": {
+        "name": "三文鱼沙拉",
+        "description": "用三文鱼和生菜做的沙拉。"
+    },
+    "grilled_squid": {
+        "name": "烤鱿鱼",
+        "description": "烤鱿鱼料理。"
+    },
+    "fish_and_chips": {
+        "name": "炸鱼薯条",
+        "description": "搭配炸土豆的鱼肉料理。"
+    },
+    "grilled_vegetables": {
+        "name": "烤蔬菜",
+        "description": "烤土豆和玉米的简单料理。"
+    },
+    "potato_salad": {
+        "name": "土豆沙拉",
+        "description": "用土豆和生菜做的沙拉。"
+    },
+    "chop_steak": {
+        "name": "嫩煎牛排",
+        "description": "用牛肉和蔬菜做的牛排。"
+    },
+    "barbecue": {
+        "name": "烧烤",
+        "description": "牛肉和猪肉一起烤制的料理。"
+    },
+    "grilled_pork_belly": {
+        "name": "烤五花肉",
+        "description": "烤猪肉料理。"
+    },
+    "seafood_set": {
+        "name": "海鲜套餐",
+        "description": "搭配鱿鱼和鱼肉的套餐。"
+    },
+    "meat_salad": {
+        "name": "肉类沙拉",
+        "description": "用肉和生菜做的沙拉。"
+    },
+    "yogurt_smoothie": {
+        "name": "酸奶奶昔",
+        "description": "用牛奶做的奶昔。"
+    },
+    "strawberry_smoothie": {
+        "name": "草莓奶昔",
+        "description": "用浆果和牛奶做的奶昔。"
+    },
+    "weird_dish": {
+        "name": "奇怪的料理",
+        "description": "用不属于任何食谱的组合做出的来历不明的料理。NPC不喜欢这道菜。"
+    },
+    "hunter_stew": {
+        "name": "猎人炖菜",
+        "description": "把狩猎得到的兔肉和蔬菜一起放入锅中炖煮的炖菜。"
+    },
+    "roast_bird": {
+        "name": "烤鸡",
+        "description": "把狩猎得到的鸟肉烤制而成的料理。"
+    },
+    "chicken_salad": {
+        "name": "鸡肉沙拉",
+        "description": "用烤鸡和生菜做的沙拉。"
+    }
+}

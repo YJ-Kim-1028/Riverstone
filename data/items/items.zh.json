@@ -1,0 +1,385 @@
+{
+    "potato": {
+        "name": "土豆",
+        "description": "从田地里收获的土豆。用作烹饪食材。"
+    },
+    "corn": {
+        "name": "玉米",
+        "description": "从田地里收获的玉米。用作烹饪食材。"
+    },
+    "lettuce": {
+        "name": "生菜",
+        "description": "从田地里收获的生菜。用作烹饪食材。"
+    },
+    "potato_seed": {
+        "name": "土豆种子",
+        "description": "种在田里可以长出土豆。"
+    },
+    "corn_seed": {
+        "name": "玉米种子",
+        "description": "种在田里可以长出玉米。"
+    },
+    "lettuce_seed": {
+        "name": "生菜种子",
+        "description": "种在田里可以长出生菜。"
+    },
+    "pork": {
+        "name": "猪肉",
+        "description": "牧场出产的猪肉。用作烹饪食材。"
+    },
+    "beef": {
+        "name": "牛肉",
+        "description": "牧场出产的牛肉。用作烹饪食材。"
+    },
+    "milk": {
+        "name": "牛奶",
+        "description": "牧场出产的牛奶。用作烹饪食材。"
+    },
+    "salmon": {
+        "name": "三文鱼",
+        "description": "钓鱼获得的三文鱼。用作烹饪食材。"
+    },
+    "mackerel": {
+        "name": "鲭鱼",
+        "description": "钓鱼获得的鲭鱼。用作烹饪食材。"
+    },
+    "squid": {
+        "name": "鱿鱼",
+        "description": "钓鱼获得的鱿鱼。用作烹饪食材。"
+    },
+    "legendary_fish": {
+        "name": "传说之鱼",
+        "description": "据说只有用黄金鱼竿才能钓到的传说之鱼。几乎没有人真正见过。"
+    },
+    "berry": {
+        "name": "浆果",
+        "description": "采集获得的浆果。用作烹饪食材。"
+    },
+    "rabbit_meat": {
+        "name": "兔肉",
+        "description": "狩猎获得的兔肉。用作烹饪食材。"
+    },
+    "bird_meat": {
+        "name": "鸟肉",
+        "description": "狩猎获得的鸟肉。用作烹饪食材。"
+    },
+    "fishing_rod": {
+        "name": "鱼竿",
+        "description": "用于钓鱼的工具。"
+    },
+    "golden_fishing_rod": {
+        "name": "黄金鱼竿",
+        "description": "闪闪发光的黄金鱼竿。在钓具店前的海里使用会发生什么呢…?"
+    },
+    "legend_statue": {
+        "name": "传说雕像",
+        "description": "可以用100条传说之鱼兑换的雕像。"
+    },
+    "furniture_hammer": {
+        "name": "家具锤",
+        "description": "可以拿起家具和装饰品,但仅限拿着它的时候。"
+    },
+    "watering_can": {
+        "name": "洒水壶",
+        "description": "用于给作物浇水的工具。"
+    },
+    "golden_watering_can": {
+        "name": "黄金洒水壶",
+        "description": "散发柔和光芒的黄金洒水壶。可以一次浇灌周围3x3的区域。"
+    },
+    "hoe": {
+        "name": "锄头",
+        "description": "用于把土地开垦成农田的工具。"
+    },
+    "hunting_rifle": {
+        "name": "猎枪",
+        "description": "用于狩猎的工具。"
+    },
+    "bucket": {
+        "name": "水桶",
+        "description": "可以给奶牛挤奶获得牛奶。"
+    },
+    "chair": { "name": "椅子" },
+    "sofa": { "name": "沙发" },
+    "display_table": { "name": "陈列桌" },
+    "bookshelf_33": { "name": "书架(大)" },
+    "bookshelf_23": { "name": "书架(中)" },
+    "bookshelf_22": { "name": "书架(小)" },
+    "cabinet_23": { "name": "柜子" },
+    "kitchen_cabinet": { "name": "厨房柜" },
+    "jukebox": { "name": "自动点唱机" },
+    "glass_display_shelf": { "name": "玻璃陈列架" },
+    "blinder": { "name": "研磨机" },
+    "drink_fridge": { "name": "饮料冰箱" },
+    "stove": { "name": "炉子" },
+    "desk": { "name": "书桌" },
+    "vase_1": { "name": "花瓶1" },
+    "vase_2": { "name": "花瓶2" },
+    "vase_3": { "name": "花瓶3" },
+    "vase_4": { "name": "花瓶4" },
+    "bed": { "name": "床" },
+    "iron_cabinet": { "name": "铁柜" },
+    "light": { "name": "灯" },
+    "standing_light": { "name": "落地灯" },
+    "candle": { "name": "蜡烛" },
+    "shrine_light": { "name": "神社灯笼" },
+    "temple_light": { "name": "寺庙灯笼" },
+    "flowerpot": { "name": "花盆" },
+    "round_carpet": { "name": "圆形地毯" },
+    "rect_carpet": { "name": "长方形地毯" },
+    "rect_carpet_2": { "name": "长方形地毯(2)" },
+    "welcome_carpet": { "name": "欢迎垫" },
+    "memo": { "name": "备忘录" },
+    "rat_poison": {
+        "name": "老鼠药",
+        "description": "含有致命毒药。"
+    },
+    "soul_crystal": {
+        "name": "灵魂结晶",
+        "description": "无法辨认的结晶。散发着微弱的温暖。赛吉或许知道些什么。"
+    },
+    "recipe_grilled_fish": {
+        "name": "食谱:烤鱼",
+        "description": "右键学习后即可烹饪烤鱼。已学会的食谱可以在图鉴中查看。"
+    },
+    "recipe_salmon_salad": {
+        "name": "食谱:三文鱼沙拉",
+        "description": "右键学习后即可烹饪三文鱼沙拉。已学会的食谱可以在图鉴中查看。"
+    },
+    "recipe_grilled_squid": {
+        "name": "食谱:烤鱿鱼",
+        "description": "右键学习后即可烹饪烤鱿鱼。已学会的食谱可以在图鉴中查看。"
+    },
+    "recipe_fish_and_chips": {
+        "name": "食谱:炸鱼薯条",
+        "description": "右键学习后即可烹饪炸鱼薯条。已学会的食谱可以在图鉴中查看。"
+    },
+    "recipe_grilled_vegetables": {
+        "name": "食谱:烤蔬菜",
+        "description": "右键学习后即可烹饪烤蔬菜。已学会的食谱可以在图鉴中查看。"
+    },
+    "recipe_potato_salad": {
+        "name": "食谱:土豆沙拉",
+        "description": "右键学习后即可烹饪土豆沙拉。已学会的食谱可以在图鉴中查看。"
+    },
+    "recipe_chop_steak": {
+        "name": "食谱:嫩煎牛排",
+        "description": "右键学习后即可烹饪嫩煎牛排。已学会的食谱可以在图鉴中查看。"
+    },
+    "recipe_barbecue": {
+        "name": "食谱:烧烤",
+        "description": "右键学习后即可烹饪烧烤。已学会的食谱可以在图鉴中查看。"
+    },
+    "recipe_grilled_pork_belly": {
+        "name": "食谱:烤五花肉",
+        "description": "右键学习后即可烹饪烤五花肉。已学会的食谱可以在图鉴中查看。"
+    },
+    "recipe_seafood_set": {
+        "name": "食谱:海鲜套餐",
+        "description": "右键学习后即可烹饪海鲜套餐。"
+    },
+    "recipe_meat_salad": {
+        "name": "食谱:肉类沙拉",
+        "description": "右键学习后即可烹饪肉类沙拉。已学会的食谱可以在图鉴中查看。"
+    },
+    "recipe_yogurt_smoothie": {
+        "name": "食谱:酸奶奶昔",
+        "description": "右键学习后即可烹饪酸奶奶昔。已学会的食谱可以在图鉴中查看。"
+    },
+    "recipe_strawberry_smoothie": {
+        "name": "食谱:草莓奶昔",
+        "description": "右键学习后即可烹饪草莓奶昔。已学会的食谱可以在图鉴中查看。"
+    },
+    "teddy_bear": {
+        "name": "泰迪熊",
+        "description": "一只舒适的泰迪熊玩偶。"
+    },
+    "wildflower_bouquet": {
+        "name": "野花花束",
+        "description": "在田野里采摘的朴素花束。"
+    },
+    "rose_bouquet": {
+        "name": "玫瑰花束",
+        "description": "华丽的玫瑰花束。"
+    },
+    "perfume_blue_de_ocean": {
+        "name": "蓝色海洋",
+        "description": "带有海洋气息的香水。留下淡蓝色花香。"
+    },
+    "perfume_mr_lilac": {
+        "name": "丁香先生",
+        "description": "带有丁香气息的香水。留下紫色花香。"
+    },
+    "perfume_pale_light": {
+        "name": "苍白之光",
+        "description": "香气柔和的香水。留下白色花香。"
+    },
+    "perfume_somewhere_behind_you": {
+        "name": "在你身后的某处",
+        "description": "马尔送的香水。可以右键使用。"
+    },
+    "animal_feed": {
+        "name": "饲料",
+        "description": "给奶牛和猪吃的食物。"
+    },
+    "small_knife": {
+        "name": "小刀",
+        "description": "可以宰杀奶牛或猪来获取肉。"
+    },
+    "bait": {
+        "name": "鱼饵",
+        "description": "放在背包里钓鱼时会自动使用。可以提高钓到鱿鱼的概率。"
+    },
+    "americano": {
+        "name": "美式咖啡",
+        "description": "右键使用可暂时提高移动速度。"
+    },
+    "energy_tonic": {
+        "name": "能量补剂",
+        "description": "喝下去感觉充满活力!(右键使用可解除异常状态)"
+    },
+    "recipe_random": {
+        "name": "万能食谱",
+        "description": "右键使用可学会一道随机料理的食谱。已学会的食谱可以在图鉴中查看。"
+    },
+    "book_beyond_the_door": {
+        "name": "门的另一边",
+        "description": "作者:厄舍(在背包中右键即可阅读)"
+    },
+    "book_perfect_alibi": {
+        "name": "完美的不在场证明",
+        "description": "作者:厄舍(在背包中右键即可阅读)"
+    },
+    "book_life_as_a_cat": {
+        "name": "作为一只猫的人生",
+        "description": "作者:厄舍(在背包中右键即可阅读)"
+    },
+    "book_culprit_is_here": {
+        "name": "凶手就在其中",
+        "description": "作者:厄舍(在背包中右键即可阅读)"
+    },
+    "book_love_in_three_seconds": {
+        "name": "坠入爱河只需三秒",
+        "description": "作者:厄舍(在背包中右键即可阅读)"
+    },
+    "book_resolve_before_death": {
+        "name": "临终前的觉悟",
+        "description": "作者:厄舍(在背包中右键即可阅读)"
+    },
+    "book_last_summer": {
+        "name": "我知道你去年夏天做的事",
+        "description": "作者:厄舍(在背包中右键即可阅读)"
+    },
+    "book_detectives_last_trace": {
+        "name": "侦探最后的痕迹",
+        "description": "作者:厄舍(在背包中右键即可阅读)"
+    },
+    "book_unsent_letter": {
+        "name": "未寄出的信",
+        "description": "作者:厄舍(在背包中右键即可阅读)"
+    },
+    "book_girl_in_the_alley": {
+        "name": "总是站在那条巷子里的女孩",
+        "description": "作者:厄舍(在背包中右键即可阅读)"
+    },
+    "record_chiptune": {
+        "name": "芯片音乐",
+        "description": "可以在自动点唱机上播放的唱片。"
+    },
+    "record_city_pop": {
+        "name": "City Pop",
+        "description": "可以在自动点唱机上播放的唱片。"
+    },
+    "record_lofi": {
+        "name": "Lo-fi",
+        "description": "可以在自动点唱机上播放的唱片。"
+    },
+    "record_bossa_nova": {
+        "name": "波萨诺瓦",
+        "description": "可以在自动点唱机上播放的唱片。"
+    },
+    "record_acoustic_folk": {
+        "name": "原声民谣",
+        "description": "可以在自动点唱机上播放的唱片。"
+    },
+    "record_acoustic_pop": {
+        "name": "原声流行",
+        "description": "可以在自动点唱机上播放的唱片。"
+    },
+    "record_be_with_you": {
+        "name": "Be with you",
+        "description": "可以在自动点唱机上播放的唱片。"
+    },
+    "record_the_day_after_you_came": {
+        "name": "The day after you came",
+        "description": "可以在自动点唱机上播放的唱片。"
+    },
+    "record_the_heart_sutra_remix": {
+        "name": "心经(混音版)",
+        "description": "可以在自动点唱机上播放的唱片。"
+    },
+    "record_we_are_all_christmas": {
+        "name": "We are all christmas",
+        "description": "可以在自动点唱机上播放的唱片。"
+    },
+    "storage_box": {
+        "name": "收纳箱",
+        "description": "可以存放物品的箱子。"
+    },
+    "test_hat": {
+        "name": "测试帽子",
+        "description": "用于测试装备系统的临时物品 - 等有正式物品后删除。"
+    },
+    "test_shoes": {
+        "name": "测试鞋子",
+        "description": "用于测试装备系统的临时物品 - 等有正式物品后删除。"
+    },
+    "cooked_corn": {
+        "name": "蒸玉米",
+        "description": "用锅蒸熟的玉米。"
+    },
+    "cooked_potato": {
+        "name": "蒸土豆",
+        "description": "用锅蒸熟的土豆。"
+    },
+    "cooked_pork": {
+        "name": "烤猪肉",
+        "description": "用平底锅烤的猪肉。"
+    },
+    "cooked_beef": {
+        "name": "烤牛肉",
+        "description": "用平底锅烤的牛肉。"
+    },
+    "cooked_salmon": {
+        "name": "烤三文鱼",
+        "description": "用平底锅烤的三文鱼。"
+    },
+    "cooked_mackerel": {
+        "name": "烤鲭鱼",
+        "description": "用平底锅烤的鲭鱼。"
+    },
+    "cooked_squid": {
+        "name": "烤鱿鱼",
+        "description": "用平底锅烤的鱿鱼。"
+    },
+    "salad_greens": {
+        "name": "沙拉生菜",
+        "description": "用砧板处理过的生菜。"
+    },
+    "mashed_berry": {
+        "name": "浆果泥",
+        "description": "用搅拌机打碎的浆果。"
+    },
+    "smoothie": {
+        "name": "奶昔基底",
+        "description": "用搅拌机搅拌的牛奶。"
+    },
+    "cooked_rabbit_meat": {
+        "name": "炖兔肉",
+        "description": "用锅炖煮的兔肉。"
+    },
+    "cooked_bird_meat": {
+        "name": "烤鸟肉",
+        "description": "用平底锅烤的鸟肉。"
+    }
+}

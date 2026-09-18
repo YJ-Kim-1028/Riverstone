@@ -1,0 +1,70 @@
+{
+    "grilled_fish": {
+        "name": "焼き魚",
+        "description": "サバかサケで作るシンプルな焼き料理。"
+    },
+    "salmon_salad": {
+        "name": "サーモンサラダ",
+        "description": "サケとレタスで作るサラダ。"
+    },
+    "grilled_squid": {
+        "name": "焼きイカ",
+        "description": "イカを焼いた料理。"
+    },
+    "fish_and_chips": {
+        "name": "フィッシュ&チップス",
+        "description": "揚げたジャガイモを添えた魚料理。"
+    },
+    "grilled_vegetables": {
+        "name": "焼き野菜",
+        "description": "ジャガイモととうもろこしを焼いたシンプルな料理。"
+    },
+    "potato_salad": {
+        "name": "ポテトサラダ",
+        "description": "ジャガイモとレタスで作るサラダ。"
+    },
+    "chop_steak": {
+        "name": "チョップステーキ",
+        "description": "牛肉と野菜で作るステーキ。"
+    },
+    "barbecue": {
+        "name": "バーベキュー",
+        "description": "牛肉と豚肉を一緒に焼いた料理。"
+    },
+    "grilled_pork_belly": {
+        "name": "豚バラ焼き",
+        "description": "豚肉を焼いた料理。"
+    },
+    "seafood_set": {
+        "name": "シーフードセット",
+        "description": "イカと魚を添えたセットメニュー。"
+    },
+    "meat_salad": {
+        "name": "ミートサラダ",
+        "description": "肉とレタスで作るサラダ。"
+    },
+    "yogurt_smoothie": {
+        "name": "ヨーグルトスムージー",
+        "description": "牛乳で作るスムージー。"
+    },
+    "strawberry_smoothie": {
+        "name": "ストロベリースムージー",
+        "description": "ベリーと牛乳で作るスムージー。"
+    },
+    "weird_dish": {
+        "name": "謎の料理",
+        "description": "どのレシピにも当てはまらない組み合わせから生まれた正体不明の料理。NPCはこの料理を好まない。"
+    },
+    "hunter_stew": {
+        "name": "ハンターシチュー",
+        "description": "狩りで得たウサギの肉を野菜と一緒に鍋で煮込んだシチュー。"
+    },
+    "roast_bird": {
+        "name": "チキン",
+        "description": "狩りで得た鳥の肉を焼いた料理。"
+    },
+    "chicken_salad": {
+        "name": "チキンサラダ",
+        "description": "チキンとレタスで作るサラダ。"
+    }
+}

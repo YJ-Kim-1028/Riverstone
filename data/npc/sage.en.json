@@ -1,0 +1,267 @@
+{
+    "id": "sage",
+    "name": "Sage",
+    "name_en": "Sage",
+    "gender": "여성",
+    "age": "20대",
+    "job": "무녀",
+    "npc_type": "story",
+    "can_die": false,
+    "is_stalker": false,
+    "personality": [
+        "Blunt.",
+        "Reserved, speaks and expresses little.",
+        "Gives off a cold impression."
+    ],
+    "preferred_food": ["우유"],
+    "disliked_food": ["베리"],
+    "special_notes": [
+        "Reads the player's fortune and manages the shrine.",
+        "Can see spiritual beings, and indirectly warns of omens before a murder.",
+        "Talks more once she gets close to the player.",
+        "After the first murder, she starts seeing an unidentified spirit beside the player."
+    ],
+    "memento_item": {
+        "name": "Protective Charm",
+        "description": "A charm Sage made herself. She never gives these to anyone else, but she hands one to the player.",
+        "lore_lines": []
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/sage_port.png",
+        "happy": "res://assets/npc/portrait/sage_port.png",
+        "sad": "res://assets/npc/portrait/sage_sad.png",
+        "angry": "res://assets/npc/portrait/sage_sad.png"
+    },
+    "sprite": "res://assets/npc/sprite/sageSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "plaza5_standing"},
+                {"time": "16:00", "state": "shrine_sitting"},
+                {"time": "21:00", "state": "shrine_standing"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "shrine_standing_next"},
+                {"time": "16:00", "state": "shrine_sitting"},
+                {"time": "21:00", "state": "shrine_standing"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "shrine_sitting"},
+                {"time": "12:00", "state": "furniture_sitting"},
+                {"time": "16:00", "state": "furniture_looking"},
+                {"time": "18:00", "state": "plaza1_flower_standing"},
+                {"time": "21:00", "state": "shrine_sitting"}
+            ]
+        }
+    },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "shrine_sitting",
+        "npc_spawn": "shrine_sitting",
+        "player_spawn": "sage_heart_player",
+        "emote": "excited",
+        "lines": [
+            {"text": "Hey, here for a fortune?", "emotion": "happy"},
+            "Curious about today's fortune?",
+            "...The reading says you should absolutely not wander outside today.",
+            {"text": "It's quite bad. {player_name}, you should be careful for a while.", "emotion": "sad"},
+            {"text": "Kidding. Sorry. Maybe that joke was a bit much.", "emotion": "happy"},
+            {"text": "Hmm... today's fortune is a perfect score. Maybe it's because you came to see me?", "emotion": "happy"}
+        ]
+    },
+    "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "description": "직접 고른 음반을 건넨다.",
+            "lines": [
+                "{player_name}. Take this.",
+                {"type": "gift", "item_id": "record_we_are_all_christmas"},
+                "Before I came to this town, I lived in Hokkaido. It snowed so much there that everyone used to enjoy the winter festival.",
+                "This is a recording of that winter festival, from back when I lived in that town.",
+                "It was a really good memory for me. Please keep it safe."
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "액막이 부적을 건네준다.",
+            "lines": [
+                "{player_name}. How is living in this town?",
+                "Are you doing okay, mentally?",
+                "We've grown close, so I always worry about whether you're all right.",
+                "{player_name}. A charm doesn't block everything,",
+                "but at least it's my way of hoping you stay safe."
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "post_first_murder_soul_sight": [
+            "Ever since that incident, I've been able to see a spirit beside you.",
+            {"text": "Who is it, you ask?... I've asked many times myself, but I never get an answer back.", "emotion": "sad"},
+            {"text": "It's probably someone deeply connected to you.", "emotion": "sad"},
+            {"text": "If I'd known something like this would happen... I should have warned the townspeople too.", "emotion": "sad"}
+        ],
+        "murder_warning_examples": [
+            ["Go home early today.", "Don't wander around outside for no reason.", "The energy isn't good."],
+            ["Today's reading isn't good.", "I feel like something is bound to happen."]
+        ],
+        "player_poisoned_innocent_npc": [
+            "You've done something you shouldn't have.",
+            "There's a spirit beside you now, and it's furious."
+        ],
+        "murder_grief": [
+            {"text": "...That presence still hasn't faded.", "emotion": "sad"},
+            {"text": "It's hard to put into words.", "emotion": "sad"},
+            {"text": "Be careful.", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            "...This is the second time.",
+            {"text": "Even with the warning, it still happened.", "emotion": "sad"},
+            {"text": "If I had more power, I wouldn't have had to just watch helplessly like this.", "emotion": "sad"},
+            "I'm sorry."
+        ]
+    },
+    "fortune": {
+        "offer_line": "Want me to read your fortune today?",
+        "accept_label": "Sure",
+        "decline_label": "I'm good",
+        "decline_response": ["Okay, tell me whenever you feel like it."],
+        "good_lines": [
+            "Hmm... the energy isn't bad today. Your steps will feel light.",
+            "It's a fine day. Whatever you try should go smoothly."
+        ],
+        "bad_lines": [
+            "Hmm... there's a heavy energy today. Be careful out there.",
+            "Not a great day. Your body might feel heavier than usual."
+        ]
+    },
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    ["You're here?", "What brings you by?"],
+                    ["I'm a shrine maiden, so if you ever want a fortune, just ask."]
+                ],
+                "mid": [
+                    ["The sky's energy isn't bad today."],
+                    ["I can usually tell what's on someone's mind just from their face.", "But not meddling is my policy."]
+                ],
+                "high": [
+                    ["I have a good feeling today."],
+                    ["The fortune isn't great. Better to head home early."]
+                ]
+            },
+            "화": {
+                "low": [
+                    ["A quiet shrine is truly a charming thing.", "I hope it doesn't get too many visitors."],
+                    {"lines": ["Marin drops by without fail every Tuesday. Quite a devout believer, for how he looks."], "requires_alive": "marin", "fallback_lines": ["Marin used to drop by without fail every Tuesday. Quite a devout believer, for how he looked.", "I miss that, a little."]}
+                ],
+                "mid": [
+                    ["On a bright sunny day, nothing beats a smoothie.", "The strawberry ones are too sweet for me, though."],
+                    ["Why does Lama even come here?", "Different religion — the gods probably aren't thrilled."]
+                ],
+                "high": [
+                    {"lines": ["Woody can't tell a lie. People like that are rare."], "requires_alive": "woody", "fallback_lines": ["Woody had such a clear soul.", "I wished I could've spent more time with him."]},
+                    ["Quiet can feel strange sometimes.", "That doesn't mean I dislike it, though."]
+                ]
+            },
+            "수": {
+                "low": [
+                    ["Nothing much going on today either.", "Days like this are true happiness, don't you think?"],
+                    ["Come to the shrine whenever your mind feels heavy."]
+                ],
+                "mid": [
+                    {"lines": ["Mocha's coffee isn't bad. I drink it every morning."], "requires_alive": "mocha", "fallback_lines": ["I miss the coffee Mocha used to make me.", "It was much better than what they sell downtown."]},
+                    {"lines": ["Most of the furniture here was made by Woody.", "Quite skilled, isn't he?"], "requires_alive": "woody", "fallback_lines": ["Most of the furniture at the shrine was made by Woody.", "I owe him a great deal."]}
+                ],
+                "high": [
+                    ["The bells rang unusually clearly this morning.", "A good sign."],
+                    ["People tend to keep their distance once they know what I can see.", "Sharp senses are exhausting too, sometimes."]
+                ]
+            },
+            "목": {
+                "low": [
+                    ["Here to pray? Or just passing by?"],
+                    ["If you need anything, just ask freely."]
+                ],
+                "mid": [
+                    ["Making charms requires ghost-repelling paper and cinnabar ink.", "They're hard to get, so I make trips downtown regularly."]
+                ],
+                "high": [
+                    ["Working and cooking hard every day — isn't that tiring?", "Don't get too used to living that busy. It worries me."]
+                ]
+            },
+            "금": {
+                "low": [
+                    ["This week's wrapping up too."],
+                    ["Why'd you stop by? Bored?"]
+                ],
+                "mid": [
+                    ["I don't go out much.", "This is where I belong."]
+                ],
+                "high": [
+                    ["Don't wander around alone at night.", "If it feels too late, you can sleep here."]
+                ]
+            },
+            "토": {
+                "low": [
+                    ["Weekends tend to be more relaxed.", "As you know, it's not exactly a fun place."]
+                ],
+                "mid": [
+                    ["You're here?", "You've been showing up more than before."]
+                ],
+                "high": [
+                    ["Should I make you a charm too?", "You could hang it up in the restaurant.", "Maybe that's a bit much?"],
+                    ["I used to pray for other people, but these days I just leave things to fate.", "Trying too hard isn't great either."]
+                ]
+            },
+            "일": {
+                "low": [
+                    ["I say my morning prayers first thing on Sundays.", "Sounds like Christianity, you say?", "Watch your mouth. The gods are listening."]
+                ],
+                "mid": [
+                    ["Hey. It was nice and quiet just now... what's up?"]
+                ],
+                "high": [
+                    ["Thanks. For coming by so often."]
+                ]
+            }
+        },
+        "rain_conversation": [
+            ["My energy settles down on rainy days. Not a bad thing."],
+            ["Spirits wander around on dark, overcast days like this.", "Be careful."],
+            ["I don't mind the sound of the rain."]
+        ],
+        "mail_reaction": [
+            ["I saw your mail. '{player_mail_content}'.", "Hard to say I fully understand it, but I'll keep it in mind."]
+        ],
+        "horror_conversation": [
+            [{"text": "That presence still hasn't completely faded.", "emotion": "sad"}, "It feels like it's still lingering somewhere around here."],
+            ["Sometimes my eyes drift to the spot {victim_name} used to sit.", {"text": "Guess there's still a faint trace of that presence left.", "emotion": "sad"}]
+        ]
+    },
+    "emails": {
+        "greeting": [],
+        "event_invite": [
+            {"title": "Not bad at all", "lines": ["Thanks for inviting me.", "A gathering like that isn't so bad every once in a while."]},
+            {"title": "The milk dish wasn't bad", "requires_favorite_food": true, "lines": ["I really enjoyed the milk dish yesterday.", "It suited my taste. Make it again sometime."]}
+        ],
+        "gift_thanks": [],
+        "memento_reminder": {"title": "I have something for you.", "lines": ["You haven't been by the shrine much lately.", "I have something to give you, so come by when you have time."]},
+        "story_progress": {
+            "player_arrival_day_1": {"title": "Heard you're new in town", "lines": ["I heard you just moved here.", "The shrine is always open. Come by if you need anything.", "I'll even read your fortune for free."]}
+        },
+        "special_day": {}
+    }
+}

@@ -1,0 +1,380 @@
+{
+    "id": "flora",
+    "name": "Flora",
+    "name_en": "Flora",
+    "gender": "여성",
+    "age": "20대",
+    "job": "농가게 운영",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "감정 기복이 심하다.",
+        "외로움을 많이 탄다.",
+        "불안형 애착 성향을 가지고 있다.",
+        "무의식적으로 타인에게 상처를 줄 때가 있다.",
+        "자신이 예쁘다는 걸 알고 있다."
+    ],
+    "preferred_food": ["상추"],
+    "disliked_food": ["우유"],
+    "special_notes": [
+        "마을에서 가장 아름답다는 평가를 받는다.",
+        "남성 NPC에게 의존적인 모습을 보인다.",
+        "이샤와 매우 친하고, 폴리를 절대적으로 신뢰한다.",
+        "과거 모카의 남편과 불륜 관계였으며, 이후 그에게 스토킹당한 사건의 피해자로 알려져 있다. 진실 여부는 불명."
+    ],
+    "memento_item": {
+        "name": "Necklace",
+        "description": "The necklace Flora treasures most. Its shine has faded with age, but she always keeps it on her.",
+        "lore_lines": []
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/flora_port.png",
+        "happy": "res://assets/npc/portrait/flora_happy.png",
+        "sad": "res://assets/npc/portrait/flora_sad.png",
+        "angry": "res://assets/npc/portrait/flora_angry.png"
+    },
+    "sprite": "res://assets/npc/sprite/floraSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "farm_working"},
+                {"time": "12:00", "state": "general_looking"},
+                {"time": "16:00", "state": "plaza4_standing"},
+                {"time": "20:00", "state": "fish_standing"},
+                {"time": "21:00", "state": "farm_working"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "farm_working"},
+                {"time": "16:00", "state": "book_standing"},
+                {"time": "18:00", "state": "farm_looking"},
+                {"time": "21:00", "state": "farm_working"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "farm_working"},
+                {"time": "12:00", "state": "pond_standing_plaza2"},
+                {"time": "16:00", "state": "cafe_standing"},
+                {"time": "18:00", "state": "cafe_sitting"},
+                {"time": "21:00", "state": "farm_working"}
+            ]
+        }
+    },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "farm_working",
+        "lead_out_lines": ["Can you step outside for a second? I want to show you something."],
+        "scene_map_id": "plaza2",
+        "entry_spawn": "farm_exit",
+        "npc_spawn": "flora_heart_npc",
+        "player_spawn": "flora_heart_player",
+        "player_facing": "up",
+        "lines": [
+            "How's the lettuce seeds you bought last time doing? Growing well?",
+            "Oh, I was just asking! Not trying to pressure you or anything.",
+            {"text": "...Okay, actually I was pretty curious. Hehe.", "emotion": "happy"},
+            {"text": "I love lettuce salad!", "emotion": "happy"},
+            {"text": "And I think I'd be really happy if we had the same hobby.", "emotion": "happy"}
+        ]
+    },
+    "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "description": "화분에 물 주다가 충동적으로 산 황금 물뿌리개를 건넨다.",
+            "lines": [
+                "Hey, {player_name}! Look at this.",
+                {"text": "I got this ready for you. Looks like you've been farming a lot lately.", "emotion": "happy"},
+                {"type": "gift", "item_id": "golden_watering_can"},
+                "This should make farm work a lot easier."
+            ]
+        },
+        {
+            "threshold": 80,
+            "type": "dialogue",
+            "description": "불안한 속마음을 고백한다.",
+            "lines": [
+                "You know...",
+                {"text": "The scariest thing to me is someone coming to hate me.", "emotion": "sad"},
+                {"text": "That's why I want everyone to stay close to me.", "emotion": "sad"},
+                {"text": "You'll always stay with me, right?", "emotion": "sad"}
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "은빛 목걸이를 건네준다.",
+            "lines": [
+                "This might be a bit sudden, but, {player_name}.",
+                "This was a gift from someone I used to have feelings for.",
+                "I was so happy when I received this necklace.",
+                "But loving someone doesn't always mean making them happy.",
+                "Where is he now? Ha... don't you know it's rude to ask something like that?",
+                {"text": "These days, you make me happier than this necklace ever did. So I've decided to let it go!", "emotion": "happy"}
+            ]
+        },
+        {
+            "threshold": 105,
+            "type": "dialogue",
+            "description": "누가 따라오는 것 같은 느낌에 예전 일을 떠올린다.",
+            "lines": [
+                "Lately, every time I walk home at night, I feel like someone's following me.",
+                "This happened once before... surely it's not that again?",
+                "No, I'm probably just on edge because of what happened back then. That's all over now.",
+                "Sorry. I shouldn't have brought that up. Don't worry about it!"
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "murder_grief": [
+            {"text": "I haven't been able to sleep lately.", "emotion": "sad"},
+            {"text": "I was chased and threatened by someone once before, too. Back then no one died... but this time someone actually did.", "emotion": "sad"},
+            {"text": "Could I be... no, it's not that.", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            {"text": "I knew it... this wasn't the end.", "emotion": "sad"},
+            "I'm really scared now. I can't trust anyone in this town.",
+            {"text": "I check the door three times every night, terrified I might be next.", "emotion": "sad"}
+        ]
+    },
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    [{"text": "I'm out selling seeds again today! Need anything?", "emotion": "happy"}],
+                    ["Gotta start the week off in a good mood!", ".....Ugh. Honestly I'd rather keep playing."],
+                    [{"text": "After the weekend, seeing people feels even nicer.", "emotion": "happy"}, {"text": "Let's meet up often, {player_name}!", "emotion": "happy"}]
+                ],
+                "mid": [
+                    ["Lettuce dishes are the best. I could eat them every day and never get tired of it."],
+                    ["Sold a ton of lettuce seeds today! Feeling great~", "What, sweet potato? ...Don't have that one."],
+                    ["{player_name}, eat more lettuce than meat! It's good for you.", "A sales pitch, you say? Hey, that's mean!"],
+                    {
+                        "lines": ["Woody would look so much better with long hair. I don't get why he always keeps it short!", "Long hair is way more attractive, if you ask me."],
+                        "requires_alive": "woody",
+                        "fallback_lines": ["Sometimes I miss his cute smile.", "He really was a good kid."]
+                    }
+                ],
+                "high": [
+                    [{"text": "For some reason, having you around makes me feel good. I mean it!", "emotion": "happy"}, {"text": "Whoa, wait. I think I actually consider you a close friend!", "emotion": "happy"}],
+                    ["Sometimes I can't tell if I actually like people, or if I just hate being alone.", "It's not something I have to figure out... but it's confusing all the same."],
+                    ["I wish the shop got busy even on Mondays. So I don't feel so lonely!"]
+                ]
+            },
+            "화": {
+                "low": [
+                    ["Tuesdays are especially slow, so it's boring.", "What took you so long to show up?"],
+                    ["This new corn variety that just came in is really good.", {"text": "Want to buy some seeds?", "emotion": "happy"}]
+                ],
+                "mid": [
+                    ["I really can't drink milk. I don't even like the smell.", "I'm not a calf, why should I have to drink it?"],
+                    {
+                        "lines": ["Have you seen Isha? She's been so busy lately I barely see her — if you run into her, say hi for me!"],
+                        "requires_alive": "isha",
+                        "fallback_lines": ["Isha, resting peacefully, right? Send my regards for me.", "I just... feel like I'd fall apart if I went there."]
+                    },
+                    {
+                        "lines": ["Isha's the first person I think of whenever things get hard.", "We've been friends for twenty years, you know!"],
+                        "requires_alive": "isha",
+                        "fallback_lines": ["Isha used to be the first person I thought of whenever things got hard.", "We were friends for twenty years, you know.", {"text": "I miss her so, so much.", "emotion": "sad"}]
+                    },
+                    ["Seeing Poli out on patrol just puts my mind at ease somehow.", "I'm glad this town has a police officer."],
+                    {
+                        "lines": ["No matter what I say to Marr, there's no reaction. It gets really awkward.", "Isn't it kind of hard to get close to someone like that?"],
+                        "requires_alive": "marr",
+                        "fallback_lines": ["No matter what I said to Marr, there was never any reaction. I used to hate how awkward that felt.", "Looking back on it now, maybe that silence was actually kind of steadying."]
+                    }
+                ],
+                "high": [
+                    ["Hey, {player_name}. How do I look?", "I get told I'm pretty a lot. Do you think so too?", "Full of yourself, you say?", "Hmph. Don't be jealous.", {"text": "Hehe, sorry. Just kidding!", "emotion": "happy"}],
+                    ["Even when I get along with people, something still feels empty. I wonder if we're really close, or just seem that way.", "I'm feeling a bit down today."],
+                    {
+                        "lines": ["Sometimes it feels like Isha's keeping her distance from me. ...Did I do something wrong?", "Maybe I'm overthinking it.", "Then again, she does get jealous of me sometimes."],
+                        "requires_alive": "isha",
+                        "fallback_lines": ["If I could see Isha again, I wouldn't let her push me away no matter how much distance she tried to keep.", "...We were good friends, after all."]
+                    }
+                ]
+            },
+            "수": {
+                "low": [
+                    ["Can I come visit your restaurant sometime?", {"text": "Feels like you're always the one visiting me~", "emotion": "happy"}],
+                    ["Wednesdays just drag on forever.", "When do I get off work? I want to go shopping for clothes."],
+                    ["I found this outfit I really loved on an online shop yesterday.", "But the price was....", "Ugh. I can't even dream of affording it."]
+                ],
+                "mid": [
+                    ["Nighttime scares me a bit, so I try to head home early.", "I'm just scared of ghosts, and scared of people too.."],
+                    ["I overheard someone talking behind my back yesterday.", {"text": "Isn't that awful? Acting all friendly to my face and then that!!", "emotion": "angry"}],
+                    ["Soy milk is at least drinkable, unlike regular milk.", {"text": "Could you make just my smoothie with soy milk?", "emotion": "happy"}, "...You want me to give you soybean seeds?"],
+                    ["Did you see Sage's hair color? That silver hair is amazing.", "Do the gods only visit pretty women? Why does Sage always seem so special?"]
+                ],
+                "high": [
+                    ["Officer Poli's a truly good person. One of the few people I can really trust."],
+                    ["Other than Officer Poli, honestly, everyone scares me a little sometimes.", "It's not that anything happened with the townspeople. It's just some old trauma."],
+                    ["I want to be someone others can lean on too. But it just never seems to work out.", "I guess I'm not very good at standing on my own."]
+                ]
+            },
+            "목": {
+                "low": [
+                    [{"text": "Nice weather today! Perfect day for flower watching.", "emotion": "happy"}],
+                    ["Weirdly, there are a lot of male customers on Thursdays.", {"text": "So I wore a pretty dress today, teehee.", "emotion": "happy"}],
+                    ["How are the flowers I grew?", {"text": "They grow up pretty because a pretty person raised them~", "emotion": "happy"}]
+                ],
+                "mid": [
+                    [
+                        "Do you like spending time alone?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "Sometimes", "affection": 0, "response": ["I see. I find that kind of hard, myself."]},
+                                {"label": "I don't like it much either", "affection": 1, "response": [{"text": "Right? I knew it wasn't just me!", "emotion": "happy"}]},
+                                {"label": "I actually find it comfortable", "affection": 0, "response": ["Wow, that's fascinating. I can't even imagine that."]}
+                            ]
+                        }
+                    ],
+                    {
+                        "lines": ["I gave Isha some lettuce I grew myself. She cares a lot about her health."],
+                        "requires_alive": "isha",
+                        "fallback_lines": ["Around this time of year I used to grow lettuce and give it to Isha.", "She always cared a lot about her health."]
+                    },
+                    {
+                        "lines": ["I stopped by the ranch today and Belze looked pretty tired. I'm a little worried."],
+                        "requires_alive": "belje",
+                        "fallback_lines": [{"text": "I still can't accept that Belze isn't at the ranch anymore whenever I stop by.", "emotion": "sad"}]
+                    }
+                ],
+                "high": [
+                    ["Am I too dependent on others? I think that sometimes.", {"text": "I guess I'm just lacking somewhere.", "emotion": "sad"}],
+                    ["Being alone makes bad thoughts creep in. That's why I keep seeking people out."],
+                    ["I think I'd feel pretty empty without you. Did you know that?", "....Sorry if that felt like a burden."],
+                    {
+                        "lines": ["You know Usher, right? He does whatever I ask.", "I think he might like me, but...", "Finding someone to marry in a small town like this is just... you know?"],
+                        "requires_alive": "usher",
+                        "fallback_lines": ["If I'd known I'd never see him again, I would've treated Usher better.", "I always just leaned on the fact that he liked me.", "It's something I feel terribly sorry for."]
+                    }
+                ]
+            },
+            "금": {
+                "low": [
+                    ["Another week's gone already! What are you doing this weekend?"],
+                    [{"text": "Friday evenings just get me a little excited somehow.", "emotion": "happy"}],
+                    ["Maybe it's because the weekend's coming, but more people are showing up."]
+                ],
+                "mid": [
+                    {
+                        "lines": ["Isha seems really busy lately. Hard to catch her these days."],
+                        "requires_alive": "isha",
+                        "fallback_lines": ["When she had a lot of patients, it was hard to catch Isha's face.", "Still, I should've gone to see her...", "I don't feel good about it."]
+                    },
+                    ["{player_name}, have you decided what to wear this weekend?", {"text": "I've already picked out three outfits, teehee.", "emotion": "happy"}],
+                    ["Isn't Lama kind of handsome? Why'd he become a monk, though?"]
+                ],
+                "high": [
+                    [
+                        "You don't hate me, right? ...Just asking, haha.",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "Of course I don't hate you", "affection": 2, "response": [{"text": "Really? ...What a relief.", "emotion": "happy"}]},
+                                {"label": "Why are you suddenly asking that?", "affection": 0, "response": [{"text": "No reason... I just get anxious sometimes.", "emotion": "sad"}]},
+                                {"label": "Did something happen?", "affection": 1, "response": ["No, nothing happened. I was just asking."]}
+                            ]
+                        }
+                    ],
+                    ["I don't usually ask things like this. I guess I am today."],
+                    ["Sometimes even while I'm smiling in front of people, my mind's somewhere else entirely."]
+                ]
+            },
+            "토": {
+                "low": [
+                    ["There are a few more customers on weekends. Doesn't everyone go out and have fun?"],
+                    ["I make sure to dress up nice on Saturday mornings.", "Customers enjoy seeing something pretty too, you know!"],
+                    ["It's the weekend, why do I have so much to do?", "Still, growing flowers is fun, so I put up with it."]
+                ],
+                "mid": [
+                    {
+                        "lines": ["Isn't my outfit pretty today? Isha picked it out for me.", {"text": "Though honestly, it suits me better than it would her.", "emotion": "happy"}],
+                        "requires_alive": "isha",
+                        "fallback_lines": ["I still wear the dress Isha picked out for me.", "This way, I feel like I won't forget her."]
+                    },
+                    ["Sometimes I feel like I can't decide anything on my own."],
+                    [{"text": "A customer complimented my outfit today!", "emotion": "happy"}, {"text": "I knew they had good taste~", "emotion": "happy"}],
+                    {
+                        "lines": ["Shepherd seems too much of a good guy, kind of boring, honestly~", {"text": "They say bad boys are more charming, hehe.", "emotion": "happy"}],
+                        "requires_alive": "shepherd",
+                        "fallback_lines": ["Whenever farm work got hard, Shepherd used to help me out.", "I can manage the hard work alone, but watching the good memories I shared with a friend fade away is a reality I find hard to bear."]
+                    }
+                ],
+                "high": [
+                    ["Having someone by my side — that's the biggest comfort to me.", "Really, thank you, {player_name}."],
+                    ["I like people's attention, but it scares me too.", {"text": "I'm afraid of what they might think of me.", "emotion": "sad"}, "I just can't stop worrying about how others see me."],
+                    [{"text": "It's the weekend, so I should watch my favorite drama!", "emotion": "happy"}],
+                    {
+                        "lines": ["Marin's really kind to other women, isn't she.", "But weirdly, she doesn't seem interested in me at all. Why is that?", "Am I not charming enough?"],
+                        "requires_alive": "marin",
+                        "fallback_lines": ["I regret not getting closer to Marin while she was alive.", "I wish I'd treated her a little better."]
+                    }
+                ]
+            },
+            "일": {
+                "low": [
+                    ["I opened the shop kind of leisurely today, it being Sunday.", "Might close up early? I want to go play!"],
+                    ["I slept in a bit this morning. Hehe.", "So I couldn't do my makeup, but I still look fine, right?"],
+                    ["I wish Mocha would add a strawberry latte to the cafe menu.", "Coffee, ugh. It's so bitter!"]
+                ],
+                "mid": [
+                    ["On days like this, I like just people-watching too."],
+                    ["{player_name}, is there something weighing on your mind?", "Me? I've got way too many things. So I try not to think about them.", "Whatever's going on, I hope only good things happen to you."],
+                    ["I open the shop on Sundays mostly for the fun of chatting with customers.", "Time flies once everyone gets talking."],
+                    ["I'd like to get closer to Old Man Roshi, but he's rarely seen around town, so it still feels a bit awkward."]
+                ],
+                "high": [
+                    ["I feel at ease when I'm with you. Come visit often, okay?"],
+                    ["I'm kind of exhausting to deal with, right? I know. It's my own shortcoming.", "Still... thank you for putting up with me."],
+                    ["Sometimes even I don't understand why I'm like this. Still, I wish everyone would like me."]
+                ]
+            }
+        },
+        "rain_conversation": [
+            ["Rainy days are boring since customers are scarce."],
+            ["Ugh. I styled my hair this morning, but the humidity messed it all up."],
+            ["Rainy days just make me feel down somehow."]
+        ],
+        "mail_reaction": [
+            ["You wrote '{player_mail_content}.' Did you mean that for real, or was it just something you said?"],
+            [{"text": "That email you sent, '{player_mail_content}'... I couldn't stop thinking about it all day!", "emotion": "happy"}]
+        ],
+        "horror_conversation": [
+            ["Sometimes when there are no customers, I think about the little everyday conversations I used to have with {victim_name}.", {"text": "They were such trivial talks, so why do I miss them so much?", "emotion": "sad"}],
+            ["It feels especially empty knowing {victim_name} won't come by anymore."]
+        ]
+    },
+    "emails": {
+        "greeting": [
+            {"title": "Just thought of you", "lines": ["It was boring today with no customers.", "Come by often. I hate being alone!"]},
+            {"title": "My mood's been all over the place today", "lines": ["I felt great this morning, but now I'm feeling kind of down.", "I usually just write this stuff in my diary, but we've gotten close enough that I figured I'd let it out.", "Don't take it too seriously! I'll be fine again soon."]},
+            {"title": "The lettuce is growing well", "lines": ["I checked the lettuce field today and everything's growing nicely.", "I'll pick out the best ones to save for you!"]}
+        ],
+        "event_invite": [
+            {"title": "Yesterday was fun!", "lines": ["Thanks for inviting me.", "Somehow I always feel good on days I visit your restaurant.", "Invite me again, okay?"]},
+            {"title": "That was really delicious!", "requires_favorite_food": true, "lines": ["Yesterday's meal was really delicious.", "The dish with lettuce was totally my taste.", "Thank you!"]}
+        ],
+        "gift_thanks": [
+            {"title": "Thanks for the gift", "lines": ["Getting that gift made me really happy!", "Things like this don't happen much lately, so it felt even more special.", "Thank you, really."]},
+            {"title": "You didn't have to do this", "lines": ["You got me something again.", "I appreciate it, but... you don't need to feel obligated toward me.", "Just having you around is enough."]}
+        ],
+        "memento_reminder": {"title": "Why haven't you come by?", "lines": ["Why haven't you been coming by lately? I might get upset.", "It's because I have something for you! Seriously, come visit soon."]},
+        "story_progress": {
+            "player_arrival_day_2": {"title": "Let's really become friends!", "lines": ["Oh my, I wrote this the second I heard you'd just moved in!", "I'm Flora, I run the farm shop. Nice to meet you!", "Come visit anytime you're bored. I'll be genuinely happy to see you."]}
+        },
+        "special_day": {}
+    }
+}

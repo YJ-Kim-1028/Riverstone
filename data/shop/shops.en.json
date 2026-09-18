@@ -1,0 +1,12 @@
+{
+    "marr_shop": { "name": "General Store" },
+    "flora_shop": { "name": "Farm Shop" },
+    "belje_shop": { "name": "Ranch Shop" },
+    "roshi_shop": { "name": "Fishing Shop" },
+    "woody_shop": { "name": "Furniture Store" },
+    "usher_shop": { "name": "Bookstore" },
+    "isha_shop": { "name": "Hospital" },
+    "mocha_shop": { "name": "Cafe" },
+    "kira_clothing_shop": { "name": "♥ Kira's Clothing Shop" },
+    "para_hair_shop": { "name": "♥ Para's Hair Salon" }
+}

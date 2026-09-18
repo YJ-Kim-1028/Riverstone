@@ -1,0 +1,355 @@
+{
+    "id": "mocha",
+    "name": "Mocha",
+    "name_en": "Mocha",
+    "gender": "여성",
+    "age": "40대",
+    "job": "카페 운영",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "친절하다.",
+        "어른스럽다.",
+        "현실적이다.",
+        "감정 표현이 솔직하다.",
+        "죄책감이 적다.",
+        "자신의 선택에 책임을 진다."
+    ],
+    "preferred_food": ["베리"],
+    "disliked_food": ["감자"],
+    "special_notes": [
+        "카페 운영 NPC. 버프 아이템(모카의 커피)을 제공/판매한다.",
+        "호감도가 일정 수치 이상이면 커피를 선물한다.",
+        "마을 여자들을 별로 좋아하지 않는다.",
+        "전남편의 불륜 피해자였으나, 현재 벨제의 연인인 셰퍼드와 불륜 관계이다."
+    ],
+    "buff_item": {
+        "name": "Mocha's Coffee",
+        "effect": "Move Speed +30%",
+        "duration": "3 minutes",
+        "line": "You look busy today. Drink this and get going."
+    },
+    "memento_item": {
+        "name": "Photo with Her Ex-Husband",
+        "description": "A photo of Mocha and her ex-husband taken when they were young. In the photo, the two of them are smiling happily.",
+        "lore_lines": [
+            "버리려고 몇 번이나 했어.",
+            "근데 사진 속 내가 생각보다 행복해 보여서."
+        ]
+    },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "cafe_working",
+        "npc_spawn": "mocha_heart_npc",
+        "player_spawn": "mocha_heart_player",
+        "player_facing": "down",
+        "lines": [
+            "Hey. Here for coffee?",
+            "Want to sit here for a bit? Let's enjoy some downtime together.",
+            "I've been reading a book Usher wrote lately. Goes really well with coffee.",
+            "I'm in a good mood today, so I won't charge you for the coffee.",
+            {"text": "Just treating a regular customer well. Not because I'm thinking about sales.", "emotion": "happy"},
+            {"type": "gift", "item_id": "americano"}
+        ]
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/mocha_port.png",
+        "happy": "res://assets/npc/portrait/mocha_happy.png",
+        "sad": "res://assets/npc/portrait/mocha_sad.png",
+        "angry": "res://assets/npc/portrait/mocha_angry.png"
+    },
+    "sprite": "res://assets/npc/sprite/mokaSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "cafe_working"},
+                {"time": "14:00", "state": "cafe_sitting"},
+                {"time": "18:00", "state": "hospital_sitting"},
+                {"time": "21:00", "state": "cafe_working"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "cafe_working"},
+                {"time": "18:00", "state": "furniture_looking2"},
+                {"time": "21:00", "state": "cafe_working"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "cafe_working"}
+            ]
+        }
+    },
+    "affection_events": [
+        {
+            "threshold": 70,
+            "type": "dialogue",
+            "requires": {"npc_id": "poli", "threshold": 60},
+            "description": "전남편에 대한 이야기와 플로라에 대한 미안함을 털어놓는다.",
+            "lines": [
+                {"text": "I can't stand any of the women in this town except Woody.", "emotion": "angry"},
+                {"text": "One of these bitches had an affair with my husband.", "emotion": "angry"},
+                "Woody's not really my husband's type anyway, so, she's excluded.",
+                "Even when I asked Poli, he said he can't reveal victim information and never told me who it was.",
+                {"text": "Victim? What a joke. How is someone who committed adultery a victim? The only real victim here is me.", "emotion": "angry"},
+                {"text": "It happened a long time ago, but I still have nightmares about it. I won't forgive that woman even in death.", "emotion": "angry"}
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "오래된 사진을 건네준다.",
+            "lines": [
+                "Kid. Has anything in your life ever truly mattered to you?",
+                "Maybe that's too early a question for you.",
+                "Me? I had one. But you know what? Sometimes the thing that matters most changes.",
+                "Take this photo.",
+                "It's proof of a time when I truly loved someone who mattered deeply to me.",
+                {"text": "But now something more precious has come along. So I've decided to let it go.", "emotion": "happy"},
+                "It mattered to me, but it was never a happy memory.",
+                "Let's see each other often. Good memories pile up when I'm with you."
+            ]
+        },
+        {
+            "threshold": 105,
+            "type": "dialogue",
+            "description": "인기척을 죄책감 탓으로 돌린다.",
+            "lines": [
+                "Lately, every time I close up the café and leave, I feel like someone's watching me.",
+                {"text": "Maybe it's all the karma I've built up over the years, all sorts of thoughts cross my mind.", "emotion": "angry"},
+                "Well, a guilty conscience makes you jumpy, I guess. I've decided to just ignore it."
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "murder_grief": [
+            "Something like this happening again.",
+            "It was the same back with my ex-husband's thing too. Makes me wonder if this town's always been one where someone dying is this easy.",
+            "Anyway, the living have to keep living."
+        ],
+        "murder_grief_2": [
+            "Second time now.",
+            "At this point I'm convinced this town itself just isn't safe.",
+            "Not that there's anywhere for me to run off to, either."
+        ],
+        "suspicion_talk_2": {
+            "requires_alive": "marr",
+            "lines": [
+                "Poli still hasn't caught the culprit. Two people are dead now.",
+                {"text": "If you ask me, it's Marr. He's kind of creepy, isn't he.", "emotion": "angry"},
+                {"text": "He doesn't even say hello when he runs into people in town. He clearly doesn't want to get close to anyone.", "emotion": "angry"},
+                "And nobody knows how he ended up in this town. Unlike the rest of us — most people here have lived here since childhood."
+            ]
+        },
+        "partner_death_reaction": [
+            "Sorry, I'm not in the mood to talk right now. Since he left, I feel like I'm losing my mind, day after day.",
+            {"text": "Why did it have to be Shepherd? Why...?", "emotion": "sad"},
+            {"text": "It's not like what we did was so wrong that we deserved to be punished like this.", "emotion": "sad"},
+            {"text": "I can't breathe properly. He was the last person I had to lean on. Why do the people around me...", "emotion": "sad"}
+        ]
+    },
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    ["The smell of coffee is the best thing about Monday mornings."],
+                    ["You look busy again today. Want a cup of coffee?"],
+                    ["Ground fresh beans today. Doesn't the smell already tell you?"]
+                ],
+                "mid": [
+                    ["Running a café, you see all kinds of customers. It's fun."],
+                    ["Especially busy with morning customers. Guess everyone needs their coffee."],
+                    {
+                        "lines": ["Woody came by asking me to grind some beans. Turns out she's more of a tea person than coffee.", {"text": "Such a sweet kid.", "emotion": "happy"}],
+                        "requires_alive": "woody",
+                        "fallback_lines": ["I miss Woody, who used to come by asking for tea sometimes.", "What did that lovely kid ever do to deserve this...", "Heaven can be so heartless."]
+                    }
+                ],
+                "high": [
+                    ["Talking with you is, surprisingly, comfortable."],
+                    ["Sometimes listening to customers' stories ends up comforting me too."],
+                    ["Time flies when I'm talking with you."]
+                ]
+            },
+            "화": {
+                "low": [
+                    [{"text": "Got a new berry dessert on the menu. Want to try it?", "emotion": "happy"}],
+                    ["I especially crave sweets on Tuesdays. Might have another dessert."],
+                    ["Ran out of beans today so I rush-ordered more.", "The coffee made from what's left might be a bit weak."]
+                ],
+                "mid": [
+                    ["I really can't stand potatoes. Just something about them I dislike."],
+                    {
+                        "lines": ["Woody dresses so boyish, makes me wonder if she likes girls.", "Might be rude to say, but it's true, isn't it."],
+                        "requires_alive": "woody",
+                        "fallback_lines": ["On days like this I think of Woody, who used to chatter away here at the shop.", "Good memories."]
+                    },
+                    ["Chatting with customers is the best part of this job.", "No room to feel lonely."]
+                ],
+                "high": [
+                    ["An older woman has a kind of ease that the young ones just don't have.", {"text": "The kind of ease that somehow makes you want to lean on it.", "emotion": "happy"}],
+                    {
+                        "lines": ["Accidentally over-ordered beans by a lot last time.", "Just carrying it all in was a job in itself, but Shepherd helped out and it went fine.", {"text": "It's really nice having a warm-hearted person around town.", "emotion": "happy"}],
+                        "requires_alive": "shepherd",
+                        "fallback_lines": ["Shepherd used to come help out at the café now and then.", "The whole town was like that — there wasn't a place his hands hadn't touched.", "He built up so much good will in his life, he'll go somewhere good."]
+                    },
+                    ["You just take in whatever I say, no matter what.", "That's oddly comfortable."]
+                ]
+            },
+            "수": {
+                "low": [
+                    ["Middle of the week. Everyone's worn out around now.", "Want a cup of coffee?"],
+                    ["Customers are sparse on Wednesdays, perfect for cleaning."],
+                    ["Got some new cups in today. Like them?"]
+                ],
+                "mid": [
+                    ["You look busy today. Drink this and go.", {"type": "gift", "item_id": "americano"}],
+                    ["Brewing coffee every day, your hands just remember how eventually."],
+                    ["Sometimes I end up memorizing all the regulars' preferences. Occupational hazard."]
+                ],
+                "high": [
+                    ["I'm not a good person. But I'm not a completely bad one either."],
+                    ["There are wounds time just doesn't dull.", "Can't go into detail, but I find myself keeping people at a distance without even meaning to."],
+                    ["You're back. I was waiting.", "I start worrying when you don't show your face for a while."]
+                ]
+            },
+            "목": {
+                "low": [
+                    ["Café did decent business again today."],
+                    ["Thursdays I check on the bean roasting."],
+                    ["Coffee smells good again today."],
+                    {
+                        "lines": ["Flora keeps begging me to make her a strawberry latte.", "How am I supposed to make something that childish."],
+                        "requires_alive": "flora",
+                        "fallback_lines": ["Made myself a strawberry latte today, for the first time in a while.", "I know. It's the childish latte that little Flora used to love."]
+                    }
+                ],
+                "mid": [
+                    ["People are strange. You swear you'll never love again, and yet you end up falling in love anyway."],
+                    {
+                        "lines": ["That Marin kid talks about his dad every time I see him. Envious, honestly, that kind of bond.", "If only my own guy had been as good a person as Roshi..."],
+                        "requires_alive": ["marin", "roshi"],
+                        "fallback_lines": ["Marin and Roshi really were a close father and son.", "Such a shame, what happened."]
+                    },
+                    ["I don't think there's a single person in town who hasn't stopped by my café.", {"text": "That's a pretty proud thing.", "emotion": "happy"}]
+                ],
+                "high": [
+                    ["I was married once, you know. Now, though... it's all in the past."],
+                    ["Seeing you again, {player_name}. How are you feeling today?", "I've got a lot on my mind. Not sure the choices I've made were the right ones.", "Still, I probably made the best choice I could at the time, right?", "I'm trying not to regret it."]
+                ]
+            },
+            "금": {
+                "low": [
+                    ["Another week's over. Have a cup of coffee before you go."],
+                    ["Customers pick up a bit on Friday evenings. Guess everyone's wrapping up the week."],
+                    ["Didn't raise coffee prices again this week. Even though bean prices keep going up."]
+                ],
+                "mid": [
+                    [
+                        "What menu item do you think I should add to the café?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "How about a sweet dessert?", "affection": 1, "response": ["Oh, nice. I've been craving something sweet lately too.", "I'll look into a recipe. You're taste-testing first, got it?"]},
+                                {"label": "Isn't the current menu perfect already?", "affection": 1, "response": [{"text": "Don't people only say that when sales are up?", "emotion": "happy"}, "Still, it's nice to hear."]},
+                                {"label": "How about one more menu item with seasonal berries?", "affection": 2, "response": ["Berries? I'm all for it.", "The berries have been especially good lately anyway."]}
+                            ]
+                        }
+                    ],
+                    ["Do you like lattes more too?", "Now that I think about it, seems like more people prefer lattes."],
+                    ["Poli's a regular at my café too. Coffee helps a lot with the morning shift, I guess."]
+                ],
+                "high": [
+                    ["You don't know what kind of person I really am. You might be disappointed if you did.", "Kind of silly to bring this up at my age.", "Someone being disappointed in me isn't such a big deal anyway."],
+                    ["{player_name}, seeing you a lot lately.", {"text": "You like this café too, right?", "emotion": "happy"}, "I'll set aside a regular seat for you if you want."],
+                    ["Still debating whether to add that menu item you said you wanted last time."]
+                ]
+            },
+            "토": {
+                "low": [
+                    ["The café's busiest on weekends."],
+                    ["Even two hands aren't enough on Saturdays."],
+                    ["I like that weekend customers take their time."]
+                ],
+                "mid": [
+                    {
+                        "lines": ["Woody drops by often. She's an easy customer to have around.", "I'd love a daughter like her, honestly."],
+                        "requires_alive": "woody",
+                        "fallback_lines": ["I always used to think I'd love having a daughter like Woody.", "...No, honestly, I still think that now.", "I think of her often. Such a sweet kid."]
+                    },
+                    ["Sage comes by for tea sometimes. Doesn't say much, though.", "Is she going for that mysterious act on purpose?"],
+                    ["Didn't you run into Poli on your way here?", "He usually stops by around this time.", "Hm? There's just something personal I wanted to ask him."]
+                ],
+                "high": [
+                    ["Lately I grind the beans on purpose to match when you usually come by.", "I'll give you a good cup."],
+                    [{"text": "I've kept your seat reserved, wouldn't let anyone else sit there.", "emotion": "happy"}, {"text": "Of course, if it gets busy, no exceptions!", "emotion": "happy"}],
+                    ["Sometimes I feel like you're a friend, kind of.", "With this age gap between us. Funny, right?"]
+                ]
+            },
+            "일": {
+                "low": [
+                    ["Opened up a bit later, more relaxed, on Sunday."],
+                    ["I start Sunday mornings with a cup of coffee myself."],
+                    ["Guess the café smell's soaked into me even on my day off."]
+                ],
+                "mid": [
+                    ["On a day like today, I take a break with a cup of coffee myself."],
+                    {
+                        "lines": ["Usher comes by sometimes with a book and just sits there. It's nice, the quiet."],
+                        "requires_alive": "usher",
+                        "fallback_lines": ["Even now, that seat over there reminds me of Usher, coming here to write."]
+                    },
+                    ["On Sundays I like just staring blankly out the window too."]
+                ],
+                "high": [
+                    ["Coffee smell's pretty nice, isn't it?", "A lot better than walking around smelling of cows or pigs.", "Stay a while."],
+                    [{"text": "Seeing your face makes it feel like the whole day's gone right.", "emotion": "happy"}, "Just saying."],
+                    ["Well, it's not bad. Keep coming by."],
+                    ["I was sitting alone in the café after all the customers left today.", "And out of nowhere, I remembered something I let slide even though I knew it was wrong toward someone.", "I think people just do bad things for their own sake sometimes, don't they."]
+                ]
+            }
+        },
+        "rain_conversation": [
+            ["Rainy days bring more people to the café. Guess everyone craves coffee."],
+            ["If you don't have an umbrella, rest at the café for a while."],
+            ["On days like this you have to roast the beans extra carefully so they don't go damp."]
+        ],
+        "mail_reaction": [
+            ["You sent '{player_mail_content}'. Enjoyed reading it. Feel free to send more like that."],
+            ["About that mail you sent, '{player_mail_content}'. Honestly, it made me laugh a little. No offense meant."]
+        ],
+        "horror_conversation": [
+            [{"text": "I still keep {victim_name}'s favorite seat open these days.", "emotion": "sad"}, "Even when it's busy, I won't give that one away. Not even sure why myself."],
+            ["I thought of {victim_name} out of nowhere while roasting beans. No real reason.", {"text": "I just never realized talking about someone who's gone would feel this strange.", "emotion": "sad"}]
+        ]
+    },
+    "emails": {
+        "greeting": [
+            {"title": "Today's Bean Recommendation", "lines": ["The beans I roasted today smell especially good.", "I'll brew you a cup with these next time you come by.", "Don't get so busy you can't even spare time for coffee."]},
+            {"title": "Just Wondering How You're Doing", "lines": ["You've been scarce lately, so I wrote a few lines out of curiosity.", "It's been a while since I had the time to write a letter like this, running the shop and all.", "Busy or not, doing well or not, either way is fine."]},
+            {"title": "Let Me Brag About a Customer", "lines": ["A stranger told me today that my café makes the best coffee in town.", "Couldn't help feeling a little proud.", "You think so too, right?"]}
+        ],
+        "event_invite": [
+            {"title": "Had a Great Meal", "lines": ["Thanks for inviting me over yesterday.", "Food someone else makes really does taste different.", "I'll pay you back with coffee next time."]},
+            {"title": "That Berry Dish Was Something Else", "requires_favorite_food": true, "lines": ["Can't stop thinking about that berry dish from yesterday.", "Wanted to sneak the recipe out, but held back.", "Invite me again."]}
+        ],
+        "alibi_reminder": {"title": "Everyone's Shaken Up", "lines": ["Heard it happened right outside your house. Must've been a shock, are you okay?", "{player_name}, there's something I want to talk about too — could you stop by the café?"]},
+        "gift_thanks": [
+            {"title": "Got Your Gift", "lines": ["You didn't have to get me something like this.", "Still, I'll gladly take it. Thanks."]},
+            {"title": "How Do I Pay This Back", "lines": ["I'm the type who needs to return what I'm given to feel at ease.", "I'll throw in an extra cup of coffee next time you come by. Let's call it even."]}
+        ],
+        "memento_reminder": {"title": "You've Been Scarce Lately", "lines": ["Haven't seen your face around in a while.", "I've got something set aside for you, come by the café when you have time."]},
+        "story_progress": {
+            "player_arrival_day_3": {"title": "Heard You're New Here?", "lines": ["Heard you just moved into town.", "Stop by the café if you're bored. I'll charge you fair prices.", "Welcome, {player_name}."]}
+        },
+        "special_day": {}
+    }
+}

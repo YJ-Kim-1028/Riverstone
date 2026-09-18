@@ -1,0 +1,70 @@
+{
+	"book_interior": {
+        "book1" : "A Shakespeare script sits on the shelf.",
+        "book2" : ["Usher's name is written as the author.", "...It's a thick book, but only about ten pages are actually written on."],
+        "book3" : ["To Flora.\nFlora, I went to the cafe this evening and thought of you.", "...", "Maybe it's best not to read any further."],
+        "book4" : "There are way too many words. Just looking at it gives me a headache.",
+        "book5" : "This month's new releases are on display.",
+        "music1" : "A record you can put in the jukebox. Did Usher compose all of these?"
+    },
+	"cafe_interior": {
+        "oven" : "A warm oven, still radiating heat. It smells like fresh bread.",
+        "grinder" : ["The grinder is full of freshly ground coffee beans.", "...Maybe I'll grab a cup of coffee."],
+        "jam" : "Strawberry jam, apple jam, grape jam... all kinds of jam are lined up here.",
+        "beberage" : ["A drink with a cute little chick sticker on it."],
+        "bread" : ["Dinner rolls, cheesecake, pudding, muffins.", "Unfortunately, none of it seems to be for sale."],
+        "doll1" : "The cafe's mascot - a big plush chick.",
+        "doll2" : "The cafe's mascot - a big plush chick."
+    },
+	"farm_interior": {
+        "dirt" : "Fine soil for growing flowers.",
+        "flower" : "A pot with a single flower in it. Nice for setting the mood.",
+        "seed" : "Seeds for planting in the field. You can buy them from Flora.",
+        "vase" : "A wooden pot with a plant growing lush inside. Did Woody make this pot too?"
+    },
+	"fish_interior": {
+        "fish1" : "A fishing rod. Careful not to prick yourself on the hook.",
+        "box" : "An ice box, handy for fishing.",
+        "fish2" : "Dried mackerel. A bit fishy, but it smells delicious.",
+        "fish3" : ["Fresh fish caught at dawn.", "...This many? That's some serious skill."]
+    },
+	"furniture_interior": {
+        "bed" : "A bed with a sturdy frame. Feel free to lie down - it's nice and soft!",
+        "sofa" : "A two-seater sofa. Great both as decor and as everyday furniture.",
+        "shelf" : "A bookshelf made of spruce wood. We can adjust it to whatever height you like.",
+        "chair" : "A classic wooden chair. Try lifting it - it's surprisingly light!",
+        "drawer" : "Dressers are made to order as soon as we take your request. Just tell us the design you want.",
+        "ref" : "A beverage fridge. We'll even install it for you.",
+        "carpet" : "A wool carpet dyed with natural materials.",
+        "picture" : "A painting by the famous artist Yuja. It's the real thing."
+    },
+	"general_interior": {
+        "door" : "This must be Marr's private space. Better not go in without permission.",
+        "goods" : "Items sold at Marr's general store are on display here.",
+        "calc" : "A checkout counter shared by the whole village."
+    },
+	"hospital_interior": {
+        "drags" : ["Full of medicines with names too complicated to pronounce.", "...What are these even used for?"]
+    },
+	"pasture_interior": {
+        "feed" : "A big pile of feed for the animals.",
+        "record" : ["A logbook recording the animals' health.", "This must be Belze's handwriting? It's really cute."],
+        "trough" : "A trough filled to the brim with water.",
+        "lamp" : ["A small lamp, always lit even at night.", "Looks like it's there for the animals that are afraid of the dark."]
+    },
+	"police_interior": {
+        "board" : "A board with case files pinned up. There's a rough-looking face pinned to it.",
+        "cabinet" : ["An old filing cabinet, locked shut.", "Pulling on the handle doesn't budge it."],
+        "shelf" : ["Files with cases organized inside.", "Feels like I shouldn't open these without permission."],
+        "jail" : "A jail cell with a small window. Hopefully I never end up in here."
+    },
+	"shrine_interior": {
+        "talisman" : "Protective talismans hang here. Did Sage make these herself?",
+        "plum_pot" : ["A pot with a plum blossom planted in it.", "...It seems to be blooming out of season somehow."],
+        "lantern" : "A traditional hexagonal lantern. It glows softly once night falls."
+    },
+	"temple_interior": {
+        "statue" : ["A Buddha statue. Looking closely, it's been polished to a subtle shine.", "A faint scent of incense drifts past."],
+        "donation_box" : ["A donation box.", "If I opened it without permission, Poli would probably arrest me, right?"]
+    }
+}

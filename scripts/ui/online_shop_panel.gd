@@ -624,7 +624,7 @@ func _open_color_picker(shop_id: String, item_id: String, world_sprite_path: Str
 		else:
 			_pending_color_slots.append(ABSENT_MARKER_PLACEHOLDER)
 	var definition := InventoryManager.get_item_definition(item_id)
-	_color_message_label.text = "%s 색을 골라주세요" % String(definition.get("name", item_id))
+	_color_message_label.text = tr("%s 색을 골라주세요") % String(definition.get("name", item_id))
 	_build_color_slot_rows()
 	_refresh_color_preview()
 	_set_color_picker_open(true)
@@ -641,7 +641,7 @@ func _build_color_slot_rows() -> void:
 		if not _pending_color_present[slot_index]:
 			continue
 		var label := Label.new()
-		label.text = COLOR_SLOT_LABELS[slot_index] if slot_index < COLOR_SLOT_LABELS.size() else "색 %d" % (slot_index + 1)
+		label.text = COLOR_SLOT_LABELS[slot_index] if slot_index < COLOR_SLOT_LABELS.size() else tr("색 %d") % (slot_index + 1)
 		label.add_theme_font_size_override("font_size", DESCRIPTION_FONT_SIZE)
 		_color_slots_container.add_child(label)
 		var grid := GridContainer.new()
