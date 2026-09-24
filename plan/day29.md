@@ -102,6 +102,12 @@ day28(브금 전면 교체, itch.io 출시 준비 논의) 다음 세션. 이번 
   짧게 보였음 -> `player.gd` `show_held_message()`로 임시 메시지 표시 중에는 hide/show 무시.
   (`hide_interaction_prompt(force)`는 맵 이동 시에만 강제 해제.)
 
+## 스크린샷용 HUD 숨김
+
+- `game_manager.gd`에 Ctrl+H로 `UI/HUD` 토글(`_toggle_hud_visibility`) 추가. NPC/문 근처 "E ..."
+  프롬프트는 HUD가 아니라 그대로 나옴 - 상호작용 대상 없는 자리에서 찍을 것.
+- 커버는 실내보다 바깥 풍경에 레스토랑 외관이 보이는 구도 추천(썸네일에서 읽힘).
+
 ## 다음 세션에서 할 일
 
 - [ ] 타이틀 화면 실제 확인 (로고 배경 투명 여부, 로고 크기/버튼 겹침)

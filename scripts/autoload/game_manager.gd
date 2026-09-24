@@ -141,9 +141,22 @@ func start_play_timer() -> void:
 	_play_timer_running = true
 
 
+func _toggle_hud_visibility() -> void:
+	var scene := get_tree().current_scene
+	if scene == null:
+		return
+	var hud := scene.get_node_or_null("UI/HUD") as CanvasItem
+	if hud != null:
+		hud.visible = not hud.visible
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F11:
 		_toggle_fullscreen()
+	## 스크린샷용 HUD 숨김 토글(사용자 지시, 2026-09-24 - "UI를 어떻게 꺼") -
+	## 커버/스크린샷을 UI 없이 찍기 위한 Ctrl+H.
+	if event is InputEventKey and event.pressed and not event.echo and event.ctrl_pressed and event.keycode == KEY_H:
+		_toggle_hud_visibility()
 	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F9:
 		_debug_give_test_ingredients()
 	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F7:
