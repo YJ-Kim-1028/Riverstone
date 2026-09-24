@@ -802,6 +802,17 @@ func _check_same_map_arrivals() -> void:
 			## 보정한다.
 			_active_sprites[npc_id].call("snap_to", target)
 		NPCManager.set_npc_physical_spot(npc_id, String(_npc_last_map.get(npc_id, "")), target)
+		_face_down_if_working(npc_id)
+
+
+## 근무 자리("*_working" 스케줄 상태)에 서 있을 때는 마지막으로 걸어온 방향이
+## 아니라 항상 정면을 본다(사용자 지시, 2026-09-24 - "working 자리에 서면 항상
+## 앞에 봐야할거같은데 뜬금으로 옆에 보고 있네").
+func _face_down_if_working(npc_id: String) -> void:
+	if not _active_sprites.has(npc_id):
+		return
+	if NPCManager.get_current_schedule_state(npc_id).ends_with("_working"):
+		_active_sprites[npc_id].call("face_down")
 
 
 ## 진행 중이던 한 홉(경유 홉 또는 마지막 다리)이 끝났을 때 호출된다. 경유
@@ -821,6 +832,7 @@ func _complete_current_hop(npc_id: String, player_map: String) -> void:
 			## 여기도 동일하게 정확한 좌표로 스냅한다.
 			_active_sprites[npc_id].call("snap_to", _npc_last_position[npc_id])
 			_active_sprites[npc_id].call("face_down")
+		_face_down_if_working(npc_id)
 		return
 
 	var spawn_name: String = String(_npc_pending_spawn[npc_id])

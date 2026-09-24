@@ -1,0 +1,129 @@
+{
+    "book_beyond_the_door": {
+        "title": "Beyond the Door",
+        "author": "Usher",
+        "pages": [
+            "This is a story about an old mansion at the top of the village.",
+            "Who owns that mansion?\nIt had been empty for far too long.",
+            "No one had ever opened its door. The hinges were rusted with age, and the handle was thick with cobwebs.",
+            "Some said there was treasure beyond it.\nAlong with a monster guarding it.",
+            "Could the rumors be true? If so, they were worth verifying. I devoted my whole life to finding the key.",
+            "With a trembling heart, I finally opened the door.",
+            "But\nbehind it\nwas\nanother door.",
+            "\"There's only one key!\"\nI howled in anguish.",
+            "Fortunately, though, the inner door wasn't locked.",
+            "With a shaking hand, I turned the knob. A monster? Or treasure?",
+            "Creeeak--\nThe door opened.",
+            "It was outside."
+        ]
+    },
+    "book_perfect_alibi": {
+        "title": "The Perfect Alibi",
+        "author": "Usher",
+        "pages": [
+            "It wasn't me who committed the murder that night.",
+            "I have a perfect alibi.",
+            "I held my head high and shouted proudly.\n\"I was asleep at that hour!\"",
+            "\"Who were you sleeping with?\"\nthe detective asked.",
+            "\"....\"\n\"Alone.\"",
+            "There were no witnesses.",
+            "Thinking it over again, it's not a perfect alibi."
+        ]
+    },
+    "book_life_as_a_cat": {
+        "title": "How to Live as a Cat",
+        "author": "Usher",
+        "pages": [
+            "Living as a human is exhausting!",
+            "So I decided to become a cat.",
+            "In the morning I basked in the sun,\nand in the afternoon I napped.\nMeals were fish.",
+            "It was a satisfying day as a cat.",
+            "But the next morning, I realized I had to go to the shop and work.",
+            "I became human again."
+        ]
+    },
+    "book_culprit_is_here": {
+        "title": "The Culprit Is Among Us",
+        "author": "Usher",
+        "pages": [
+            "In 1977, a murder took place at a party in the West.",
+            "The host of the party was found cold and dead after drinking poisoned wine.",
+            "As it happened, a famous detective was present, and he immediately sealed every door.",
+            "\"The culprit is in this room.\"\nWhen he said this, the crowd murmured.",
+            "Through deduction, the detective let people out of the room one by one.",
+            "When the last person left, the detective said,",
+            "\"Now there's no one left in here.\""
+        ]
+    },
+    "book_love_in_three_seconds": {
+        "title": "Falling in Love Takes Only 3 Seconds",
+        "author": "Usher",
+        "pages": [
+            "The summer I turned 15, I fell in love the moment I first saw her.",
+            "Only three seconds were enough.",
+            "In the first second, I looked at her face. Her red hair and shining eyes were beautiful.",
+            "In the next second, I heard her laugh. Her voice was clear, without a speck of dust.",
+            "In the third second, I wondered whether to ask her name.",
+            "But I had never spoken with any woman other than my mother.\nSo I couldn't ask her name.",
+            "I still don't know her name."
+        ]
+    },
+    "book_resolve_before_death": {
+        "title": "Resolve Before Death",
+        "author": "Usher",
+        "pages": [
+            "I will die tomorrow.\nSo I decided to spend my last day meaningfully.",
+            "I wrote the letter I'd put off for so long, met a friend I love, and even saw the sea.",
+            "By the time I got home, I felt quite good.",
+            "So I decided to put off dying."
+        ]
+    },
+    "book_last_summer": {
+        "title": "I Know What You Did Last Summer",
+        "author": "Usher",
+        "pages": [
+            "I know what you did last summer.",
+            "The man's hands trembled as he read the letter.",
+            "He was a shut-in who never left his house, and he had told no one where he'd been.",
+            "\"How does he know my secret?\"\nHe cautiously turned the letter over.",
+            "\"Summer-limited cold noodles are back on the menu.\"",
+            "He looked at the sender. It was a flyer from the regular restaurant he often ordered delivery from.",
+            "The next day, the man went out for cold noodles."
+        ]
+    },
+    "book_detectives_last_trace": {
+        "title": "The Detective's Last Trace",
+        "author": "Usher",
+        "pages": [
+            "A locked-room case.\nThe door was firmly locked from the inside.\nThe windows were blocked with iron bars.",
+            "The victim lay in the middle of the room.\nThe detective stood there and pondered for a long time.",
+            "Then he said,",
+            "\"I have no idea.\"",
+            "He called the police. That was the detective's final case."
+        ]
+    },
+    "book_unsent_letter": {
+        "title": "The Unsent Letter",
+        "author": "Usher",
+        "pages": [
+            "Today, too, I write a letter to you.",
+            "But I won't send it, will I...",
+            "I wrote yesterday, and the day before, faithfully. The feelings I couldn't deliver now number over 300 letters.",
+            "Even if I wanted to send them now, stamps cost too much.",
+            "I realized that an unsent letter is no different from a diary.",
+            "So from now on, I'm going to write a diary."
+        ]
+    },
+    "book_girl_in_the_alley": {
+        "title": "He Was Always Standing in That Alley",
+        "author": "Usher",
+        "pages": [
+            "Every day at three in the afternoon, a man waited for someone in the same spot.",
+            "Rain or snow, he was always there.",
+            "One day I couldn't contain my curiosity and asked on impulse.",
+            "\"What are you waiting for?\"",
+            "\"Four o'clock.\"",
+            "Ah. An hour later, he went home."
+        ]
+    }
+}

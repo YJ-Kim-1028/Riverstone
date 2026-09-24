@@ -3,12 +3,10 @@ extends Node
 ## 레스토랑 주크박스(jukebox Interactable) 상태 - data/jukebox/songs.json의 곡
 ## 목록을 읽고, 지금 선택된 곡을 추적한다. 해금 여부는 ShopManager의 구매
 ## 기록(purchase_counts)으로 판정한다 - 음반을 인벤토리에 들고 있어야만
-## 해금되는 게 아니라 "한 번이라도 산 적 있으면" 영구 해금(사용자 지시,
-## 2026-08-10: "음원은 아이템으로 갖고있어도 할 게 없잖아 그냥 구매하면
-## 템창은 안달라지고 주크박스에서 틀 수 있는것만 많아져야지"). 음반 구매
-## 자체가 인벤토리에 아무것도 남기지 않도록 ShopManager.buy()도 is_record_item()
-## 으로 감지해 특수 처리한다. 선택된 곡 id만 SaveManager를 통해 저장한다
-## (get_save_data 참고).
+## 해금되는 게 아니라 "한 번이라도 산 적 있으면" 영구 해금. 음반은 실물
+## 아이템으로 인벤토리에도 들어간다(사용자 지시, 2026-09-24 - 8월 10일의
+## "구매 시 인벤토리 안 들어감" 지시를 되돌림, ShopManager.buy()는 일반 구매
+## 경로 사용). 선택된 곡 id만 SaveManager를 통해 저장한다(get_save_data 참고).
 
 signal song_selected(song_id: String)
 

@@ -32,4 +32,4 @@ func _load_books() -> void:
 	if not (parsed is Dictionary):
 		push_error("Book catalog is not valid JSON: %s" % BOOKS_PATH)
 		return
-	_books = parsed
+	_books = Localizer.apply_language(parsed, BOOKS_PATH) as Dictionary

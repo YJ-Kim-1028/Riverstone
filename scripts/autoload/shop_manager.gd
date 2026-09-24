@@ -233,8 +233,6 @@ func buy(shop_id: String, item_id: String, stall_index: int = -1, colors: Array[
 		return _buy_inventory_expansion(shop_id, item_id)
 	if item_id == HOUSE_UPGRADE_ITEM_ID:
 		return _buy_house_upgrade(shop_id, item_id)
-	if JukeboxManager.is_record_item(item_id):
-		return _buy_jukebox_record(shop_id, item_id)
 	if is_hd_outfit_unlock_item(item_id):
 		return _buy_hd_outfit_unlock(shop_id, item_id)
 	if is_hd_hairstyle_unlock_item(item_id):
@@ -385,29 +383,6 @@ func _buy_house_upgrade(shop_id: String, item_id: String) -> String:
 	return ""
 
 
-## 음반(주크박스 곡 해금 아이템, JukeboxManager.is_record_item())은 인벤토리
-## 칸을 차지할 이유가 없다(사용자 지시, 2026-08-10 - 다 산 음반은 인벤토리에서
-## 할 게 없는 죽은 아이템이었음) - InventoryManager.add_item()을 아예 타지
-## 않고, 골드 결제 + _purchase_counts 기록만 한다. JukeboxManager.is_unlocked()가
-## 바로 이 _purchase_counts를 보고 해금 여부를 판정하므로, 이 함수가 끝나는
-## 순간 해당 곡이 즉시 재생 목록에 나타난다.
-func _buy_jukebox_record(shop_id: String, item_id: String) -> String:
-	var listing := _find_listing(shop_id, item_id)
-	if listing.is_empty():
-		return REASON_NOT_SOLD
-	var limit := int(listing.get("purchase_limit", 0))
-	if limit > 0 and get_purchase_count(item_id) >= limit:
-		return REASON_LIMIT_REACHED
-	var price := int(listing.get("price", 0))
-	if not EconomyManager.can_afford(price) or not EconomyManager.spend(price):
-		return REASON_NOT_ENOUGH_GOLD
-	_purchase_counts[item_id] = get_purchase_count(item_id) + 1
-	if not _purchase_days.has(item_id):
-		_purchase_days[item_id] = TimeManager.current_day
-	item_purchased.emit(shop_id, item_id, price)
-	return ""
-
-
 func is_hd_outfit_unlock_item(item_id: String) -> bool:
 	return item_id.begins_with(HD_OUTFIT_ITEM_PREFIX)
 
@@ -421,8 +396,8 @@ func is_hd_outfit_unlocked(style: String) -> bool:
 	return get_purchase_count(HD_OUTFIT_ITEM_PREFIX + style) > 0
 
 
-## _buy_jukebox_record()와 완전히 같은 구조/이유 - 인벤토리에 들어갈 물건이
-## 아니라 옷장에서 그 스타일을 고를 수 있게 되는 1회 해금이다.
+## 인벤토리에 들어갈 물건이 아니라 옷장에서 그 스타일을 고를 수 있게 되는
+## 1회 해금이다(골드 결제 + _purchase_counts 기록만).
 func _buy_hd_outfit_unlock(shop_id: String, item_id: String) -> String:
 	var listing := _find_listing(shop_id, item_id)
 	if listing.is_empty():

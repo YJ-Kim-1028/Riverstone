@@ -33,7 +33,7 @@
         "stock": [
             {"item_id": "bucket", "price": 1000, "purchase_limit": 1},
             {"item_id": "animal_feed", "price": 10},
-            {"item_id": "small_knife", "price": 1000},
+            {"item_id": "small_knife", "price": 1000, "purchase_limit": 1},
             {"item_id": "livestock:cow", "price": 400},
             {"item_id": "livestock:pig", "price": 300}
         ],
