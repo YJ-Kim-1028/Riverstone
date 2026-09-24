@@ -2521,7 +2521,7 @@ func _on_restaurant_confirmed() -> void:
 ## 파라미터로 뺐다(플레이테스트 피드백 #9, 2026-09-05 - "너무 짧게 뜬다").
 func _show_temporary_message(text: String, duration: float = MESSAGE_DURATION) -> void:
 	_message_timer = duration
-	player.show_interaction_prompt(text)
+	player.show_held_message(text, duration)
 
 
 ## descriptions.json의 값은 문자열 하나 또는 문자열 배열 둘 다 지원한다(사용자
@@ -3078,7 +3078,7 @@ func _load_map(map_id: String, spawn_name: String, skip_fade: bool = false) -> v
 		player.position = spawn_position
 		player.set_camera_bounds(world_map.get_map_size())
 		player.snap_camera()
-		player.hide_interaction_prompt()
+		player.hide_interaction_prompt(true)
 		GameManager.set_current_map(map_id)
 		_update_restaurant_sign()
 		_update_closet_old_overlay()

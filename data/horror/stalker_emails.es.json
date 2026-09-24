@@ -1,0 +1,42 @@
+{
+    "second_murder_sack": {"title": "¿Lo recibiste?", "lines": ["Te preparé un regalo, ¿lo recibiste?", "No te sorprendiste, ¿verdad? Ya te lo había dicho.", "Espero de verdad que hayas abierto el saco.", "Porque tienes que ver con tus propios ojos lo que pasa cuando no me haces caso."]},
+    "early": [
+        {"title": "¡Mucho gusto~!", "lines": ["Hola, es la primera vez que envío un correo así. ¿Adivina quién soy? ^___^"]},
+        {"title": "¿Por qué lo envío de forma anónima?", "lines": ["La verdad, apenas me enteré de que existía este sistema de correo. Todos en el pueblo comparten sus correos entre sí, pero...", "Me hice otra cuenta en secreto.", "¿No crees que un amigo así podría ser divertido?"]},
+        {"title": "¿Tienes curiosidad por saber quién soy?", "lines": ["¿Tú también disfrutas mis correos? ¿No te da curiosidad saber quién podría ser?", "Siempre quise un amigo imaginario como este.", "Yo seré tu amigo imaginario.", "Imagíname mucho, ¿sí? Yupi."]},
+        {"title": "Nunca sabrás quién soy.", "lines": ["¿Has estado preguntándole a la gente del pueblo quién puedo ser?", "Nunca me conocerás.", "No hasta que yo cambie de opinión.", "Porque no voy a dejar que lo averigües."]},
+        {"title": "¿Este soy yo de verdad?", "lines": ["¿Los correos que te envío reflejan cómo hablo en realidad?", "¿O será que en la vida real te hablo con mucha formalidad?", "¿Soy así de hablador?", "¿Pienso tanto en ti?", "Es un día frustrante, no poder darte la respuesta."]},
+        {"title": "Hola hola hola hola.", "lines": ["¿Qué estás haciendo hoy?", "¿Preparando los ingredientes del restaurante?", "Tengo curiosidad.", "Quiero saber más de ti."]},
+        {"title": "Anoche estuve mirando tu campo.", "lines": ["Tú no lo sabes, pero caminé mucho rato frente a tu casa.", "Caminaba y caminaba, preguntándome qué harías aquí.", "Cuando por fin me conozcas algún día, cuéntamelo..."]},
+        {"title": "¿No te cansa el mismo día de siempre?", "lines": ["Sin mis correos, solo cultivarías, pescarías, cocinarías, servirías,", "cultivarías, pescarías, cocinarías, servirías,", "cultivarías, pescarías, cocinarías, servirías,", "¿No soy yo quien hace especial tu día?"]},
+        {"title": "¿Has pensado en responderme?", "lines": ["¿Has pensado en ser tú también mi amigo secreto, como yo lo soy para ti?", "¿Qué estarás pensando ahora mismo...? Quiero saberlo."]},
+        {"title": "Hoy te vi comprar semillas.", "lines": ["Lo vi todo: las semillas que compraste hoy. ¿Qué vas a plantar?", "Cuando coseches, cocina para mí.", "Qué maravilla sería que solo yo pudiera comer tu comida."]},
+        {"title": "Parece que últimamente el negocio va bien.", "lines": ["El restaurante ha estado muy concurrido.", "Debe de ser agotador atender a tantos clientes.", "Me molesta la gente que te hace la vida difícil.", "...¿Quieres que me deshaga de ellos?", "Es broma. ^__^"]},
+        {"title": "¿Caminamos juntos un día con buen clima?", "lines": ["En un día tan lindo deberíamos caminar juntos.", "¿Podrías venir adonde estoy yo?", "Te esperaré..."]},
+        {"title": "Mientras menos sepas, más pensarás en mí.", "lines": ["Sin importar a quién conozcas en el pueblo, te preguntarás si esa persona será yo.", "Con quien sea que te encuentres, lo primero en lo que pensarás es en mí.", "Con lo bien que funciona, ¿cómo podría renunciar al anonimato?", "No te lo tomes tan a mal. Yo pienso en ti igual de seguido.", "Siempre..."]},
+        {"title": "No pases tanto tiempo con otras personas.", "lines": ["Eres lo único que tengo, mi compañía. Mi amigo. Mi amor. Mi persona.", "Entonces, ¿por qué te acercas también a otras personas?", "Eso no se puede.", "No."]},
+        {"title": "Cuando abras los ojos por la mañana", "lines": ["Ven conmigo. No me gusta que veas primero a otra persona.", "Basta.Basta.Basta.Basta.Basta.Basta.Basta.Basta.Basta.Basta.Basta.Basta.Basta.Basta.Basta.Basta.Basta."]},
+        {"title": "La comida hecha con tu esmero.", "lines": ["Ojalá solo yo pudiera comerla.", "Quiero matar a todos los clientes que vienen a tu restaurante."]},
+        {"title": "¿Y si lo compro todo yo?", "lines": ["Últimamente andas de un lado a otro comprando de todo. Quizá debería comprar todas las tiendas del pueblo.", "Todas....."]},
+        {"title": "Dame regalos solo a mí", "lines": ["¿A quién le diste un regalo hoy?", "Deja de andar repartiendo regalos por ahí.", "Todos empiezan a fijarse en ti.", "¿No te preocupa ese futuro?"]},
+        {"title": "Invítame a mí también.", "lines": ["Por favor, no seas tan cruel.", "¡¡¡¡Sabes que estoy esperando!!!!", "¿No puedes.... no puedes esperarme tú también? Por favor, espérame."]},
+        {"title": "En tu día no estoy yo", "lines": ["¿En quién pensaste todo el día hoy?", "Ojalá haya sido en mí.", "Y si no... haré que vuelvas a pensar en mí."]},
+        {"title": "Pronto lo sabrás", "lines": ["Estoy observando, uno por uno, a las personas que aprecias.", "Yo también tengo curiosidad por saber quién es el más importante para ti.", "Pronto lo sabrás."]}
+    ],
+    "mid": [
+        {"title": "¿Sabes por qué {victim_name} terminó así?", "lines": ["{victim_name} se te acercó demasiado.", "Esa es la razón. Solo eso.", "Simple, ¿no?", "Te lo advertí. Te lo dije de antemano. Si tan solo me hubieras escuchado..."]},
+        {"title": "Parece que de verdad eran muy cercanos.", "lines": ["Te siguió llamando hasta el final.", "Murió lentamente, diciendo tu nombre.", "Lo miré hasta que la luz se apagó en sus ojos.", "Me dio rabia. ¿Incluso muriendo? ¿Por ti?", "Pensé en despedazar hasta el cadáver, pero por un último gesto de piedad lo arrojé al mar."]},
+        {"title": "Si no hubieras sido tan amable con esa persona.", "lines": ["Es tu culpa. Es tu culpa. Si no hubieras sido tan amable, {victim_name} seguiría con vida.", "Es porque ignoraste lo que te dije.", "Espero que no vuelvas a cometer este error."]},
+        {"title": "Te haré una promesa..", "lines": ["Quienquiera que se te acerque demasiado", "terminará igual que {victim_name}.", "Esto no es una advertencia....", "Es una promesa."]},
+        {"title": "El destino es algo que uno mismo se forja.", "lines": ["{victim_name}, que murió por ti. Piensa en esa persona y no vuelvas a tomar una decisión tan necia."]},
+        {"title": "Adivinar con los pétalos.", "lines": ["La persona a tu alrededor que me estorba: la mato, no la mato. La mato. No la mato. La mato. No la mato.... La mato."]},
+        {"title": "Ojalá pararas", "lines": ["Que rías y charles con otras personas es una violencia demasiado cruel para mí.", "Por favor, detente..."]}
+    ],
+    "late": [
+        {"title": "Al final volvió a pasar.", "lines": ["Llegó el futuro que no quería que llegara.", "No puedo parar.", "Mancharme las manos de sangre ya se volvió costumbre.", "Ya no me da miedo matar a alguien por ti.", "Poli, ese imbécil, es un inútil.", "He matado a dos personas en un pueblo tan pequeño. ¿Y todavía no me atrapan?"]},
+        {"title": "Jaja, hoy también afilé el cuchillo por ti.", "lines": ["Voy a matar a todos los que te hagan la vida difícil. ¡Te lo prometo!", "- Tu propio héroe oscuro -"]},
+        {"title": "Al principio lo hacía por ti.", "lines": ["Pero ahora me volví adicto a la emoción.", "No solo tú: ahora todos piensan en mí.", "Sin saber quién es el culpable, la gente se aleja entre sí.", "Mientras más sospechan, hablan mal y se distancian unos de otros, más aislados quedan,", "y más aumentan sus probabilidades de morir a mis manos.", "Un consejo por tu bien: no andes solo."]},
+        {"title": "Ten cuidado, {player_name}", "lines": ["Tú también puedes morir en cualquier momento. Cuida siempre tu espalda al caminar. Mira el cielo: fíjate hacia dónde se mueven las nubes.", "¿Sage? ¿Lama? Diles a esos imbéciles inútiles que se larguen.", "¿De verdad creen que sus dioses pueden detenerme?"]},
+        {"title": "Confía en mí", "lines": ["Encontré una manera de que estemos juntos para siempre.", "Nunca nos separaremos.", "Confía en mi método."]}
+    ]
+}

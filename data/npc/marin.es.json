@@ -1,0 +1,894 @@
+{
+    "id": "marin",
+    "name": "Marin",
+    "name_en": "Marin",
+    "gender": "남성",
+    "age": "10대 후반",
+    "job": "없음",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "Enérgico.",
+        "Activo.",
+        "Le encantan los deportes.",
+        "De mente simple."
+    ],
+    "preferred_food": [
+        "고등어"
+    ],
+    "disliked_food": [
+        "상추"
+    ],
+    "special_notes": [
+        "Hijo de Roshi. Renunció a su sueño de ser futbolista para continuar el negocio familiar de pesca de su padre.",
+        "Visita el santuario a menudo porque Sage es bonita, pero en realidad es para rezar por la seguridad de su padre.",
+        "Le gustan los días de lluvia porque su padre se queda en casa.",
+        "Estuvo enamorado de Belze desde niño, pero lo dejó pasar porque ella tiene a Shepherd."
+    ],
+    "memento_item": {
+        "name": "Balón de fútbol",
+        "description": "Un viejo balón de fútbol que usa desde que era pequeño. Tiene marcas de haber sido remendado muchas veces y el color se ha desteñido en varios puntos.",
+        "lore_lines": []
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/marin_port.png",
+        "happy": "res://assets/npc/portrait/marin_happy.png",
+        "sad": "res://assets/npc/portrait/marin_sad.png",
+        "angry": "res://assets/npc/portrait/marin_port.png"
+    },
+    "sprite": "res://assets/npc/sprite/marinSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {
+                    "time": "09:00",
+                    "state": "fish_working"
+                },
+                {
+                    "time": "18:00",
+                    "state": "plaza5_standing"
+                },
+                {
+                    "time": "21:00",
+                    "state": "fish_working"
+                }
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {
+                    "time": "09:00",
+                    "state": "fish_working"
+                },
+                {
+                    "time": "18:00",
+                    "state": "plaza5_standing"
+                },
+                {
+                    "time": "21:00",
+                    "state": "fish_working"
+                }
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {
+                    "time": "09:00",
+                    "state": "cafe_standing"
+                },
+                {
+                    "time": "12:00",
+                    "state": "general_looking"
+                },
+                {
+                    "time": "18:00",
+                    "state": "shrine_standing"
+                },
+                {
+                    "time": "21:00",
+                    "state": "fish_working"
+                }
+            ]
+        }
+    },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "fish_working",
+        "scene_map_id": "plaza3",
+        "lead_out_lines": [
+            "¿Eh? Es {player_name}. ¿Viniste?",
+            "Ah, ¿esto que tengo en las manos?",
+            "Es un balón de fútbol con el que jugaba de niño.",
+            "Sabes que me encantaba el fútbol.",
+            "Oye, {player_name}. ¿Sabes jugar fútbol?",
+            "¿Quieres patearlo un ratito? Ahora que no hay clientes es la oportunidad perfecta."
+        ],
+        "entry_spawn": "fish_exit",
+        "npc_spawn": "marin_heart_npc",
+        "player_spawn": "marin_heart_player",
+        "player_facing": "left",
+        "lines": [
+            {
+                "text": "Uf, qué bien se siente correr y sudar después de tanto tiempo.",
+                "emotion": "happy"
+            },
+            {
+                "text": "¿Verdad?",
+                "emotion": "happy"
+            },
+            {
+                "text": "Creo que podríamos ser buenos amigos. ¡Repitámoslo alguna vez!",
+                "emotion": "happy"
+            }
+        ]
+    },
+    "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "requires_not_shown": {
+                "npc_id": "roshi",
+                "threshold": 50
+            },
+            "description": "Le entrega una caña de pescar dorada que arregló especialmente, en lugar de la vieja caña de su padre.",
+            "lines": [
+                "¡{player_name}, ven un momento! Tengo algo que quiero enseñarte.",
+                {
+                    "text": "¡Mira esto, está genial! Lo encontré hurgando en la bodega de papá y estaba reluciente.",
+                    "emotion": "happy"
+                },
+                {
+                    "type": "gift",
+                    "item_id": "golden_fishing_rod"
+                },
+                "Dicen que era del abuelo. Papá hace siglos que dejó de pescar, y yo casi no la uso, así que estaba arrumbada en la bodega.",
+                {
+                    "text": "Pero viéndote pescar, sentí que esto le corresponde a alguien como tú.",
+                    "emotion": "happy"
+                },
+                {
+                    "text": "¿Quién sabe? Con esto igual pescas hasta una serpiente marina de verdad.",
+                    "emotion": "happy"
+                }
+            ]
+        },
+        {
+            "threshold": 65,
+            "type": "dialogue",
+            "description": "Le entrega un disco que compró por impulso al ver el título.",
+            "lines": [
+                "¡{player_name}! Qué bueno encontrarte, justo andaba trayendo esto para dártelo.",
+                {
+                    "text": "Es un disco. La verdad es que hace tiempo Usher me enseñó a componer.",
+                    "emotion": "happy"
+                },
+                {
+                    "type": "gift",
+                    "item_id": "record_the_day_after_you_came"
+                },
+                "'The day after you came'. Bueno, no tengo ninguna musa ni nada. Eres prácticamente la única persona cercana a mí. Así que la escribí para ti.",
+                {
+                    "text": "Ahora que te lo doy me da vergüenza. Quizá debí mandártelo en secreto por correo.",
+                    "emotion": "happy"
+                },
+                {
+                    "text": "No está tan bien como lo de Usher, así que no esperes demasiado.",
+                    "emotion": "happy"
+                }
+            ]
+        },
+        {
+            "threshold": 80,
+            "type": "dialogue",
+            "description": "Confiesa su angustia por su padre.",
+            "lines": [
+                "La verdad es que...",
+                "Me da miedo cada vez que papá sale al mar.",
+                "Algún día... podría no volver."
+            ]
+        },
+        {
+            "threshold": 85,
+            "type": "dialogue",
+            "requires": {
+                "npc_id": "lama",
+                "threshold": 60
+            },
+            "description": "Extraña a su madre sin conocer la verdad.",
+            "lines": [
+                "La verdad es que no recuerdo bien la cara de mamá.",
+                "Pero, curiosamente, recuerdo cómo se sentía cuando me tomaba de la mano. Y la canción que le gustaba también.",
+                {
+                    "text": "A veces escucho esa canción y me dan ganas de llorar sin razón. Qué poco propio de mí.",
+                    "emotion": "sad"
+                },
+                "Eso sí, nunca lloro frente a papá. Creo que lo pondría aún más triste.",
+                "Tengo que ser el hijo fuerte, ¿sabes?"
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "Le entrega el viejo balón de fútbol.",
+            "lines": [
+                "Oye, {player_name}. La verdad es que mi sueño era ser futbolista.",
+                "Pero si no soy yo, ¿quién va a continuar el negocio de papá?",
+                {
+                    "text": "Tampoco es que fuera tan bueno en el fútbol... así que supongo que esto ya solo debe quedar como un recuerdo.",
+                    "emotion": "sad"
+                },
+                {
+                    "text": "¡Eh, estoy bien! No hace falta que me mires con esa cara.",
+                    "emotion": "happy"
+                },
+                {
+                    "text": "Tú también eres un buen recuerdo para mí, así que quiero regalarte uno mío.",
+                    "emotion": "happy"
+                },
+                "¿Lo aceptas?"
+            ]
+        },
+        {
+            "threshold": 105,
+            "type": "dialogue",
+            "description": "Le resta importancia con bravuconería a una presencia extraña frente a su casa.",
+            "lines": [
+                "Últimamente se oye un ruido de crujidos frente a mi casa por las noches.",
+                "Al principio pensé que era un gato, pero como que parecía más grande.",
+                {
+                    "text": "¡Bah, seguro que no es nada! Con el fútbol me puse bien fuerte, ¿sabes? ¡No soy de los que se asustan por eso!",
+                    "emotion": "happy"
+                }
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "murder_grief": [
+            {
+                "text": "Ojalá esa persona... haya ido a un buen lugar.",
+                "emotion": "sad"
+            },
+            {
+                "text": "Algo así no debió pasarle a alguien como esa persona.",
+                "emotion": "sad"
+            }
+        ],
+        "murder_grief_2": [
+            "Otra vez algo así... esta vez sí tengo miedo de verdad.",
+            {
+                "text": "Ya no siento que nadie esté a salvo.",
+                "emotion": "sad"
+            }
+        ]
+    },
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    [
+                        "¡Hoy también salí con mi balón!",
+                        "¿Jugamos un rato al fútbol esta noche?",
+                        "¿No te interesa?... Bah."
+                    ],
+                    [
+                        "Que sea lunes no cambia nada.",
+                        "Supongo que me quedaré aquí esperando gente otra vez.",
+                        "Uf, quiero salir."
+                    ],
+                    {
+                        "lines": [
+                            "Los lunes lo primero es arreglar las redes. Órdenes de papá.",
+                            "Puaj. Qué aburrido."
+                        ],
+                        "requires_alive": "roshi",
+                        "fallback_lines": [
+                            "Antes arreglaba las redes junto con papá...",
+                            "...."
+                        ]
+                    }
+                ],
+                "mid": [
+                    [
+                        "Siento que últimamente perdí el toque goleador. Tendría que patear todos los días.",
+                        "¡Un talento como yo desperdiciándose así!"
+                    ],
+                    [
+                        "Si hay caballa de guarnición, me como dos platos de arroz sin problema.",
+                        "Huelo pescado todos los días y aun así me sigue pareciendo delicioso, ¿por qué será?"
+                    ],
+                    {
+                        "lines": [
+                            "Últimamente me divierte pasar por la clínica de Isha.",
+                            "¿Eh? No, no estoy enfermo ni nada.",
+                            "Es que ella es amable y divertida."
+                        ],
+                        "requires_alive": "isha",
+                        "fallback_lines": [
+                            "Extraño a Isha, era tan amable y divertida...",
+                            "Solía pasar por la clínica muy seguido."
+                        ]
+                    },
+                    [
+                        "¿Quién es tu futbolista favorito?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {
+                                    "label": "Messi",
+                                    "affection": 1,
+                                    "response": [
+                                        "¡Oh, respeto!",
+                                        {
+                                            "text": "Yo también soy fan total, ¿no es un personaje roto de tan bueno?",
+                                            "emotion": "happy"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "label": "Ronaldo",
+                                    "affection": 1,
+                                    "response": [
+                                        "¿Eh, Ronaldo?",
+                                        "No está mal, pero yo soy más del equipo Messi.",
+                                        "Aun así, ¡se respetan los gustos!"
+                                    ]
+                                },
+                                {
+                                    "label": "Bak Gi-bong",
+                                    "affection": 0,
+                                    "response": [
+                                        "¿Y ese quién es? Nunca lo había oído.",
+                                        "...¿el presidente de un club de fútbol matutino?",
+                                        {
+                                            "text": "¡Oye, ese no es un jugador, es solo un señor del barrio!",
+                                            "emotion": "happy"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                ],
+                "high": [
+                    [
+                        "¿Sabes ver fútbol?",
+                        "Sería divertido pedir pollo frito juntos y ver los partidos los días de juego."
+                    ],
+                    {
+                        "lines": [
+                            "¿Se aburrirá papá cuando sale al mar solo?",
+                            "Claro que me preocupo, es mi papá."
+                        ],
+                        "requires_alive": "roshi",
+                        "fallback_lines": [
+                            "No dejo de pensar en papá saliendo solo al mar.",
+                            "Si hubiera sabido que se iría así, habría ido con él."
+                        ]
+                    },
+                    [
+                        "¿En qué pensará la gente frente al mar?",
+                        "Es que... a mí ni me gusta el mar, pero todos vienen aquí y me da curiosidad."
+                    ]
+                ]
+            },
+            "화": {
+                "low": [
+                    [
+                        "¡Ey, restaurante!",
+                        "Qué gusto verte."
+                    ],
+                    [
+                        "El pescado de hoy está bien fresco.",
+                        "Lo acaban de pescar esta madrugada."
+                    ],
+                    [
+                        "El monje Lama me dijo que voy seguido al santuario pero nunca vengo al templo.",
+                        "Pues que se vista de sacerdotisa del santuario, entonces."
+                    ]
+                ],
+                "mid": [
+                    [
+                        "Cualquier platillo de caballa me viene bien. ¡Es lo mejor!"
+                    ],
+                    {
+                        "lines": [
+                            "Le conseguí un amuleto a Sage. Lo voy a colgar en el barco de papá."
+                        ],
+                        "requires_alive": "roshi",
+                        "fallback_lines": [
+                            "El amuleto que me dio Sage sigue colgado en el barco de papá.",
+                            "...supongo que rezarle a los dioses tampoco lo arregla todo."
+                        ]
+                    },
+                    [
+                        "Ahora el fútbol es solo un pasatiempo.",
+                        "Estoy demasiado grande para seguir aferrado a un sueño.",
+                        "...¿20 años? Todavía no los cumplo."
+                    ]
+                ],
+                "high": [
+                    {
+                        "lines": [
+                            "Papá otra vez se preocupó por mí. Y eso que ya soy grande."
+                        ],
+                        "requires_alive": "roshi",
+                        "fallback_lines": [
+                            "A veces extraño los regaños de papá.",
+                            "En ese entonces sentía que me trataba como a un niño y lo odiaba tanto."
+                        ]
+                    },
+                    {
+                        "lines": [
+                            {
+                                "text": "Ojalá lloviera más seguido. ¡Así podría pasar más tiempo con papá!",
+                                "emotion": "happy"
+                            }
+                        ],
+                        "requires_alive": "roshi",
+                        "fallback_lines": [
+                            "Extraño el tiempo que pasaba con papá los días de lluvia."
+                        ]
+                    },
+                    [
+                        "Oye, {player_name}. ¿Ya llegaste?",
+                        "Esta mañana practiqué yo solo a fileter pescado.",
+                        "Ya estoy al nivel de poder venderlo, en serio.",
+                        {
+                            "text": "Estoy bien orgulloso.",
+                            "emotion": "happy"
+                        }
+                    ]
+                ]
+            },
+            "수": {
+                "low": [
+                    [
+                        "Qué aburrido... ¿hasta cuándo tengo que cuidar la tienda?"
+                    ],
+                    [
+                        "¿A ti también te parece que huelo a pescado?",
+                        "Ugh. Compré un desodorante nuevo y ni funciona."
+                    ],
+                    [
+                        "Correr con la brisa del mar en la cara se siente increíble."
+                    ],
+                    {
+                        "lines": [
+                            "Papá llega tarde hoy.",
+                            "...bueno, supongo que están picando bien los peces."
+                        ],
+                        "requires_alive": "roshi",
+                        "fallback_lines": [
+                            "El mar sin papá se siente tan raro. ¿Verdad?",
+                            "...es muy difícil."
+                        ]
+                    }
+                ],
+                "mid": [
+                    [
+                        "Fui al santuario. A ver a Sage."
+                    ],
+                    [
+                        "Últimamente descubrí lo rico que es echarse una siesta a la sombra."
+                    ]
+                ],
+                "high": [
+                    {
+                        "lines": [
+                            "La verdad es que tengo otra razón para ir al santuario.",
+                            {
+                                "text": "Cada vez pido que papá regrese sano y salvo. Quizás Sage ya se dio cuenta.",
+                                "emotion": "sad"
+                            },
+                            "Ah, no le cuentes a nadie lo que acabo de decir. Me da algo de vergüenza."
+                        ],
+                        "requires_alive": "roshi",
+                        "fallback_lines": [
+                            "Por esta época solía ir mucho al santuario a pedir por la salud de papá.",
+                            "Aunque al final resultó inútil."
+                        ]
+                    },
+                    [
+                        "Cuidado con los anzuelos cuando mires la tienda. Están muy afilados."
+                    ],
+                    [
+                        "Uaaah. Llevo casi una semana sin poder jugar fútbol.",
+                        "Ya no aguanto las ganas."
+                    ]
+                ]
+            },
+            "목": {
+                "low": [
+                    {
+                        "lines": [
+                            "Papá salió a pescar. Hoy estoy solo."
+                        ],
+                        "requires_alive": "roshi",
+                        "fallback_lines": [
+                            "Hola. ¿Te ayudo en algo?"
+                        ]
+                    },
+                    [
+                        "Los jueves casi siempre como solo. Pero está bien."
+                    ],
+                    [
+                        "Ayer vi un ratito fútbol en la tele...",
+                        "¡Oye, yo también jugaba a ese nivel! En serio."
+                    ]
+                ],
+                "mid": [
+                    {
+                        "lines": [
+                            "¿Conoces a Belze?",
+                            "A ella le encantan los animales, ¿no?",
+                            "¿Entonces quizás le gusten también los peces?"
+                        ],
+                        "requires_alive": "belje",
+                        "fallback_lines": [
+                            "Será porque a Belze le gustaban tanto los animales.",
+                            "A mí también me terminaron gustando las vacas.",
+                            "Aunque ella ya no está..."
+                        ]
+                    },
+                    [
+                        "Últimamente hasta me volví bastante rápido atando nudos de red.",
+                        "Cómo he crecido."
+                    ]
+                ],
+                "high": [
+                    [
+                        "Antes estaba enamorado de Belze. Ahora... bueno, ya no me importa. Es cosa del pasado."
+                    ],
+                    {
+                        "lines": [
+                            "A veces, al pasar por el rancho de Belze, solo la saludo. Con eso me basta."
+                        ],
+                        "requires_alive": "belje",
+                        "fallback_lines": [
+                            "Extraño ver a Belze cuando pasaba por el rancho."
+                        ]
+                    },
+                    [
+                        "No llegué a ser futbolista, pero puedo ser pescador. Con eso me alcanza.",
+                        "¡Es que me veo genial haga lo que haga!"
+                    ]
+                ]
+            },
+            "금": {
+                "low": [
+                    [
+                        "¡Otra semana que se va! Este fin de semana toca jugar hasta cansarme."
+                    ],
+                    [
+                        "Estuve afuera todo el día el viernes y me bronceé un poco."
+                    ],
+                    [
+                        "Me pone de buen humor cuando se pescan muchas caballas."
+                    ]
+                ],
+                "mid": [
+                    [
+                        "Mi sueño era ser futbolista. Últimamente casi ni lo pienso."
+                    ],
+                    [
+                        "Ni se te ocurra hacerme comer pasto.",
+                        "Guácala. Lo odio."
+                    ],
+                    {
+                        "lines": [
+                            "Parece que a papá le duele la espalda últimamente. Aunque no lo demuestra."
+                        ],
+                        "requires_alive": "roshi",
+                        "fallback_lines": [
+                            "En vida, a papá le dolía mucho la espalda.",
+                            "Si hubiera sabido que terminaría así, lo habría dejado descansar más."
+                        ]
+                    },
+                    [
+                        "Ya estoy grande. No me quejo como antes.",
+                        "...aunque a veces lo extraño."
+                    ]
+                ],
+                "high": [
+                    [
+                        "¿Qué opinas de que sea futbolista? ¿Y si lo intento otra vez, aunque sea ahora?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {
+                                    "label": "¡Hazlo! Te apoyo",
+                                    "affection": 1,
+                                    "response": [
+                                        "¿En serio? Gracias, eso me da fuerzas."
+                                    ]
+                                },
+                                {
+                                    "label": "Tu vida actual también se ve bien",
+                                    "affection": 1,
+                                    "response": [
+                                        "¿Tú crees?... Eso también es cierto."
+                                    ]
+                                },
+                                {
+                                    "label": "Mmm, no sé",
+                                    "affection": 0,
+                                    "response": [
+                                        "Es verdad, yo tampoco sé."
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    {
+                        "lines": [
+                            "Cuando sale el tema del fútbol me pongo serio sin darme cuenta. Es gracioso, ¿no?",
+                            "Aun así, este trabajo tampoco está mal. Puedo estar al lado de papá."
+                        ],
+                        "requires_alive": "roshi",
+                        "fallback_lines": [
+                            "Renunciar al fútbol fue una decisión que tomé solo por papá.",
+                            "Pero ahora papá tampoco está...",
+                            "Y solo quedo yo, sin mi sueño."
+                        ]
+                    }
+                ]
+            },
+            "토": {
+                "low": [
+                    [
+                        "¡Es fin de semana! Toca salir a patear el balón."
+                    ],
+                    [
+                        "{player_name}. ¿Ya te llevas mejor con la gente del pueblo?",
+                        "Yo tengo que caerte mejor que nadie, ¿eh? ¿Entendido?"
+                    ],
+                    [
+                        "Hoy también hay que limpiar el barco....",
+                        "No quiero....",
+                        "¿Lo haces por mí?",
+                        "Es broma."
+                    ]
+                ],
+                "mid": [
+                    {
+                        "lines": [
+                            "¿Por qué querrá ser escritor Usher?",
+                            "¿Qué tiene de divertido escribir?"
+                        ],
+                        "requires_alive": "usher",
+                        "fallback_lines": [
+                            "Yo no leo, pero en casa tengo algunos libros que escribió Usher.",
+                            "En ese entonces no lo sabía. Que esto sería el último recuerdo."
+                        ]
+                    },
+                    [
+                        "Jugar fútbol con amigos me trae recuerdos de antes."
+                    ],
+                    {
+                        "lines": [
+                            "El amuleto de Sage sigue colgado en el barco de papá."
+                        ],
+                        "requires_alive": "roshi",
+                        "fallback_lines": [
+                            "El amuleto del barco, ¿y si simplemente lo quito?",
+                            "...total, no sirvió de nada."
+                        ]
+                    }
+                ],
+                "high": [
+                    {
+                        "lines": [
+                            "Me gustan los días de lluvia. Papá no sale en el barco y se queda en casa."
+                        ],
+                        "requires_alive": "roshi",
+                        "fallback_lines": [
+                            "Los días de lluvia me siento especialmente solo.",
+                            "No sabía que vivir solo sería tan difícil."
+                        ]
+                    },
+                    [
+                        "¡Hoy limpiando el barco me cayó un chorro de agua enorme encima!",
+                        {
+                            "text": "Fue muy gracioso.",
+                            "emotion": "happy"
+                        }
+                    ],
+                    [
+                        "Al menos los fines de semana sobra tiempo para patear el balón un poco más.",
+                        {
+                            "text": "Lo mejor.",
+                            "emotion": "happy"
+                        }
+                    ]
+                ]
+            },
+            "일": {
+                "low": [
+                    [
+                        "El domingo dormí hasta tarde."
+                    ],
+                    {
+                        "lines": [
+                            "Los domingos por la mañana desayuno con papá."
+                        ],
+                        "requires_alive": "roshi",
+                        "fallback_lines": []
+                    },
+                    [
+                        "Incluso en mis días libres el cuerpo me pide movimiento y termino saliendo a correr."
+                    ]
+                ],
+                "mid": [
+                    [
+                        "Desde mañana me voy a aburrir otra vez. No hay mucho que hacer."
+                    ],
+                    [
+                        "A veces pienso en mis viejos amigos del equipo de fútbol."
+                    ],
+                    [
+                        "Sage dice que la próxima vez ayude a limpiar el santuario.",
+                        "Dice que si vengo tan seguido, también tengo que hacer algo.",
+                        "Bueno, lo que ella me pida, me parece bien."
+                    ]
+                ],
+                "high": [
+                    [
+                        "Todavía no sé qué seré de grande. Pero vivir así ahora tampoco está mal."
+                    ],
+                    {
+                        "lines": [
+                            "Hoy me levanté temprano y salí a pescar con papá.",
+                            {
+                                "text": "¡Fue muy refrescante!",
+                                "emotion": "happy"
+                            }
+                        ],
+                        "requires_alive": "roshi",
+                        "fallback_lines": [
+                            "Los domingos por la mañana siempre salía a pescar con papá.",
+                            "Siento que todavía vivo de ese recuerdo."
+                        ]
+                    },
+                    {
+                        "lines": [
+                            "Ser como papá tampoco sería una mala vida."
+                        ],
+                        "requires_alive": "roshi",
+                        "fallback_lines": [
+                            "Renuncié a ser futbolista, pero al menos este trabajo me permite recordar a papá. Eso creo que es bueno."
+                        ]
+                    }
+                ]
+            }
+        },
+        "rain_conversation": [
+            {
+                "lines": [
+                    "¡Me encantan los días de lluvia! Papá se queda en casa."
+                ],
+                "requires_alive": "roshi",
+                "fallback_lines": [
+                    "Los días de lluvia pienso muchísimo en papá."
+                ]
+            },
+            [
+                "No puedo jugar fútbol, pero los días de lluvia tampoco están mal."
+            ],
+            [
+                "¿Trajiste paraguas? Yo simplemente ando mojándome, jaja."
+            ]
+        ],
+        "mail_reaction": [
+            [
+                "¡Oye, me mandaste un correo! '{player_mail_content}'... ¡qué risa!"
+            ],
+            [
+                {
+                    "text": "¡Leí tu correo! '{player_mail_content}'... ¡qué cursi! Pero me puso contento.",
+                    "emotion": "happy"
+                }
+            ]
+        ],
+        "horror_conversation": [
+            [
+                "Con {victim_name} solo nos saludábamos al cruzarnos, pero últimamente extraño hasta ese saludo.",
+                {
+                    "text": "No era gran cosa, ¿por qué me viene tanto a la mente?",
+                    "emotion": "sad"
+                }
+            ],
+            [
+                "Estaba pateando el balón y de repente pensé en {victim_name}. Ni yo sé por qué."
+            ]
+        ]
+    },
+    "emails": {
+        "greeting": [
+            {
+                "title": "Hoy fue increíble de verdad",
+                "lines": [
+                    "¡Hoy cayó una caballa enorme en la red!",
+                    "Estaba emocionadísimo.",
+                    "¡Cuando vengas te lo voy a presumir!"
+                ]
+            },
+            {
+                "title": "Me muero de aburrimiento",
+                "lines": [
+                    "Últimamente no tengo nada que hacer, así que solo pateo el balón.",
+                    "¿Cuándo vienes a pasar el rato?",
+                    "¡Te digo que me aburro!"
+                ]
+            },
+            {
+                "title": "Escribo porque sí",
+                "lines": [
+                    "No tengo nada especial que decir, pero como es la primera vez que escribo una carta me pareció divertido y escribí porque sí.",
+                    "Si suena raro, compréndeme.",
+                    "¡Bueno, adiós!"
+                ]
+            }
+        ],
+        "event_invite": [
+            {
+                "title": "¡Comí buenísimo!",
+                "lines": [
+                    "Ayer comí hasta reventar.",
+                    "¡Me comí dos platos de arroz, yo!",
+                    "¡Invítame otra vez, sin falta!"
+                ]
+            },
+            {
+                "title": "Ese platillo de caballa fue lo mejor",
+                "requires_favorite_food": true,
+                "lines": [
+                    "¡El platillo de caballa de ayer estuvo justo a mi gusto!",
+                    "Hasta se lo presumí a papá.",
+                    "¡Muchas gracias, en serio!"
+                ]
+            }
+        ],
+        "gift_thanks": [
+            {
+                "title": "¡Guau! ¿Esto es para mí?",
+                "lines": [
+                    "¡Me emocioné muchísimo al recibir el regalo!",
+                    "¡Gracias, en serio!"
+                ]
+            },
+            {
+                "title": "Andaba presumiéndolo",
+                "lines": [
+                    "Les presumí a mis amigos lo que me diste.",
+                    "Se morían de envidia.",
+                    "¡Gracias!"
+                ]
+            }
+        ],
+        "memento_reminder": {
+            "title": "¡Oye! ¡¿Por qué no has venido últimamente?!",
+            "lines": [
+                "¡Oye, {player_name}! ¿Por qué no has venido en todo este tiempo?",
+                "¡Tengo algo para ti, así que ven rápido!"
+            ]
+        },
+        "story_progress": {
+            "player_arrival_day_4": {
+                "title": "¡Ey! ¿Es verdad que acabas de llegar?",
+                "lines": [
+                    "¡Escuché que llegó alguien nuevo al pueblo!",
+                    "Soy Marin, el hijo de la tienda de pesca.",
+                    "¡Si te aburres, ven a pasar el rato al muelle!"
+                ]
+            }
+        },
+        "special_day": {}
+    }
+}

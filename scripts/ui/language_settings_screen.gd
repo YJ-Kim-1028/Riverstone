@@ -26,6 +26,7 @@ const BUTTON_TEXT_COLOR := Color(0.25, 0.15, 0.08)
 	$Panel/Margin/VBox/LanguageRow/EnButton,
 	$Panel/Margin/VBox/LanguageRow/JaButton,
 	$Panel/Margin/VBox/LanguageRow/ZhButton,
+	$Panel/Margin/VBox/LanguageRow/EsButton,
 ]
 @onready var _back_button: Button = $Panel/Margin/VBox/BackButton
 

@@ -1,0 +1,447 @@
+{
+    "potato": {
+        "name": "Papa",
+        "description": "Una papa cosechada en el campo. Se usa como ingrediente de cocina."
+    },
+    "corn": {
+        "name": "Maíz",
+        "description": "Maíz cosechado en el campo. Se usa como ingrediente de cocina."
+    },
+    "lettuce": {
+        "name": "Lechuga",
+        "description": "Lechuga cosechada en el campo. Se usa como ingrediente de cocina."
+    },
+    "potato_seed": {
+        "name": "Semillas de Papa",
+        "description": "Plántalas en el campo para cosechar papas."
+    },
+    "corn_seed": {
+        "name": "Semillas de Maíz",
+        "description": "Plántalas en el campo para cosechar maíz."
+    },
+    "lettuce_seed": {
+        "name": "Semillas de Lechuga",
+        "description": "Plántalas en el campo para cosechar lechuga."
+    },
+    "pork": {
+        "name": "Cerdo",
+        "description": "Carne de cerdo del rancho. Se usa como ingrediente de cocina."
+    },
+    "beef": {
+        "name": "Res",
+        "description": "Carne de res del rancho. Se usa como ingrediente de cocina."
+    },
+    "milk": {
+        "name": "Leche",
+        "description": "Leche del rancho. Se usa como ingrediente de cocina."
+    },
+    "salmon": {
+        "name": "Salmón",
+        "description": "Salmón pescado. Se usa como ingrediente de cocina."
+    },
+    "mackerel": {
+        "name": "Caballa",
+        "description": "Caballa pescada. Se usa como ingrediente de cocina."
+    },
+    "squid": {
+        "name": "Calamar",
+        "description": "Calamar pescado. Se usa como ingrediente de cocina."
+    },
+    "legendary_fish": {
+        "name": "Pez Legendario",
+        "description": "Un pez legendario que, según dicen, solo aparece con la caña de pescar dorada. Casi nadie ha llegado a verlo."
+    },
+    "berry": {
+        "name": "Baya",
+        "description": "Una baya recolectada. Se usa como ingrediente de cocina."
+    },
+    "rabbit_meat": {
+        "name": "Carne de Conejo",
+        "description": "Carne de conejo obtenida cazando. Se usa como ingrediente de cocina."
+    },
+    "bird_meat": {
+        "name": "Carne de Ave",
+        "description": "Carne de ave obtenida cazando. Se usa como ingrediente de cocina."
+    },
+    "fishing_rod": {
+        "name": "Caña de Pescar",
+        "description": "Una herramienta para pescar."
+    },
+    "golden_fishing_rod": {
+        "name": "Caña de Pescar Dorada",
+        "description": "Una brillante caña de pescar dorada. ¿Qué pasará si la usas en el mar frente a la tienda de pesca...?"
+    },
+    "legend_statue": {
+        "name": "Estatua Legendaria",
+        "description": "Una estatua que se puede canjear por 100 peces legendarios."
+    },
+    "furniture_hammer": {
+        "name": "Martillo de Muebles",
+        "description": "Permite recoger muebles y decoraciones, pero solo mientras lo sostienes."
+    },
+    "watering_can": {
+        "name": "Regadera",
+        "description": "Una herramienta para regar los cultivos."
+    },
+    "golden_watering_can": {
+        "name": "Regadera Dorada",
+        "description": "Una regadera dorada de un suave brillo. Riega de una sola vez un área de 3x3 a tu alrededor."
+    },
+    "hoe": {
+        "name": "Azada",
+        "description": "Una herramienta para labrar la tierra y convertirla en campo de cultivo."
+    },
+    "hunting_rifle": {
+        "name": "Rifle de Caza",
+        "description": "Una herramienta para cazar."
+    },
+    "bucket": {
+        "name": "Balde",
+        "description": "Permite ordeñar una vaca para obtener leche."
+    },
+    "chair": {
+        "name": "Silla"
+    },
+    "sofa": {
+        "name": "Sofá"
+    },
+    "display_table": {
+        "name": "Mesa de Exhibición"
+    },
+    "bookshelf_33": {
+        "name": "Librero (Grande)"
+    },
+    "bookshelf_23": {
+        "name": "Librero (Mediano)"
+    },
+    "bookshelf_22": {
+        "name": "Librero (Pequeño)"
+    },
+    "cabinet_23": {
+        "name": "Gabinete"
+    },
+    "kitchen_cabinet": {
+        "name": "Gabinete de Cocina"
+    },
+    "jukebox": {
+        "name": "Jukebox"
+    },
+    "glass_display_shelf": {
+        "name": "Vitrina de Cristal"
+    },
+    "blinder": {
+        "name": "Molinillo"
+    },
+    "drink_fridge": {
+        "name": "Refrigerador de Bebidas"
+    },
+    "stove": {
+        "name": "Estufa"
+    },
+    "desk": {
+        "name": "Escritorio"
+    },
+    "vase_1": {
+        "name": "Florero 1"
+    },
+    "vase_2": {
+        "name": "Florero 2"
+    },
+    "vase_3": {
+        "name": "Florero 3"
+    },
+    "vase_4": {
+        "name": "Florero 4"
+    },
+    "bed": {
+        "name": "Cama"
+    },
+    "iron_cabinet": {
+        "name": "Gabinete de Metal"
+    },
+    "light": {
+        "name": "Lámpara"
+    },
+    "standing_light": {
+        "name": "Lámpara de Pie"
+    },
+    "candle": {
+        "name": "Vela"
+    },
+    "shrine_light": {
+        "name": "Farol del Santuario"
+    },
+    "temple_light": {
+        "name": "Farol del Templo"
+    },
+    "flowerpot": {
+        "name": "Maceta"
+    },
+    "round_carpet": {
+        "name": "Alfombra Redonda"
+    },
+    "rect_carpet": {
+        "name": "Alfombra Rectangular"
+    },
+    "rect_carpet_2": {
+        "name": "Alfombra Rectangular (2)"
+    },
+    "welcome_carpet": {
+        "name": "Tapete de Bienvenida"
+    },
+    "memo": {
+        "name": "Nota"
+    },
+    "rat_poison": {
+        "name": "Veneno para Ratas",
+        "description": "Contiene un veneno letal."
+    },
+    "soul_crystal": {
+        "name": "Cristal del Alma",
+        "description": "Un cristal de origen desconocido. Emite una tenue calidez. Quizá Sage sepa algo al respecto."
+    },
+    "recipe_grilled_fish": {
+        "name": "Receta: Pescado a la Parrilla",
+        "description": "Haz clic derecho para aprenderla y podrás cocinar Pescado a la Parrilla. Las recetas aprendidas se pueden consultar en el libro de colecciones."
+    },
+    "recipe_salmon_salad": {
+        "name": "Receta: Ensalada de Salmón",
+        "description": "Haz clic derecho para aprenderla y podrás cocinar Ensalada de Salmón. Las recetas aprendidas se pueden consultar en el libro de colecciones."
+    },
+    "recipe_grilled_squid": {
+        "name": "Receta: Calamar a la Parrilla",
+        "description": "Haz clic derecho para aprenderla y podrás cocinar Calamar a la Parrilla. Las recetas aprendidas se pueden consultar en el libro de colecciones."
+    },
+    "recipe_fish_and_chips": {
+        "name": "Receta: Fish and Chips",
+        "description": "Haz clic derecho para aprenderla y podrás cocinar Fish and Chips. Las recetas aprendidas se pueden consultar en el libro de colecciones."
+    },
+    "recipe_grilled_vegetables": {
+        "name": "Receta: Verduras Asadas",
+        "description": "Haz clic derecho para aprenderla y podrás cocinar Verduras Asadas. Las recetas aprendidas se pueden consultar en el libro de colecciones."
+    },
+    "recipe_potato_salad": {
+        "name": "Receta: Ensalada de Papa",
+        "description": "Haz clic derecho para aprenderla y podrás cocinar Ensalada de Papa. Las recetas aprendidas se pueden consultar en el libro de colecciones."
+    },
+    "recipe_chop_steak": {
+        "name": "Receta: Filete Picado",
+        "description": "Haz clic derecho para aprenderla y podrás cocinar Filete Picado. Las recetas aprendidas se pueden consultar en el libro de colecciones."
+    },
+    "recipe_barbecue": {
+        "name": "Receta: Barbacoa",
+        "description": "Haz clic derecho para aprenderla y podrás cocinar Barbacoa. Las recetas aprendidas se pueden consultar en el libro de colecciones."
+    },
+    "recipe_grilled_pork_belly": {
+        "name": "Receta: Panceta a la Parrilla",
+        "description": "Haz clic derecho para aprenderla y podrás cocinar Panceta a la Parrilla. Las recetas aprendidas se pueden consultar en el libro de colecciones."
+    },
+    "recipe_seafood_set": {
+        "name": "Receta: Menú de Mariscos",
+        "description": "Haz clic derecho para aprenderla y podrás cocinar Menú de Mariscos."
+    },
+    "recipe_meat_salad": {
+        "name": "Receta: Ensalada de Carne",
+        "description": "Haz clic derecho para aprenderla y podrás cocinar Ensalada de Carne. Las recetas aprendidas se pueden consultar en el libro de colecciones."
+    },
+    "recipe_yogurt_smoothie": {
+        "name": "Receta: Batido de Yogur",
+        "description": "Haz clic derecho para aprenderla y podrás cocinar Batido de Yogur. Las recetas aprendidas se pueden consultar en el libro de colecciones."
+    },
+    "recipe_strawberry_smoothie": {
+        "name": "Receta: Batido de Fresa",
+        "description": "Haz clic derecho para aprenderla y podrás cocinar Batido de Fresa. Las recetas aprendidas se pueden consultar en el libro de colecciones."
+    },
+    "teddy_bear": {
+        "name": "Osito de Peluche",
+        "description": "Un osito de peluche calentito y suave."
+    },
+    "wildflower_bouquet": {
+        "name": "Ramo de Flores Silvestres",
+        "description": "Un sencillo ramo de flores recogidas en el campo."
+    },
+    "rose_bouquet": {
+        "name": "Ramo de Rosas",
+        "description": "Un espléndido ramo de rosas."
+    },
+    "perfume_blue_de_ocean": {
+        "name": "Blue de Ocean",
+        "description": "Un perfume con aroma a mar. Deja a tu alrededor una estela de fragancia floral azul."
+    },
+    "perfume_mr_lilac": {
+        "name": "Mr. Lilac",
+        "description": "Un perfume con aroma a lila. Deja a tu alrededor una estela de fragancia floral morada."
+    },
+    "perfume_pale_light": {
+        "name": "Pale Light",
+        "description": "Un perfume de aroma suave. Deja a tu alrededor una estela de fragancia floral blanca."
+    },
+    "perfume_somewhere_behind_you": {
+        "name": "Somewhere behind you",
+        "description": "Un perfume que Marr te regaló. Se puede usar con clic derecho."
+    },
+    "animal_feed": {
+        "name": "Forraje",
+        "description": "Alimento para vacas y cerdos."
+    },
+    "small_knife": {
+        "name": "Cuchillo Pequeño",
+        "description": "Permite sacrificar una vaca o un cerdo para obtener carne."
+    },
+    "bait": {
+        "name": "Cebo",
+        "description": "Si lo tienes en el inventario, se usa automáticamente al pescar. Aumenta la probabilidad de atrapar calamares."
+    },
+    "americano": {
+        "name": "Americano",
+        "description": "Haz clic derecho para usarlo y aumentar temporalmente tu velocidad de movimiento."
+    },
+    "energy_tonic": {
+        "name": "Tónico Energético",
+        "description": "¡Bébelo y sentirás cómo te llenas de energía! (Haz clic derecho para usarlo y quitar un debuff)"
+    },
+    "recipe_random": {
+        "name": "Receta Multiuso",
+        "description": "Haz clic derecho para usarla y aprender la receta de un plato al azar. Las recetas aprendidas se pueden consultar en el libro de colecciones."
+    },
+    "book_beyond_the_door": {
+        "name": "Más Allá de la Puerta",
+        "description": "Autor: Usher (Haz clic derecho en el inventario para leerlo)"
+    },
+    "book_perfect_alibi": {
+        "name": "La Coartada Perfecta",
+        "description": "Autor: Usher (Haz clic derecho en el inventario para leerlo)"
+    },
+    "book_life_as_a_cat": {
+        "name": "Cómo Vivir como un Gato",
+        "description": "Autor: Usher (Haz clic derecho en el inventario para leerlo)"
+    },
+    "book_culprit_is_here": {
+        "name": "El Culpable Está Aquí Dentro",
+        "description": "Autor: Usher (Haz clic derecho en el inventario para leerlo)"
+    },
+    "book_love_in_three_seconds": {
+        "name": "Enamorarse Toma Solo Tres Segundos",
+        "description": "Autor: Usher (Haz clic derecho en el inventario para leerlo)"
+    },
+    "book_resolve_before_death": {
+        "name": "Una Decisión Ante la Muerte",
+        "description": "Autor: Usher (Haz clic derecho en el inventario para leerlo)"
+    },
+    "book_last_summer": {
+        "name": "Sé Lo Que Hiciste el Verano Pasado",
+        "description": "Autor: Usher (Haz clic derecho en el inventario para leerlo)"
+    },
+    "book_detectives_last_trace": {
+        "name": "El Último Rastro del Detective",
+        "description": "Autor: Usher (Haz clic derecho en el inventario para leerlo)"
+    },
+    "book_unsent_letter": {
+        "name": "La Carta Que No Se Envió",
+        "description": "Autor: Usher (Haz clic derecho en el inventario para leerlo)"
+    },
+    "book_girl_in_the_alley": {
+        "name": "El Hombre Que Siempre Estaba en Ese Callejón",
+        "description": "Autor: Usher (Haz clic derecho en el inventario para leerlo)"
+    },
+    "record_chiptune": {
+        "name": "Chip tune",
+        "description": "Un disco que se puede reproducir en el jukebox."
+    },
+    "record_city_pop": {
+        "name": "City pop",
+        "description": "Un disco que se puede reproducir en el jukebox."
+    },
+    "record_lofi": {
+        "name": "Lo-fi",
+        "description": "Un disco que se puede reproducir en el jukebox."
+    },
+    "record_bossa_nova": {
+        "name": "Bossa Nova",
+        "description": "Un disco que se puede reproducir en el jukebox."
+    },
+    "record_acoustic_folk": {
+        "name": "Acoustic Folk",
+        "description": "Un disco que se puede reproducir en el jukebox."
+    },
+    "record_acoustic_pop": {
+        "name": "Acoustic Pop",
+        "description": "Un disco que se puede reproducir en el jukebox."
+    },
+    "record_be_with_you": {
+        "name": "Be with you",
+        "description": "Un disco que se puede reproducir en el jukebox."
+    },
+    "record_the_day_after_you_came": {
+        "name": "The day after you came",
+        "description": "Un disco que se puede reproducir en el jukebox."
+    },
+    "record_the_heart_sutra_remix": {
+        "name": "The heart sutra (remix)",
+        "description": "Un disco que se puede reproducir en el jukebox."
+    },
+    "record_we_are_all_christmas": {
+        "name": "We are all christmas",
+        "description": "Un disco que se puede reproducir en el jukebox."
+    },
+    "storage_box": {
+        "name": "Caja de Almacenamiento",
+        "description": "Una caja que puede guardar objetos del inventario."
+    },
+    "test_hat": {
+        "name": "Sombrero de Prueba",
+        "description": "Un objeto temporal para probar el sistema de equipo; eliminar cuando exista un objeto real."
+    },
+    "test_shoes": {
+        "name": "Zapatos de Prueba",
+        "description": "Un objeto temporal para probar el sistema de equipo; eliminar cuando exista un objeto real."
+    },
+    "cooked_corn": {
+        "name": "Maíz al Vapor",
+        "description": "Maíz cocido al vapor en una olla."
+    },
+    "cooked_potato": {
+        "name": "Papa al Vapor",
+        "description": "Papa cocida al vapor en una olla."
+    },
+    "cooked_pork": {
+        "name": "Cerdo a la Parrilla",
+        "description": "Cerdo asado en una sartén."
+    },
+    "cooked_beef": {
+        "name": "Res a la Parrilla",
+        "description": "Res asada en una sartén."
+    },
+    "cooked_salmon": {
+        "name": "Salmón a la Parrilla",
+        "description": "Salmón asado en una sartén."
+    },
+    "cooked_mackerel": {
+        "name": "Caballa a la Parrilla",
+        "description": "Caballa asada en una sartén."
+    },
+    "cooked_squid": {
+        "name": "Calamar a la Parrilla",
+        "description": "Calamar asado en una sartén."
+    },
+    "salad_greens": {
+        "name": "Verduras para Ensalada",
+        "description": "Lechuga preparada en una tabla de cortar."
+    },
+    "mashed_berry": {
+        "name": "Baya Triturada",
+        "description": "Bayas trituradas en una licuadora."
+    },
+    "smoothie": {
+        "name": "Base de Batido",
+        "description": "Leche licuada en una licuadora."
+    },
+    "cooked_rabbit_meat": {
+        "name": "Carne de Conejo Hervida",
+        "description": "Carne de conejo hervida en una olla."
+    },
+    "cooked_bird_meat": {
+        "name": "Carne de Ave a la Parrilla",
+        "description": "Carne de ave asada en una sartén."
+    }
+}

@@ -1,0 +1,25 @@
+{
+    "poli_greeting": [
+        "Bienvenido, joven.",
+        "Soy Poli, el policía de este pueblo.",
+        "¿Y tú cómo te llamas?",
+        "{player_name}. Muy bien. Me dijeron que llegaste hoy.",
+        "Todos están emocionados porque por fin el pueblo tendrá su único restaurante.",
+        "Si no te molesta, ¿me servirías un plato primero?"
+    ],
+    "open_hint": [
+        "Primero abramos el restaurante."
+    ],
+    "poli_seated": [
+        "Qué ganas tengo de probarlo."
+    ],
+    "poli_farewell": [
+        "Estaba realmente delicioso. Tendré que venir seguido de ahora en adelante.",
+        "Ya les avisé a los vecinos sobre ti. Seguramente a estas horas ya te están escribiendo correos de bienvenida."
+    ],
+    "mail_hint": [
+        "Revisemos el correo en la computadora de casa.",
+        "Además, por correo puedes invitar a una persona al restaurante por día.",
+        "A medida que te hagas amigo de los vecinos, recuerda dejar un espacio libre en el inventario: nunca sabes cuándo ni dónde te darán un regalo."
+    ]
+}

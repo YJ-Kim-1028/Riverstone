@@ -1,0 +1,931 @@
+{
+    "id": "belje",
+    "name": "Belze",
+    "name_en": "Belze",
+    "gender": "여성",
+    "age": "20대",
+    "job": "목장 운영",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "애정결핍이 있다.",
+        "정이 많다.",
+        "사람을 쉽게 믿지 않는다.",
+        "동물을 매우 아낀다.",
+        "외로움을 잘 탄다."
+    ],
+    "preferred_food": [
+        "감자"
+    ],
+    "disliked_food": [
+        "오징어"
+    ],
+    "special_notes": [
+        "목장 운영 NPC로 축산 관련 아이템(소, 돼지, 여물)을 판매한다.",
+        "어릴 적 천식을 앓았으며, 이샤가 치료해줬다고 믿고 있다.",
+        "셰퍼드가 상의 없이 소 '맑음이'를 팔아버린 뒤로 관계가 예전 같지 않다.",
+        "어셔가 집 근처에 심는 꽃나무 때문에 꽃가루 알레르기로 고생한다."
+    ],
+    "memento_item": {
+        "name": "Muñeco de peluche con forma de vaca",
+        "description": "Un pequeño muñeco inspirado en 'Malgeumi', la vaca que Belze crió cuando empezó el rancho.",
+        "lore_lines": [
+            "이 애 이름은 '맑음이'였어.",
+            "내가 처음으로 가족이라고 생각했던 아이였지.",
+            "소의 눈을 가까이서 본 적이 있어? 정말 맑고 깨끗해.",
+            "맑음이는 항상 그런 아이였어. 나에게 솔직하고 따뜻하게 대해줬지."
+        ]
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/belje_port.png",
+        "happy": "res://assets/npc/portrait/belje_happy.png",
+        "sad": "res://assets/npc/portrait/belje_sad.png",
+        "angry": "res://assets/npc/portrait/belje_angry.png"
+    },
+    "sprite": "res://assets/npc/sprite/beljeSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {
+                    "time": "09:00",
+                    "state": "pasture_working"
+                },
+                {
+                    "time": "16:00",
+                    "state": "hospital_lying"
+                },
+                {
+                    "time": "18:00",
+                    "state": "plaza4_pond_sitting"
+                },
+                {
+                    "time": "22:00",
+                    "state": "pasture_working"
+                }
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {
+                    "time": "09:00",
+                    "state": "pasture_working"
+                },
+                {
+                    "time": "12:00",
+                    "state": "cafe_looking"
+                },
+                {
+                    "time": "16:00",
+                    "state": "furniture_sitting"
+                },
+                {
+                    "time": "20:00",
+                    "state": "pasture_working"
+                }
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {
+                    "time": "09:00",
+                    "state": "pasture_working"
+                },
+                {
+                    "time": "12:00",
+                    "state": "plaza4_pond_sitting"
+                },
+                {
+                    "time": "14:00",
+                    "state": "pond_standing_plaza4"
+                },
+                {
+                    "time": "18:00",
+                    "state": "pasture_working"
+                }
+            ]
+        }
+    },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "pasture_working",
+        "lead_out_lines": [
+            "¡Espera, sal conmigo un momento!"
+        ],
+        "scene_map_id": "plaza2",
+        "entry_spawn": "pasture_exit",
+        "npc_spawn": "belje_heart_npc",
+        "player_spawn": "belje_heart_player",
+        "player_facing": "up",
+        "lines": [
+            "¿Sabes cómo se llama esta vaca? Se llama 'Bori'.",
+            "Creo que eres la primera persona que viene a comprar a la que le digo su nombre.",
+            {
+                "text": "¿Verdad que es adorable? Ven a acariciarla de vez en cuando.",
+                "emotion": "happy"
+            },
+            "A Bori le encanta la gente.",
+            {
+                "text": "¡Y yo también te considero una buena amistad!",
+                "emotion": "happy"
+            }
+        ]
+    },
+    "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "description": "Acoge a un gatito callejero que encontró cerca del establo y, incapaz de despegarse de él, se lo confía al jugador.",
+            "lines": [
+                "El otro día escuché un ruido extraño detrás del establo, fui a ver y había un gatito llorando.",
+                "No se veía a la madre... pensé que se moriría si lo dejaba ahí, así que me lo traje a casa por ahora.",
+                "Pero con cuidar del ganado ya tengo más que suficiente.",
+                "Creo que estaría más cómodo en tu casa. ¿Qué te parece?",
+                {
+                    "text": "Eso sí... ponle tú el nombre. Se me da fatal inventar nombres.",
+                    "emotion": "happy"
+                }
+            ]
+        },
+        {
+            "threshold": 80,
+            "type": "dialogue",
+            "description": "셰퍼드에 대한 의심을 잠깐 내비쳤다가 거둔다.",
+            "lines": [
+                "Shepherd ha estado demasiado cariñoso últimamente. Sospechosamente cariñoso.",
+                "Cuando alguien de pronto es amable contigo, normalmente es que esconde algo.",
+                {
+                    "text": "¿Será que la gente no me cae muy bien y por eso pienso lo peor...?",
+                    "emotion": "sad"
+                }
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "소 인형을 건네준다.",
+            "lines": [
+                "Se llamaba 'Malgeumi'.",
+                "Fue la primera a la que consideré mi familia.",
+                "¿Alguna vez has mirado de cerca los ojos de una vaca? Son tan claros y puros.",
+                "Malgeumi siempre fue así. Sincera y cálida conmigo.",
+                "Oye, {player_name}. Este muñeco... quiero que te lo quedes.",
+                {
+                    "text": "Ahora, cuando piense en Malgeumi, creo que no me dará solo tristeza... creo que podré ser feliz recordando los buenos momentos.",
+                    "emotion": "sad"
+                },
+                "Y, sabes...",
+                {
+                    "text": "Creo que has resultado ser una muy buena persona.",
+                    "emotion": "happy"
+                }
+            ]
+        },
+        {
+            "threshold": 105,
+            "type": "dialogue",
+            "description": "밤마다 소들이 이상하게 구는 걸 의아해한다.",
+            "lines": [
+                "Últimamente, al amanecer, siento que hay alguien cerca del establo. Al principio me dio miedo, pero seguro que no es una persona.",
+                "No hay nadie que pudiera venir. ¿Verdad?",
+                "Deben de ser animales salvajes atraídos por el olor del grano."
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "murder_grief": [
+            {
+                "text": "Que pase algo así me hace sentirlo otra vez: nunca se puede saber realmente lo que hay dentro de una persona.",
+                "emotion": "sad"
+            },
+            {
+                "text": "Eso es lo que más miedo me da. No sé en quién puedo confiar.",
+                "emotion": "sad"
+            },
+            {
+                "text": "...Pero yo confío en ti. De eso sí estoy segura.",
+                "emotion": "sad"
+            }
+        ],
+        "murder_grief_2": [
+            "Otra vez...",
+            {
+                "text": "¿Cómo puede pasar esto? No... supongo que sí puede pasar.",
+                "emotion": "sad"
+            },
+            {
+                "text": "Ya hasta se me está entumeciendo decir que tengo miedo. Pero ¿sabes qué? Lo más aterrador es que ya no me da miedo.",
+                "emotion": "sad"
+            }
+        ],
+        "suspicion_talk_2": {
+            "requires_alive": "marr",
+            "lines": [
+                "Con dos personas muertas, todo el pueblo está revuelto.",
+                {
+                    "text": "Todos piensan que el culpable es uno de nosotros, así que ya nadie puede confiar en nadie.",
+                    "emotion": "sad"
+                },
+                "Si me preguntas... Marr me parece raro. Nunca muestra emoción... es como si no fuera del todo humano.",
+                "Hay que ser completamente frío para hacer algo así.",
+                "No digo que sea él sin duda... pero entiendes lo que quiero decir, ¿verdad?"
+            ]
+        }
+    },
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    {
+                        "lines": [
+                            "Hoy otra vez el trabajo del rancho se me acumula. Shepherd ayuda, pero...",
+                            "Ya sabes cómo soy: si no lo hago yo misma, no me fío."
+                        ],
+                        "requires_alive": "shepherd",
+                        "fallback_lines": [
+                            "Hoy otra vez el trabajo del rancho se me acumula. Extraño cuando Shepherd me ayudaba."
+                        ]
+                    },
+                    [
+                        "¿Ya comiste?",
+                        "Come bien. Es lo que te da fuerzas para trabajar.",
+                        "¿Yo?... Primero alimento a las vacas y luego como yo."
+                    ],
+                    [
+                        "No me termino de despertar hasta que oigo mugir a las vacas por la mañana.",
+                        "¿Por qué tengo tanto sueño por las mañanas? Ugh.."
+                    ]
+                ],
+                "mid": [
+                    [
+                        "Los platillos de papa son lo mejor. Podría comerlos todos los días y nunca me cansaría.",
+                        "La carne... no tanto."
+                    ],
+                    [
+                        "Tu platillo de papa estaba buenísimo. Lo cultivaste con las semillas que te dio Isha, ¿verdad?"
+                    ],
+                    {
+                        "lines": [
+                            "Sería genial que Flora también mejorara una semilla de camote.",
+                            "Los camotes también están ricos, ¿sabes?"
+                        ],
+                        "requires_alive": "flora",
+                        "fallback_lines": [
+                            "Flora sí que era buena mejorando semillas.",
+                            "A veces me pregunto a qué habrían sabido sus semillas mejoradas de camote."
+                        ]
+                    }
+                ],
+                "high": [
+                    [
+                        "¿Alguna vez has tenido una mascota?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {
+                                    "label": "Sí, he tenido",
+                                    "affection": 2,
+                                    "response": [
+                                        "Entonces sabes lo que se siente."
+                                    ]
+                                },
+                                {
+                                    "label": "No, nunca",
+                                    "affection": 0,
+                                    "response": [
+                                        "Ya veo."
+                                    ]
+                                },
+                                {
+                                    "label": "Estoy más a gusto con la gente que con los animales",
+                                    "affection": -1,
+                                    "response": [
+                                        "...Supongo que hay gente así."
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "text": "Cuando cuidas una mascota, aprendes lo que es el amor de verdad.",
+                            "emotion": "happy"
+                        },
+                        {
+                            "text": "Y aprendes a comunicarte solo con la mirada.",
+                            "emotion": "happy"
+                        }
+                    ],
+                    {
+                        "lines": [
+                            "A Woody le encanta trabajar la madera, ¿verdad? Yo siento justo eso cuando estoy con los animales.",
+                            "Estar cerca de la naturaleza me tranquiliza."
+                        ],
+                        "requires_alive": "woody",
+                        "fallback_lines": [
+                            "A Woody le encantaba trabajar la madera, ¿verdad? Yo siento justo eso cuando estoy con los animales.",
+                            "Estar cerca de la naturaleza me tranquiliza.",
+                            "...Hablar de él me hace extrañarlo. ¿A ti no?"
+                        ]
+                    },
+                    [
+                        "Hola. Hoy me alegra verte de una forma rara. Quizá porque últimamente no me he topado con mucha gente."
+                    ]
+                ]
+            },
+            "화": {
+                "low": [
+                    [
+                        "Los cerdos están especialmente ruidosos hoy.",
+                        "¿Nos estará faltando alimento?"
+                    ],
+                    {
+                        "lines": [
+                            {
+                                "text": "Marr habla poco, ¿sabes? A mí me resulta cómodo. Es mucho mejor que alguien que se mete en todo.",
+                                "emotion": "happy"
+                            }
+                        ],
+                        "requires_alive": "marr",
+                        "fallback_lines": [
+                            "La persona más cómoda de este pueblo era Marr. Era mucho mejor que alguien que se mete en todo.",
+                            "Ahora lo único que puedo hacer es extrañarlo."
+                        ]
+                    },
+                    {
+                        "lines": [
+                            "Todos los martes me duele la cabeza calculando el costo del alimento.",
+                            "Sería genial que Shepherd me ayudara con eso."
+                        ],
+                        "requires_alive": "shepherd",
+                        "fallback_lines": [
+                            "Todos los martes me duele la cabeza calculando el costo del alimento.",
+                            "Sería genial que Shepherd todavía pudiera ayudarme con eso."
+                        ]
+                    }
+                ],
+                "mid": [
+                    [
+                        "De verdad no soporto el calamar. Solo con el olor ya me da asco."
+                    ],
+                    [
+                        "Por alguna razón, el mar y yo no nos llevamos bien.",
+                        "No sé. Nunca me acostumbré a ese olor salado."
+                    ],
+                    {
+                        "lines": [
+                            "El café de Mocha está buenísimo, pero...",
+                            "El olor del mar me revuelve el estómago, así que no puedo ir seguido."
+                        ],
+                        "requires_alive": "mocha",
+                        "fallback_lines": [
+                            "El café de Mocha estaba buenísimo, pero...",
+                            "El olor del mar me revolvía el estómago, así que no podía ir seguido.",
+                            "Si hubiera sabido que las cosas terminarían así, habría ido más seguido."
+                        ]
+                    }
+                ],
+                "high": [
+                    [
+                        "En realidad, de niña tuve asma.",
+                        "El médico que me diagnosticó dijo que sería difícil curarme del todo, pero Isha lo logró.",
+                        "No hay palabras para expresar lo agradecida que estoy."
+                    ],
+                    [
+                        "Lama es monje, pero le encanta la carne. Es un poco...",
+                        "Se siente algo raro, ¿no crees?"
+                    ],
+                    [
+                        {
+                            "text": "En realidad, yo no como carne. ¿Cómo voy a comerme a los animales que veo todos los días?",
+                            "emotion": "sad"
+                        },
+                        "Se me hace raro ver a todos comerla como si nada. Yo simplemente no puedo."
+                    ]
+                ]
+            },
+            "수": {
+                "low": [
+                    [
+                        "Ya es miércoles. Hoy estoy hasta el cuello ordeñando vacas."
+                    ],
+                    [
+                        "Si te sientes aunque sea un poco mal, ve directo con Isha.",
+                        "Siempre sabe exactamente qué te pasa y lo arregla enseguida."
+                    ],
+                    [
+                        "Criar animales te hace tener el sueño ligero.",
+                        "Si los oigo llorar al amanecer, me levanto de un salto."
+                    ]
+                ],
+                "mid": [
+                    [
+                        "Mirar a los animales me tranquiliza. Mucho más que la gente.",
+                        "Hay momentos en que no puedes confiar en la gente, pero los animales nunca te dan esa sensación."
+                    ],
+                    [
+                        "Me dijeron que la clínica de Isha ha estado ocupada últimamente. Quisiera ayudar de alguna manera, pero no hay mucho que yo pueda hacer."
+                    ],
+                    [
+                        "A veces, cuando no hay trabajo en el rancho, no sé qué hacer conmigo misma.",
+                        "Quizá debería buscarme un pasatiempo."
+                    ]
+                ],
+                "high": [
+                    [
+                        "Normalmente no confío fácilmente en la gente, pero tú eres diferente.",
+                        "Digas lo que digas, termino creyéndote.",
+                        "Siempre me da la impresión de que la persona que me muestras y la real son la misma."
+                    ],
+                    [
+                        "Me pregunto si Sage de verdad ve cosas. Yo suelo creer solo lo que veo con mis propios ojos, así que a veces me da curiosidad."
+                    ],
+                    [
+                        "¿Tú le das mucha importancia a tus sueños?",
+                        "Anoche tuve sueños bastante inquietos.",
+                        "¿Tal vez debería preguntarle a Sage sobre algo así...?"
+                    ]
+                ]
+            },
+            "목": {
+                "low": [
+                    [
+                        "El rancho está igual que siempre hoy. Sin novedades."
+                    ],
+                    {
+                        "lines": [
+                            "No sé por qué Marin siempre está tan llena de energía. Es un poco demasiado para mí."
+                        ],
+                        "requires_alive": "marin",
+                        "fallback_lines": [
+                            "Cuando Marin pateaba su pelota, parecía que todo el pueblo se animaba un poco.",
+                            "Es triste que nunca vuelva a ver eso."
+                        ]
+                    },
+                    [
+                        "Hola. Viniste otra vez hoy. ¿Quieres comprar forraje?"
+                    ]
+                ],
+                "mid": [
+                    {
+                        "lines": [
+                            {
+                                "text": "Usher plantó otro árbol con flores cerca de mi casa.",
+                                "emotion": "angry"
+                            },
+                            "Quizá sea porque tuve asma, pero el polen me inquieta.",
+                            "Técnicamente es su propio jardín delantero, así que no tengo derecho a quejarme, pero..."
+                        ],
+                        "requires_alive": "usher",
+                        "fallback_lines": [
+                            "Desde que Usher se fue, soy yo quien riega ese árbol con flores.",
+                            "Cuando estaba vivo, le guardaba rencor por eso.",
+                            "Pero ahora, esta es una de las pocas formas que me quedan de recordarlo..."
+                        ]
+                    },
+                    [
+                        "Al principio elegí este trabajo porque amaba a los animales.",
+                        "Pero si pudiera volver atrás, elegiría otro.",
+                        {
+                            "text": "Porque vender a los que crié con mis propias manos es demasiado cruel.",
+                            "emotion": "sad"
+                        }
+                    ],
+                    [
+                        "Sage dejó un amuleto en el rancho. Creo que rezó para que protegieran a los animales."
+                    ]
+                ],
+                "high": [
+                    {
+                        "lines": [
+                            "Ayer volví a ver a Usher escribiendo bajo un árbol.",
+                            "Supongo que los artistas sí son diferentes.",
+                            "Ay, supongo que tendré que aguantar el polen."
+                        ],
+                        "requires_alive": "usher",
+                        "fallback_lines": [
+                            "Lo que Usher escribía se sentía algo vacío, pero a mí me gustaba.",
+                            "¿Quién más que él habría podido escribir así?"
+                        ]
+                    },
+                    {
+                        "lines": [
+                            "Shepherd ha estado mucho más ocupado últimamente. También pasa mucho tiempo frente a la computadora.",
+                            "¿Te ha mandado algún mensaje?",
+                            {
+                                "type": "choice",
+                                "options": [
+                                    {
+                                        "label": "No, nada",
+                                        "affection": 0,
+                                        "response": [
+                                            "Ya veo... no importa, solo preguntaba."
+                                        ]
+                                    },
+                                    {
+                                        "label": "No sé",
+                                        "affection": 0,
+                                        "response": [
+                                            "Claro... no tendrías cómo saberlo."
+                                        ]
+                                    },
+                                    {
+                                        "label": "¿Pasa algo?",
+                                        "affection": 1,
+                                        "response": [
+                                            "...No. No es nada."
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "requires_alive": "shepherd",
+                        "fallback_lines": [
+                            "Cuando Shepherd estaba vivo, también pasaba mucho tiempo frente a la computadora.",
+                            "¿Alguna vez recibiste algún mensaje suyo?",
+                            {
+                                "type": "choice",
+                                "options": [
+                                    {
+                                        "label": "No, nada",
+                                        "affection": 0,
+                                        "response": [
+                                            "Ya veo... no importa, solo preguntaba."
+                                        ]
+                                    },
+                                    {
+                                        "label": "No sé",
+                                        "affection": 0,
+                                        "response": [
+                                            "Claro... no tendrías cómo saberlo."
+                                        ]
+                                    },
+                                    {
+                                        "label": "¿Pasa algo?",
+                                        "affection": 1,
+                                        "response": [
+                                            "...No. No es nada."
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    [
+                        "Oye, ¿crees que existe otra vida después de esta?",
+                        "Si existe, quiero nacer como vaca.",
+                        {
+                            "text": "Quiero darle a alguien la felicidad que Malgeumi me dio a mí.",
+                            "emotion": "sad"
+                        },
+                        "Ah. Malgeumi era el nombre de la vaca que crié cuando era pequeña."
+                    ]
+                ]
+            },
+            "금": {
+                "low": [
+                    [
+                        "Otra semana que casi se va. Supongo que también debería dejar descansar un poco a las vacas."
+                    ],
+                    [
+                        "Ayer nació un becerro.",
+                        "Me alegra que el parto haya salido bien."
+                    ],
+                    [
+                        "Últimamente las estrellas se ven muy claras por la noche. Las miro seguido frente al establo."
+                    ]
+                ],
+                "mid": [
+                    [
+                        "¿Qué te gusta más, la gente o los animales?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {
+                                    "label": "A mí también me gustan los animales",
+                                    "affection": 1,
+                                    "response": [
+                                        "¿Verdad? Los animales son sinceros y adorables."
+                                    ]
+                                },
+                                {
+                                    "label": "La gente tampoco está tan mal",
+                                    "affection": 0,
+                                    "response": [
+                                        "¿Ah, sí?... Yo todavía no estoy segura de eso."
+                                    ]
+                                },
+                                {
+                                    "label": "Me gustan ambos",
+                                    "affection": 1,
+                                    "response": [
+                                        "Qué codicia la tuya, pero eso también me gusta."
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    [
+                        "Es viernes. ¿Tienes planes hoy?",
+                        "¿Yo?.. Ocupada como siempre, como de costumbre."
+                    ],
+                    [
+                        "Hay quien dice que el calamar está delicioso, pero yo no le encuentro el atractivo.",
+                        "Es caro y ni siquiera sabe bien..."
+                    ]
+                ],
+                "high": [
+                    [
+                        "Ir a ver a los animales me hace sentir mejor cuando me siento sola.",
+                        {
+                            "text": "Siempre me están esperando.",
+                            "emotion": "happy"
+                        }
+                    ],
+                    {
+                        "lines": [
+                            "Ver al señor Roshi salir en su bote me parece impresionante. Yo creo que nunca podría hacerlo.",
+                            "El mar abierto es tan solitario."
+                        ],
+                        "requires_alive": "roshi",
+                        "fallback_lines": [
+                            "A veces recuerdo cómo el señor Roshi salía en su bote.",
+                            "De verdad parecía valiente."
+                        ]
+                    }
+                ]
+            },
+            "토": {
+                "low": [
+                    [
+                        "Es fin de semana, ¿el restaurante no abre hoy?",
+                        "Ya sé cómo es. La gente como nosotros no tiene días libres."
+                    ],
+                    [
+                        "Al menos los fines de semana hay más clientes, así que es un poco menos aburrido."
+                    ],
+                    [
+                        "Los sábados son de recortar las pezuñas de las vacas. Da mucho trabajo."
+                    ]
+                ],
+                "mid": [
+                    [
+                        "Hola. Hoy te noto con cara de cansancio.",
+                        "Cuando te sientas así, prueba a descansar un rato junto al estanque."
+                    ],
+                    {
+                        "lines": [
+                            "No entiendo por qué Flora depende tanto de los hombres. Para mí no tiene mucho sentido.",
+                            "¿Cómo se puede confiar en la gente?"
+                        ],
+                        "requires_alive": "flora",
+                        "fallback_lines": [
+                            "Flora dependía tanto de los hombres. Cuando estaba viva, de verdad no lograba entender por qué.",
+                            "Pensándolo ahora... quizá solo necesitaba a alguien en quien apoyarse.",
+                            "Ojalá hubiera sido más amable con ella."
+                        ]
+                    },
+                    {
+                        "lines": [
+                            "El comedero que hizo Woody es tan resistente que lo llevo usando años.",
+                            "Es un chico muy dulce. ¿No crees?"
+                        ],
+                        "requires_alive": "woody",
+                        "fallback_lines": [
+                            "El comedero que Woody me hizo es tan resistente que lo llevo usando años.",
+                            "De verdad era un chico muy dulce. ¿No crees?"
+                        ]
+                    }
+                ],
+                "high": [
+                    [
+                        "Supongo que a veces sí quería hablar con alguien así.",
+                        {
+                            "text": "Ven seguido, {player_name}. Cuando estás tú, no me siento sola.",
+                            "emotion": "happy"
+                        }
+                    ],
+                    {
+                        "lines": [
+                            "Isha y Flora son muy cercanas. A veces desearía sentirme tan cómoda con alguien, pero...",
+                            "Mmm, olvídalo. ¿Necesitabas algo?"
+                        ],
+                        "requires_alive": [
+                            "isha",
+                            "flora"
+                        ],
+                        "fallback_lines": [
+                            "Isha y Flora eran muy cercanas. A veces desearía haberme sentido tan cómoda con alguien, pero...",
+                            "Mmm, olvídalo. ¿Necesitabas algo?"
+                        ]
+                    },
+                    [
+                        {
+                            "text": "¡Hola, {player_name}! Te extrañaba.",
+                            "emotion": "happy"
+                        },
+                        {
+                            "text": "Hoy de verdad necesitaba a alguien con quien charlar.",
+                            "emotion": "happy"
+                        }
+                    ]
+                ]
+            },
+            "일": {
+                "low": [
+                    [
+                        "Los animales necesitan comer incluso los domingos. No hay días libres."
+                    ],
+                    [
+                        "El domingo por la mañana toca limpieza general del establo.",
+                        "Uf, qué fastidio."
+                    ],
+                    [
+                        "Hola, {player_name}.",
+                        "Ah... no mires tan de cerca, por favor.",
+                        "Mis pantalones de trabajo están gastados y necesito unos nuevos, pero no he tenido tiempo de comprarlos."
+                    ]
+                ],
+                "mid": [
+                    [
+                        {
+                            "text": "¿Alguna vez has mirado los ojos de una vaca? Son tan claros. Me tranquilizan.",
+                            "emotion": "happy"
+                        }
+                    ],
+                    [
+                        "Cada vez que llega una vaca nueva al rancho, no puedo evitar compararla con Malgeumi."
+                    ],
+                    {
+                        "lines": [
+                            "Marr es muy callado. Es interesante. ¿No se sentirá solo?"
+                        ],
+                        "requires_alive": "marr",
+                        "fallback_lines": [
+                            "Marr sí era callado. En aquel entonces yo solo suponía que eso significaba que estaba solo.",
+                            "Aunque quizá simplemente estaba en paz."
+                        ]
+                    }
+                ],
+                "high": [
+                    [
+                        "Al menos cría a una vaca con cariño, ¿sí?",
+                        "No las trates solo como objetos...",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {
+                                    "label": "Claro, todos los animales que crío son importantes para mí",
+                                    "affection": 2,
+                                    "response": [
+                                        {
+                                            "text": "Oírte decir eso me tranquiliza.",
+                                            "emotion": "happy"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "label": "Es un negocio, no hay otra opción",
+                                    "affection": -1,
+                                    "response": [
+                                        "...Eso duele un poco."
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    [
+                        "El oficial Poli es muy trabajador. Incluso a su edad, sigue patrullando con tanto empeño."
+                    ],
+                    [
+                        "Cuando sea mayor... no, olvídalo.",
+                        "Solo quiero cuidar de los animales por mucho, mucho tiempo."
+                    ]
+                ]
+            }
+        },
+        "rain_conversation": [
+            [
+                "Los animales se ponen algo nerviosos en los días de lluvia."
+            ],
+            [
+                "¿Trajiste paraguas? El camino al rancho se pone resbaloso."
+            ],
+            [
+                "En los días de lluvia todos se quedan en el establo, así que hay silencio."
+            ],
+            {
+                "lines": [
+                    "Estoy decaída... como si algo fuera a pasar.",
+                    "Me pregunto adónde va Shepherd en días como este."
+                ],
+                "requires_alive": "shepherd",
+                "fallback_lines": [
+                    "Estoy decaída... como si algo fuera a pasar.",
+                    "Si Shepherd siguiera aquí en un día como este..."
+                ]
+            }
+        ],
+        "mail_reaction": [
+            [
+                "'{player_mail_content}'... comunicarse así por escrito también es agradable. Gracias."
+            ]
+        ],
+        "horror_conversation": [
+            [
+                "A veces todavía me resulta extraño que {victim_name} ya no esté en el pueblo."
+            ]
+        ]
+    },
+    "emails": {
+        "greeting": [
+            {
+                "title": "Porque sí",
+                "lines": [
+                    "El rancho se siente especialmente silencioso hoy.",
+                    "Solo... quería saber si estás bien."
+                ]
+            },
+            {
+                "title": "Últimamente no duermo bien",
+                "lines": [
+                    "Últimamente doy vueltas en la cama por las noches.",
+                    "No me atreví a decírtelo en persona; no quería que te preocuparas.",
+                    "No es nada grave. Solo quería contártelo."
+                ]
+            },
+            {
+                "title": "Sobre las vacas",
+                "lines": [
+                    "Estoy pensando qué nombre ponerle al becerro que nació hoy.",
+                    "¿Puedo ponerle tu nombre?"
+                ]
+            }
+        ],
+        "event_invite": [
+            {
+                "title": "Gracias por ayer",
+                "lines": [
+                    "Gracias por invitarme.",
+                    "Fue agradable comer en un lugar que no fuera el rancho, por una vez.",
+                    "Invítame otra vez alguna vez."
+                ]
+            },
+            {
+                "title": "Qué buena comida",
+                "lines": [
+                    "Lo pasé muy bien en el restaurante ayer.",
+                    "El platillo de papa estuvo buenísimo, como siempre.",
+                    "Gracias, {player_name}."
+                ]
+            }
+        ],
+        "alibi_reminder": {
+            "title": "Quizá sea por el miedo",
+            "lines": [
+                "Justo frente a tu casa, de todos los lugares... no deja de preocuparme. ¿Estás bien?",
+                "{player_name}, hay algo de lo que quiero hablar contigo. Pásate cuando tengas un momento."
+            ]
+        },
+        "gift_thanks": [
+            {
+                "title": "¡Siempre me das motivos para agradecerte!",
+                "lines": [
+                    "Gracias por el regalo.",
+                    "Hace tiempo que nadie se preocupaba por mí así, así que se siente un poco extraño.",
+                    "En fin, gracias."
+                ]
+            },
+            {
+                "title": "Lo hiciste otra vez",
+                "lines": [
+                    "Sigues cuidándome y creo que he empezado a confiar en ti sin darme cuenta.",
+                    "Hacía tiempo que no me sentía así.",
+                    "En fin... gracias."
+                ]
+            }
+        ],
+        "memento_reminder": {
+            "title": "Hace tiempo que no te veo",
+            "lines": [
+                "Como últimamente no te he visto, terminé rondando frente al rancho sin motivo.",
+                "En realidad tengo algo para ti... ¿podrías pasar cuando tengas tiempo?"
+            ]
+        },
+        "story_progress": {
+            "player_arrival_day_2": {
+                "title": "Hola, soy Belze.",
+                "lines": [
+                    "Me enteré de que te acabas de mudar, así que quise escribirte unas líneas. Soy Belze, me encargo del rancho.",
+                    "Pasa cuando quieras si necesitas algo.",
+                    "Te doy la bienvenida al pueblo."
+                ]
+            }
+        },
+        "special_day": {}
+    }
+}

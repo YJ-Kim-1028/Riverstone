@@ -84,6 +84,24 @@ day28(브금 전면 교체, itch.io 출시 준비 논의) 다음 세션. 이번 
 - **인벤토리 툴팁 잘림**: `status_screen.tscn` 루트의 `clip_contents`를 `Background`로
   옮기고 툴팁 라벨에 최소 너비 100 + 자동 줄바꿈(보관함 수정과 동일). 사용자 확인 완료.
 
+## 스페인어(es) 추가
+
+- 사용자 결정: 스페인어권 시장 고려해 출시 전에 한 번에 추가(원어민 검수 없음은 en/ja/zh와 동일).
+- Galmuri11-Bold에 스페인어 악센트/¿¡ 글리프 전부 있음(Godot `has_char`로 확인) - 폰트 교체 불필요.
+- `Localizer.SUPPORTED_LANGUAGES`에 "es" 추가, 언어 설정 화면에 Español 버튼(`EsButton`) 추가 +
+  패널 폭 170 -> 210. 언어 코드 순서 = 버튼 배열 순서(ko,en,ja,zh,es).
+- 번역 파일 신규 23개 `*.es.json`(NPC 13, items, recipes, shops, books, requests,
+  recurring_templates, furniture descriptions, tutorial, stalker_emails, animals) +
+  `strings.json` 308개 키 전부에 `es` 추가. en 파일과 구조/배열 길이/자리표시자 일치 검증 통과.
+- 중남미 중립 스페인어, 용어집: papa/maíz/lechuga/cerdo/res/salmón/caballa/calamar/bayas 등.
+  마르=usted, 나머지 tú. 성별은 한국어 원본 기준(en 파일이 틀린 곳이 있음: 우디는 여성, 마린은 남성).
+- 어셔 책 제목은 books.es/items.es/usher.es 모두 동일하게 통일.
+- **en 파일 오류(미수정)**: `strings.json` 장소/이름 `%s` 순서(키 "…%s에서 %s를 본…")와
+  `roshi.en.json` witness_seen이 코드 인자 순서(장소, 사람)와 반대라 영어에서 이름/장소가 뒤바뀜.
+- 레스토랑 4시 종료 문구: 표시 시간은 4초였으나 문/NPC 근처에서 다른 프롬프트 갱신이 지워서
+  짧게 보였음 -> `player.gd` `show_held_message()`로 임시 메시지 표시 중에는 hide/show 무시.
+  (`hide_interaction_prompt(force)`는 맵 이동 시에만 강제 해제.)
+
 ## 다음 세션에서 할 일
 
 - [ ] 타이틀 화면 실제 확인 (로고 배경 투명 여부, 로고 크기/버튼 겹침)

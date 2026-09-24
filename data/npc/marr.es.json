@@ -1,0 +1,349 @@
+{
+    "id": "marr",
+    "name": "Marr",
+    "name_en": "Mar",
+    "gender": "남성",
+    "age": "30대",
+    "job": "잡화점 주인",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "Le cuesta sentir emociones.",
+        "Extremadamente racional.",
+        "Disfruta observando a la gente.",
+        "Prefiere pasar tiempo a solas.",
+        "Mantiene las distancias con los vecinos del pueblo.",
+        "Nunca miente."
+    ],
+    "preferred_food": ["연어"],
+    "disliked_food": ["베리"],
+    "special_notes": [
+        "Vende artículos para regalo y veneno para ratas.",
+        "Ama el mar y a veces se queda de pie en la orilla durante horas sin decir palabra.",
+        "Deduce que el jugador ha estado envenenando a alguien porque en el pueblo no hay ratas, pero no avisa a la policía: simplemente deja de venderle."
+    ],
+    "alibi_speech": {
+        "known": "Ese día a las 6 de la tarde estaba en %s.",
+        "unknown": "Dónde estuve esa noche... la verdad es que no lo recuerdo bien.",
+        "witness_seen": "Ah, ahora que lo menciona, creo que ese día vi a %s en %s.",
+        "witness_none": "Ah, pero creo que ese día no vi a nadie en particular."
+    },
+    "memento_item": {
+        "name": "Espejo de mano",
+        "description": "Un espejo de mano antiguo. El mango está gastado y muestra señales de un uso prolongado.",
+        "lore_lines": [
+            "Incluso practiqué cómo sonreír.",
+            "Pero la persona en el espejo siempre me parecía alguien distinto."
+        ]
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/marr_port.png",
+        "happy": "res://assets/npc/portrait/marr_port.png",
+        "sad": "res://assets/npc/portrait/marr_sad.png",
+        "angry": "res://assets/npc/portrait/marr_port.png"
+    },
+    "sprite": "res://assets/npc/sprite/marrSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "general_working"},
+                {"time": "18:00", "state": "plaza3_sitting"},
+                {"time": "21:00", "state": "general_room_enterance"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "general_working"},
+                {"time": "18:00", "state": "plaza3_sitting"},
+                {"time": "21:00", "state": "general_room_enterance"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "general_room_enterance"},
+                {"time": "16:00", "state": "plaza3_sitting"},
+                {"time": "21:00", "state": "general_room_enterance"}
+            ]
+        }
+    },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "general_working",
+        "npc_spawn": "marr_heart_npc",
+        "player_spawn": "marr_heart_player",
+        "lines": [
+            "{player_name}, han pasado {days_since_arrival} días desde que llegó a este pueblo.",
+            "Gracias por invitarme a buena comida y por visitarme tan a menudo durante todo este tiempo.",
+            "Tengo la impresión de que nos hemos vuelto un poco amigos.",
+            "Tenga, esto va por la casa.",
+            {"type": "gift", "item_id": "wildflower_bouquet"},
+            "Si este sentimiento tuviera nombre, me pregunto cómo se llamaría."
+        ]
+    },
+    "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "description": "가게에서 파는 향수 중 하나를 별다른 설명 없이 건넨다.",
+            "lines": [
+                "{player_name}. ¿Tiene un momento?",
+                "Tengo algo para usted.",
+                {"type": "gift", "item_id": "perfume_somewhere_behind_you"},
+                "Es un perfume que hice pensando en usted, {player_name}. Se llama 'Somewhere behind you'.",
+                "Dicen que un perfume deja su aroma incluso después de que uno pasa. Aunque ya no esté en ese lugar.",
+                "Usted es alguien que permanece en mi memoria, {player_name}, igual que un aroma.",
+                "Por favor... no se lo dé a nadie más."
+            ]
+        },
+        {
+            "threshold": 70,
+            "type": "dialogue",
+            "description": "세이지의 점사 이후로 그녀를 신뢰하지 않게 된 이유를 설명한다.",
+            "lines": [
+                "Sage me leyó la fortuna una vez, hace tiempo.",
+                {"text": "Sigo sin entender del todo cómo hay personas que se confían a algo que ni siquiera pueden ver.", "emotion": "sad"},
+                "En todo caso, desde ese día no confío demasiado en lo que ella dice."
+            ]
+        },
+        {
+            "threshold": 85,
+            "type": "dialogue",
+            "description": "이 세계에 뭔가 이상함을 느낀다고 한다.",
+            "lines": [
+                "{player_name}. Ha venido.",
+                "Quisiera compartir con usted algo extraño que últimamente siento.",
+                "A veces tengo la sensación de que todos nosotros solo actuamos según lo ya decidido.",
+                "Por ejemplo, que Marin visite nuestra tienda el mismo día y a la misma hora todas las semanas.",
+                "O que los rostros con los que me cruzo al ir y venir sean siempre las mismas personas.",
+                {"text": "Ahora mismo estoy intentando decirle algo,", "emotion": "sad"},
+                {"text": "algo que", "emotion": "sad"},
+                {"text": "quiero", "emotion": "sad"},
+                {"text": "decirle,", "emotion": "sad"},
+                {"text": "a usted,", "emotion": "sad"},
+                {"text": "                                ", "emotion": "sad"},
+                {"text": "poniendo en palabras lo que se me viene a la mente...", "emotion": "sad"},
+                {"text": "y es algo verdaderamente extraño.", "emotion": "sad"},
+                "Usted es la única persona fuera de lo predecible, así que decidí confiarle esta inquietud.",
+                "¿Usted también ha estado pensando lo mismo?"
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "손거울을 건네준다.",
+            "lines": [
+                "Hola, {player_name}. En realidad, tengo algo para usted.",
+                "Este es un espejo de mano que he tenido durante mucho tiempo.",
+                "Durante un largo periodo intenté encontrar en mí algo humano a través de él.",
+                "Pero últimamente he empezado a pensar algo.",
+                "¿De verdad necesito ser humano?",
+                {"text": "Le mostré mi verdadero yo y usted no se apartó de él.", "emotion": "sad"},
+                "Con eso me basta."
+            ]
+        },
+        {
+            "threshold": 105,
+            "type": "dialogue",
+            "description": "처음 느껴보는 낯선 감각을 관찰자 시점으로 보고한다.",
+            "lines": [
+                "Últimamente, cuando cierro la tienda por la noche, tengo la sensación de que alguien me observa.",
+                "No es que haya visto ni oído nada en concreto. Es solo... una sensación."
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "murder_grief": [
+            {"text": "Los vecinos del pueblo están actuando de forma distinta a la habitual.", "emotion": "sad"},
+            {"text": "Llorando, o hablando menos.", "emotion": "sad"},
+            {"text": "A mí no me afecta tanto como a ellos, pero aun así no puedo decir que esté del todo bien.", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            {"text": "Ha vuelto a ocurrir algo así.", "emotion": "sad"},
+            {"text": "Hay una inquietud en mí, en alguna parte.", "emotion": "sad"}
+        ],
+        "suspicion_talk_2": {
+            "lines": [
+                "¿Mi coartada? A esa hora estaba en la tienda. Aunque no tengo forma de demostrarlo.",
+                "Parece que todos piensan que fui yo. ...Bueno, lo entiendo. Ya de por sí me dicen con frecuencia que no parezco humano.",
+                "¿Usted también lo piensa?"
+            ]
+        }
+    },
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    ["Buenos días. ¿Necesita algo?"],
+                    ["Otra vez lunes."],
+                    ["Si necesita algo, avíseme."]
+                ],
+                "mid": [
+                    ["Fui al mar. El sonido de las olas me calma la mente."],
+                    ["Lama pasa a veces a hablarme. No es muy conversador, así que es difícil charlar, pero no me molesta."],
+                    {
+                        "lines": ["Belze dice que soy cómodo porque soy callado. Oír eso me pone de bastante buen humor."],
+                        "requires_alive": "belje",
+                        "fallback_lines": ["Belze fue alguien que me trató con amabilidad cuando yo estaba solo.", "Probablemente no haya muchas personas tan buenas como ella en este mundo."]
+                    }
+                ],
+                "high": [
+                    ["Ya nos conocemos desde hace un tiempo.", "Me siento bastante tranquilo cuando usted está."],
+                    ["{player_name}, usted sonríe mucho.", "En realidad yo también intenté practicar la sonrisa, hace tiempo,", "pero después de uno o dos intentos, nunca volví a hacerlo.", "...No pregunte por qué."],
+                    ["Pensar que alguien es buena persona solo porque le da buena comida,", "¿será una forma de pensar demasiado propia de un perro?"]
+                ]
+            },
+            "화": {
+                "low": [
+                    ["Es una tienda de artículos variados, pero no espere demasiado.", "En un pueblo tan pequeño cuesta mantener mucho surtido."],
+                    ["También tengo artículos para regalo. ¿Quiere verlos?"],
+                    ["Nos vemos otra vez."]
+                ],
+                "mid": [
+                    ["Estoy acostumbrado a que la gente guarde distancia conmigo.", "Usted, en cambio, no lo hace."],
+                    ["Viene a menudo.", "No tengo mucho que decir, pero siéntase libre de descansar aquí un rato."],
+                    ["¿Hay algo que le gustaría que añadiera a la tienda?"]
+                ],
+                "high": [
+                    ["Usted es una buena persona. Después de todo, me da comida con frecuencia."],
+                    ["Si hay alguien a quien puedo hablarle con sinceridad,", "sería usted."],
+                    ["Gracias a que compra tanto, mis bolsillos están un poco más llenos.", "Si me sobra más, se lo devolveré como propina."]
+                ]
+            },
+            "수": {
+                "low": [
+                    ["Hoy no hay muchos clientes."],
+                    ["Si no necesita nada, puede simplemente mirar."],
+                    ["A las 3 tengo que reponer mercancía, así que venga antes o después."]
+                ],
+                "mid": [
+                    ["Hoy tengo un compromiso."],
+                    ["Me siento cómodo pasando tiempo a solas."],
+                    ["Lama pasa a veces a hablarme. Casi no responde, pero no me molesta."]
+                ],
+                "high": [
+                    ["He intentado practicar sonrisas. No funcionó muy bien."],
+                    ["A veces me quedo de pie en la orilla durante horas. Sin pensar en nada."],
+                    ["Los platos que usted vende no se consiguen en ningún otro lugar."]
+                ]
+            },
+            "목": {
+                "low": [
+                    ["Puede mirar sin compromiso."],
+                    ["Si busca algo en particular, dígamelo."],
+                    ["El jueves no tiene nada de especial."]
+                ],
+                "mid": [
+                    ["No me gustan mucho las bayas.", "No hay ninguna razón. Simplemente no van con mi gusto."],
+                    ["Hoy realmente no hubo muchos clientes."],
+                    ["Más o menos terminé de ordenar la tienda."],
+                    ["Los artículos para regalo se venden bastante bien."]
+                ],
+                "high": [
+                    [
+                        "Al observar a los clientes, puedo distinguir por su expresión quién viene de verdad a comprar y quién solo a mirar.",
+                        "Pero ni siquiera sé cuál es mi propio estado de ánimo ahora.",
+                        "¿Cómo me ve ahora mismo?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "Se ve igual que de costumbre", "affection": 1, "response": ["Esa es más o menos la respuesta más segura."]},
+                                {"label": "Se ve un poco aburrido", "affection": 2, "response": [{"text": "...Se acercó bastante.", "emotion": "happy"}]},
+                                {"label": "Yo tampoco lo sé", "affection": 1, "response": ["A mí me pasa igual. Estamos en el mismo barco, entonces."]}
+                            ]
+                        }
+                    ],
+                    ["Creo que con usted puedo ser sincero.", "Si algún día se presenta la ocasión, me gustaría que pasáramos algo de tiempo conociéndonos mejor."],
+                    ["No sé qué le gusta a usted, pero creo que tengo alguna idea de lo que le disgusta."]
+                ]
+            },
+            "금": {
+                "low": [
+                    ["Esta semana también se termina."],
+                    ["El viernes no tiene nada de especial."],
+                    ["Bienvenido."]
+                ],
+                "mid": [
+                    ["Hoy los clientes escasean."],
+                    ["Arreglé los escalones de la entrada. Llevaban un tiempo algo flojos."],
+                    ["A veces leo los libros que escribe Usher.", "Su prosa no está pulida, pero tiene una extraña honestidad.", "Eso es raro de encontrar."]
+                ],
+                "high": [
+                    ["Siempre cobro un precio justo por mis productos."],
+                    ["Al ver los ingredientes que compra, me da un poco de curiosidad qué preparará hoy con ellos."],
+                    ["Gracias a usted, los artículos para regalo se han vendido un poco mejor últimamente."]
+                ]
+            },
+            "토": {
+                "low": [
+                    ["Los fines de semana la tienda se llena un poco más."],
+                    ["Si le da curiosidad algo, pregunte con confianza."],
+                    ["Tómese su tiempo para mirar."]
+                ],
+                "mid": [
+                    ["Me siento cómodo pasando tiempo a solas. Aunque usted... parece ser una excepción."],
+                    ["La brisa del mar es agradable."],
+                    ["Cierro la tienda temprano cuando cae la noche."]
+                ],
+                "high": [
+                    ["Quedarme quieto sin hacer nada me resulta curiosamente cómodo."],
+                    ["Antes, cada vez que me sentía distinto de los demás, me quedaba horas frente a un espejo.", "Ya no lo hago. Me di cuenta de que no tenía sentido."],
+                    ["Tener un lugar al que ir solo no está mal."]
+                ]
+            },
+            "일": {
+                "low": [
+                    ["Hoy abrí la tienda tarde."],
+                    ["La tienda también abre los domingos. No entiendo bien por qué habría que descansar."],
+                    ["Mire con calma."]
+                ],
+                "mid": [
+                    ["Hoy hubo pocos clientes."],
+                    ["Esta semana no pasó nada especialmente digno de mención."],
+                    ["A veces voy a algún lugar donde no hay nadie más."]
+                ],
+                "high": [
+                    ["Hoy también vino."],
+                    ["El tiempo que paso conversando con usted no está mal. Aunque no sé exactamente cómo llamarlo."],
+                    ["La razón por la que creo que usted es buena persona es simple. Me trata bien."]
+                ]
+            }
+        },
+        "rain_conversation": [
+            ["Los días de lluvia la tienda no tiene clientes."],
+            ["Escuchar el sonido de la lluvia resulta muy tranquilizador."],
+            ["¿Tiene paraguas? Si no, lleve uno."]
+        ],
+        "mail_reaction": [
+            ["Veo que envió '{player_mail_content}'.", "Cuando recibo algo así, me cuesta saber cómo responder."]
+        ],
+        "horror_conversation": [
+            [{"text": "Últimamente, mientras ordeno la tienda, a veces mis manos se detienen.", "emotion": "sad"}, "Suele pasar cerca del lugar donde {victim_name} compraba cosas. Es difícil explicar por qué."],
+            ["La gente usa a menudo la palabra 'extrañar'.", {"text": "Creo que últimamente yo mismo siento algo parecido.", "emotion": "sad"}]
+        ]
+    },
+    "emails": {
+        "greeting": [
+        ],
+        "event_invite": [
+            {"title": "Fue una buena comida", "lines": ["Gracias por la invitación.", "Es difícil describir con exactitud a qué sabía, pero no estuvo mal.", "Por favor, invíteme de nuevo alguna vez."]},
+            {"title": "Ser tratado como cliente", "lines": ["Sentarme en un restaurante como cliente me resultó extraño.", "Normalmente soy yo quien recibe a los clientes.", "Aun así, me sentí cómodo."]},
+            {"title": "El plato de salmón no estuvo mal", "requires_favorite_food": true, "lines": ["El plato de salmón de ayer estuvo bien.", "Es una de las pocas comidas que van con mi gusto.", "¿Podría comerlo otra vez alguna vez?", "Gracias."]}
+        ],
+        "gift_thanks": [
+            {"title": "Gracias por el regalo", "lines": ["No estoy acostumbrado a recibir regalos, así que no supe cómo responder.", "Aun así, sé que me alegró.", "Gracias."]},
+            {"title": "A cambio", "lines": ["Cuando recibo algo, me siento inquieto si no devuelvo algo.", "La próxima vez que venga a la tienda, le reservaré algo bueno."]}
+        ],
+        "memento_reminder": {"title": "Tengo algo que entregarle.", "lines": ["Últimamente viene poco.", "Tengo algo que entregarle, así que por favor pase por la tienda cuando tenga tiempo."]},
+        "story_progress": {
+            "player_arrival_day_3": {"title": "Me dijeron que es nuevo por aquí", "lines": ["Me enteré de que se mudó hace poco a este pueblo.", "Si necesita algo, venga a la tienda de artículos variados.", "La tienda está junto a la fuente, al lado del mar."]}
+        },
+        "special_day": {}
+    }
+}

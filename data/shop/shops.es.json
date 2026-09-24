@@ -1,0 +1,12 @@
+{
+    "marr_shop": { "name": "Tienda General" },
+    "flora_shop": { "name": "Tienda Agrícola" },
+    "belje_shop": { "name": "Tienda del Rancho" },
+    "roshi_shop": { "name": "Tienda de Pesca" },
+    "woody_shop": { "name": "Mueblería" },
+    "usher_shop": { "name": "Librería" },
+    "isha_shop": { "name": "Hospital" },
+    "mocha_shop": { "name": "Cafetería" },
+    "kira_clothing_shop": { "name": "♥ Tienda de Ropa de Kira" },
+    "para_hair_shop": { "name": "♥ Salón de Belleza de Para" }
+}

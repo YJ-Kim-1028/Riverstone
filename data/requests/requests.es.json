@@ -1,0 +1,106 @@
+{
+    "greet_all_npcs": {
+        "title": "¿Ya saludaste a la gente del pueblo?",
+        "lines": [
+            "Si alguien recién llegado ni siquiera conoce a la gente del pueblo, cuando pase algo no podremos ayudarnos unos a otros.",
+            "Es un pueblo pequeño. Que todos nos conozcamos es mejor en más de un sentido.",
+            "Cuando tengas tiempo, saluda a la gente con la que te cruces. Cuando los hayas conocido a todos, avísame."
+        ]
+    },
+    "try_fishing_rod": {
+        "title": "Deberías conseguirte una caña de pescar",
+        "lines": [
+            "Quien viene a este pueblo debería tener por lo menos una caña de pescar, ¿no crees?",
+            "Llévate una de mi tienda. Cuesta 500. Tampoco es tan cara.",
+            "Ya sea en el mar o en el río, con solo lanzar la línea perderás la noción del tiempo."
+        ]
+    },
+    "welcome_income_boost": {
+        "title": "Deseándole un buen negocio",
+        "lines": [
+            "Me enteré de que ha abierto un restaurante nuevo.",
+            "Me recuerda a cuando abrí mi tienda por primera vez en este pueblo. No había ni un solo cliente y me pasé el día entero quitando el polvo.",
+            "Cuando sus ingresos totales superen los 300, vuelva a escribirme. Le reservaré algo que le sirva, por pequeño que sea."
+        ]
+    },
+    "try_harvest_potato": {
+        "title": "¿Quieres cosechar una papa?",
+        "lines": [
+            "Oye, compraste semillas de papa pero todavía no has plantado ninguna, ¿verdad? Se te nota.",
+            "Yo también empecé con papas cuando abrí mi negocio. Son las que menos fallan y mejor se dan.",
+            "Solo plántalas y riégalas bien. Te sorprenderás de lo bien que se siente cosechar."
+        ]
+    },
+    "try_harvest_corn": {
+        "title": "Cultiva también maíz",
+        "lines": [
+            "¿Ya plantaste maíz? Las semillas que llegaron esta vez están especialmente llenitas.",
+            "Da un poco de trabajo, pero la satisfacción cuando termina de crecer es otra cosa.",
+            "Cultiva un poco y cuéntame qué te pareció. La verdad es que me da curiosidad."
+        ]
+    },
+    "try_harvest_lettuce": {
+        "title": "La lechuga crece rápido",
+        "lines": [
+            "Todavía no has cultivado lechuga, ¿verdad? En realidad es el cultivo que más rápido crece en nuestra tienda.",
+            "Sé lo que es posponer el trabajo del campo con la excusa de estar ocupado. Pero la lechuga es rapidísima, de verdad.",
+            "Plántala una sola vez. Verás enseguida que no es nada difícil."
+        ]
+    },
+    "try_pork": {
+        "title": "¿Quieres probar a trabajar con cerdo?",
+        "lines": [
+            "Ayudando en el rancho me he dado cuenta de que no hay ingrediente más fácil de cocinar que el cerdo.",
+            "Si tuvieras uno en el menú del restaurante, seguro que a los clientes les encantaría. Te lo garantizo.",
+            "No te presiones, solo inténtalo. En cuanto a Belze... bueno, no hace falta darle muchos detalles, ¿no?"
+        ]
+    },
+    "try_beef": {
+        "title": "Prueba también con res",
+        "lines": [
+            "Prueba también con la res. Es un ingrediente que da bastante trabajo, pero la reacción de la gente cuando lo cocinas es muy buena.",
+            "Yo aprendí estas cosas de forma natural trabajando en el rancho. Lo difícil es la primera vez; después se hace rápido.",
+            "Si necesitas algo, dímelo cuando quieras. Del trabajo del rancho, yo soy quien más sabe."
+        ]
+    },
+    "try_mackerel": {
+        "title": "¿Alguna vez has pescado una caballa?",
+        "lines": [
+            "La caballa, eh. No sé si alguna vez has pescado una. Mientras tengas caña, no es difícil.",
+            "Si te paras en la playa de este pueblo y lanzas la línea, pican con facilidad. Es la presa perfecta para principiantes.",
+            "Ve y atrapa una. Esa sensación en las manos no se olvida fácilmente."
+        ]
+    },
+    "try_salmon": {
+        "title": "¿Y si pescas un salmón?",
+        "lines": [
+            "¿Te animas a pescar también un salmón? Da algo más de trabajo que la caballa.",
+            "Marin ha estado trayéndolos bastante bien últimamente. No hay razón para que tú no puedas.",
+            "Con calma, sin apurarte, lanza la línea. Con eso bastará."
+        ]
+    },
+    "try_squid": {
+        "title": "El calamar es un poco complicado",
+        "lines": [
+            "El calamar es algo complicado, y a todos les cuesta pescarlo.",
+            "Aun así, cuando logras atrapar uno, resulta bastante divertido. Hasta a Marin le costó al principio.",
+            "Cuando lo atrapes, puedes presumírmelo un poco. Seguro se siente bastante bien."
+        ]
+    },
+    "try_serve_dish": {
+        "title": "¿Ya le serviste un plato a un cliente?",
+        "lines": [
+            "Hace tiempo que abriste el restaurante, ¿has servido bien un plato a algún cliente?",
+            "Así es el negocio. Atender al primer cliente es lo que más nervios da, y después uno sigue haciéndolo.",
+            "Sirve un plato. Todavía recuerdo ese orgullo."
+        ]
+    },
+    "try_harvest_berry": {
+        "title": "¿Quieres recoger unas bayas?",
+        "lines": [
+            "Como solo te dedicas al campo, nunca has recogido bayas, ¿verdad? No se plantan, solo recoges las que ya están ahí, así que es mucho más fácil.",
+            "Hay un arbusto cerca del estanque, frente al restaurante. Yo también recojo algunas de vez en cuando al pasar, y me las como.",
+            "Será una sensación distinta a cultivarlas en el campo. Ve a recoger unas."
+        ]
+    }
+}

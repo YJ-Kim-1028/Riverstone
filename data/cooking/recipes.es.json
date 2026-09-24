@@ -1,0 +1,70 @@
+{
+    "grilled_fish": {
+        "name": "Pescado a la Parrilla",
+        "description": "Un plato sencillo de caballa o salmón a la parrilla."
+    },
+    "salmon_salad": {
+        "name": "Ensalada de Salmón",
+        "description": "Una ensalada hecha con salmón y lechuga."
+    },
+    "grilled_squid": {
+        "name": "Calamar a la Parrilla",
+        "description": "Un plato de calamar a la parrilla."
+    },
+    "fish_and_chips": {
+        "name": "Fish and Chips",
+        "description": "Un plato de pescado acompañado de papas fritas."
+    },
+    "grilled_vegetables": {
+        "name": "Verduras Asadas",
+        "description": "Un plato sencillo de papa y maíz asados."
+    },
+    "potato_salad": {
+        "name": "Ensalada de Papa",
+        "description": "Una ensalada hecha con papa y lechuga."
+    },
+    "chop_steak": {
+        "name": "Filete Picado",
+        "description": "Un filete hecho con res y verduras."
+    },
+    "barbecue": {
+        "name": "Barbacoa",
+        "description": "Un plato de res y cerdo asados juntos."
+    },
+    "grilled_pork_belly": {
+        "name": "Panceta a la Parrilla",
+        "description": "Un plato de cerdo a la parrilla."
+    },
+    "seafood_set": {
+        "name": "Menú de Mariscos",
+        "description": "Un menú completo servido con calamar y pescado."
+    },
+    "meat_salad": {
+        "name": "Ensalada de Carne",
+        "description": "Una ensalada hecha con carne y lechuga."
+    },
+    "yogurt_smoothie": {
+        "name": "Batido de Yogur",
+        "description": "Un batido hecho con leche."
+    },
+    "strawberry_smoothie": {
+        "name": "Batido de Fresa",
+        "description": "Un batido hecho con bayas y leche."
+    },
+    "weird_dish": {
+        "name": "Plato Raro",
+        "description": "Un plato irreconocible hecho con una combinación que no está en ninguna receta. A los NPC no les gusta este plato."
+    },
+    "hunter_stew": {
+        "name": "Estofado del Cazador",
+        "description": "Un estofado de carne de conejo de caza cocido a fuego lento en una olla con verduras."
+    },
+    "roast_bird": {
+        "name": "Pollo Asado",
+        "description": "Un plato de carne de ave de caza a la parrilla."
+    },
+    "chicken_salad": {
+        "name": "Ensalada de Pollo",
+        "description": "Una ensalada hecha con pollo y lechuga."
+    }
+}

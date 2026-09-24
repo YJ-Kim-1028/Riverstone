@@ -1,0 +1,355 @@
+{
+    "id": "mocha",
+    "name": "Mocha",
+    "name_en": "Mocha",
+    "gender": "여성",
+    "age": "40대",
+    "job": "카페 운영",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "Amable.",
+        "Madura.",
+        "Realista.",
+        "Expresa sus emociones con franqueza.",
+        "Siente poca culpa.",
+        "Asume la responsabilidad de sus decisiones."
+    ],
+    "preferred_food": ["베리"],
+    "disliked_food": ["감자"],
+    "special_notes": [
+        "Encargada de la cafetería. Ofrece/vende un objeto de mejora (el café de Mocha).",
+        "Si el afecto supera cierto nivel, regala café.",
+        "No le caen bien las mujeres del pueblo.",
+        "Fue víctima de la infidelidad de su exmarido, pero ahora mantiene una aventura con Shepherd, la pareja de Belze."
+    ],
+    "buff_item": {
+        "name": "Café de Mocha",
+        "effect": "Velocidad de movimiento +30%",
+        "duration": "3 minutos",
+        "line": "Hoy te veo ocupado. Bébete esto y sigue con lo tuyo."
+    },
+    "memento_item": {
+        "name": "Foto con su exmarido",
+        "description": "Una foto de Mocha y su exmarido tomada cuando eran jóvenes. En la foto, los dos sonríen felices.",
+        "lore_lines": [
+            "Intenté tirarla un montón de veces.",
+            "Pero es que en la foto me veo más feliz de lo que pensaba."
+        ]
+    },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "cafe_working",
+        "npc_spawn": "mocha_heart_npc",
+        "player_spawn": "mocha_heart_player",
+        "player_facing": "down",
+        "lines": [
+            "Hola. ¿Vienes a tomar un café?",
+            "¿Te sientas un rato? Disfrutemos juntos de un descanso.",
+            "Últimamente estoy leyendo un libro que escribió Usher. Va genial con el café.",
+            "Hoy estoy de buen humor, así que no te cobro el café.",
+            {"text": "Solo es un trato de cliente habitual. No lo hago pensando en las ventas.", "emotion": "happy"},
+            {"type": "gift", "item_id": "americano"}
+        ]
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/mocha_port.png",
+        "happy": "res://assets/npc/portrait/mocha_happy.png",
+        "sad": "res://assets/npc/portrait/mocha_sad.png",
+        "angry": "res://assets/npc/portrait/mocha_angry.png"
+    },
+    "sprite": "res://assets/npc/sprite/mokaSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "cafe_working"},
+                {"time": "14:00", "state": "cafe_sitting"},
+                {"time": "18:00", "state": "hospital_sitting"},
+                {"time": "21:00", "state": "cafe_working"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "cafe_working"},
+                {"time": "18:00", "state": "furniture_looking2"},
+                {"time": "21:00", "state": "cafe_working"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "cafe_working"}
+            ]
+        }
+    },
+    "affection_events": [
+        {
+            "threshold": 70,
+            "type": "dialogue",
+            "requires": {"npc_id": "poli", "threshold": 60},
+            "description": "전남편에 대한 이야기와 플로라에 대한 미안함을 털어놓는다.",
+            "lines": [
+                {"text": "No soporto a ninguna de las chicas del pueblo, salvo a Woody.", "emotion": "angry"},
+                {"text": "Una de esas perras tuvo una aventura con mi marido.", "emotion": "angry"},
+                "Woody, en fin, no es el tipo de mi marido, así que queda excluida.",
+                "Hasta le pregunté a Poli, y dijo que no puede revelar los datos de la víctima y nunca me dijo quién era.",
+                {"text": "¿Víctima? Qué chiste. ¿Cómo va a ser víctima quien cometió adulterio? Aquí la única víctima de verdad soy yo.", "emotion": "angry"},
+                {"text": "Pasó hace mucho, pero todavía tengo pesadillas. A esa mujer no la perdonaré ni después de muerta.", "emotion": "angry"}
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "오래된 사진을 건네준다.",
+            "lines": [
+                "Chiquillo. ¿Alguna vez en tu vida has tenido algo que de verdad te importara?",
+                "Quizá sea una pregunta demasiado pronto para ti.",
+                "¿Yo? Yo sí tuve algo. Pero ¿sabes qué? A veces lo más importante cambia.",
+                "Toma esta foto.",
+                "Es la prueba de una época en que quise de verdad a alguien que era muy importante para mí.",
+                {"text": "Pero ahora ha aparecido algo más valioso. Así que decidí soltarla.", "emotion": "happy"},
+                "Me importaba, pero nunca fue un recuerdo feliz.",
+                "Veámonos seguido. Contigo se me acumulan muchos buenos recuerdos."
+            ]
+        },
+        {
+            "threshold": 105,
+            "type": "dialogue",
+            "description": "인기척을 죄책감 탓으로 돌린다.",
+            "lines": [
+                "Últimamente, cada vez que cierro la cafetería y salgo, siento que alguien me observa.",
+                {"text": "Será por todo el karma que he acumulado con los años, se me vienen todo tipo de ideas.", "emotion": "angry"},
+                "Bueno, con la conciencia sucia una se pone nerviosa, supongo. He decidido ignorarlo."
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "murder_grief": [
+            "Que vuelva a pasar algo así.",
+            "Con lo de mi exmarido fue igual. Me hace preguntarme si este pueblo siempre fue un lugar donde morirse es tan fácil.",
+            "En fin, los vivos tenemos que seguir viviendo."
+        ],
+        "murder_grief_2": [
+            "Ya van dos.",
+            "A estas alturas estoy convencida de que este pueblo en sí no es seguro.",
+            "Aunque tampoco es que tenga adónde huir."
+        ],
+        "suspicion_talk_2": {
+            "requires_alive": "marr",
+            "lines": [
+                "Poli sigue sin atrapar al culpable. Ya han muerto dos personas.",
+                {"text": "Si me preguntas, es Marr. Da bastante escalofríos, ¿no?", "emotion": "angry"},
+                {"text": "Ni siquiera saluda cuando se cruza con alguien en el pueblo. Está claro que no quiere acercarse a nadie.", "emotion": "angry"},
+                "Y nadie sabe cómo acabó viniendo a este pueblo. A diferencia de nosotros: la mayoría vivimos aquí desde pequeños."
+            ]
+        },
+        "partner_death_reaction": [
+            "Perdona, ahora no tengo ganas de hablar. Desde que se fue, siento que me vuelvo loca día tras día.",
+            {"text": "¿Por qué justo Shepherd? ¿Por qué...?", "emotion": "sad"},
+            {"text": "Lo que hicimos no fue tan malo como para merecer un castigo así.", "emotion": "sad"},
+            {"text": "No puedo respirar bien. Era la última persona en la que me apoyaba. ¿Por qué la gente a mi alrededor...?", "emotion": "sad"}
+        ]
+    },
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    ["El aroma del café es lo mejor de las mañanas de lunes."],
+                    ["Hoy también te veo ocupado. ¿Te sirvo un café?"],
+                    ["Hoy molí granos nuevos. ¿No se nota ya por el olor?"]
+                ],
+                "mid": [
+                    ["Con una cafetería ves clientes de todo tipo. Es divertido."],
+                    ["Hay muchísimos clientes por la mañana. Todos necesitarán su café."],
+                    {
+                        "lines": ["Woody vino a pedirme que le moliera unos granos. Resulta que ella es más de té que de café.", {"text": "Es una chica encantadora.", "emotion": "happy"}],
+                        "requires_alive": "woody",
+                        "fallback_lines": ["Extraño a Woody, que a veces venía a pedirme té negro.", "¿Qué habrá hecho esa criatura tan adorable para merecer esto...?", "El cielo puede ser tan cruel."]
+                    }
+                ],
+                "high": [
+                    ["Hablar contigo es, sorprendentemente, cómodo."],
+                    ["A veces, escuchar las historias de los clientes acaba consolándome a mí también."],
+                    ["Cuando hablo contigo, el tiempo vuela."]
+                ]
+            },
+            "화": {
+                "low": [
+                    [{"text": "Salió un postre nuevo de bayas. ¿Quieres probarlo?", "emotion": "happy"}],
+                    ["Los martes se me antojan especialmente los dulces. Quizá me coma otro postre."],
+                    ["Hoy se acabaron los granos, así que hice un pedido urgente.", "El café hecho con lo que queda puede salir un poco flojo."]
+                ],
+                "mid": [
+                    ["Las papas de verdad no me entran. No sé por qué, pero me caen mal."],
+                    {
+                        "lines": ["Woody se viste tan de chico que me hace pensar que le gustan las mujeres.", "Quizá sea de mala educación decirlo, pero es verdad, ¿no?"],
+                        "requires_alive": "woody",
+                        "fallback_lines": ["En días como hoy me acuerdo de Woody, que venía a parlotear a la tienda.", "Buenos recuerdos."]
+                    },
+                    ["Charlar con los clientes es lo mejor de este trabajo.", "No queda tiempo para sentirse sola."]
+                ],
+                "high": [
+                    ["Una mujer mayor tiene una calma que las jóvenes no tienen.", {"text": "Ese tipo de calma que de algún modo te dan ganas de apoyarte en ella.", "emotion": "happy"}],
+                    {
+                        "lines": ["La última vez, sin querer, pedí demasiados granos.", "Solo cargarlos ya fue un trabajo en sí, pero Shepherd ayudó y todo salió bien.", {"text": "Da gusto tener a alguien de buen corazón en el pueblo.", "emotion": "happy"}],
+                        "requires_alive": "shepherd",
+                        "fallback_lines": ["Shepherd venía de vez en cuando a echar una mano en la cafetería.", "Todo el pueblo era así: no había lugar que sus manos no hubieran tocado.", "Acumuló tantas buenas obras en vida que irá a un buen lugar."]
+                    },
+                    ["Tú aceptas todo lo que te digo, diga lo que diga.", "Eso resulta curiosamente cómodo."]
+                ]
+            },
+            "수": {
+                "low": [
+                    ["Mitad de semana. A estas alturas todos están agotados.", "¿Te sirvo un café?"],
+                    ["Los miércoles hay pocos clientes, perfecto para limpiar."],
+                    ["Hoy estrené unas tazas nuevas. ¿Te gustan?"]
+                ],
+                "mid": [
+                    ["Hoy te veo ocupado. Bébete esto y sigue.", {"type": "gift", "item_id": "americano"}],
+                    ["Preparar café todos los días acaba siendo algo que la mano recuerda sola."],
+                    ["A veces acabo memorizando los gustos de todos los clientes habituales. Deformación profesional."]
+                ],
+                "high": [
+                    ["No soy buena persona. Pero tampoco soy del todo mala."],
+                    ["Hay heridas que el tiempo no adormece.", "No puedo entrar en detalles, pero me descubro manteniendo a la gente a distancia sin querer."],
+                    ["Volviste. Te estaba esperando.", "Me preocupo cuando pasas un tiempo sin dejarte ver."]
+                ]
+            },
+            "목": {
+                "low": [
+                    ["Hoy también la cafetería funcionó más o menos."],
+                    ["Los jueves reviso el estado del tostado de los granos."],
+                    ["Hoy también huele bien el café."],
+                    {
+                        "lines": ["Flora no deja de insistirme en que le haga un latte de fresa.", "¿Cómo voy a preparar algo tan infantil?"],
+                        "requires_alive": "flora",
+                        "fallback_lines": ["Hoy me preparé un latte de fresa, después de mucho tiempo.", "Ya sé. Es ese latte infantil que le encantaba a la pequeña Flora."]
+                    }
+                ],
+                "mid": [
+                    ["La gente es rara. Juras que nunca volverás a amar y, aun así, terminas enamorándote otra vez."],
+                    {
+                        "lines": ["Ese chico Marin habla de su padre cada vez que lo veo. Me da envidia, sinceramente, una relación así.", "Ojalá mi hombre hubiera sido tan buena persona como Roshi..."],
+                        "requires_alive": ["marin", "roshi"],
+                        "fallback_lines": ["Marin y Roshi de verdad eran un padre y un hijo muy unidos.", "Qué pena lo que pasó."]
+                    },
+                    ["No creo que haya una sola persona en el pueblo que no haya pasado por mi cafetería.", {"text": "Es algo de lo que me siento muy orgullosa.", "emotion": "happy"}]
+                ],
+                "high": [
+                    ["Yo estuve casada una vez, ¿sabes? Ahora... todo eso ya pasó."],
+                    ["Otra vez te veo, {player_name}. ¿Cómo te sientes hoy?", "Yo tengo la cabeza llena. No sé si las decisiones que tomé fueron las correctas.", "Aun así, en su momento tomé la mejor decisión posible, ¿no?", "Intento no arrepentirme."]
+                ]
+            },
+            "금": {
+                "low": [
+                    ["Otra semana que termina. Tómate un café antes de irte."],
+                    ["Los viernes por la tarde aumentan un poco los clientes. Todos querrán cerrar la semana."],
+                    ["Esta semana tampoco subí el precio del café. Aunque el de los granos no para de subir."]
+                ],
+                "mid": [
+                    [
+                        "¿Qué platillo crees que debería añadir a la cafetería?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "¿Qué tal algún tipo de postre dulce?", "affection": 1, "response": ["Ah, genial. Últimamente a mí también se me antoja algo dulce.", "Buscaré alguna receta. Tú lo pruebas primero, ¿entendido?"]},
+                                {"label": "¿No es perfecto ya el menú actual?", "affection": 1, "response": [{"text": "¿Eso no lo dice la gente solo cuando suben las ventas?", "emotion": "happy"}, "Aun así, da gusto oírlo."]},
+                                {"label": "¿Qué tal un plato más con bayas de temporada?", "affection": 2, "response": ["¿Bayas? Estoy totalmente a favor.", "De todos modos, últimamente las bayas están buenísimas."]}
+                            ]
+                        }
+                    ],
+                    ["¿A ti también te gustan más los lattes?", "Ahora que lo pienso, parece que hay más gente que prefiere los lattes."],
+                    ["Poli también es cliente habitual de mi cafetería. Supongo que el café ayuda mucho en el turno de la mañana."]
+                ],
+                "high": [
+                    ["Tú no sabes qué clase de persona soy en realidad. Quizá te decepcionarías si lo supieras.", "Qué ridículo sacar este tema a mi edad.", "Que alguien se decepcione conmigo tampoco es tan grave."],
+                    ["{player_name}, te veo mucho últimamente.", {"text": "A ti también te gusta esta cafetería, ¿verdad?", "emotion": "happy"}, "Si quieres, te reservo un asiento fijo."],
+                    ["Todavía estoy dudando si añadir ese platillo que dijiste la última vez que querías."]
+                ]
+            },
+            "토": {
+                "low": [
+                    ["Los fines de semana la cafetería es cuando más se llena."],
+                    ["Los sábados ni con cuatro manos me alcanza."],
+                    ["Me gusta que los clientes de fin de semana se lo tomen con calma."]
+                ],
+                "mid": [
+                    {
+                        "lines": ["Woody pasa a menudo. Es una clienta fácil de tener.", "Me encantaría tener una hija así, sinceramente."],
+                        "requires_alive": "woody",
+                        "fallback_lines": ["Siempre pensé que me encantaría tener una hija como Woody.", "...No, en realidad todavía lo pienso ahora.", "Me acuerdo mucho de ella. Era una criatura tan tierna."]
+                    },
+                    ["Sage viene a veces a tomar té. Aunque habla poco.", "¿Se hace la misteriosa a propósito?"],
+                    ["¿No te cruzaste con Poli de camino?", "Suele pasar más o menos a esta hora.", "¿Eh? Es que tengo algo personal que pedirle."]
+                ],
+                "high": [
+                    ["Últimamente muelo los granos adrede para que coincida con la hora a la que sueles venir.", "Te daré un buen café."],
+                    [{"text": "Te he guardado tu asiento, no dejé que nadie más se sentara.", "emotion": "happy"}, {"text": "¡Claro que, si hay mucha gente, no hay excepciones!", "emotion": "happy"}],
+                    ["A veces siento que eres como una amiga, más o menos.", "Con la diferencia de edad que hay entre nosotras. Qué gracia, ¿no?"]
+                ]
+            },
+            "일": {
+                "low": [
+                    ["El domingo abrí un poco más tarde, con más calma."],
+                    ["Los domingos por la mañana yo también empiezo con una taza de café."],
+                    ["Parece que el olor de la cafetería se me ha pegado incluso en mi día libre."]
+                ],
+                "mid": [
+                    ["En un día como hoy, yo también hago una pausa con una taza de café."],
+                    {
+                        "lines": ["Usher viene a veces con un libro y simplemente se sienta. Se está bien, con esa quietud."],
+                        "requires_alive": "usher",
+                        "fallback_lines": ["Todavía hoy, ese asiento de allá me recuerda a Usher, que venía a escribir."]
+                    },
+                    ["Los domingos también me gusta quedarme mirando por la ventana sin pensar en nada."]
+                ],
+                "high": [
+                    ["El olor a café está bastante bien, ¿no?", "Mucho mejor que andar por ahí oliendo a vaca o a cerdo.", "Quédate un rato."],
+                    [{"text": "Solo con verte la cara, siento que todo el día sale bien.", "emotion": "happy"}, "Simplemente lo digo."],
+                    ["Bueno, no está mal. Sigue viniendo."],
+                    ["Hoy me quedé sola en la cafetería después de que se fueron todos los clientes.", "Y de repente me acordé de algo que dejé pasar a sabiendas de que estaba mal hacia alguien.", "Supongo que a veces la gente hace cosas malas por su propio bien, ¿no crees?"]
+                ]
+            }
+        },
+        "rain_conversation": [
+            ["Los días de lluvia hay más gente en la cafetería. Supongo que a todos se les antoja un café."],
+            ["Si no tienes paraguas, descansa un rato en la cafetería."],
+            ["En días así hay que tostar los granos con más cuidado para que no se humedezcan."]
+        ],
+        "mail_reaction": [
+            ["Me enviaste '{player_mail_content}'. Lo disfruté leyéndolo. Puedes mandarme más cosas así."],
+            ["Sobre ese correo que mandaste, '{player_mail_content}'. La verdad es que me hizo reír un poco. No lo digo con mala intención."]
+        ],
+        "horror_conversation": [
+            [{"text": "Todavía dejo libre el asiento donde solía sentarse {victim_name}.", "emotion": "sad"}, "Aunque haya mucha gente, ese no lo cedo. Ni yo misma sé por qué."],
+            ["Me acordé de {victim_name} de la nada mientras tostaba los granos. Sin ningún motivo real.", {"text": "Es solo que nunca imaginé que hablar de alguien que ya no está se sintiera tan raro.", "emotion": "sad"}]
+        ]
+    },
+    "emails": {
+        "greeting": [
+            {"title": "Recomendación de granos de hoy", "lines": ["Los granos que tosté hoy huelen especialmente bien.", "La próxima vez que vengas te prepararé una taza con ellos.", "No andes tan ocupado como para no sacar tiempo para un café."]},
+            {"title": "Solo quería saber cómo estás", "lines": ["Últimamente vienes poco, así que por curiosidad te escribo unas líneas.", "Hacía tiempo que, con el trabajo del local, no tenía calma para escribir una carta así.", "Ocupado o no, bien o no, de cualquier modo está bien."]},
+            {"title": "Déjame presumir de un cliente", "lines": ["Hoy un desconocido me dijo que mi cafetería hace el mejor café del pueblo.", "No pude evitar sentirme un poco orgullosa.", "Tú también lo piensas, ¿verdad?"]}
+        ],
+        "event_invite": [
+            {"title": "Comí muy bien", "lines": ["Gracias por invitarme ayer.", "La comida que prepara otra persona realmente sabe distinto.", "La próxima vez te lo pago con café."]},
+            {"title": "Ese plato de bayas era otra cosa", "requires_favorite_food": true, "lines": ["No dejo de pensar en el plato de bayas de ayer.", "Quería robar la receta a escondidas, pero me contuve.", "Invítame otra vez."]}
+        ],
+        "alibi_reminder": {"title": "Todos andan alterados", "lines": ["Me dijeron que fue justo frente a tu casa. Debió de ser una impresión, ¿estás bien?", "{player_name}, también hay algo de lo que quiero hablar, ¿podrías pasar por la cafetería?"]},
+        "gift_thanks": [
+            {"title": "Recibí tu regalo", "lines": ["No hacía falta que me regalaras algo así.", "Aun así, lo acepto con gusto. Gracias."]},
+            {"title": "¿Cómo te lo devuelvo?", "lines": ["Soy de las que se quedan tranquilas solo si devuelven lo que reciben.", "La próxima vez que vengas te añadiré un café extra. Con eso quedamos a mano."]}
+        ],
+        "memento_reminder": {"title": "Últimamente vienes poco", "lines": ["Hace tiempo que no te veo la cara.", "Tengo algo guardado para ti; pásate por la cafetería cuando tengas tiempo."]},
+        "story_progress": {
+            "player_arrival_day_3": {"title": "¿Me dijeron que eres nuevo?", "lines": ["Me enteré de que llegaste hace poco al pueblo.", "Pásate por la cafetería si te aburres. El café te lo cobro con honestidad.", "Bienvenido, {player_name}."]}
+        },
+        "special_day": {}
+    }
+}

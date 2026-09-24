@@ -20,9 +20,9 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -85.0
+offset_left = -105.0
 offset_top = -35.0
-offset_right = 85.0
+offset_right = 105.0
 offset_bottom = 35.0
 texture = ExtResource("2_frame")
 patch_margin_left = 16
@@ -86,6 +86,14 @@ toggle_mode = true
 button_group = SubResource("ButtonGroup_language")
 theme_override_font_sizes/font_size = 5
 text = "中文"
+
+[node name="EsButton" type="Button" parent="Panel/Margin/VBox/LanguageRow"]
+custom_minimum_size = Vector2(30, 16)
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_language")
+theme_override_font_sizes/font_size = 5
+text = "Español"
 
 [node name="BackButton" type="Button" parent="Panel/Margin/VBox"]
 custom_minimum_size = Vector2(0, 16)

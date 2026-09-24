@@ -1,0 +1,453 @@
+{
+    "id": "poli",
+    "name": "Poli",
+    "name_en": "Poli",
+    "gender": "남성",
+    "age": "50대",
+    "job": "경찰",
+    "npc_type": "story",
+    "can_die": false,
+    "is_stalker": false,
+    "personality": [
+        "Tiene un fuerte sentido de la responsabilidad.",
+        "Valora la seguridad de los demás por encima de todo.",
+        "Se considera incompetente.",
+        "Siente una culpa abrumadora por los casos que no puede resolver."
+    ],
+    "preferred_food": ["돼지고기"],
+    "disliked_food": ["소고기"],
+    "special_notes": [
+        "El único policía del pueblo y un NPC que aporta información: ubicación, hora y día en que se hallan los cuerpos, coartadas de los NPC y registros de casos pasados.",
+        "Siempre es el primero en encontrar los cuerpos, pero le inquieta en silencio el hecho extraño de no tener recuerdos de la noche en que ocurre cada asesinato.",
+        "En el pasado mató en defensa propia al culpable de un caso de acecho (víctima: Flora, culpable: el esposo de Mocha).",
+        "Llega a la escena poco antes del tercer asesinato e intenta arrestar al culpable, pero cuando este amenaza con un cuchillo al objetivo sobreviviente, le dispara y lo mata, de nuevo en defensa propia."
+    ],
+    "memento_item": {
+        "name": "Vieja placa desgastada",
+        "description": "La placa que le entregaron a Poli el primer día que fue policía. Ha estado con él en incontables escenas de crimen, y tiene las esquinas gastadas.",
+        "lore_lines": []
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/poli_port.png",
+        "happy": "res://assets/npc/portrait/poli_happy.png",
+        "sad": "res://assets/npc/portrait/poli_sad.png",
+        "angry": "res://assets/npc/portrait/poli_angry.png"
+    },
+    "sprite": "res://assets/npc/sprite/poliSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "police_working"},
+                {"time": "12:00", "state": "police_standing"},
+                {"time": "15:00", "state": "plaza1_police_office_standing"},
+                {"time": "18:00", "state": "farm_standing"},
+                {"time": "21:00", "state": "police_working"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "police_working"},
+                {"time": "12:00", "state": "police_standing"},
+                {"time": "15:00", "state": "plaza1_police_office_standing"},
+                {"time": "18:00", "state": "hospital_sitting"},
+                {"time": "21:00", "state": "police_working"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "police_working"},
+                {"time": "12:00", "state": "police_standing"},
+                {"time": "15:00", "state": "plaza1_police_office_standing"},
+                {"time": "18:00", "state": "cafe_looking"},
+                {"time": "21:00", "state": "police_working"}
+            ]
+        }
+    },
+    "affection_events": [
+        {
+            "threshold": 60,
+            "type": "dialogue",
+            "description": "과거 스토킹 사건과 정당방위 총격을 회고한다.",
+            "lines": [
+                "Llevas ya bastante tiempo en el pueblo, así que quizás hayas oído hablar de esto.",
+                "Hace unos años hubo un caso de acecho en este pueblo.",
+                "La víctima fue Flora, y el culpable era... el ex esposo de Mocha.",
+                {"text": "Fui a arrestarlo, y él se me vino encima... al final tuve que dispararle.", "emotion": "sad"},
+                "Dijeron que fue defensa propia, pero todavía hoy no sé si de verdad fue la decisión correcta.",
+                "Por eso siempre siento culpa con Mocha. Es parte de por qué quiero cuidarla."
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "낡은 경찰 명찰을 건네준다.",
+            "lines": [
+                {"text": "Te estoy profundamente agradecido, siempre me invitas comida tan buena.", "emotion": "happy"},
+                {"text": "Ese plato de cerdo que preparaste, en particular, fue una comida verdaderamente memorable.", "emotion": "happy"},
+                "Yo también quisiera darte algo especial.",
+                "¿Lo aceptarías? Es la placa que me entregaron cuando empecé en este trabajo.",
+                {"text": "De ahora en adelante, sigamos velando juntos por la paz de este pueblo.", "emotion": "happy"}
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "murder_discovery": {
+            "lines": [
+                "{player_name}. Tú...",
+                {"text": "Lo siento. Seguramente oíste el grito.", "emotion": "sad"},
+                {"text": "Acabo de sacar un saco del mar.", "emotion": "sad"},
+                {"text": "Dentro... había una persona. Por lo rápido que avanzó la descomposición al estar sumergida, parece que la mataron alrededor de las 6 de la tarde.", "emotion": "sad"},
+                {"text": "¿Que quién era?... {victim_name}.", "emotion": "sad"},
+                {"text": "Lamento que hayas tenido que ver esto.", "emotion": "sad"},
+                {"text": "Cómo puede pasar algo así, en un pueblo con tan pocos habitantes...", "emotion": "sad"},
+                {"text": "No parece obra de un forastero. A esta hora no hay ningún autobús que salga hacia la ciudad.", "emotion": "sad"},
+                {"text": "Maldición, ni siquiera sé cómo se lo voy a decir a la gente.", "emotion": "angry"},
+                {"text": "Por ahora, te pido que no menciones que fue un asesinato. Necesito tiempo para investigar primero.", "emotion": "sad"},
+                {"text": "El cuerpo debería enterrarse en algún lugar digno. Si no te importa, ¿podrías ayudarme, en silencio, sin que los vecinos se enteren?", "emotion": "sad"}
+            ]
+        },
+        "first_murder_occurred": {
+            "lines": [
+                {"text": "Pasé toda la noche en vela preguntando a los vecinos por sus coartadas.", "emotion": "sad"},
+                {"text": "Pero ninguno tenía nada extraño.", "emotion": "sad"},
+                {"text": "La verdad es que no sé cómo resolver esta situación.", "emotion": "sad"},
+                {"text": "...", "emotion": "sad"},
+                {"text": "En realidad, hay algo que tengo que sacarme del pecho.", "emotion": "sad"},
+                {"text": "No tengo recuerdos de esa noche. No sé por qué. Quizás el impacto de ver un cuerpo mutilado después de tanto tiempo... o quizás algo más.", "emotion": "sad"},
+                {"text": "Todos los demás están limpios, y el único que actúa de forma extraña soy yo.", "emotion": "sad"},
+                {"text": "¿Habré sido... yo mismo?", "emotion": "sad"},
+                {"text": "Pero aunque no lo haya hecho yo, ¿de qué sirve un policía que no puede atrapar a un solo culpable?", "emotion": "sad"},
+                {"text": "Ahh...", "emotion": "sad"},
+                {"text": "...Perdón. Por descargarte todo esto encima.", "emotion": "sad"},
+                {"text": "Atraparé al culpable pronto. Cuídate.", "emotion": "sad"}
+            ]
+        },
+        "second_murder_discovery": {
+            "lines": [
+                {"text": "Me dijeron que tú mismo encontraste el cuerpo, y que además lo denunciaste. Debió de ser una gran impresión.", "emotion": "sad"},
+                {"text": "Lo verifiqué, y... era {victim_name}.", "emotion": "sad"},
+                {"text": "Lamento que hayas sido tú quien lo encontró.", "emotion": "sad"},
+                {"text": "Pero esta vez es diferente. No lo arrojaron al mar; fue justo frente a tu casa.", "emotion": "sad"},
+                {"text": "Eso no puede ser casualidad.", "emotion": "sad"},
+                {"text": "Significa que el culpable te conoce. Y quizás... significa que te está vigilando.", "emotion": "sad"},
+                {"text": "Seré sincero. Esta vez yo también tengo miedo.", "emotion": "sad"},
+                {"text": "Por favor, no vayas a ningún lado solo por un tiempo. Lo digo en serio.", "emotion": "sad"},
+                {"text": "Me temo que el cuerpo tendrá que manejarse en silencio otra vez. ¿Me ayudarás?", "emotion": "sad"}
+            ]
+        },
+        "murder_grief_2": [
+            {"text": "...Perdí a otro.", "emotion": "sad"},
+            {"text": "Esta vez mi memoria está intacta. Quizás eso lo hace peor, de algún modo.", "emotion": "sad"},
+            {"text": "Fallar dos veces en proteger a alguien... no sé qué fracaso puede ser mayor para un policía.", "emotion": "sad"},
+            {"text": "No debería haber... una próxima vez.", "emotion": "sad"}
+        ],
+        "poison_victim_reaction": [
+            {"text": "{player_name}, hubo otro asesinato.", "emotion": "sad"},
+            {"text": "Pero el método de esta vez fue muy distinto al anterior. Si los otros fueron brutales, este fue limpio: solo veneno, que detuvo la respiración.", "emotion": "sad"},
+            "Creo que este fue obra de un tercero.",
+            "Le encargué la autopsia a Isha; dice que la causa de muerte fue intoxicación por brodifacum.",
+            "Y resulta que sé exactamente dónde se vende ese veneno.",
+            "...",
+            "Dime. ¿Por qué lo hiciste?",
+            "Ya tengo el registro de ventas de Marr donde consta que compraste veneno para ratas, así que no te molestes en mentir."
+        ],
+        "accomplice_release": [
+            "Tienes razón en lo que dices.",
+            "Seguiré yo mismo con la investigación desde aquí. Vete a casa por hoy."
+        ],
+        "arrest_scene_warning": [
+            {"text": "¡Alto ahí! ¡Si te mueves un centímetro más, disparo!", "emotion": "angry"},
+            "Tu falsa coartada después del último asesinato me pareció sospechosa, así que llevo un buen rato siguiéndote.",
+            "Efectivamente, fuiste tú todo este tiempo, Usher. Tú eres quien ha estado matando a todos.",
+            {"text": "¿Por qué lo hiciste? ¿No son ustedes y la gente de este pueblo como una familia, después de tanto tiempo juntos?", "emotion": "angry"}
+        ],
+        "arrest_scene_reaction": [
+            {"text": "¿Qué tonterías estás diciendo? Esta persona no tiene nada que ver contigo.", "emotion": "angry"},
+            {"text": "Cierra la boca y ponte de rodillas, ahora mismo. No voy a tolerar esto más.", "emotion": "angry"},
+            {"text": "Usher, quedas arrestado por los asesinatos en serie.", "emotion": "angry"},
+            {"text": "Tienes derecho a guardar silencio, y derecho a un abogado...", "emotion": "angry"}
+        ],
+        "arrest_scene_farewell": [
+            "Tú también vuelve a casa y descansa por hoy. Yo me encargo del resto.",
+            "Hoy viste algo muy difícil de soportar, así que asegúrate de pedirle a Isha una sesión de apoyo psicológico.",
+            {"text": "Uf. Me pregunto si de verdad esto es el final.", "emotion": "sad"},
+            {"text": "...Lo hiciste bien, {player_name}.", "emotion": "sad"}
+        ]
+    },
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    ["Será porque es lunes, pero el pueblo está inusualmente tranquilo.", "Bueno, en este trabajo es mejor que sea aburrido."],
+                    ["Ya empezó otra semana. Los lunes siempre parecen volver demasiado rápido."],
+                    ["¿Descansaste bien este fin de semana? Yo me quedé en casa.", "Con tanto patrullaje entre semana, necesito el fin de semana para recuperarme."]
+                ],
+                "mid": [
+                    ["El cuerpo se me pone pesado sin motivo los lunes. Supongo que es la edad."],
+                    ["Quedarme sentado en la comisaría se vuelve muy aburrido.", "Debería poner un televisor ahí."],
+                    ["Este fin de semana me llamó un viejo amigo para que nos viéramos.", "Pero estaba demasiado agotado para salir.", "Estoy llegando a la edad en que hasta divertirse cansa. Je."]
+                ],
+                "high": [
+                    ["¿Abriste hoy el restaurante?", {"text": "Invítame algún día, si se da la ocasión.", "emotion": "happy"}],
+                    ["Hoy me dan ganas de charlar en lugar de patrullar.", "Pero no sería de buena educación entretener a alguien ocupado, ¿verdad?"],
+                    ["La próxima vez que vengas, ¿me enseñarías a usar el correo electrónico?", "Todavía no me acostumbro a esas cosas; es un verdadero problema.", "No me mires así. Algún día tú también envejecerás."],
+                    {
+                        "lines": ["Llevo quince años usando la silla que me hizo Woody y todavía no ha crujido ni una vez.", "La habilidad de ese muchacho era algo especial de verdad."],
+                        "requires_alive": "woody",
+                        "fallback_lines": ["Llevo quince años usando la silla que me hizo Woody y todavía no ha crujido ni una vez.", "Extraño esa habilidad que ya no volveré a ver."]
+                    }
+                ]
+            },
+            "화": {
+                "low": [
+                    ["Otra vez de patrulla hoy. Sin mayores novedades."],
+                    ["Los martes siempre parecen alargarse eternamente, curiosamente."],
+                    ["Ten cuidado por el camino. Últimamente las calles están oscuras de noche.", "Debería proponer que pongamos más farolas."]
+                ],
+                "mid": [
+                    {
+                        "lines": ["Pasé un rato por la clínica de Isha. Parece que ha tenido más pacientes últimamente."],
+                        "requires_alive": "isha",
+                        "fallback_lines": ["El tratamiento de Isha para mi tobillo era verdaderamente lo mejor.", "Gracias a ella pude hacer mis rondas con seguridad.", "Se preocupó tanto por mí que siento que nunca podré cuidarla lo suficiente a cambio, y eso me pesa."]
+                    },
+                    {
+                        "lines": ["En la librería de Usher nunca hay mucho que comprar.", "Nunca tuve talento para la lectura, yo.", "Aunque está bien que tengan una sección de discos."],
+                        "requires_alive": "usher",
+                        "fallback_lines": ["Los discos que hacía Usher eran realmente algo.", "Ya no queda nadie que haga música así."]
+                    },
+                    [
+                        "¿Te gusta este pueblo?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "Sí, me gusta mucho", "affection": 2, "response": ["¿Es así? Yo he vivido aquí tanto tiempo que también le he tomado bastante cariño."]},
+                                {"label": "A veces se siente asfixiante", "affection": 0, "response": ["Hay días así. Yo sentía lo mismo cuando era joven."]},
+                                {"label": "Todavía no lo sé", "affection": 0, "response": ["No hay que apurarse. Con el tiempo lo irás entendiendo."]}
+                            ]
+                        }
+                    ]
+                ],
+                "high": [
+                    {
+                        "lines": ["¿Alguna vez has probado el café de Mocha?", "Yo soy más de café con leche.", {"text": "Supongo que con los años me han ido gustando las cosas más suaves.", "emotion": "happy"}],
+                        "requires_alive": "mocha",
+                        "fallback_lines": ["Extraño el café suave que preparaba Mocha."]
+                    },
+                    ["Cuando empecé en este trabajo, no veía la hora de llegar a una escena de crimen.", "Ahora solo deseo que cada día pase sin que nadie salga herido."],
+                    ["¿Sabes qué tipo de árbol está plantado frente a la comisaría?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "Un pino.", "affection": 0, "response": [{"text": "Ja, se parecen, pero es un abeto.", "emotion": "happy"}]},
+                                {"label": "Un abeto.", "affection": 4, "response": [{"text": "Oh. De verdad sabes de árboles. Estoy pensando en decorarlo para Navidad.", "emotion": "happy"}]},
+                                {"label": "Un árbol... un arbolwiki.", "affection": 0, "response": ["¿De qué demonios estás hablando? "]}
+                            ]
+                        }
+                    ],
+                    ["A veces me siento un rato en el banco del patio del templo.", {"text": "No es que pida nada en particular, solo disfruto de la calma.", "emotion": "happy"}]
+                ]
+            },
+            "수": {
+                "low": [
+                    ["Vivir en un pueblo tranquilo es agradable, pero a veces se vuelve aburrido.", "Ayuda tener un lugar al que ir en esos días.", "Para mí, es el mar. Pasar por ahí siempre me despeja la cabeza."],
+                    ["Los miércoles tengo papeleo que ordenar en la comisaría, así que ando algo ocupado."],
+                    ["Estoy sentado un rato en la comisaría, tomando un breve descanso. ¿Te gustaría descansar aquí un poco también?"]
+                ],
+                "mid": [
+                    {
+                        "lines": ["Últimamente me duelen las rodillas.", "Isha me dijo que bajara el ritmo de las patrullas.", "Pero soy policía; hay trabajo que debo hacer."],
+                        "requires_alive": "isha",
+                        "fallback_lines": ["Ahora que Isha ya no está, tengo que ir hasta la ciudad para ver a un médico.", "Ni de lejos tan hábil como ella.", "Mantenerse dedicado al propio trabajo toda una vida no es fácil.", "En ese sentido, Isha era realmente admirable."]
+                    },
+                    ["La res nunca me ha caído muy bien. ¿Y a ti?"],
+                    {
+                        "lines": ["Mocha me ha saludado con una frecuencia inusual últimamente. Quizás sea solo su carácter."],
+                        "requires_alive": "mocha",
+                        "fallback_lines": ["Me pregunto si las cosas habrían salido distinto si hubiera tratado un poco mejor a Mocha. Me sorprendo pensándolo."]
+                    }
+                ],
+                "high": [
+                    [{"text": "Como eres tú, te lo digo:", "emotion": "default"}, "a veces este trabajo se me hace demasiado pesado. Pero no puedo demostrarlo; solo preocuparía a los vecinos."],
+                    [
+                        "Nunca estoy del todo seguro de si estoy haciendo un buen trabajo protegiendo este pueblo, yo solo. ¿Cómo te parezco?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "Eres el mejor policía que hay", "affection": 2, "response": [{"text": "Je, significa mucho viniendo de ti. Me has dado fuerzas de verdad.", "emotion": "happy"}]},
+                                {"label": "Está bien descansar a veces", "affection": 1, "response": ["Descansar es también una forma de trabajo. Entendido, lo tendré en cuenta."]},
+                                {"label": "Yo tampoco estoy seguro", "affection": 0, "response": ["Es justo. Tampoco esperaba una respuesta, de todos modos."]}
+                            ]
+                        }
+                    ],
+                    ["También puse uno de los amuletos de Sage en la comisaría.", "No es que crea en particular en eso; simplemente me tranquiliza."]
+                ]
+            },
+            "목": {
+                "low": [
+                    ["Otro día tranquilo, sin novedades.", "Los días así son los mejores."],
+                    ["Los jueves suelen pasar sin sobresaltos."],
+                    ["¿Estás comiendo bien estos días?"]
+                ],
+                "mid": [
+                    ["Tengo que ver ese programa de cocina que pasan los jueves a las 10 de la noche.", "¿Que si cocino yo, dices?", "...No."],
+                    ["De verdad quiero mucho a este pueblo.", "Es pequeño, pero tiene todo lo que necesita.", "Ver a todos esforzándose cada uno en su lugar me llena de orgullo."],
+                    {
+                        "lines": [
+                            "A Roshi no se le ha visto mucho últimamente; ¿te lo has topado?",
+                            {
+                                "type": "choice",
+                                "options": [
+                                    {"label": "Lo vi hace poco en el lugar de pesca", "affection": 0, "response": [{"text": "¿Sí? ¿Parecía estar bien? Me alegra oírlo.", "emotion": "happy"}]},
+                                    {"label": "Yo tampoco sé", "affection": 0, "response": ["Mmm, debería pasar yo mismo a verlo."]},
+                                    {"label": "No me interesa", "affection": 0, "response": ["Ja, no hace falta ser tan frío.."]}
+                                ]
+                            }
+                        ],
+                        "requires_alive": "roshi",
+                        "fallback_lines": ["Una cerveza con Roshi en una tarde de fin de semana caía tan bien.", "Da algo de vergüenza decirlo entre dos viejos, pero lo extraño. Je."]
+                    }
+                ],
+                "high": [
+                    {
+                        "lines": ["Pasé hace un rato por la mueblería de Woody. Dicen que hay muchísimo trabajo últimamente. Deberías ir a ver cómo andan."],
+                        "requires_alive": "woody",
+                        "fallback_lines": ["Cada vez que veo cerrada aquí abajo la mueblería de Woody, me pesa en el ánimo."]
+                    },
+                    [{"text": "Charlando así contigo parece que se me va el cansancio del día.", "emotion": "happy"}],
+                    ["¿Abriste hoy el restaurante? ¿No te cansas de estar todo el día junto a la estufa?", "Avísame si alguna vez piensas entrar a la fuerza.", {"text": "¡Ja, es broma! Extrañaría demasiado tu comida.", "emotion": "happy"}],
+                    {
+                        "lines": ["Isha y Flora... no sé cuándo crecieron tanto esos dos chicos.", {"text": "Verlos cumplir cada uno con su parte me llena de un orgullo extraño.", "emotion": "happy"}],
+                        "requires_alive": ["isha", "flora"],
+                        "fallback_lines": ["Enfrentar la muerte de chicos a los que has visto crecer desde pequeños es verdaderamente duro.", "Todavía me acuerdo mucho de ella, incluso ahora."]
+                    }
+                ]
+            },
+            "금": {
+                "low": [
+                    ["Esta semana casi termina. Menos mal que no pasó nada."],
+                    ["Los viernes todos parecen un poco más animados. ¿O soy solo yo?"],
+                    {
+                        "lines": ["Esta noche me voy a tomar una cerveza con Roshi."],
+                        "requires_alive": "roshi",
+                        "fallback_lines": ["Ya no está Roshi, y no queda nadie que me haga compañía por las tardes.", "Las noches de viernes hacen que el hueco que dejó un amigo se sienta todavía más grande."]
+                    }
+                ],
+                "mid": [
+                    [
+                        "¿Crees que todos en el pueblo están bien estos días? ¿Cómo se ve desde donde estás?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "Todos parecen estar bien", "affection": 1, "response": [{"text": "Me alegra oírlo. Así debe ser.", "emotion": "happy"}]},
+                                {"label": "No sé, la verdad", "affection": 0, "response": ["¿Sí?... Yo también ando algo inquieto últimamente, sin razón clara."]},
+                                {"label": "Algunos parecen algo intranquilos", "affection": 0, "response": ["¿De veras? Dime luego, en voz baja, quiénes. Me preocupa un poco."]}
+                            ]
+                        }
+                    ],
+                    ["No puedo dejar de pensar en ese plato de cerdo que me preparaste.", "Intenté hacerlo yo en casa, pero lo quemé por completo.", "Controlar el fuego es más difícil de lo que parece."]
+                ],
+                "high": [
+                    [{"text": "Cerrar la semana charlando así contigo es agradable.", "emotion": "happy"}],
+                    {
+                        "lines": ["Isha me dijo que debería reducir el trabajo.", "Sé que solo es su regaño, pero se agradece que se preocupen por uno."],
+                        "requires_alive": "isha",
+                        "fallback_lines": ["Extraño los regaños que a veces me hacía Isha.", "En ese entonces fingía no oírlos, pero ahora sí he empezado a reducir el trabajo.", "No quiero preocuparla, esté donde esté."]
+                    },
+                    {
+                        "lines": ["Roshi volvió a salir a pescar hoy; me pregunto si habrá sacado algo bueno. ¿Por qué no vas y le preguntas de mi parte?", {"text": "Es broma, puedo preguntarle yo mismo.", "emotion": "happy"}],
+                        "requires_alive": "roshi",
+                        "fallback_lines": ["El sashimi de caballa que me cortaba Roshi era verdaderamente lo mejor.", "Fue un buen amigo que me dejó recuerdos maravillosos."]
+                    },
+                    {
+                        "lines": ["Mocha me puso una galleta extra. No sé si es buen servicio o si lo hace con todos los clientes."],
+                        "requires_alive": "mocha",
+                        "fallback_lines": ["¿Sabías que Mocha hacía no solo café, sino también unas galletas buenísimas?", "Tan ricas que me preguntaba por qué no las ponía en el menú.", "Es una lástima que ya no pueda volver a probarlas."]
+                    }
+                ]
+            },
+            "토": {
+                "low": [
+                    ["No podía quedarme quieto ni en mi día libre, así que salí de todos modos."],
+                    ["La patrulla ha estado tranquila hoy."],
+                    ["Los fines de semana hay menos gente; se está bien y en calma."]
+                ],
+                "mid": [
+                    ["Estaba a punto de tomarme un café en la cafetería."],
+                    ["Los fines de semana salgo solo por el gusto de ver la cara de la gente."],
+                    {
+                        "lines": ["Shepherd me ayudó una vez cuando estaba arreglando mi casa; tiene manos muy hábiles.", "Es una lástima que solo se dedique al trabajo del rancho."],
+                        "requires_alive": "shepherd",
+                        "fallback_lines": ["Shepherd también ayudó muchísimo cuando se construyó esta comisaría.", "De verdad era un amigo amable."]
+                    }
+                ],
+                "high": [
+                    ["A veces solo quiero descansar así, sin pensar en nada."],
+                    ["Tú también deberías descansar los fines de semana. No te conviene trabajar todos los días."],
+                    ["Vestido así te vas a destacar enseguida; facilitaría las patrullas.", {"text": "Ja, solo te tomo el pelo. El estilo te queda bien.", "emotion": "happy"}]
+                ]
+            },
+            "일": {
+                "low": [
+                    ["Solo de pensar que mañana ya empieza otra semana, me canso."],
+                    ["En días así solo quiero sentarme en un banco a tomar el sol."],
+                    ["A veces me gusta simplemente sentarme en un banco a ver pasar a la gente.", "Si hay una próxima vida, creo que me gustaría renacer como una roca."]
+                ],
+                "mid": [
+                    ["Me siento más tranquilo en días como este que entre semana."],
+                    ["En un día como hoy, solo espero que no pase absolutamente nada."],
+                    {
+                        "lines": ["Una vez jugué a patear una pelota con Marin, cuando Roshi estaba demasiado ocupado pescando para darse cuenta. Ese chico tenía un juego de piernas de verdad."],
+                        "requires_alive": "marin",
+                        "fallback_lines": ["Si hubiera sabido que Marin se iría tan pronto, habría jugado al fútbol con él más seguido.", "De verdad me arrepiento de haberlo rechazado con la excusa de las patrullas."]
+                    }
+                ],
+                "high": [
+                    ["¿Tienes planes para hoy?", {"text": "Tomemos una cerveza juntos algún día.", "emotion": "happy"}],
+                    ["Ojalá hubiera una persona más como tú en este pueblo. Yo podría descansar.", "Tú siempre andas corriendo de aquí para allá."],
+                    ["Tengo muchos papeles que ordenar; ¿vienes a ayudarme? Eso sí, sin paga.", {"text": "Ja, es broma. Un policía no debe andar metido en asuntos turbios.", "emotion": "happy"}]
+                ]
+            }
+        },
+        "rain_conversation": [
+            ["Los días de lluvia me inquietan, no sé por qué.", "Siento como si algo fuera a pasar."],
+            ["El pueblo se pone inusualmente tranquilo en días así. Perfecto para una taza de té."],
+            ["Maldición, si salgo a patrullar se me van a empapar los zapatos."],
+            ["Sentarme a escuchar la lluvia me calma un poco la mente."],
+            ["Lo mejor es que todos se queden en casa un día como este. Tú también deberías entrar."]
+        ],
+        "mail_reaction": [
+            ["Nunca logré responder como es debido a ese correo, y me ronda la cabeza. «{player_mail_content}»... no lo he olvidado."],
+            ["Leí tu correo. «{player_mail_content}»... supongo que significa que no pasa nada, ¿verdad? Bien, con eso me basta."]
+        ],
+        "horror_conversation": [
+            [{"text": "Estaba ordenando expedientes y volví a ver el nombre de {victim_name}.", "emotion": "sad"}, "Pensé que me acostumbraría, pero cada vez pesa de una forma nueva."],
+            ["Cada vez que paso patrullando por el lugar donde solía estar {victim_name}, bajo el paso sin darme cuenta."]
+        ]
+    },
+    "emails": {
+        "greeting": [
+            {"title": "Se nota que estoy envejeciendo", "lines": ["Últimamente pienso cada vez más en los viejos tiempos.", "Me encontré con Roshi en el lugar de pesca, y él también hablaba de su edad.", "Solo quería decirte que me alegra tenerte cerca."]},
+            {"title": "Sin novedades", "lines": ["No te escribo por ningún motivo en particular.", "Pasé de camino por la cafetería de Mocha y ella habló de ti.", "Solo me preguntaba cómo estás, nada más.", "No hace falta que respondas, debes de estar ocupado."]},
+            {"title": "Una noche sin poder dormir", "lines": ["Últimamente me cuesta dormir de noche, así que pensé en escribir unas líneas.", "Pensé en pedirle a Lama que me prestara el patio del templo, pero desistí.", "Si alguna noche tampoco puedes dormir, no te fuerces; simplemente descansa."]}
+        ],
+        "event_invite": [
+            {"title": "Comí muy bien", "lines": ["Gracias por invitarme ayer.", "Fue la primera vez en mucho tiempo que comí con la mente tranquila.", "Vuelve a llamarme alguna vez."]},
+            {"title": "Eso es lo que hace tu cocina", "requires_favorite_food": true, "lines": ["Ese plato de cerdo de ayer estuvo tan bueno como siempre.", "Confío en todo lo que preparas, pero ese fue especialmente memorable.", "Gracias."]}
+        ],
+        "gift_thanks": [
+            {"title": "Recibido, gracias", "lines": ["Recibí tu regalo con agradecimiento, {player_name}.", "Tener a alguien que piensa así en uno da más consuelo de lo que parece."]},
+            {"title": "De nuevo en deuda contigo", "lines": ["Esta vez volviste a darme algo. Perdona el agradecimiento tardío.", "Siento que siempre soy yo quien recibe, aunque Woody me dice que precisamente eso es lo divertido de la vida.", "La próxima vez yo también debería regalarte algo."]}
+        ],
+        "memento_reminder": {"title": "¿Tienes un momento?", "lines": ["Hace tiempo que no veo tu cara durante mis rondas.", "Tengo algo para ti, así que pásate por la comisaría cuando estés libre."]},
+        "story_progress": {
+            "player_arrival_day_1": {"title": "Bienvenido al pueblo", "lines": ["No estoy muy acostumbrado a escribir cosas así, así que le pedí ayuda a Isha y a Flora.", "No sé si lo estoy haciendo bien, pero... en fin, {player_name}, bienvenido al pueblo.", "Me dijeron que vas a montar un restaurante. Ven a la comisaría cuando quieras si necesitas algo.", "Isha dijo que también debería poner algunos emoticonos, pero simplemente no pude hacerlo."]}
+        },
+        "special_day": {}
+    }
+}

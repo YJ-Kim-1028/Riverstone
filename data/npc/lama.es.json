@@ -1,0 +1,320 @@
+{
+    "id": "lama",
+    "name": "Lama",
+    "name_en": "Lama",
+    "gender": "남성",
+    "age": "30대",
+    "job": "스님",
+    "npc_type": "story",
+    "can_die": false,
+    "is_stalker": false,
+    "personality": [
+        "Tranquilo y relajado.",
+        "Socarrón.",
+        "Realista.",
+        "No confía fácilmente en la gente."
+    ],
+    "preferred_food": ["소고기"],
+    "disliked_food": ["돼지고기"],
+    "special_notes": [
+        "Encargado del templo. Es lo que se dice un 'monje de pacotilla' y a menudo usa las donaciones como excusa para no pagar la comida.",
+        "Le gusta arreglarse.",
+        "Aprecia a Isha (por las donaciones), aprecia a Sage y ella lo detesta.",
+        "Le caen bien todos en el pueblo, pero no confía del todo en nadie."
+    ],
+    "memento_item": {
+        "name": "Cuentas de oración",
+        "description": "Unas cuentas de oración que Lama ha usado durante mucho tiempo. No tienen ninguna historia especial detrás.",
+        "lore_lines": [
+            "Es que no tenía nada mejor que darte.",
+            "Ah, no pongas esa cara de decepción."
+        ]
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/lama_port.png",
+        "happy": "res://assets/npc/portrait/lama_happy.png",
+        "sad": "res://assets/npc/portrait/lama_angry.png",
+        "angry": "res://assets/npc/portrait/lama_angry.png"
+    },
+    "sprite": "res://assets/npc/sprite/ramaSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "temple_sitting"},
+                {"time": "12:00", "state": "plaza3_standing"},
+                {"time": "16:00", "state": "book_standing"},
+                {"time": "18:00", "state": "hospital_lying"},
+                {"time": "21:00", "state": "temple_sitting"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "temple_sitting"},
+                {"time": "12:00", "state": "plaza4_standing"},
+                {"time": "16:00", "state": "plaza5_standing"},
+                {"time": "18:00", "state": "furniture_looking"},
+                {"time": "21:00", "state": "temple_sitting"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "temple_sitting"}
+            ]
+        }
+    },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "temple_sitting",
+        "npc_spawn": "temple_sitting",
+        "player_spawn": "lama_heart_player",
+        "lines": [
+            "¿Vienes a rezar?",
+            "¿Qué pasa? Te escucho.",
+            "Si es posible, haré realidad ese deseo por ti.",
+            "No será algo como ganar la lotería, ¿verdad?",
+            {"text": "Je, je, eso sí que no puedo.", "emotion": "happy"}
+        ]
+    },
+    "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "description": "예전에 사냥꾼이었다는 걸 밝히고 사냥용 소총을 준다.",
+            "lines": [
+                "{player_name}, ¿alguna vez has visto conejos correteando por la hierba de aquí al lado?",
+                "No es nada del otro mundo, es que... tienes un restaurante, ¿no? Pensé que esto te haría falta.",
+                {"text": "Y además estaría bien que yo pudiera probar un menú más variado.", "emotion": "happy"},
+                {"type": "gift", "item_id": "hunting_rifle"},
+                "¿Que por qué tiene un monje un rifle de caza?",
+                "¿No te lo había dicho? Antes era cazador. No me pega, ¿verdad?",
+                "Ten cuidado al usarlo. Si necesitas que te enseñe, dímelo."
+            ]
+        },
+        {
+            "threshold": 80,
+            "type": "dialogue",
+            "description": "취미로 만든 음반을 몰래 준다.",
+            "lines": [
+                "{player_name}, ven un momento.",
+                "Últimamente pareces venir mucho al templo. ¿Te preocupa algo?",
+                "Esta es la música que uso cuando medito. Si la escuchas, tu mente también se sosegará.",
+                {"type": "gift", "item_id": "record_the_heart_sutra_remix"},
+                "Te la doy solo a ti, como algo especial. Escúchala bien."
+            ]
+        },
+        {
+            "threshold": 60,
+            "type": "dialogue",
+            "description": "이샤가 마린의 엄마 일로 절에서 고해성사하는 걸 엿들었던 일을 무심코 흘린다.",
+            "lines": [
+                "¿Sabes por qué Isha está tan obsesionada con ser perfecta?",
+                "Hace unos años Marin perdió a su madre. La médica a cargo entonces era Isha.",
+                "No sé si cometió algún error o no, pero después de que esa mujer murió, Isha vino sola a confesarse llorando delante de la estatua de Buda.",
+                "...Ah, esto lo oí a escondidas, quizá no debería contártelo. Bueno, ya lo dije.",
+                "No se lo cuentes a Roshi. Ese hombre se desmoronaría si lo supiera."
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "묵주를 건네준다.",
+            "lines": [
+                "Toma esto.",
+                "Son unas cuentas de oración.",
+                "No es nada especialmente especial.",
+                "Pensé que quizá te ayudaría a espantar la mala suerte que se te acerque."
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "murder_grief": [
+            {"text": "...Hoy no voy a bromear.", "emotion": "sad"},
+            {"text": "Creo que nunca me acostumbraré a algo así.", "emotion": "sad"},
+            {"text": "Lo mínimo que puedo hacer es rezar por su alma.", "emotion": "sad"}
+        ],
+        "murder_grief_2": [
+            "Volví a encender incienso.",
+            {"text": "Esta vez me temblaban un poco las manos.", "emotion": "sad"},
+            "A veces me pregunto para qué sirve tanta fe, pero luego pienso: sin siquiera eso, ¿qué me quedaría?"
+        ]
+    },
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    ["Hoy un pájaro se posaba una y otra vez en el patio del templo.", "¿De qué vida se habrá reencarnado?"],
+                    ["Hola. ¿Aburrido?", "Entonces deja una donación al salir.", {"text": "Je, je, es broma. No hace falta.", "emotion": "happy"}],
+                    ["¿Qué haces aquí tan temprano un lunes? ¿Ya cometiste algún pecado?"]
+                ],
+                "mid": [
+                    ["¿Acaso el lunes cambia algo? Holgazanear es mi trabajo principal de todos modos."],
+                    ["Ya que hablamos de carne, ¿qué tiene de malo que un monje la coma? Ni que la hubiera matado yo."],
+                    ["Llevar el hábito bien planchado es una virtud esencial en un monje.", "Eh, no vuelvas a sacar el tema de la carne."]
+                ],
+                "high": [
+                    ["Contigo aquí ya no me aburro.", {"text": "Las historias de la gente con negocio siempre son entretenidas.", "emotion": "happy"}, "Pasa cada personaje raro..."],
+                    ["La fe no es para tanto. Simplemente se disfruta, nada más."],
+                    ["Con unas pocas personas que me aprecien lo justo, basta. Más que eso es puro cansancio."],
+                    {"lines": ["Woody parece bastante devota. Sería estupendo que una chica así se hiciera seguidora."], "requires_alive": "woody", "fallback_lines": ["Woody de verdad era una chica devota.", "Quizá alguien como ella debió haber llevado este templo en lugar de mí."]}
+                ]
+            },
+            "화": {
+                "low": [
+                    ["La carne de cerdo no es lo mío...", "No por razones religiosas, es que no va con mi gusto.", {"text": "Paladar bastante fino para un monje, ¿eh? Je, je.", "emotion": "happy"}],
+                    ["¿Vienes a ver el templo? Mira con calma.", "Este lugar es para todos, después de todo."],
+                    ["Los martes los fieles escasean un poco. Bueno, el templo no es un negocio."],
+                    {"lines": ["Ese chico Marin va todo el tiempo al santuario, pero por aquí ni se asoma.", {"text": "Me duele un poco, la verdad. Quizá debí haber nacido como una chica bonita.", "emotion": "happy"}], "requires_alive": "marin", "fallback_lines": ["Cuando estaba vivo, Marin siempre iba al santuario en vez de venir aquí.", "Si estaba molesto conmigo, supongo que debí haberme disfrazado de chica...", "Era un chico divertido."]}
+                ],
+                "mid": [
+                    ["Eso de que has cortado con la vida mundana es todo mentira. Solo intentas aferrarte menos."],
+                    ["Cambié el color de la túnica esta vez, ¿qué tal se ve?", "...¿No mucho?", {"text": "Supongo que volveré a ponerme la de siempre.", "emotion": "happy"}],
+                    ["No sé por qué, pero los martes el mokugyo suena más fuerte."]
+                ],
+                "high": [
+                    {"lines": ["¿Isha? Es buena persona. Y da buenas donaciones. ¿No es una virtud estupenda en una sociedad capitalista?"], "requires_alive": "isha", "fallback_lines": ["Este templo ha durado tanto gracias a Isha.", "Lo mínimo que puedo hacer es rezar para que haya ido a un buen lugar."]},
+                    ["Me caen bien todos en este pueblo. No hay razón para que me caiga mal quien me aprecia."],
+                    ["Tomármelo con calma es mi especialidad. Nunca hago nada con prisa."]
+                ]
+            },
+            "수": {
+                "low": [
+                    ["Hoy no tenía nada que hacer, así que me eché una siesta."],
+                    ["Los miércoles barro un poco el patio del templo, tomo algo de té.", {"text": "¿Qué tal, da envidia, eh?", "emotion": "happy"}],
+                    ["En un día soleado, quedarse sentado así es lo mejor."]
+                ],
+                "mid": [
+                    ["Una vez vi a Sage hacer un talismán, escribía esos caracteres complicados como si nada.", {"text": "¿Un monje?", "emotion": "happy"}, {"text": "A un monje le basta con vaciar la mente.", "emotion": "happy"}],
+                    ["Yo no espero mucho de nadie. Así no hay nada que me decepcione.", "Cuanto mayor es la alegría, mayor es la tristeza que viene después.", "Mantengo la mente en calma en todo momento."],
+                    ["¿Que si creo en la reencarnación? En vez de preocuparme por la próxima vida, mejor vivir bien esta."],
+                    {"lines": ["Flora parece algo inestable a veces. Si una chica así se hiciera seguidora, quizá se le calmaría el ánimo."], "requires_alive": "flora", "fallback_lines": ["Flora, ojalá ahora esté en paz, al menos.", "Esa inestabilidad que mostraba a veces siempre daba un poco de pena verla."]}
+                ],
+                "high": [
+                    ["Hasta tú estarás de acuerdo en que tengo una cara demasiado buena para desperdiciarla de monje, ¿no?", {"text": "Quizá debería vivir algo más mundanamente. Je, je.", "emotion": "happy"}],
+                    ["A veces viene algún fiel a desahogar sus preocupaciones. Yo me limito a escucharlo todo, más o menos.", "Resolverlo... bueno, eso les toca a ellos.", "A mí escuchar me basta."],
+                    {"lines": ["Ver a Roshi salir tantas veces al mar me recuerda un poco a lo que hago yo.", "Estar solo en un lugar tan amplio hace que se te vengan todo tipo de pensamientos."], "requires_alive": "roshi", "fallback_lines": ["Roshi y yo teníamos mucho en común, de un modo u otro.", "Sentía mucha afinidad con él. Da pena que ya no esté."]},
+                    ["Tomarse algo demasiado en serio solo cansa. Vivir sin apretarse es la respuesta."]
+                ]
+            },
+            "목": {
+                "low": [
+                    ["Hoy hace buen tiempo. En días así solo quiero quedarme sentado."],
+                    ["Los jueves no tengo mucho que decir. Simplemente estoy bien."],
+                    ["Hoy no hay fieles. Bueno, si no vienen, iré yo a ellos."]
+                ],
+                "mid": [
+                    ["No soy un monje perfecto. Quien me conoce lo sabe.", "Pero un monje sigue siendo un monje.", "¿Dónde demonios se encontraría uno perfecto?"],
+                    ["Eh, cuánto tiempo.", {"text": "Casi se me olvida tu cara.", "emotion": "happy"}],
+                    ["Me hice hacer ropa nueva y la reacción ha sido bastante tibia."]
+                ],
+                "high": [
+                    ["Apreciar a alguien y confiar en él son cosas distintas. Así son las cosas, qué le vamos a hacer."],
+                    ["Confiar en todos cansa. Apreciar lo justo y dudar lo justo es el punto perfecto."],
+                    ["Tú eres, bueno, una persona bastante divertida. Sin mala intención."],
+                    ["Cuando te enfadas, con solo darte cuenta de que estás enfadado ya se calma la mitad. No fuerces para quitártelo."]
+                ]
+            },
+            "금": {
+                "low": [
+                    ["Otra semana que se va. El tiempo vuela de verdad."],
+                    ["Si tienes la cabeza llena de pensamientos, párate un rato frente a la estatua de Buda.", "Ayuda a vaciar la mente."],
+                    ["Esta semana tampoco hice gran cosa. Bueno, es lo normal en mí."]
+                ],
+                "mid": [
+                    [
+                        "Oye, {player_name}. ¿Te parece sospechoso un monje de pacotilla como yo?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "Sí, un poco sospechoso.", "affection": 1, "response": ["Qué cruel. Me duele un poco."]},
+                                {"label": "No, pareces una persona divertida.", "affection": 1, "response": [{"text": "¿Ah, sí? Da gusto oír eso.", "emotion": "happy"}]},
+                                {"label": "No estoy seguro.", "affection": 0, "response": ["Esa es la respuesta más segura que podías dar."]}
+                            ]
+                        }
+                    ],
+                    ["Esta semana pasó sin mayores novedades. Eso es bueno."],
+                    ["A veces me pregunto si de verdad debería esforzarme más con mis oraciones."],
+                    ["Una vez le sugerí a Usher que probara a copiar sutras. Pensé que le ayudaría a escribir."]
+                ],
+                "high": [
+                    ["Esta noche, no sé por qué, se me antoja carne de res.", "¿Estás listo, chef?"],
+                    ["Fe o lo que sea aparte, lo único que necesito es tumbarme cómodamente en la cama a última hora de la noche."],
+                    ["Me dijeron que Sage ha hecho talismanes nuevos hace poco, pero a mí no me vende ninguno."]
+                ]
+            },
+            "토": {
+                "low": [
+                    ["Es fin de semana, ¿te apetece pollo frito con cerveza?", {"text": "Es broma. No pongas esa cara.", "emotion": "happy"}],
+                    ["Los sábados me lo paso pasando el rato por el pueblo."],
+                    ["¿Acaso un día libre cambia algo? Para un monje, todos los días son libres."]
+                ],
+                "mid": [
+                    ["Yo solo vivo con sinceridad, nada más. ¿Qué tiene de malo?", "No hace falta vivir según una regla fija."],
+                    ["Hoy salí arreglado. ¿Se nota?"],
+                    {"lines": ["Isha siempre parece estar esforzándose demasiado cada vez que la veo. Podría descansar un poco."], "requires_alive": "isha", "fallback_lines": ["Debí haber tratado mejor a Isha cuando venía al templo.", "Siempre se la veía esforzándose tanto que daba pena.", "Espero que ahora descanse en paz."]}
+                ],
+                "high": [
+                    ["Contigo el tiempo se me pasa sin darme cuenta."],
+                    ["A veces al verte pienso que la vida de todo el mundo es más o menos igual."],
+                    ["Cuéntame de tu negocio. Da gusto escucharte."],
+                    {"lines": ["Shepherd siempre anda sonriendo, ¿no es un poco raro? Una persona debería tener alguna sombra en alguna parte."], "requires_alive": "shepherd", "fallback_lines": ["Pensándolo ahora, mantener una sonrisa constante como hacía Shepherd probablemente no era fácil.", "A veces extraño esa sonrisa."]}
+                ]
+            },
+            "일": {
+                "low": [
+                    ["Parece que hasta los fieles duermen hasta tarde los domingos. Ni un alma a la vista."],
+                    ["Supongo que los domingos yo también puedo permitirme ser un poco perezoso."],
+                    ["Los días libres no tengo nada planeado. Simplemente voy viendo sobre la marcha."]
+                ],
+                "mid": [
+                    ["Pasarlo bien hoy es lo más importante. Lo demás son problemas para más tarde."],
+                    {"lines": ["Pasé un momento por la tienda de Marr, sigue igual de callado. Tiene su encanto, eso también."], "requires_alive": "marr", "fallback_lines": ["Marr era tan callado que pensé que su ausencia no dejaría un gran vacío.", "Pero me acuerdo de él más a menudo de lo que esperaba."]},
+                    ["Suéltalo todo. Y si no puedes soltarlo, suelta hasta el esfuerzo por soltar."]
+                ],
+                "high": [
+                    ["Hoy también viniste. Debe de ser un día decente."],
+                    ["Todos dicen que soy alguien en quien no se puede confiar, y bueno, no se equivocan."],
+                    ["Aun así, tú estás entre los más divertidos. Sigue viniendo."],
+                    ["Poli tiene un trabajo de mucha responsabilidad. Yo no podría hacer algo así ni muerto."]
+                ]
+            }
+        },
+        "rain_conversation": [
+            ["Rezar mientras escuchas la lluvia es algo bastante agradable.", "Da la sensación de que limpia la mente."],
+            ["En los días húmedos hay que cuidar mucho la ropa, qué fastidio.", "La colada huele mal si no se seca bien."],
+            ["Si no tienes paraguas, descansa un rato en el templo."]
+        ],
+        "mail_reaction": [
+            [{"text": "Vi tu correo. '{player_mail_content}', vaya, hasta esto es cosa del destino, supongo. Je, je, no te lo tomes demasiado en serio.", "emotion": "happy"}]
+        ],
+        "horror_conversation": [
+            ["Puse una varita de incienso más frente a la estatua de Buda. Por {victim_name}.", {"text": "Fe o no fe, simplemente me apeteció hacerlo.", "emotion": "sad"}],
+            ["A veces creo oír la voz de {victim_name} en el patio. Sé que es solo mi imaginación, pero aun así me giro a mirar."]
+        ]
+    },
+    "emails": {
+        "greeting": [
+            {"title": "Una cadena de la suerte", "lines": ["Esta carta comenzó en Inglaterra y ha dado la vuelta al mundo una vez al año, trayendo suerte a quien la recibe. Ahora que ha llegado a usted, debe salir de sus manos en un plazo de 4 días. Debe enviar esta carta, junto con 7 copias, a personas que necesiten buena suerte. Se permiten fotocopias. Quizá piense que es mera superstición, pero es verdad. Un hombre en Inglaterra llamado HGXWCH recibió esta carta en 1930. Le pidió a su secretaria que la copiara y la enviara. Unos días después ganó la lotería y recibió 2000 millones de wones. Una persona recibió esta carta pero olvidó que debía salir de sus manos en menos de 96 horas. Poco después lo despidieron de su trabajo. Solo más tarde supo la verdad y, tras enviar 7 copias, consiguió un empleo aún mejor. El presidente Kennedy de Estados Unidos recibió esta carta, pero simplemente la tiró. Nueve días después fue asesinado. Recuérdelo. Si envía esta carta tendrá 7 años de buena suerte; si no, 3 años de mala suerte. Y nunca debe tirar esta carta ni garabatear sobre ella. 7 copias. Quien reciba esta carta será bendecido con buena fortuna. Puede resultar una molestia, pero piense que es por su bien. Le deseo 7 años de suerte..."]},
+            {"title": "Te dije que te leería la fortuna", "lines": ["La próxima vez que vengas, dime tu fecha y hora de nacimiento.", "No te preocupes, no se lo voy a vender a nadie. Tampoco hay quien lo compre."]},
+            {"title": "{player_name}, ¿qué haces?", "lines": ["Escríbeme una carta si te aburres.", "Este pueblo ya es bastante tranquilo; aparte de ti, no hay nadie que hable conmigo."]}
+        ],
+        "event_invite": [
+            {"title": "Estuvo buenísimo, en serio", "lines": ["La carne de res de ayer estaba de primera.", "He decidido dejar la iluminación para la próxima vida. Por ahora solo quiero tener la barriga llena.", "Invítame otra vez. Vale la pena tenerme cerca."]},
+            {"title": "Parece que ya soy cliente fijo", "lines": ["Intenté contar cuántas veces me has invitado ya, pero lo dejé a medias.", "A este paso puede que me quede a vivir ahí para siempre.", "Es broma. Gracias por invitarme."]}
+        ],
+        "gift_thanks": [
+            {"title": "¡Un regalo, nada menos!", "lines": ["Gracias por el detalle tan acertado.", "{player_name}, me alegraste un poco el día.", "Un regalo así siempre lo recibo con gusto."]},
+            {"title": "Interrumpió mi meditación", "lines": ["Estuve tan ocupado presumiendo del regalo que me diste que me salté la oración de la tarde.", "De todos modos tampoco se me daba bien, así que no te sientas mal.", "Gracias por el regalo."]}
+        ],
+        "memento_reminder": {"title": "Eh, {player_name}", "lines": ["¿Por qué últimamente vienes tan poco? El pueblo se ha vuelto aburrido.", "Tengo algo para ti. Pásate por el templo cuando tengas ocasión."]},
+        "story_progress": {
+            "player_arrival_day_1": {"title": "Bienvenido al pueblo... aunque antes de eso", "lines": ["La noticia de que alguien nuevo se mudó ya llegó hasta el templo. Así de pequeño es este pueblo.", "Si te aburres, pásate por el templo. Te leeré la fortuna, aunque la mitad me la invento.", "En fin, me alegra que hayas venido. Ojalá resultes ser alguien interesante."]}
+        },
+        "special_day": {}
+    }
+}

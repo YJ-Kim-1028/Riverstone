@@ -1,0 +1,325 @@
+{
+    "id": "shepherd",
+    "name": "Shepherd",
+    "name_en": "Shepherd",
+    "gender": "남성",
+    "age": "20대",
+    "job": "목장 관리 (벨제의 목장)",
+    "npc_type": "normal",
+    "can_die": true,
+    "is_stalker": false,
+    "personality": [
+        "다정하다.",
+        "사람을 잘 챙긴다.",
+        "사랑 표현이 풍부하다.",
+        "죄책감을 회피하는 경향이 있다.",
+        "자기합리화에 능하다.",
+        "자신보다 동물을 더 사랑하는 벨제 때문에 외로움을 느낀다."
+    ],
+    "preferred_food": ["오징어"],
+    "disliked_food": ["옥수수"],
+    "special_notes": [
+        "마을에서 대표적인 사랑꾼으로 알려져 있으나, 실제로는 모카와 불륜 관계이다.",
+        "절을 자주 방문하며, 기도로 자신의 죄가 사해진다고 믿는다.",
+        "가난 때문에 벨제와 상의 없이 소 '맑음이'를 팔아버린 과거가 있다."
+    ],
+    "memento_item": {
+        "name": "Anillo",
+        "description": "Un anillo que mandó hacer junto con Belze cuando eran novios. Por dentro tiene grabadas, casi borradas, las palabras «Juntos para siempre».",
+        "lore_lines": [
+            "Qué raro, ¿no?",
+            "En ese tiempo sentía que todo iba a durar para siempre."
+        ]
+    },
+    "portraits": {
+        "default": "res://assets/npc/portrait/shep_port.png",
+        "happy": "res://assets/npc/portrait/shep_happy.png",
+        "sad": "res://assets/npc/portrait/shep_sad.png",
+        "angry": "res://assets/npc/portrait/shep_angry.png"
+    },
+    "sprite": "res://assets/npc/sprite/shepSprite.png",
+    "sprite_frame_width": 32,
+    "sprite_frame_height": 64,
+    "sprite_walk_frame_count": 8,
+    "schedule": {
+        "mon_wed_thu": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "pasture_looking"},
+                {"time": "12:00", "state": "cafe_looking"},
+                {"time": "16:00", "state": "plaza3_standing"},
+                {"time": "18:00", "state": "pasture_looking"}
+            ]
+        },
+        "tue_fri": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "pasture_looking"},
+                {"time": "12:00", "state": "cafe_sitting"},
+                {"time": "16:00", "state": "fish_standing"},
+                {"time": "21:00", "state": "pasture_looking"}
+            ]
+        },
+        "weekend": {
+            "visible_only_when_raining": false,
+            "entries": [
+                {"time": "09:00", "state": "pasture_looking"},
+                {"time": "12:00", "state": "pasture_working"},
+                {"time": "18:00", "state": "book_standing"},
+                {"time": "21:00", "state": "pasture_looking"}
+            ]
+        }
+    },
+    "heart_event_30": {
+        "threshold": 30,
+        "anchor_state": "pasture_looking",
+        "npc_spawn": "shepherd_heart_npc",
+        "player_spawn": "shepherd_heart_player",
+        "lines": [
+            "Hola, {player_name}. ¿Cómo va el restaurante últimamente?",
+            "Me han dado ganas de aprender a cocinar algo.",
+            "No se me da bien, pero quisiera preparar al menos un plato como se debe.",
+            {"text": "Más adelante... quiero poder hacérselo con mis propias manos a alguien que quiero.", "emotion": "happy"}
+        ]
+    },
+    "affection_events": [
+        {
+            "threshold": 50,
+            "type": "dialogue",
+            "description": "Passes off a hunting dog an acquaintance dumped on him to the player.",
+            "lines": [
+                "Ah, es verdad, hace poco un conocido me dejó un perro de caza.",
+                "Dijo que ya no podía seguir criándolo con tanto salir de cacería y me lo encajó de golpe.",
+                {"text": "Creo que contigo estaría muchísimo mejor cuidado. ¿Qué te parece?", "emotion": "happy"},
+                "Y el nombre también tienes que ponérselo tú, uno nuevo."
+            ]
+        },
+        {
+            "threshold": 70,
+            "type": "dialogue",
+            "description": "마르 혼자만 비싸게 파는 것에 불만을 터뜨린다.",
+            "lines": [
+                {"text": "¿Por qué ese tal Marr vende todo tan caro, solo él?", "emotion": "angry"},
+                {"text": "Ese tipo de cosas la gente suele comprarlas cuando quiere ganarse el favor de alguien, ¿no?", "emotion": "angry"},
+                {"text": "Ese comerciante no tiene corazón. Se llena los bolsillos aprovechándose de los sentimientos de la gente.", "emotion": "angry"},
+                "Aun así, no hay otro lugar donde comprarlo, así que... qué se le va a hacer."
+            ]
+        },
+        {
+            "threshold": 100,
+            "type": "memento",
+            "description": "벨제와 함께 끼던 반지를 건네준다.",
+            "lines": [
+                "{player_name}. ¿No sientes que nos hemos acercado bastante?",
+                "Tú también lo sabes, ¿verdad? Que entre nosotros hay una cercanía especial.",
+                "Bueno, estoy casado, pero no creo que eso lo vuelva algo malo.",
+                "Siempre deseé tener a alguien cerca de mí.",
+                {"text": "Quiero darte algo mío que es muy valioso.", "emotion": "happy"},
+                {"text": "Ya no siento nada por este anillo. Ahora tú me importas más.", "emotion": "happy"}
+            ]
+        },
+        {
+            "threshold": 105,
+            "type": "dialogue",
+            "description": "인기척을 죄책감 탓으로 돌리며 기도로 넘기려 한다.",
+            "lines": [
+                "Últimamente, cada noche cuando termino de ordenar el pastizal, siento un escalofrío en la espalda, como si alguien me estuviera mirando.",
+                "Será que últimamente no ando tranquilo. Debí haber vivido sin hacer nada malo.",
+                {"text": "Jaja, es broma. No te lo tomes tan a pecho.", "emotion": "happy"}
+            ]
+        }
+    ],
+    "story_dialogue": {
+        "murder_grief": [
+            "Es algo horrible. De verdad.",
+            "Pero si me quedo pensando en eso, siento que me voy a derrumbar primero, así que trato de no hacerlo.",
+            "Supongo que solo me queda rezar con todas mis fuerzas."
+        ],
+        "murder_grief_2": [
+            "Una vez, tal vez lo podía aceptar. Pero dos...",
+            "Ni rezando se me pasa ya.",
+            "Me da miedo lo que de verdad está pasando en este pueblo."
+        ],
+        "suspicion_talk_2": {
+            "requires_alive": "marr",
+            "lines": [
+                "Mocha sospecha de Marr. Yo también creo que ese tiene algo raro.",
+                "¿No se lo puede encerrar primero y pensar después? La seguridad de la gente es más importante.",
+                "Poli dijo que encontraron un cuerpo justo frente a tu casa.",
+                "Como no tiene amigos, es más probable que se obsesione con alguien que lo trate bien, como tú. Bueno, solo digo."
+            ]
+        },
+        "partner_death_reaction": [
+            {"text": "¿Por qué tenía que ser Mocha? ¿Sabes lo que ella significaba para mí?", "emotion": "sad"},
+            {"text": "Si hubiera sido Belze en su lugar... no, no debería pensar esto. Pero no puedo evitar pensarlo.", "emotion": "sad"},
+            {"text": "Era la única que me dio algo de calidez. Si hay un dios, ¿no es esto demasiado cruel?", "emotion": "sad"},
+            {"text": "...Perdón. Ahora mismo no estoy en mis cabales.", "emotion": "sad"}
+        ]
+    },
+    "dialogue": {
+        "daily": {
+            "월": {
+                "low": [
+                    {"lines": ["Hola, {player_name}. Qué bueno verte. ¿Qué hiciste hoy?", "Yo estuve toda la mañana ayudando en el rancho de Belze."], "requires_alive": "belje", "fallback_lines": ["Hola, {player_name}. Qué bueno verte. ¿Qué hiciste hoy?", "Yo estuve toda la mañana trabajando en el rancho."]},
+                    ["Si te quedas decaído solo porque es lunes, no consigues nada. ¡Hay que animarse!"],
+                    ["En el establo la ventilación es importante. Así huele menos."]
+                ],
+                "mid": [
+                    {"lines": ["Belze no parece tener muchos amigos cercanos en el pueblo. Si no soy yo, ¿quién la va a cuidar?"], "requires_alive": "belje", "fallback_lines": ["¿Habría estado menos sola si hubiera tenido más amigos en vida?", "No... tal vez si yo no me hubiera mantenido a distancia de ella..."]},
+                    {"lines": ["A veces extraño los ratos en que cocinábamos juntos con Belze.", "¿Ahora?", "Ni siquiera comemos juntos. Ja."], "requires_alive": "belje", "fallback_lines": ["A veces extraño los ratos en que cocinábamos juntos con Belze."]},
+                    ["{player_name}. Ya te habrás hecho amigo de alguien cercano en el pueblo, ¿no?", "¿Quién es?"]
+                ],
+                "high": [
+                    {"lines": ["A veces siento a Belze tan lejana.", "En la familia uno debería poder apoyarse en el otro, al fin y al cabo..."], "requires_alive": "belje", "fallback_lines": ["Incluso cuando estaba con Belze, la sentía tan lejana.", "Pero ahora... hasta extraño esa distancia."]},
+                    {"lines": [{"text": "Roshi me regaló pescado hoy. Es un buen día.", "emotion": "happy"}], "requires_alive": "roshi", "fallback_lines": ["Extraño el pescado que me regalaba Roshi.", "De verdad era un buen hombre."]},
+                    {"lines": ["Esta mañana le mandé un mensaje a Belze preguntándole si había dormido bien, mientras salía a comprar forraje.", "Pero tardó muchísimo en contestar.", "Dijo que estaba ocupada cuidando a las vacas."], "requires_alive": "belje", "fallback_lines": ["Belze ya se fue, así que me toca a mí cuidar a los animales que dejó."]}
+                ]
+            },
+            "화": {
+                "low": [
+                    ["Uf, qué sueño. Quiero oler unos granos de café aromáticos."],
+                    ["¿Has ido a la cafetería? El muñeco de pollito en el centro es súper lindo.", "Deberías ir alguna vez."]
+                ],
+                "mid": [
+                    ["Me encantan los platos de calamar. Comí tanto de los que me daba Roshi que se volvió mi comida favorita."],
+                    {"lines": ["Ojalá pudiera ver más seguido a Roshi.", "Solo lo encuentro los días de lluvia."], "requires_alive": "roshi", "fallback_lines": ["A Roshi solo se lo veía los días de lluvia.", "Debí aprovechar más esos momentos mientras pude."]},
+                    {"lines": ["Cuando un animal se enferma, Belze se queda a su lado toda la noche.", "Me preocupa que se sobreexija hasta enfermarse."], "requires_alive": "belje", "fallback_lines": ["Cuando un animal se enfermaba, Belze se quedaba a su lado toda la noche.", "Yo nunca llegué a tanto, pero... bueno, igual me preocupaba mucho."]},
+                    {"lines": ["Mocha dijo que vas mucho a la cafetería.", "Si me ves ahí, salúdame.", "Yo voy seguido solo porque me gusta el café."], "requires_alive": "mocha", "fallback_lines": ["Extraño el café que me preparaba Mocha.", "No... quizás a quien extraño es a ella, no al café."]}
+                ],
+                "high": [
+                    ["¿Hasta cuándo tendré que vivir así?", "A veces, cuando lo pienso, me quedo sin rumbo."],
+                    {"lines": ["Hoy Belze, por una vez, se mostró preocupada por mí.", {"text": "Días así me ponen de buen humor sin motivo.", "emotion": "happy"}], "requires_alive": "belje", "fallback_lines": ["Hoy estoy de buen humor, qué raro. Será por el buen clima.", "¿Necesitas algo?"]},
+                    ["Si alguna vez oyes rumores raros sobre mí, no te los creas todos.", "Mientras más pequeño es el pueblo, más le gusta a la gente hablar de los demás."]
+                ]
+            },
+            "수": {
+                "low": [
+                    {"lines": ["Ya estamos a mitad de semana. Belze también debe estar agotada.", "Quizás debería invitarla a tomar un café."], "requires_alive": "belje", "fallback_lines": ["Ya estamos a mitad de semana. Estoy agotado. Quizás vaya a tomar un café."]},
+                    ["Qué bueno verte la cara.", "Veámonos seguido, {player_name}"],
+                    ["¿Hubo mucho trabajo hoy en el restaurante?", "Descansa bien y que tengas un buen día."]
+                ],
+                "mid": [
+                    ["Este año también pasó mi cumpleaños sin que nadie lo notara.", "No es que esperara mucho...", "Así pasa cuando uno anda ocupado ganándose la vida."],
+                    ["Fui al templo. Me alivió un poco el corazón.", "Tener un lugar donde expiar es una bendición para alguien tan lleno de errores como yo."],
+                    ["¿Por qué alguien con la cara de Lama se habrá hecho monje... mmm...?"]
+                ],
+                "high": [
+                    {"lines": ["La verdad, Belze y yo no somos tan cercanos.", "A veces pasa con las parejas casadas.", "Ojalá alguien fuera un buen amigo para ella."], "requires_alive": "belje", "fallback_lines": ["La verdad, Belze y yo nunca fuimos tan cercanos.", "Siempre deseé que alguien que no fuera yo se ocupara de que ella no se sintiera sola.", "Mirando atrás, fue algo bastante horrible de desear.", "Lo lamento."]},
+                    ["No me importa nada el trabajo del rancho. Tampoco lo hago porque quiera.", "Yo también tengo mis propios sueños, ¿sabes?", "Aunque siempre me los ignoren."],
+                    ["Algún día saldré de este pueblito."]
+                ]
+            },
+            "목": {
+                "low": [
+                    {"lines": ["Hoy también ayudé en el rancho. Belze se pasó el día entero mirando a las vacas."], "requires_alive": "belje", "fallback_lines": ["Hoy también ayudé en el rancho. Criar animales da más trabajo de lo que uno cree."]},
+                    {"lines": ["Los jueves siempre hay muchísimo trabajo en el rancho. A veces da pena ver a Belze haciéndolo todo sola."], "requires_alive": "belje", "fallback_lines": ["Uf, ¿todavía es jueves? Ojalá llegue pronto el fin de semana."]},
+                    ["Aun así, mantener el cuerpo ocupado me tranquiliza la mente. Así no tengo que pensar en nada."]
+                ],
+                "mid": [
+                    {"lines": ["Cuando digo que cuidar a Belze es lo que me da alegría, todos solo dicen que soy amable.", "Pero ¿es raro que a veces yo también quiera que me cuiden?"], "requires_alive": "belje", "fallback_lines": ["Belze era de las despistadas, así que yo la cuidaba mucho.", "Incluso ahora, cuando me vienen esos recuerdos, voy a verla."]},
+                    {"lines": ["Roshi quiso enseñarme a limpiar pescado.", "Se burlaba de lo torpe que soy, pero igual siguió enseñándome. Eso se agradece."], "requires_alive": "roshi", "fallback_lines": ["Roshi me enseñó a limpiar calamar.", "Seguro porque sabía que me gustaba.", "Era un anciano muy considerado."]},
+                    {"lines": ["Hoy Belze estuvo todo el rato cantándole una canción de cuna a un ternero enfermo.", "...Traté de recordar si alguna vez hizo eso por mí. No pude."], "requires_alive": "belje", "fallback_lines": ["Cuando un ternero se enfermaba, recuerdo a Belze cantándole canciones de cuna a su lado.", "Esos animales tenían mejor suerte que las personas."]}
+                ],
+                "high": [
+                    ["Pensé que todo sería fácil al crecer.", "Resulta que cada día parece una tarea. Y ni siquiera hay quien la califique."],
+                    {"lines": ["Hoy ayudé a Mocha a mover unos granos de café.", "No es nada del otro mundo, pero hacía tiempo que no me daban las gracias por algo tan pequeño. Me llenó de orgullo."], "requires_alive": "mocha", "fallback_lines": ["Mocha era de las que nunca se ahorraban un gracias, ni por cosas pequeñas.", "Cuando estaba con ella, sentía el mayor orgullo."]},
+                    {"lines": ["A veces me confundo sobre para quién me esfuerzo tanto.", "Decir que es por Belze... la verdad, últimamente ya no estoy seguro."], "requires_alive": "belje", "fallback_lines": ["A veces me confundo sobre para quién me esfuerzo tanto."]}
+                ]
+            },
+            "금": {
+                "low": [
+                    {"lines": ["Otra semana que se fue. Dije que descansaría con Belze... pero ella igual va a estar pegada al rancho el fin de semana."], "requires_alive": "belje", "fallback_lines": ["Otra semana que se fue. Supongo que luego iré a descansar a la cafetería..."]},
+                    ["Los viernes vendo los productos del rancho en el mercado. El cuerpo se cansa, pero, curiosamente, es cuando más tranquilo me siento."],
+                    ["Saber que se acerca el fin de semana me tranquiliza sin razón. Aunque en realidad no voy a descansar."]
+                ],
+                "mid": [
+                    [
+                        "¿Entiendes esa sensación de querer ser amado?",
+                        {
+                            "type": "choice",
+                            "options": [
+                                {"label": "Claro, todos la tenemos.", "affection": 1, "response": ["¿Verdad? Ojalá no sea el único."]},
+                                {"label": "No estoy seguro.", "affection": 0, "response": ["También puede ser."]},
+                                {"label": "¿No hay algo más que eso?", "affection": 0, "response": ["...Quizás."]}
+                            ]
+                        }
+                    ],
+                    {"lines": ["Le compré flores a Belze para su cumpleaños y se me olvidó que es alérgica al polen.", "Le pedí perdón, pero solo se rio y lo dejó pasar. Debió enojarse conmigo."], "requires_alive": "belje", "fallback_lines": ["Belze era tan alérgica al polen que nunca pude regalarle un ramo.", "Y como criaba animales, ni siquiera podía usar perfume.", "En cierto modo, creo que tuvo una vida bastante poco alegre.", "Qué pena."]},
+                    ["No puedo explicarme ni yo por qué paso tanto por la cafetería.", "Quizás simplemente... se respira más fácil allí, o algo así."]
+                ],
+                "high": [
+                    ["Últimamente voy mucho más al templo.", "...Sin ningún motivo en particular.", "No me preguntes demasiado."],
+                    {"lines": [{"text": "Hoy probé un queso que hizo Belze, estaba buenísimo. Qué bueno tener un buen momento otra vez, después de tanto.", "emotion": "happy"}], "requires_alive": "belje", "fallback_lines": ["Belze de verdad tenía talento para hacer queso.", "Su pasta fue la mejor que he comido en mi vida."]},
+                    {"lines": ["Todos me preguntan primero por Belze apenas me ven.", "Resulta que casi nadie siente curiosidad por mí."], "requires_alive": "belje", "fallback_lines": ["Ahora sí me preguntan cómo me siento.", "Supongo que se preocupan por mí."]}
+                ]
+            },
+            "토": {
+                "low": [
+                    ["Los fines de semana el trabajo del rancho es más relajado. Es el único día en que puedo respirar."],
+                    {"lines": ["Los sábados voy con Belze a hacer las compras. Aunque casi no hablamos."], "requires_alive": "belje", "fallback_lines": ["Mmm. ¿Qué se supone que haga ahora los sábados?", "Supongo que iré a la playa frente a la cafetería, como siempre."]},
+                    ["Cuando hace buen tiempo, soltar a las vacas y mirarlas no está mal. Al menos ellas nunca parecen fastidiadas conmigo."]
+                ],
+                "mid": [
+                    {"lines": ["Trato de pasar tiempo con Belze, pero para ella los animales siempre van primero.", "Ya me acostumbré."], "requires_alive": "belje", "fallback_lines": ["Ahora soy yo quien pasa tanto tiempo con los animales como lo hacía Belze.", "Antes pensaba que sonaba aburrido, pero quizás no es una mala vida."]},
+                    {"lines": ["Hoy Belze también se veía ocupada, tratando de ponerle nombre al nuevo cerdo."], "requires_alive": "belje", "fallback_lines": ["¿Cómo le pongo al cerdo nuevo?", "¿Se te ocurre algún buen nombre?"]}
+                ],
+                "high": [
+                    ["A veces me siento solo. Solo que no lo demuestro.", "Aunque lo demostrara, no cambiaría nada."],
+                    {"lines": ["Hoy Belze, por una vez, me pidió que cenáramos juntos.", "Me alegró, pero una parte de mí se pregunta por qué eso se volvió algo tan especial."], "requires_alive": "belje", "fallback_lines": ["Ahora ceno solo, a menos que haya algo especial.", "Está más silencioso que antes. Y más solitario también.", "Bueno, supongo que tengo que acostumbrarme."]}
+                ]
+            },
+            "일": {
+                "low": [
+                    ["El domingo me quedé hasta tarde en el rancho. De todos modos no hay mucho que hacer en casa."],
+                    {"lines": ["Los domingos por la mañana desayuno con Belze. Incluso entonces solo hablamos de vacas."], "requires_alive": "belje", "fallback_lines": ["Yo como carne. Son animales que yo mismo crío, pero la gente necesita comer carne para vivir.", "Eso no tiene nada de malo, ¿verdad?", "Sería más raro que Lama comiera carne a que la coma yo."]},
+                    ["Incluso en mi día libre me da comezón en el cuerpo y termino yendo al rancho. ¿Se me habrá olvidado cómo descansar?"]
+                ],
+                "mid": [
+                    ["Dios me entenderá... eso quiero creer.", "Y si no, pues no hay nada que hacer."],
+                    ["Lama parece tener tiempo libre los domingos también, así que nuestras charlas se alargan.", "Escuchándolo pierdo la noción del tiempo."],
+                    ["A veces voy a algún lugar donde no hay nadie y ordeno mis pensamientos a solas.", "Aunque no sé si de verdad se ordenan."]
+                ],
+                "high": [
+                    ["Contigo siento unas ganas raras de ser sincero.", "Ni yo sé por qué."],
+                    {"lines": [{"text": "Hoy Belze y yo, después de mucho tiempo, hablamos y nos reímos. Fue un buen día.", "emotion": "happy"}], "requires_alive": "belje", "fallback_lines": ["Como no tengo con quién hablar, he terminado dependiendo de los mensajes.", "Escríbeme muchos correos."]},
+                    ["Quiero ser bueno en todo, pero no se puede.", "Supongo que yo también necesito un lugar donde apoyarme.", "...Estas cosas no se las digo a cualquiera."]
+                ]
+            }
+        },
+        "rain_conversation": [
+            ["Los días de lluvia tengo aún más trabajo cuidando a los animales."],
+            ["¿Tienes paraguas? Si no, te presto uno."],
+            ["Los días de lluvia se me asienta un poco el ánimo."]
+        ],
+        "mail_reaction": [
+            [{"text": "¡«{player_mail_content}»! Recibir algo así me deja de buen humor todo el día. Mándame más.", "emotion": "happy"}],
+            [{"text": "«{player_mail_content}»... hoy me pasé el día sonriendo solo. Resulta que recibir correos es divertido.", "emotion": "happy"}]
+        ],
+        "horror_conversation": [
+            ["Ya casi no saco el tema de {victim_name}.", "Pero a veces me viene de golpe mientras trabajo en el rancho. Cada vez se me hace difícil."],
+            ["También pongo el nombre de {victim_name} en mis oraciones.", "No hay mucho más que pueda hacer."]
+        ]
+    },
+    "emails": {
+        "greeting": [
+            {"title": "Busco a {player_name} para ir a la cafetería conmigo.", "lines": ["Me aburro demasiado yendo solo a tomar café.", "Avísame cuando tengas tiempo. Vamos juntos a la cafetería."]},
+            {"title": "Hoy pasó Marin por aquí", "lines": ["¿Por qué viene a ayudar al rancho si ni siquiera es su trabajo?", "Hay algo en la cara de ese tipo que me cae mal."], "requires_alive": "marin"},
+            {"title": "Una carta que en realidad es hablar solo", "lines": ["No tengo nada en especial que decir, pero últimamente escribir cartas me consuela.", "Lo que no puedo decir en voz alta se alivia un poco al ponerlo por escrito."]}
+        ],
+        "event_invite": [
+            {"title": "Me llegó al corazón", "lines": ["Gracias por invitarme.", "Fue la primera comida que disfruto con la mente tranquila en mucho tiempo.", "Creo que le voy a agarrar cariño a tu restaurante."]},
+            {"title": "Ese plato de calamar fue lo mejor", "requires_favorite_food": true, "lines": ["El plato con calamar de ayer estuvo buenísimo de verdad.", "Con algo tan pequeño se me levantó el ánimo por completo. Gracias."]}
+        ],
+        "alibi_reminder": {"title": "No he podido estar tranquilo", "lines": ["Desde que oí que fue justo frente a tu casa, no dejo de darle vueltas. ¿Estás bien?", "{player_name}, tengo algo que decirte; pásate cuando tengas tiempo."]},
+        "gift_thanks": [
+            {"title": "Hasta pensaste en algo así", "lines": ["De verdad agradecí el regalo.", "Hacía tanto que nadie se acordaba de mí que se me hizo extraño."]},
+            {"title": "Qué bueno que estás aquí", "lines": ["Me da pena ser siempre el que recibe.", "De verdad significa mucho tener a alguien como tú cerca."]}
+        ],
+        "memento_reminder": {"title": "Te extrañaba", "lines": ["¿Por qué no te veo últimamente? Te extrañaba.", "También tengo algo guardado para ti, así que ven pronto."]},
+        "story_progress": {
+            "player_arrival_day_2": {"title": "Bienvenido al pueblo", "lines": ["Me dijeron que te acabas de mudar aquí.", "Si algo te resulta extraño o difícil, dímelo cuando quieras. Se me da bien cuidar a la gente.", "Qué bueno que llegaste, {player_name}."]},
+            "affection_100_reached": {"title": "Ahora te lo cuento todo", "lines": ["Desde que te di ese anillo, creo que de todos modos ya quería contarte todo.", "Te seré sincero. Mocha y yo... tenemos algo.", "Pero en parte es por Belze también. Si ella me hubiera cuidado mejor, nunca habría llegado a esto.", "Sabía que perdí a mi madre de niño. Sabía que eso me hacía sentir muy solo. Y no hizo nada.", "Malgeumi, Malgeumi. ¿Hasta cuándo va a seguir cargando con una vaca que vendí hace siglos?", "¿No es básicamente una mujer trastornada que se enamoró de los animales en vez de una persona?", "Mocha es como una madre para mí. Me da el tipo de calidez que nunca tuve al crecer.", "No digo que no hice nada malo... pero tú me entiendes, ¿verdad?"]}
+        },
+        "special_day": {}
+    }
+}

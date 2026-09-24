@@ -1,0 +1,70 @@
+{
+	"book_interior": {
+        "book1" : "Hay un guion de Shakespeare en el estante.",
+        "book2" : ["El nombre de Usher aparece como autor.", "...Es un libro grueso, pero solo tiene escritas unas diez páginas."],
+        "book3" : ["Para Flora.\nFlora, esta tarde fui a la cafetería y pensé en ti.", "...", "Tal vez sea mejor no seguir leyendo."],
+        "book4" : "Tiene demasiadas letras. Con solo mirarlo me duele la cabeza.",
+        "book5" : "Están exhibidas las novedades de este mes.",
+        "music1" : "Un disco que se puede poner en el jukebox. ¿Será que Usher compuso todos estos?"
+    },
+	"cafe_interior": {
+        "oven" : "Un horno cálido que todavía irradia calor. Huele a pan recién horneado.",
+        "grinder" : ["El molino está lleno de granos de café recién molidos.", "...¿Y si me tomo un café?"],
+        "jam" : "Mermelada de fresa, de manzana, de uva... hay mermeladas de todo tipo.",
+        "beberage" : ["Una bebida con una linda calcomanía de pollito."],
+        "bread" : ["Bollitos, pastel de queso, pudín y muffins.", "Por desgracia, parece que no están a la venta."],
+        "doll1" : "La mascota de la cafetería: un enorme pollito de peluche.",
+        "doll2" : "La mascota de la cafetería: un enorme pollito de peluche."
+    },
+	"farm_interior": {
+        "dirt" : "Tierra fina para cultivar flores.",
+        "flower" : "Una maceta con una sola flor. Da un lindo ambiente.",
+        "seed" : "Semillas para plantar en el campo. Se las puedes comprar a Flora.",
+        "vase" : "Una maceta de madera con una planta frondosa. ¿Esta maceta también la habrá hecho Woody?"
+    },
+	"fish_interior": {
+        "fish1" : "Una caña de pescar. Ten cuidado de no pincharte con el anzuelo.",
+        "box" : "Una hielera. Muy útil para pescar.",
+        "fish2" : "Caballa seca. Huele a pescado, pero huele delicioso.",
+        "fish3" : ["Pescado fresco capturado al amanecer.", "...¿Tanto? Qué gran habilidad."]
+    },
+	"furniture_interior": {
+        "bed" : "Una cama con un marco resistente. ¡Acuéstate cuanto quieras, es muy suave!",
+        "sofa" : "Un sofá de dos plazas. Excelente tanto como decoración como para el uso diario.",
+        "shelf" : "Un librero hecho de madera de abeto. Lo ajustamos a la altura que quieras.",
+        "chair" : "Una silla de madera clásica. ¡Levántala, es ligerísima!",
+        "drawer" : "Las cómodas se fabrican por encargo en cuanto recibimos el pedido. Solo dinos el diseño que quieres.",
+        "ref" : "Un refrigerador de bebidas. Hasta te lo instalamos nosotros.",
+        "carpet" : "Una alfombra de lana teñida con materiales naturales.",
+        "picture" : "Una obra del famoso pintor Yuja. Es auténtica."
+    },
+	"general_interior": {
+        "door" : "Debe de ser el espacio privado de Marr. Mejor no entrar sin permiso.",
+        "goods" : "Están exhibidos los productos que vende la tienda general de Marr.",
+        "calc" : "Una caja registradora que usa todo el pueblo."
+    },
+	"hospital_interior": {
+        "drags" : ["Está lleno de medicinas con nombres muy difíciles.", "...¿Para qué servirán?"]
+    },
+	"pasture_interior": {
+        "feed" : "Hay un montón de alimento apilado para los animales.",
+        "record" : ["Un registro con el estado de salud de los animales.", "¿Será la letra de Belze? Es adorable."],
+        "trough" : "Un bebedero lleno de agua hasta el borde.",
+        "lamp" : ["Una lámpara pequeña, siempre encendida incluso de noche.", "Parece que está ahí para los animales que le tienen miedo a la oscuridad."]
+    },
+	"police_interior": {
+        "board" : "Un tablero con los expedientes de los casos. Tiene pegado un rostro de aspecto amenazante.",
+        "cabinet" : ["Un archivero viejo, cerrado con llave.", "Aunque jales la manija, no se abre."],
+        "shelf" : ["Carpetas con casos ordenados.", "Parece que no debería abrirlas sin permiso."],
+        "jail" : "Una celda con una ventanita. Ojalá nunca termine aquí dentro."
+    },
+	"shrine_interior": {
+        "talisman" : "Hay talismanes protectores colgados. ¿Los habrá hecho Sage misma?",
+        "plum_pot" : ["Una maceta con un ciruelo en flor.", "...Es como si estuviera floreciendo fuera de temporada."],
+        "lantern" : "Un farol tradicional hexagonal. Se enciende con una luz suave al caer la noche."
+    },
+	"temple_interior": {
+        "statue" : ["Una estatua de Buda. Al mirarla de cerca, está pulida con un discreto brillo.", "Un tenue aroma a incienso roza la nariz."],
+        "donation_box" : ["Una caja de donativos.", "Si la abro sin permiso, Poli me arrestaría, ¿verdad?"]
+    }
+}

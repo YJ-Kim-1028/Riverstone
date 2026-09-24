@@ -8,7 +8,7 @@ class_name Localizer
 ## 두면 plumbing이 더 필요했음). 2026-09-14 다국어 지원 1단계 - 계획 파일:
 ## C:\Users\code1\.claude\plans\expressive-twirling-fern.md
 
-const SUPPORTED_LANGUAGES: Array[String] = ["ko", "en", "ja", "zh"]
+const SUPPORTED_LANGUAGES: Array[String] = ["ko", "en", "ja", "zh", "es"]
 ## tr() 키/데이터 원본 파일이 실제로 쓰여진 언어 - "번역이 필요 없는 기준
 ## 언어"라는 뜻이라 아래 INITIAL_LANGUAGE(첫 실행 시 화면에 보일 언어)와는
 ## 다른 개념이다. 절대 바꾸지 말 것 - 데이터 파일 자체가 한국어라 이 값이

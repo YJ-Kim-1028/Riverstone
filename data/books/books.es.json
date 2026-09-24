@@ -1,0 +1,129 @@
+{
+    "book_beyond_the_door": {
+        "title": "Más Allá de la Puerta",
+        "author": "Usher",
+        "pages": [
+            "Esta es una historia sobre una vieja mansión en lo alto del pueblo.",
+            "¿Quién será el dueño de esa mansión?\nLlevaba demasiado tiempo vacía.",
+            "Nadie había abierto jamás la puerta de la mansión. Las bisagras estaban oxidadas por el tiempo y la manija, cubierta de telarañas.",
+            "Algunos decían que al otro lado había un tesoro.\nJunto con el monstruo que lo custodiaba.",
+            "¿Serán ciertos los rumores? Si lo son, vale la pena comprobarlo. Dediqué toda mi vida a encontrar la llave.",
+            "Con el corazón temblando, por fin abrí la puerta.",
+            "Pero\ndetrás de ella\nhabía\notra puerta.",
+            "\"¡Solo hay una llave!\"\nAullé de angustia.",
+            "Por suerte, la puerta interior no estaba cerrada con llave.",
+            "Con la mano temblorosa, giré el picaporte. ¿Un monstruo? ¿O un tesoro?",
+            "Crrrrick--\nLa puerta se abrió.",
+            "Era el exterior."
+        ]
+    },
+    "book_perfect_alibi": {
+        "title": "La Coartada Perfecta",
+        "author": "Usher",
+        "pages": [
+            "No fui yo quien cometió el asesinato aquella noche.",
+            "Tengo una coartada perfecta.",
+            "Levanté la cabeza con orgullo y grité.\n\"¡A esa hora yo estaba durmiendo!\"",
+            "\"¿Con quién dormía?\"\npreguntó el detective.",
+            "\"....\"\n\"Solo.\"",
+            "No había testigos.",
+            "Pensándolo de nuevo, no es una coartada perfecta."
+        ]
+    },
+    "book_life_as_a_cat": {
+        "title": "Cómo Vivir como un Gato",
+        "author": "Usher",
+        "pages": [
+            "¡Vivir como humano es agotador!",
+            "Así que decidí convertirme en gato.",
+            "Por la mañana tomaba el sol,\ny por la tarde dormía la siesta.\nLas comidas eran pescado.",
+            "Fue un día satisfactorio como gato.",
+            "Pero a la mañana siguiente me di cuenta de que tenía que ir a la tienda a trabajar.",
+            "Volví a ser humano."
+        ]
+    },
+    "book_culprit_is_here": {
+        "title": "El Culpable Está Aquí Dentro",
+        "author": "Usher",
+        "pages": [
+            "En 1977, ocurrió un asesinato en una fiesta en el Oeste.",
+            "El anfitrión de la fiesta fue hallado frío y sin vida tras beber vino envenenado.",
+            "Casualmente, entre los invitados había un famoso detective, que cerró de inmediato todas las puertas.",
+            "\"El culpable está aquí dentro.\"\nCuando lo dijo, los presentes murmuraron.",
+            "Mediante deducciones, el detective fue sacando a las personas de la sala una por una.",
+            "Cuando salió la última persona, el detective dijo:",
+            "\"Ahora ya no hay nadie aquí dentro.\""
+        ]
+    },
+    "book_love_in_three_seconds": {
+        "title": "Enamorarse Toma Solo Tres Segundos",
+        "author": "Usher",
+        "pages": [
+            "El verano en que cumplí 15 años, me enamoré en el instante en que la vi por primera vez.",
+            "Bastaron solo tres segundos.",
+            "En el primer segundo, vi su rostro. Su cabello rojo y sus ojos brillantes eran hermosos.",
+            "En el siguiente segundo, escuché su risa. Su voz era clara, sin una pizca de polvo.",
+            "En el tercer segundo, dudé si preguntarle su nombre.",
+            "Pero nunca había hablado con ninguna mujer que no fuera mi madre.\nAsí que no pude preguntarle su nombre.",
+            "Todavía no sé cómo se llama."
+        ]
+    },
+    "book_resolve_before_death": {
+        "title": "Una Decisión Ante la Muerte",
+        "author": "Usher",
+        "pages": [
+            "Mañana voy a morir.\nAsí que decidí pasar mi último día de forma significativa.",
+            "Escribí la carta que llevaba tanto tiempo aplazando, vi a un amigo querido e incluso fui a ver el mar.",
+            "Cuando volví a casa, me sentía bastante bien.",
+            "Así que decidí posponer lo de morir."
+        ]
+    },
+    "book_last_summer": {
+        "title": "Sé Lo Que Hiciste el Verano Pasado",
+        "author": "Usher",
+        "pages": [
+            "Sé lo que hiciste el verano pasado.",
+            "Las manos del hombre que leyó la carta temblaron.",
+            "Era un ermitaño que nunca salía de casa y no le había contado a nadie dónde había estado.",
+            "\"¿Cómo sabe mi secreto?\"\nDio vuelta a la carta con cautela.",
+            "\"Vuelven los fideos fríos de edición limitada de verano.\"",
+            "Miró al remitente. Era un volante del restaurante de siempre, al que solía pedirle comida a domicilio.",
+            "Al día siguiente, el hombre fue a comer fideos fríos."
+        ]
+    },
+    "book_detectives_last_trace": {
+        "title": "El Último Rastro del Detective",
+        "author": "Usher",
+        "pages": [
+            "Es un caso de cuarto cerrado.\nLa puerta estaba firmemente cerrada por dentro.\nLas ventanas también estaban bloqueadas con barrotes de hierro.",
+            "La víctima yacía en medio de la habitación.\nEl detective se quedó allí de pie, meditando largo rato.",
+            "Y dijo:",
+            "\"¿No tengo ni idea?\"",
+            "Llamó a la policía. Ese fue el último caso del detective."
+        ]
+    },
+    "book_unsent_letter": {
+        "title": "La Carta Que No Se Envió",
+        "author": "Usher",
+        "pages": [
+            "Hoy también te escribo una carta.",
+            "Pero no la enviaré, ¿verdad...?",
+            "Ayer y antes de ayer también te escribí sin falta. Los sentimientos que no pude entregar ya suman más de 300 cartas.",
+            "Ahora, aunque quisiera enviarlas, los sellos son demasiado caros.",
+            "Me di cuenta de que una carta que no se envía no se diferencia de un diario.",
+            "Así que de ahora en adelante voy a escribir un diario."
+        ]
+    },
+    "book_girl_in_the_alley": {
+        "title": "El Hombre Que Siempre Estaba en Ese Callejón",
+        "author": "Usher",
+        "pages": [
+            "Todos los días a las tres de la tarde, un hombre esperaba a alguien en el mismo lugar.",
+            "Con lluvia o con nieve, él siempre estaba allí.",
+            "Un día, sin poder contener mi curiosidad, le pregunté impulsivamente.",
+            "\"¿Qué está esperando?\"",
+            "\"Las cuatro.\"",
+            "Ajá. Una hora después, se fue a casa."
+        ]
+    }
+}

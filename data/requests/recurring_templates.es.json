@@ -1,0 +1,82 @@
+{
+    "belje": {
+        "title": "¿Podrías darme unas papas?",
+        "lines": [
+            "Últimamente no consigo papas por ningún lado. Estoy tan ocupada en el rancho que no tengo tiempo de ir a comprar.",
+            "Si tienes {item_name}, ¿podrías darme algunas?",
+            "Como agradecimiento, te lo pagaré sin falta."
+        ]
+    },
+    "flora": {
+        "title": "¡Necesito lechuga urgente!",
+        "lines": [
+            "Justo ahora se me acabó la lechuga. ¡No tengo ensalada para servirles a los clientes!",
+            "Si tienes {item_name}, ¿me das un poco? ¡De verdad es urgente!",
+            "Te lo devuelvo, ¡lo prometo!"
+        ]
+    },
+    "isha": {
+        "title": "Tengo un pequeño favor que pedirte",
+        "lines": [
+            "Últimamente me estoy cuidando la resistencia física, y justo se me acabó el {item_name}.",
+            "Sé que es una molestia pedírtelo, pero ¿podrías darme un poco?",
+            "En cuanto lo reciba te pagaré de inmediato."
+        ]
+    },
+    "marin": {
+        "title": "¡¿Me consigues caballa?!",
+        "lines": [
+            "¡Oye, {player_name}! Hoy se me antoja un plato de caballa y no me queda ni una.",
+            "¿Tienes {item_name}? ¡Si tienes, dame un poco!",
+            "¡La próxima vez te lo devuelvo sin falta, lo prometo!"
+        ]
+    },
+    "marr": {
+        "title": "Necesito salmón.",
+        "lines": [
+            "Se me ha acabado el salmón.",
+            "Si tiene {item_name}, hágame el favor de compartirlo.",
+            "Le pagaré el precio exacto."
+        ]
+    },
+    "mocha": {
+        "title": "¿Me podrías conseguir bayas?",
+        "lines": [
+            "Se me acabaron las bayas para los postres. Justo en un día con muchos clientes.",
+            "Si tienes {item_name}, ¿me das un poco? Tengo prisa.",
+            "Te lo pago con una taza de café."
+        ]
+    },
+    "roshi": {
+        "title": "Te pediría un poco de maíz",
+        "lines": [
+            "Me hace falta un poco de maíz, pero últimamente ando embarcado y no he tenido tiempo de comprar.",
+            "Si por casualidad tienes {item_name}, ¿me darías un poco?",
+            "Te lo pagaré bien, eso es seguro."
+        ]
+    },
+    "shepherd": {
+        "title": "¿Me consigues calamar?",
+        "lines": [
+            "Últimamente el antojo me tira cada vez más hacia el calamar.",
+            "Si tienes {item_name}, ¿me das un poco?",
+            "Lo recibiré con gusto, y te lo pagaré con generosidad."
+        ]
+    },
+    "usher": {
+        "title": "¿Puedo hablarte un poco de las bayas?",
+        "lines": [
+            "Las bayas, ¿sabes?, cada vez que las muerdes revientan con un chasquido, como una pequeña historia. ¿No te parece?",
+            "Últimamente me faltan historias así, por eso te pregunto: ¿podrías darme un poco de {item_name}?",
+            "Te lo pagaré bien. Considéralo el precio de la historia."
+        ]
+    },
+    "woody": {
+        "title": "¿Tienes papas?",
+        "lines": [
+            "Hoy pensaba comer algo con papa, pero no me quedó ni una.",
+            "Si te sobra algo de {item_name}, ¿podrías darme un poco?",
+            "¡Gracias, de verdad! La próxima vez yo también te daré algo."
+        ]
+    }
+}

@@ -375,7 +375,21 @@ func set_world_map(world_map: WorldMap) -> void:
 	_world_map = world_map
 
 
+## show_held_message()가 띄운 임시 메시지가 남은 시간(초) - 이 동안은 다른 프롬프트
+## 갱신(문/NPC 근처 등이 매 프레임 hide/show 하는 것)이 메시지를 지우거나 덮어쓰지
+## 못한다(사용자 리포트, 2026-09-24 - "4시에 레스토랑 종료 문구 너무 짧게 나와").
+var _held_message_time := 0.0
+
+
+func show_held_message(text: String, duration: float) -> void:
+	_held_message_time = 0.0
+	show_interaction_prompt(text)
+	_held_message_time = duration
+
+
 func show_interaction_prompt(text: String) -> void:
+	if _held_message_time > 0.0:
+		return
 	text = tr(text)
 	if text.begins_with("E "):
 		text = Keybinds.get_key_label(Keybinds.INTERACT_ACTION) + text.substr(1)
@@ -389,6 +403,8 @@ func show_interaction_prompt(text: String) -> void:
 ## 채워져도 이 함수를 부르는 쪽(main.gd)은 그대로 둬도 된다(사용자 지시,
 ## 2026-08-29 - 가구 나레이션 프롬프트를 "E 확인" 대신 말풍선 아이콘으로).
 func show_interaction_icon(icon_path: String, fallback_text: String) -> void:
+	if _held_message_time > 0.0:
+		return
 	if ResourceLoader.exists(icon_path):
 		_interaction_icon.texture = load(icon_path)
 		_interaction_icon.visible = true
@@ -397,7 +413,11 @@ func show_interaction_icon(icon_path: String, fallback_text: String) -> void:
 		show_interaction_prompt(fallback_text)
 
 
-func hide_interaction_prompt() -> void:
+func hide_interaction_prompt(force: bool = false) -> void:
+	if force:
+		_held_message_time = 0.0
+	elif _held_message_time > 0.0:
+		return
 	_interaction_prompt.visible = false
 	_interaction_icon.visible = false
 
@@ -579,6 +599,8 @@ func _is_blocked_at(check_position: Vector2, extra_north_margin: float = 0.0) ->
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
+	if _held_message_time > 0.0:
+		_held_message_time = maxf(_held_message_time - delta, 0.0)
 	if _has_scent:
 		_scent_time += delta
 		for i in _scent_sprites.size():
