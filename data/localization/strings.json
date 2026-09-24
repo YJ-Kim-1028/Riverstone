@@ -1555,7 +1555,7 @@
         "es": "Ah, pero creo que ese día no vi a nadie."
     },
     "아, 그러고 보니 그날 %s에서 %s를 본 것 같기도 해.": {
-        "en": "Oh, now that you mention it, I think I saw %s at %s that day.",
+        "en": "Oh, now that you mention it, that day at %s, I think I saw %s.",
         "ja": "あ、そういえばあの日、%sで%sを見かけた気がする。",
         "zh": "啊，这么说来，那天我好像在%s见到了%s。",
         "es": "Ah, ahora que lo pienso, ese día en %s creo que vi a %s."

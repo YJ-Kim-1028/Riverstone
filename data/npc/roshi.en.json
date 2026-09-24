@@ -25,7 +25,7 @@
     "alibi_speech": {
         "known": "I was at %s that day around 6 PM.",
         "unknown": "Where I was that night... I don't quite remember, myself.",
-        "witness_seen": "Ah, now that I think about it, I believe I saw %s at %s that day.",
+        "witness_seen": "Ah, now that I think about it, that day at %s, I believe I saw %s.",
         "witness_none": "Ah, but I don't think I saw anyone in particular that day."
     },
     "memento_item": {
