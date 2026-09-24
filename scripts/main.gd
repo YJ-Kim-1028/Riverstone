@@ -2304,7 +2304,7 @@ func _process(delta: float) -> void:
 				player.hide_interaction_prompt()
 			return
 		if _message_timer <= 0.0:
-			var tool_name := KitchenManager.get_tool_name(interactable_name)
+			var tool_name := tr(KitchenManager.get_tool_name(interactable_name))
 			if not RestaurantManager.is_open:
 				player.show_interaction_prompt(tr("E %s에서 꺼내기") % tool_name if not tool_name.is_empty() else tr("E 꺼내기"))
 			else:

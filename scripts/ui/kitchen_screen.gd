@@ -161,7 +161,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func open_kitchen(station_id: String) -> void:
 	_station_id = station_id
 	_selected_item_id = ""
-	_tool_label.text = KitchenManager.get_tool_name(station_id)
+	_tool_label.text = tr(KitchenManager.get_tool_name(station_id))
 	_tool_image.texture = STATION_BACKDROP_TEXTURES.get(station_id)
 	_fire_icon.texture = FIRE_ICON_TEXTURES.get(station_id)
 	# close()가 아닌 다른 경로로 이전에 숨겨졌을 가능성까지 대비해서, 새로
