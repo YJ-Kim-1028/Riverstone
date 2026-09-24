@@ -184,7 +184,7 @@ func _ready() -> void:
 ## 구분할 수 없다는 사용자 피드백으로 추가(day4 TODO).
 func get_current_real_date_string() -> String:
 	var d := Time.get_datetime_dict_from_system()
-	return "%d년 %d월 %d일 %d일차" % [d.year, d.month, d.day, TimeManager.current_day]
+	return tr("%d년 %d월 %d일 %d일차") % [d.year, d.month, d.day, TimeManager.current_day]
 
 
 func get_inbox() -> Array:
@@ -332,7 +332,7 @@ func get_request_progress_text(request_id: String) -> String:
 	var definition := _get_request_definition(request_id)
 	match String(definition.get("objective_type", "")):
 		"greet_all_npcs":
-			return "%d / %d명과 인사함" % [_greeted_npc_ids.size(), int(definition.get("objective_target", 0))]
+			return tr("%d / %d명과 인사함") % [_greeted_npc_ids.size(), int(definition.get("objective_target", 0))]
 		_:
 			return ""
 
@@ -386,7 +386,7 @@ func _load_requests() -> void:
 	if not (parsed is Dictionary):
 		push_error("Request catalog is not valid JSON: %s" % REQUESTS_PATH)
 		return
-	_request_definitions = parsed
+	_request_definitions = Localizer.apply_language(parsed, REQUESTS_PATH) as Dictionary
 
 
 func _load_recurring_templates() -> void:
@@ -398,7 +398,7 @@ func _load_recurring_templates() -> void:
 	if not (parsed is Dictionary):
 		push_error("Recurring request template catalog is not valid JSON: %s" % RECURRING_TEMPLATES_PATH)
 		return
-	_recurring_templates = parsed
+	_recurring_templates = Localizer.apply_language(parsed, RECURRING_TEMPLATES_PATH) as Dictionary
 
 
 ## 2~3일마다 살아있는 NPC 2명이 새로 선호 재료 배달을 요청한다(사용자 지시,
@@ -483,11 +483,11 @@ func _maybe_generate_furniture_request() -> void:
 	var template: Dictionary = FURNITURE_QUEST_TEMPLATES.pick_random()
 	var lines: Array = (template.get("lines", []) as Array).duplicate()
 	for i in lines.size():
-		lines[i] = String(lines[i]).replace("{item_name}", item_name)
+		lines[i] = tr(String(lines[i])).replace("{item_name}", item_name)
 	var request_id := "furniture_%s_%d" % [npc_id, TimeManager.current_day]
 	_dynamic_requests[request_id] = {
 		"npc_id": npc_id,
-		"title": String(template.get("title", "")),
+		"title": tr(String(template.get("title", ""))),
 		"lines": lines,
 		"objective_type": "deliver_item",
 		"objective_item_id": item_id,

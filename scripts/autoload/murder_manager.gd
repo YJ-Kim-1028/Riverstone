@@ -283,8 +283,8 @@ func describe_alibi(npc_id: String, case_number: int) -> String:
 		return ""
 	var alibis: Dictionary = _cases[case_number - 1].get("alibis", {})
 	if not alibis.has(npc_id):
-		return "그날 밤 어디에 있었는지 알려진 바가 없다."
-	return "오후 6시에는 %s에 있었다고 말한다." % _describe_location(String(alibis[npc_id]))
+		return tr("그날 밤 어디에 있었는지 알려진 바가 없다.")
+	return tr("오후 6시에는 %s에 있었다고 말한다.") % _describe_location(String(alibis[npc_id]))
 
 
 ## consume_alibi_line()과 같은 유효성 조건을 소비 없이 확인만 한다 - 마주침
@@ -327,7 +327,7 @@ func consume_alibi_line(npc_id: String) -> String:
 			result = _format_alibi_known_line(speech_style, lie)
 	if result.is_empty():
 		var alibis: Dictionary = _cases[_cases.size() - 1].get("alibis", {})
-		result = (String(speech_style.get("unknown", "그날 밤 어디 있었는지는... 나도 잘 기억이 안 나.")) if not alibis.has(npc_id)
+		result = (String(speech_style.get("unknown", tr("그날 밤 어디 있었는지는... 나도 잘 기억이 안 나."))) if not alibis.has(npc_id)
 			else _format_alibi_known_line(speech_style, _describe_location(String(alibis[npc_id]))))
 	# dialogue_screen.gd의 close()가 "오늘 이 대화에서 방금 애도/알리바이
 	# 대사를 했는지"를 알아야 웃음/수줍음 대신 눈물을 유지할 수 있다(사용자
@@ -338,7 +338,7 @@ func consume_alibi_line(npc_id: String) -> String:
 
 
 func _format_alibi_known_line(speech_style: Dictionary, location: String) -> String:
-	var template := String(speech_style.get("known", "난 그 날 오후 6시엔 %s에 있었어."))
+	var template := String(speech_style.get("known", tr("난 그 날 오후 6시엔 %s에 있었어.")))
 	return template % location
 
 
@@ -399,18 +399,18 @@ func consume_witness_line(npc_id: String) -> String:
 	var speech_style: Dictionary = NPCManager.get_definition(npc_id).get("alibi_speech", {})
 	var candidates: Array = witnesses[npc_id]
 	if candidates.is_empty():
-		return String(speech_style.get("witness_none", "아, 근데 그날은 딱히 아무도 못 봤던 것 같아."))
+		return String(speech_style.get("witness_none", tr("아, 근데 그날은 딱히 아무도 못 봤던 것 같아.")))
 	var picked: Dictionary = candidates.pick_random()
 	var seen_name := String(NPCManager.get_definition(String(picked.get("npc_id", ""))).get("name", ""))
 	var seen_place := _describe_map(String(picked.get("map_id", "")))
-	var template := String(speech_style.get("witness_seen", "아, 그러고 보니 그날 %s에서 %s를 본 것 같기도 해."))
+	var template := String(speech_style.get("witness_seen", tr("아, 그러고 보니 그날 %s에서 %s를 본 것 같기도 해.")))
 	return template % [seen_place, seen_name]
 
 
 ## consume_witness_line()용 - LOCATION_NAMES(state 접두어 기준)와 달리
 ## map_id를 그대로 키로 쓴다.
 func _describe_map(map_id: String) -> String:
-	return String(MAP_ID_NAMES.get(map_id, "어딘가"))
+	return tr(String(MAP_ID_NAMES.get(map_id, "어딘가")))
 
 
 ## 새 살인이 날 때마다 대기열을 새로 채운다 - 이전 사건 몫으로 아직 못 받은
@@ -774,11 +774,11 @@ func _snapshot_witnesses(victim_id: String) -> Dictionary:
 ## 패턴의 NPC가 늘어나면 스케줄 데이터에 필드를 추가하는 쪽으로 일반화할 것.
 func _describe_location(state: String) -> String:
 	if state.is_empty():
-		return "바다"
+		return tr("바다")
 	for prefix in LOCATION_NAMES:
 		if state.begins_with(prefix):
-			return String(LOCATION_NAMES[prefix])
-	return "알 수 없는 장소"
+			return tr(String(LOCATION_NAMES[prefix]))
+	return tr("알 수 없는 장소")
 
 
 func _update_pending_state() -> void:

@@ -594,11 +594,19 @@ func _on_buy_pressed(shop_id: String, item_id: String) -> void:
 			return
 	var failure_reason := ShopManager.buy(shop_id, item_id)
 	if failure_reason.is_empty():
-		_message_label.text = "주문했습니다. 다음 날 배송 되오니 내일이 오기 전 인벤토리를 비워주세요."
+		_message_label.text = _purchase_success_message(item_id)
 	else:
 		_message_label.text = failure_reason
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
 	_refresh_rows()
+
+
+## 옷/헤어스타일은 인벤토리에 들어오지 않고 옷장에서 고를 수 있게 되는 즉시
+## 해금이라 배송/인벤토리 비우기 안내가 필요 없다(사용자 지시, 2026-09-24).
+func _purchase_success_message(item_id: String) -> String:
+	if ShopManager.is_hd_outfit_unlock_item(item_id) or ShopManager.is_hd_hairstyle_unlock_item(item_id):
+		return tr("구매했습니다.")
+	return tr("주문했습니다. 다음 날 배송 되오니 내일이 오기 전 인벤토리를 비워주세요.")
 
 
 ## shop_screen.gd의 같은 이름 함수와 동일한 구조 - shop_id도 같이 들고 있어야

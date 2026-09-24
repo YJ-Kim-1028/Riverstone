@@ -244,7 +244,7 @@ func get_interact_prompt(map_id: String) -> String:
 	var animal := _nearest_animal(map_id, CATCH_RADIUS)
 	if animal == null:
 		return ""
-	return "E 조준"
+	return tr("E 조준")
 
 
 ## fishing_manager.gd의 can_fit_all_species()와 같은 이유(사용자 리포트,

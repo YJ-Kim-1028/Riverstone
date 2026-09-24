@@ -62,12 +62,12 @@ func perform_harvest(bush: Dictionary) -> String:
 	if bush.is_empty():
 		return ""
 	if not InventoryManager.can_add_item(BERRY_ITEM_ID, BERRY_YIELD_COUNT):
-		return "인벤토리가 가득 찼다."
+		return tr("인벤토리가 가득 찼다.")
 	InventoryManager.add_item(BERRY_ITEM_ID, BERRY_YIELD_COUNT)
 	_picked_today["%s:%s" % [GameManager.current_map_id, bush["id"]]] = true
 	_erase_bush(bush)
 	AudioManager.play_sfx(AudioManager.SFX_ITEM_PICKING)
-	return "베리를 땄다."
+	return tr("베리를 땄다.")
 
 
 func _erase_bush(bush: Dictionary) -> void:

@@ -440,7 +440,7 @@ func give_gift_from_hand(npc_id: String) -> String:
 	_apply_gift(npc_id, item_id)
 	var npc_name := String(NPCManager.get_definition(npc_id).get("name", npc_id))
 	var item_name := String(get_item_definition(item_id).get("name", item_id))
-	return "%s에게 %s을(를) 선물했다." % [npc_name, item_name]
+	return tr("%s에게 %s을(를) 선물했다.") % [npc_name, item_name]
 
 
 func _apply_gift(npc_id: String, item_id: String) -> void:

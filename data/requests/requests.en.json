@@ -1,0 +1,106 @@
+{
+    "greet_all_npcs": {
+        "title": "Have you met everyone in town yet?",
+        "lines": [
+            "If a newcomer doesn't even know the faces in town, nobody can help each other when something happens.",
+            "It's a small town. Everyone getting to know each other is better in more ways than one.",
+            "Whenever you have time, say hello to the people you run into. Once you've met them all, let me know."
+        ]
+    },
+    "try_fishing_rod": {
+        "title": "You ought to get a fishing rod",
+        "lines": [
+            "Anyone who's come to this town ought to have a fishing rod, wouldn't you say?",
+            "Buy one at my shop. It's 500 gold. Not so expensive.",
+            "Sea or river, you'll lose track of time just casting a line."
+        ]
+    },
+    "welcome_income_boost": {
+        "title": "Wishing you good business",
+        "lines": [
+            "I heard you've started a new restaurant.",
+            "It reminds me of when I first opened my shop in this town. There wasn't a single customer, so I dusted all day long.",
+            "Write to me again once your total income passes 300 gold. I'll set aside something that may help, however small."
+        ]
+    },
+    "try_harvest_potato": {
+        "title": "Want to try harvesting a potato?",
+        "lines": [
+            "Hey, you bought potato seeds but haven't planted them yet, right? I can tell, you know.",
+            "I started with potatoes too when I first opened the shop. They're the least likely to fail.",
+            "Just plant them and water them well. You'd be surprised how good harvesting feels."
+        ]
+    },
+    "try_harvest_corn": {
+        "title": "Try growing corn too",
+        "lines": [
+            "Have you planted corn yet? The seeds that came in this time are unusually plump.",
+            "It takes a bit of work, but the satisfaction when it's fully grown is something else.",
+            "Grow some and tell me what you think. I'm curious, honestly."
+        ]
+    },
+    "try_harvest_lettuce": {
+        "title": "Lettuce grows fast",
+        "lines": [
+            "You haven't grown lettuce yet, have you? It's actually the fastest-growing crop at our place.",
+            "I know how it is, putting off farming because you're busy. But lettuce really is quick.",
+            "Just plant it once. You'll see right away that it's not hard."
+        ]
+    },
+    "try_pork": {
+        "title": "Want to try handling some pork?",
+        "lines": [
+            "Helping out at the ranch, I've noticed there's hardly an ingredient easier to cook than pork.",
+            "Having one on the restaurant menu would make customers happy, I bet. I guarantee it.",
+            "Don't stress about it, just give it a try. As for Belje... well, no need to go into details, right?"
+        ]
+    },
+    "try_beef": {
+        "title": "Try handling some beef too",
+        "lines": [
+            "Give beef a try too. It takes a lot of effort, but people react really well when you cook it.",
+            "I picked these things up naturally working at the ranch. The first time is the hard part, after that it's quick.",
+            "If you need anything, just say so. I know ranch work better than anyone."
+        ]
+    },
+    "try_mackerel": {
+        "title": "Ever caught a mackerel?",
+        "lines": [
+            "Mackerel, eh. Not sure if you've caught one. It's not hard as long as you have a rod.",
+            "Just stand on the beach in this town and cast, and they bite readily. A perfect fish for beginners.",
+            "Go catch one. That feel in your hands, you won't forget it easily."
+        ]
+    },
+    "try_salmon": {
+        "title": "How about catching a salmon?",
+        "lines": [
+            "Care to catch a salmon too? It takes a bit more effort than mackerel.",
+            "Marin's been bringing them in quite well lately. No reason you can't.",
+            "Take it slow, don't rush your cast. That'll do it."
+        ]
+    },
+    "try_squid": {
+        "title": "Squid is a bit tricky",
+        "lines": [
+            "Squid is a bit tricky, and most folks find it hard to catch.",
+            "Still, once you catch one, it's quite fun. Even Marin struggled at first.",
+            "Feel free to brag to me a little when you do. It should feel pretty good."
+        ]
+    },
+    "try_serve_dish": {
+        "title": "Ever served a dish to a customer?",
+        "lines": [
+            "It's been a while since you opened the restaurant. Have you properly served a customer yet?",
+            "That's how business is. Your first customer is the most nerve-wracking, and after that you just keep doing it.",
+            "Send out a single dish. I still remember that pride myself."
+        ]
+    },
+    "try_harvest_berry": {
+        "title": "Want to pick some berries?",
+        "lines": [
+            "You've only been farming, so you've never picked berries, right? You don't plant them, just pick what's already growing, so it's much easier.",
+            "There's a bush near the pond across from the restaurant. I pick a few now and then when I pass by, and eat them.",
+            "It'll feel different from growing them in a field. Go pick some."
+        ]
+    }
+}

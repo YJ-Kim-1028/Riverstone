@@ -376,6 +376,9 @@ func set_world_map(world_map: WorldMap) -> void:
 
 
 func show_interaction_prompt(text: String) -> void:
+	text = tr(text)
+	if text.begins_with("E "):
+		text = Keybinds.get_key_label(Keybinds.INTERACT_ACTION) + text.substr(1)
 	_interaction_prompt.text = text
 	_interaction_prompt.visible = true
 	_interaction_icon.visible = false

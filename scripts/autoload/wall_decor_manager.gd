@@ -89,15 +89,15 @@ func place_wall_decor(world_position: Vector2) -> String:
 		return ""
 	if not ALLOWED_MAP_IDS.has(_current_map_id):
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "집 안의 벽에만 걸 수 있다."
+		return tr("집 안의 벽에만 걸 수 있다.")
 	var footprint := get_footprint(item_id)
 	var anchor_cell := _world_to_anchor_cell(world_position, footprint)
 	if has_wall_decor_overlap(_current_map_id, anchor_cell, footprint):
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "이미 걸려 있다."
+		return tr("이미 걸려 있다.")
 	if not _is_footprint_on_wall(anchor_cell, footprint):
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "벽에만 걸 수 있다."
+		return tr("벽에만 걸 수 있다.")
 	if not _wall_decor.has(_current_map_id):
 		_wall_decor[_current_map_id] = {}
 	(_wall_decor[_current_map_id] as Dictionary)[anchor_cell] = {"item_id": item_id}
@@ -117,7 +117,7 @@ func remove_wall_decor(map_id: String, anchor_cell: Vector2i) -> String:
 	var item_id := String((_wall_decor[map_id] as Dictionary)[anchor_cell].get("item_id", ""))
 	if not InventoryManager.can_add_item(item_id, 1):
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "인벤토리가 가득 찼다."
+		return tr("인벤토리가 가득 찼다.")
 	InventoryManager.add_item(item_id, 1)
 	(_wall_decor[map_id] as Dictionary).erase(anchor_cell)
 	if map_id == _current_map_id:

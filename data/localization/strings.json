@@ -1056,6 +1056,11 @@
         "ja": "ミニマップ",
         "zh": "小地图"
     },
+    "베리를 땄다.": {
+        "en": "Picked some berries.",
+        "ja": "ベリーを摘んだ。",
+        "zh": "摘了一些浆果。"
+    },
     "냄비": {
         "en": "Pot",
         "ja": "鍋",
@@ -1075,5 +1080,435 @@
         "en": "Blender",
         "ja": "ミキサー",
         "zh": "搅拌机"
+    },
+    "%d / %d명과 인사함": {
+        "en": "Greeted %d / %d villagers",
+        "ja": "%d / %d人に挨拶した",
+        "zh": "已问候 %d / %d 位居民"
+    },
+    "%d년 %d월 %d일 %d일차": {
+        "en": "%d/%d/%d - Day %d",
+        "ja": "%d年%d月%d日 %d日目",
+        "zh": "%d年%d月%d日 第%d天"
+    },
+    "%s를 정말 도살하시겠습니까? 되돌릴 수 없습니다.": {
+        "en": "Really slaughter %s? This can't be undone.",
+        "ja": "本当に%sを屠殺しますか？元に戻せません。",
+        "zh": "真的要宰杀%s吗？此操作无法撤销。"
+    },
+    "%s에게 %s을(를) 선물했다.": {
+        "en": "Gave %s a gift: %s.",
+        "ja": "%sに%sをプレゼントした。",
+        "zh": "送给%s一份礼物：%s。"
+    },
+    "%s에게서 고기를 얻었다.": {
+        "en": "Got meat from %s.",
+        "ja": "%sから肉を手に入れた。",
+        "zh": "从%s身上获得了肉。"
+    },
+    "%s을(를) 수확했다.": {
+        "en": "Harvested %s.",
+        "ja": "%sを収穫した。",
+        "zh": "收获了%s。"
+    },
+    "E 조준": {
+        "en": "E Aim",
+        "ja": "E 狙う",
+        "zh": "E 瞄准"
+    },
+    "부탁 하나만 해도 될까?": {
+        "en": "Can I ask you a favor?",
+        "ja": "ひとつお願いしてもいい？",
+        "zh": "能拜托你一件事吗？"
+    },
+    "집 좀 꾸며보려고 하는데, 아무래도 혼자 고르긴 자신이 없어서.": {
+        "en": "I'm trying to decorate my place, but I don't trust myself to pick things out alone.",
+        "ja": "家を飾ろうと思ってるんだけど、ひとりで選ぶ自信がなくて。",
+        "zh": "我想布置一下家里，但是一个人实在没信心挑。"
+    },
+    "가구점에서 {item_name} 하나만 구해다 줄 수 있어?": {
+        "en": "Could you get me a {item_name} from the furniture store?",
+        "ja": "家具店で{item_name}をひとつ買ってきてもらえる？",
+        "zh": "你能帮我在家具店买一个{item_name}吗？"
+    },
+    "값은 넉넉하게 챙겨줄게, 부탁해.": {
+        "en": "I'll pay you well, please.",
+        "ja": "お代は多めに払うから、お願い。",
+        "zh": "报酬我会给足的，拜托了。"
+    },
+    "이상하게 들릴 수도 있는데": {
+        "en": "This might sound odd, but",
+        "ja": "変に聞こえるかもしれないけど",
+        "zh": "可能听起来有点奇怪"
+    },
+    "요즘 집에 뭐가 하나 빠진 느낌이 들어서 고민하다가 부탁하는 거야.": {
+        "en": "Lately my place feels like it's missing something, and after thinking it over, I'm asking you.",
+        "ja": "最近、家に何か足りない気がして、悩んだ末にお願いしてるんだ。",
+        "zh": "最近总觉得家里少了点什么，想了很久才来拜托你。"
+    },
+    "가구점에 {item_name}가 있던데, 그거 하나만 사다 줄래?": {
+        "en": "The furniture store has a {item_name}. Could you pick one up for me?",
+        "ja": "家具店に{item_name}があったんだけど、ひとつ買ってきてくれない？",
+        "zh": "家具店里有{item_name}，能帮我买一个吗？"
+    },
+    "귀찮은 부탁인 거 아는데, 갚을게.": {
+        "en": "I know it's a hassle, but I'll make it up to you.",
+        "ja": "面倒なお願いなのは分かってる、ちゃんとお返しするよ。",
+        "zh": "我知道这个请求很麻烦，我会报答你的。"
+    },
+    "심부름 좀 부탁해도 돼?": {
+        "en": "Mind running an errand for me?",
+        "ja": "おつかいをお願いしてもいい？",
+        "zh": "能拜托你跑个腿吗？"
+    },
+    "요즘 가게 일 때문에 가구점 들를 시간이 도저히 안 나.": {
+        "en": "Between work at the shop, I just can't find time to stop by the furniture store.",
+        "ja": "最近お店の仕事で、家具店に寄る時間がどうしても取れないんだ。",
+        "zh": "最近店里太忙，实在抽不出时间去家具店。"
+    },
+    "{item_name} 하나 필요한데, 대신 좀 사다 줄 수 있어?": {
+        "en": "I need a {item_name}. Could you buy one for me?",
+        "ja": "{item_name}がひとつ必要なんだけど、代わりに買ってきてもらえる？",
+        "zh": "我需要一个{item_name}，你能帮我买一个吗？"
+    },
+    "수고비는 확실히 챙겨줄게.": {
+        "en": "I'll definitely pay you for your trouble.",
+        "ja": "手間賃はきっちり払うよ。",
+        "zh": "辛苦费一定会给你的。"
+    },
+    "가구점": {
+        "en": "the furniture store",
+        "ja": "家具店",
+        "zh": "家具店"
+    },
+    "경찰서": {
+        "en": "the police station",
+        "ja": "警察署",
+        "zh": "警察局"
+    },
+    "광장": {
+        "en": "the plaza",
+        "ja": "広場",
+        "zh": "广场"
+    },
+    "낚시가게": {
+        "en": "the fishing shop",
+        "ja": "釣具店",
+        "zh": "渔具店"
+    },
+    "농가게": {
+        "en": "the farm shop",
+        "ja": "農産物店",
+        "zh": "农产品店"
+    },
+    "레스토랑": {
+        "en": "the restaurant",
+        "ja": "レストラン",
+        "zh": "餐厅"
+    },
+    "목장": {
+        "en": "the ranch",
+        "ja": "牧場",
+        "zh": "牧场"
+    },
+    "바다": {
+        "en": "the sea",
+        "ja": "海",
+        "zh": "海边"
+    },
+    "병원": {
+        "en": "the hospital",
+        "ja": "病院",
+        "zh": "医院"
+    },
+    "서점": {
+        "en": "the bookstore",
+        "ja": "書店",
+        "zh": "书店"
+    },
+    "신사": {
+        "en": "the shrine",
+        "ja": "神社",
+        "zh": "神社"
+    },
+    "절": {
+        "en": "the temple",
+        "ja": "お寺",
+        "zh": "寺庙"
+    },
+    "잡화점": {
+        "en": "the general store",
+        "ja": "雑貨店",
+        "zh": "杂货店"
+    },
+    "지하실": {
+        "en": "the basement",
+        "ja": "地下室",
+        "zh": "地下室"
+    },
+    "집": {
+        "en": "home",
+        "ja": "家",
+        "zh": "家"
+    },
+    "축사": {
+        "en": "the cowshed",
+        "ja": "牛舎",
+        "zh": "牛棚"
+    },
+    "카페": {
+        "en": "the cafe",
+        "ja": "カフェ",
+        "zh": "咖啡馆"
+    },
+    "알 수 없는 장소": {
+        "en": "an unknown place",
+        "ja": "不明な場所",
+        "zh": "不明地点"
+    },
+    "어딘가": {
+        "en": "somewhere",
+        "ja": "どこか",
+        "zh": "某处"
+    },
+    "피해자의 집": {
+        "en": "the victim's home",
+        "ja": "被害者の家",
+        "zh": "受害者的家"
+    },
+    "그날 밤 어디 있었는지는... 나도 잘 기억이 안 나.": {
+        "en": "Where I was that night... I don't really remember.",
+        "ja": "あの夜どこにいたかは…私もよく覚えてない。",
+        "zh": "那天晚上我在哪里……我也记不太清了。"
+    },
+    "그날 밤 어디에 있었는지 알려진 바가 없다.": {
+        "en": "Nobody knows where they were that night.",
+        "ja": "あの夜どこにいたのかは分かっていない。",
+        "zh": "没有人知道他那天晚上在哪里。"
+    },
+    "난 그 날 오후 6시엔 %s에 있었어.": {
+        "en": "At 6 PM that day, I was at %s.",
+        "ja": "あの日の午後6時は%sにいたよ。",
+        "zh": "那天下午6点我在%s。"
+    },
+    "아, 근데 그날은 딱히 아무도 못 봤던 것 같아.": {
+        "en": "Ah, but I don't think I saw anyone that day.",
+        "ja": "あ、でもあの日は特に誰も見かけなかったと思う。",
+        "zh": "啊，不过那天我好像没看到什么人。"
+    },
+    "아, 그러고 보니 그날 %s에서 %s를 본 것 같기도 해.": {
+        "en": "Oh, now that you mention it, I think I saw %s at %s that day.",
+        "ja": "あ、そういえばあの日、%sで%sを見かけた気がする。",
+        "zh": "啊，这么说来，那天我好像在%s见到了%s。"
+    },
+    "오후 6시에는 %s에 있었다고 말한다.": {
+        "en": "Says they were at %s at 6 PM.",
+        "ja": "午後6時には%sにいたと言っている。",
+        "zh": "说下午6点在%s。"
+    },
+    "그 사람": {
+        "en": "that person",
+        "ja": "その人",
+        "zh": "那个人"
+    },
+    "동물": {
+        "en": "animal",
+        "ja": "動物",
+        "zh": "动物"
+    },
+    "작물": {
+        "en": "crop",
+        "ja": "作物",
+        "zh": "作物"
+    },
+    "봐줘": {
+        "en": "Read my fortune",
+        "ja": "占って",
+        "zh": "帮我看看"
+    },
+    "괜찮아": {
+        "en": "No, thanks",
+        "ja": "大丈夫",
+        "zh": "不用了"
+    },
+    "골드가 부족합니다.": {
+        "en": "Not enough gold.",
+        "ja": "ゴールドが足りません。",
+        "zh": "金币不足。"
+    },
+    "구매 한도를 초과했습니다.": {
+        "en": "Purchase limit exceeded.",
+        "ja": "購入上限を超えています。",
+        "zh": "已超过购买上限。"
+    },
+    "더 이상 확장할 수 없습니다.": {
+        "en": "Can't be expanded any further.",
+        "ja": "これ以上拡張できません。",
+        "zh": "无法再扩建。"
+    },
+    "동물을 배치할 수 없습니다.": {
+        "en": "Can't place the animal.",
+        "ja": "動物を配置できません。",
+        "zh": "无法放置动物。"
+    },
+    "맛있게 먹어.": {
+        "en": "Enjoy your meal.",
+        "ja": "おいしく食べてね。",
+        "zh": "好好吃吧。"
+    },
+    "벽에만 걸 수 있다.": {
+        "en": "Can only be hung on a wall.",
+        "ja": "壁にしか掛けられない。",
+        "zh": "只能挂在墙上。"
+    },
+    "보관함을 비워야 회수할 수 있다.": {
+        "en": "Empty the storage box before picking it up.",
+        "ja": "収納箱を空にしないと回収できない。",
+        "zh": "必须先清空储物箱才能收回。"
+    },
+    "아직 구매할 수 없는 상품입니다.": {
+        "en": "This item isn't available yet.",
+        "ja": "まだ購入できない商品です。",
+        "zh": "该商品暂时无法购买。"
+    },
+    "아직 아기라 짤 수 없다.": {
+        "en": "Still a baby, can't be milked yet.",
+        "ja": "まだ赤ちゃんだから搾れない。",
+        "zh": "还是幼崽，不能挤奶。"
+    },
+    "오늘 먼저 먹이를 줘야 한다.": {
+        "en": "Needs to be fed first today.",
+        "ja": "今日はまずエサをあげないといけない。",
+        "zh": "今天得先喂食。"
+    },
+    "오늘은 이미 먹이를 줬다.": {
+        "en": "Already fed today.",
+        "ja": "今日はもうエサをあげた。",
+        "zh": "今天已经喂过了。"
+    },
+    "오늘은 이미 짰다.": {
+        "en": "Already milked today.",
+        "ja": "今日はもう搾った。",
+        "zh": "今天已经挤过奶了。"
+    },
+    "우유를 얻었다.": {
+        "en": "Got some milk.",
+        "ja": "ミルクを手に入れた。",
+        "zh": "获得了牛奶。"
+    },
+    "이 곳에는 깔 수 없다.": {
+        "en": "Can't lay this here.",
+        "ja": "ここには敷けない。",
+        "zh": "这里不能铺。"
+    },
+    "이 곳에는 설치할 수 없다.": {
+        "en": "Can't place this here.",
+        "ja": "ここには設置できない。",
+        "zh": "这里不能放置。"
+    },
+    "이 상자는 회수할 수 없다.": {
+        "en": "This box can't be picked up.",
+        "ja": "この箱は回収できない。",
+        "zh": "这个箱子不能收回。"
+    },
+    "이런 짓을 하기엔 너무 어리다.": {
+        "en": "Too young for this.",
+        "ja": "こんなことをするには幼すぎる。",
+        "zh": "年纪太小，不能这么做。"
+    },
+    "이미 가구가 있다.": {
+        "en": "There's already furniture here.",
+        "ja": "すでに家具がある。",
+        "zh": "这里已经有家具了。"
+    },
+    "이미 걸려 있다.": {
+        "en": "Something's already hanging here.",
+        "ja": "すでに掛かっている。",
+        "zh": "这里已经挂着东西了。"
+    },
+    "이미 깔려 있다.": {
+        "en": "Already laid down here.",
+        "ja": "すでに敷いてある。",
+        "zh": "这里已经铺过了。"
+    },
+    "이미 다른 동물이 있는 칸입니다.": {
+        "en": "Another animal is already in this stall.",
+        "ja": "すでに別の動物がいる区画です。",
+        "zh": "这个栏位里已经有其他动物了。"
+    },
+    "이미 상자가 있다.": {
+        "en": "There's already a box here.",
+        "ja": "すでに箱がある。",
+        "zh": "这里已经有箱子了。"
+    },
+    "인벤토리가 가득 찼습니다.": {
+        "en": "Your inventory is full.",
+        "ja": "インベントリがいっぱいです。",
+        "zh": "背包已满。"
+    },
+    "전설의 물고기가 부족합니다.": {
+        "en": "Not enough legendary fish.",
+        "ja": "伝説の魚が足りません。",
+        "zh": "传说之鱼不足。"
+    },
+    "집 안의 벽에만 걸 수 있다.": {
+        "en": "Can only be hung on a wall inside the house.",
+        "ja": "家の中の壁にしか掛けられない。",
+        "zh": "只能挂在屋内的墙上。"
+    },
+    "집 안이나 마당에서만 깔 수 있다.": {
+        "en": "Can only be laid inside the house or in the yard.",
+        "ja": "家の中か庭にしか敷けない。",
+        "zh": "只能铺在屋内或院子里。"
+    },
+    "집 안이나 마당에서만 설치할 수 있다.": {
+        "en": "Can only be placed inside the house or in the yard.",
+        "ja": "家の中か庭にしか設置できない。",
+        "zh": "只能放置在屋内或院子里。"
+    },
+    "판매하지 않는 상품입니다.": {
+        "en": "This item isn't for sale.",
+        "ja": "販売していない商品です。",
+        "zh": "该商品不出售。"
+    },
+    "더 이상 이 추억을 만날 수 없습니다.": {
+        "en": "This memory can no longer be reached.",
+        "ja": "この思い出にはもう会えません。",
+        "zh": "再也无法遇见这段回忆了。"
+    },
+    "호감도 100 달성": {
+        "en": "Reach 100 affection",
+        "ja": "好感度100達成",
+        "zh": "好感度达到100"
+    },
+    "요리 제작": {
+        "en": "Cook it",
+        "ja": "料理を作る",
+        "zh": "烹饪制作"
+    },
+    "맑음": {
+        "en": "Sunny",
+        "ja": "晴れ",
+        "zh": "晴"
+    },
+    "흐림": {
+        "en": "Cloudy",
+        "ja": "曇り",
+        "zh": "多云"
+    },
+    "비": {
+        "en": "Rain",
+        "ja": "雨",
+        "zh": "雨"
+    },
+    "[레시피]": {
+        "en": "[Recipes]",
+        "ja": "[レシピ]",
+        "zh": "[食谱]"
+    },
+    "[추억의 물건]": {
+        "en": "[Keepsakes]",
+        "ja": "[思い出の品]",
+        "zh": "[回忆之物]"
     }
 }

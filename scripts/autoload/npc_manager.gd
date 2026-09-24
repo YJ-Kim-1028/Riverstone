@@ -657,7 +657,7 @@ func get_daily_dialogue(npc_id: String) -> Array:
 		var numbered_key := "murder_grief_%d" % MurderManager.get_murder_count()
 		var grief_lines: Array = story_dialogue.get(numbered_key, story_dialogue.get("murder_grief", []))
 		if not grief_lines.is_empty():
-			var grief_victim_name: String = String(get_definition(get_most_recent_death_npc_id()).get("name", "그 사람"))
+			var grief_victim_name: String = String(get_definition(get_most_recent_death_npc_id()).get("name", tr("그 사람")))
 			lines.append_array(_substitute_victim_name(grief_lines, grief_victim_name))
 		lines.append(alibi_line)
 		var corroboration_line := MurderManager.consume_stalker_corroboration_line(npc_id)
@@ -773,7 +773,7 @@ func get_daily_dialogue(npc_id: String) -> Array:
 		if has_horror_mode_started():
 			## 사용자 지시(2026-08-23): "그 사람" 대신 실제 희생자 이름으로 - 가장
 			## 최근 사건의 피해자 이름을 {victim_name} 자리에 채운다.
-			var victim_name: String = String(get_definition(get_most_recent_death_npc_id()).get("name", "그 사람"))
+			var victim_name: String = String(get_definition(get_most_recent_death_npc_id()).get("name", tr("그 사람")))
 			for entry in (dialogue.get("horror_conversation", []) as Array):
 				pool.append(_substitute_victim_name(entry, victim_name))
 		## 플레이어가 이 NPC에게 자유 작성 메일을 보냈고 아직 언급 안 됐으면, 오늘의
@@ -849,7 +849,7 @@ func _build_fortune_offer_lines() -> Array:
 			"type": "choice",
 			"options": [
 				{
-					"label": String(fortune.get("accept_label", "봐줘")),
+					"label": String(fortune.get("accept_label", tr("봐줘"))),
 					"affection": 0,
 					"response": [
 						result_line,
@@ -857,7 +857,7 @@ func _build_fortune_offer_lines() -> Array:
 					],
 				},
 				{
-					"label": String(fortune.get("decline_label", "괜찮아")),
+					"label": String(fortune.get("decline_label", tr("괜찮아"))),
 					"affection": 0,
 					"response": (fortune.get("decline_response", []) as Array).duplicate(true),
 				},

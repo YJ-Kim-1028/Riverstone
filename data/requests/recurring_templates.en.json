@@ -1,0 +1,82 @@
+{
+    "belje": {
+        "title": "Could you spare some potatoes?",
+        "lines": [
+            "I haven't been able to get any potatoes lately. The ranch keeps me so busy I can't find time to shop.",
+            "If you happen to have some {item_name}, could you share a few?",
+            "I'll make sure to pay you back for your kindness."
+        ]
+    },
+    "flora": {
+        "title": "I urgently need lettuce!",
+        "lines": [
+            "I've just run out of lettuce. I've got no salad to serve my customers!",
+            "If you have some {item_name}, could you share some? It's really urgent!",
+            "I'll pay you back, I promise!"
+        ]
+    },
+    "isha": {
+        "title": "I have a small favor to ask",
+        "lines": [
+            "I've been watching my stamina lately, and I've just run out of {item_name}.",
+            "I know it's a bother to ask, but could you possibly spare some?",
+            "I'll settle up right away once I receive it."
+        ]
+    },
+    "marin": {
+        "title": "Can you get me some mackerel?!",
+        "lines": [
+            "Hey, {player_name}! I want a mackerel dish today but I don't have a single one.",
+            "Do you have any {item_name}? If you do, give me some!",
+            "I'll definitely pay you back next time, promise!"
+        ]
+    },
+    "marr": {
+        "title": "I require salmon.",
+        "lines": [
+            "I have run out of salmon.",
+            "If you have {item_name}, please share some.",
+            "I will pay the exact price."
+        ]
+    },
+    "mocha": {
+        "title": "Could I get some berries?",
+        "lines": [
+            "I ran out of berries for the desserts. Of all days, a busy one.",
+            "If you've got some {item_name}, could you share? I'm in a rush.",
+            "I'll pay you back with a cup of coffee."
+        ]
+    },
+    "roshi": {
+        "title": "I'd ask you for some corn",
+        "lines": [
+            "I could use some corn, but I've been so busy on the boat I haven't had time to shop.",
+            "If you happen to have some {item_name}, would you spare some?",
+            "I'll pay you well, that's certain."
+        ]
+    },
+    "shepherd": {
+        "title": "Could you get me some squid?",
+        "lines": [
+            "Lately my appetite keeps drifting toward squid.",
+            "If you have some {item_name}, could you share some?",
+            "I'll gladly take it, and I'll pay you generously."
+        ]
+    },
+    "usher": {
+        "title": "Mind if I talk about berries?",
+        "lines": [
+            "Berries, you know, burst with a little pop each time you bite. Doesn't that feel like a tiny story?",
+            "I'm a bit short on stories lately, so, could you share some {item_name}?",
+            "I'll pay you well. Think of it as payment for the story."
+        ]
+    },
+    "woody": {
+        "title": "Got any potatoes?",
+        "lines": [
+            "I was going to eat a potato dish today, but there wasn't a single one.",
+            "If you've got any {item_name} to spare, could you give me some?",
+            "Thanks, really! Next time I'll give you something in return."
+        ]
+    }
+}

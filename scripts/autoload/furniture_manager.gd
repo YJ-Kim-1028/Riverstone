@@ -95,15 +95,15 @@ func place_furniture(world_position: Vector2) -> String:
 		return ""
 	if not is_placement_allowed(_current_map_id):
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "집 안이나 마당에서만 설치할 수 있다."
+		return tr("집 안이나 마당에서만 설치할 수 있다.")
 	var footprint := get_footprint(item_id)
 	var anchor_cell := _world_to_anchor_cell(world_position, footprint)
 	if has_furniture_overlap(_current_map_id, anchor_cell, footprint):
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "이미 가구가 있다."
+		return tr("이미 가구가 있다.")
 	if not can_place_furniture(item_id, world_position):
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "이 곳에는 설치할 수 없다."
+		return tr("이 곳에는 설치할 수 없다.")
 	if not _furniture.has(_current_map_id):
 		_furniture[_current_map_id] = {}
 	(_furniture[_current_map_id] as Dictionary)[anchor_cell] = {"item_id": item_id}
@@ -122,7 +122,7 @@ func remove_furniture(map_id: String, anchor_cell: Vector2i) -> String:
 	var item_id := String((_furniture[map_id] as Dictionary)[anchor_cell].get("item_id", ""))
 	if not InventoryManager.can_add_item(item_id, 1):
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "인벤토리가 가득 찼다."
+		return tr("인벤토리가 가득 찼다.")
 	InventoryManager.add_item(item_id, 1)
 	(_furniture[map_id] as Dictionary).erase(anchor_cell)
 	if map_id == _current_map_id:

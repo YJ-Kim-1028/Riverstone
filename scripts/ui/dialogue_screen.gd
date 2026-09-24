@@ -496,7 +496,8 @@ func _confirm_choice() -> void:
 func _set_choice_mode(active: bool) -> void:
 	_choice_box.visible = active
 	_text_label.visible = not active
-	_advance_hint.text = "▲▼ E" if active else "E ▶"
+	var key_label := Keybinds.get_key_label(Keybinds.INTERACT_ACTION)
+	_advance_hint.text = "▲▼ %s" % key_label if active else "%s ▶" % key_label
 
 
 func _is_open() -> bool:

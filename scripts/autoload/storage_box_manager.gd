@@ -127,14 +127,14 @@ func place_box(world_position: Vector2) -> String:
 		return ""
 	if not is_placement_allowed(_current_map_id):
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "집 안이나 마당에서만 설치할 수 있다."
+		return tr("집 안이나 마당에서만 설치할 수 있다.")
 	var cell := _world_to_cell(world_position)
 	if has_box_at(_current_map_id, cell):
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "이미 상자가 있다."
+		return tr("이미 상자가 있다.")
 	if not can_place_box(world_position):
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "이 곳에는 설치할 수 없다."
+		return tr("이 곳에는 설치할 수 없다.")
 	if not _boxes.has(_current_map_id):
 		_boxes[_current_map_id] = {}
 	var items: Array = []
@@ -155,15 +155,15 @@ func remove_box(map_id: String, cell: Vector2i) -> String:
 		return ""
 	if map_id == FIXED_BOX_MAP_ID:
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "이 상자는 회수할 수 없다."
+		return tr("이 상자는 회수할 수 없다.")
 	var items: Array = get_box(map_id, cell).get("items", [])
 	for slot in items:
 		if slot != null:
 			AudioManager.play_sfx(AudioManager.SFX_BEEP)
-			return "보관함을 비워야 회수할 수 있다."
+			return tr("보관함을 비워야 회수할 수 있다.")
 	if not InventoryManager.can_add_item(BOX_ITEM_ID, 1):
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "인벤토리가 가득 찼다."
+		return tr("인벤토리가 가득 찼다.")
 	InventoryManager.add_item(BOX_ITEM_ID, 1)
 	(_boxes[map_id] as Dictionary).erase(cell)
 	if map_id == _current_map_id:

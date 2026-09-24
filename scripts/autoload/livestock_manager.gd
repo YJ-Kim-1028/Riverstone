@@ -169,7 +169,7 @@ func perform_feed(stall_index: int) -> String:
 	var stall: Dictionary = _stalls[stall_index]
 	if int(stall.get("fed_day", -1)) == TimeManager.current_day:
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "오늘은 이미 먹이를 줬다."
+		return tr("오늘은 이미 먹이를 줬다.")
 	stall["fed_day"] = TimeManager.current_day
 	# 성장 판정은 날짜 경과가 아니라 실제로 먹인 횟수 기준(사용자 지시) - 이
 	# 급여로 막 성체가 됐을 수도 있으니 스프라이트를 바로 다시 그린다(전에는
@@ -186,7 +186,7 @@ func perform_feed(stall_index: int) -> String:
 			AudioManager.play_sfx(AudioManager.SFX_COW)
 		"pig":
 			AudioManager.play_sfx(AudioManager.SFX_PIG)
-	return "맛있게 먹어."
+	return tr("맛있게 먹어.")
 
 
 ## 착유(성체 소 전용) - 오늘 먼저 먹이를 줘야 하고, 하루 1번만 가능.
@@ -195,22 +195,22 @@ func perform_milk(stall_index: int) -> String:
 		return ""
 	if not is_adult(stall_index):
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "아직 아기라 짤 수 없다."
+		return tr("아직 아기라 짤 수 없다.")
 	var stall: Dictionary = _stalls[stall_index]
 	if int(stall.get("fed_day", -1)) != TimeManager.current_day:
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "오늘 먼저 먹이를 줘야 한다."
+		return tr("오늘 먼저 먹이를 줘야 한다.")
 	if int(stall.get("milked_day", -1)) == TimeManager.current_day:
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "오늘은 이미 짰다."
+		return tr("오늘은 이미 짰다.")
 	var milk_item_id := String(get_animal_definition(String(stall.get("type", ""))).get("milk_item_id", ""))
 	if not InventoryManager.add_item(milk_item_id, 1):
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "인벤토리가 가득 찼다."
+		return tr("인벤토리가 가득 찼다.")
 	stall["milked_day"] = TimeManager.current_day
 	stalls_changed.emit()
 	AudioManager.play_sfx(AudioManager.SFX_ITEM_PICKING)
-	return "우유를 얻었다."
+	return tr("우유를 얻었다.")
 
 
 ## main.gd가 작은 칼로 상호작용할 때 호출한다 - 도살 액션이 아니면 빈
@@ -222,13 +222,13 @@ func get_slaughter_request(stall_index: int) -> Dictionary:
 	if get_equipped_action(stall_index) != "slaughter":
 		return {}
 	var definition := get_animal_definition(String(_stalls[stall_index].get("type", "")))
-	var animal_name := String(definition.get("name", "동물"))
+	var animal_name := String(definition.get("name", tr("동물")))
 	if not is_adult(stall_index):
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return {"denied": true, "message": "이런 짓을 하기엔 너무 어리다."}
+		return {"denied": true, "message": tr("이런 짓을 하기엔 너무 어리다.")}
 	return {
 		"denied": false,
-		"message": "%s를 정말 도살하시겠습니까? 되돌릴 수 없습니다." % animal_name,
+		"message": tr("%s를 정말 도살하시겠습니까? 되돌릴 수 없습니다.") % animal_name,
 	}
 
 
@@ -243,12 +243,12 @@ func perform_slaughter(stall_index: int) -> String:
 	var meat_count := int(definition.get("meat_count", 1))
 	if not meat_item_id.is_empty() and not InventoryManager.add_item(meat_item_id, meat_count):
 		AudioManager.play_sfx(AudioManager.SFX_BEEP)
-		return "인벤토리가 가득 찼다."
-	var animal_name := String(definition.get("name", "동물"))
+		return tr("인벤토리가 가득 찼다.")
+	var animal_name := String(definition.get("name", tr("동물")))
 	remove_animal(stall_index)
 	if not meat_item_id.is_empty():
 		AudioManager.play_sfx(AudioManager.SFX_ITEM_PICKING)
-	return "%s에게서 고기를 얻었다." % animal_name
+	return tr("%s에게서 고기를 얻었다.") % animal_name
 
 
 ## main.gd가 맵을 옮길 때마다 호출한다(AudioManager.set_world_map()과 같은

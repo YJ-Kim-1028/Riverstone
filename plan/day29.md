@@ -40,6 +40,34 @@ day28(브금 전면 교체, itch.io 출시 준비 논의) 다음 세션. 이번 
   더 키우면 겹침.
 - 새 이미지의 `.import` 파일은 Godot 에디터를 열면 재생성됨.
 
+## 머리색 명도 계산 변경
+
+- `character_appearance.gd`의 `recolor_grayscale_to_hue()`: 원본 픽셀 명도를
+  그대로 쓰던 방식(검정이 회색으로 나오던 원인)을 `목표색 명도 x (픽셀 명도 /
+  대상 픽셀 평균 명도)`로 교체(사용자 지시 - "고른색 명도 반영해서"). 무채색
+  전용 곱연산 분기 삭제. 사용자 확인: "훨씬 낫다".
+- 한계: 검정은 음영이 전부 0이라 납작해짐, 아주 밝은 색은 하이라이트가 1.0에서
+  잘릴 수 있음.
+
+## 번역/키 설정 관련 수정
+
+- 조리기구 이름(냄비/프라이팬/도마/믹서기): 표시만 `tr()`(main.gd, kitchen_screen.gd),
+  `tool_name` 데이터는 효과음 매칭 키라 그대로. strings.json에 4개 추가.
+- "베리를 땄다." 등 `berry_bush_manager.gd` 메시지 `tr()` 적용.
+- **행동키 프롬프트**: `player.gd show_interaction_prompt()`가 `tr(text)` 후 "E "
+  접두를 현재 행동키 이름으로 치환(호출부가 8개 파일에 흩어져 있어 한 곳에서
+  처리). 대화창 힌트(`dialogue_screen.gd`)도 행동키 이름 사용.
+- 퀘스트: `data/requests/requests.*.json`, `recurring_templates.*.json`(en/ja/zh)
+  신규, `email_manager.gd` 로더 두 곳에 `Localizer.apply_language()` 연결.
+- 번역 일괄 정리: scripts/ 전체에서 `tr()` 없는 한국어 표시 문자열 11개 파일
+  수정, strings.json 새 키 약 100개. 상수라 `tr()` 못 쓴 곳(shop_manager/
+  collection_manager/weather_manager)과 main.gd 임시 메시지는 Label 자동
+  번역에 의존 - 영어로 플레이해서 한국어가 보이면 그 자리 수정 필요.
+- 온라인 샵: 옷/헤어 구매는 즉시 해금이라 "인벤토리를 비워주세요" 대신
+  "구매했습니다."(`online_shop_panel.gd _purchase_success_message`).
+- 미결: 주크박스 음반이 실제로 인벤토리에 들어오는지(코드상으론 즉시 해금) 사용자
+  확인 필요.
+
 ## 다음 세션에서 할 일
 
 - [ ] 타이틀 화면 실제 확인 (로고 배경 투명 여부, 로고 크기/버튼 겹침)

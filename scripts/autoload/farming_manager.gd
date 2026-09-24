@@ -211,14 +211,14 @@ func perform_harvest(world_position: Vector2) -> String:
 	var produce_item_id := String(definition.get("produce_item_id", ""))
 	var produce_count := int(definition.get("produce_count", 0))
 	if not InventoryManager.add_item(produce_item_id, produce_count):
-		return "인벤토리가 가득 찼다."
+		return tr("인벤토리가 가득 찼다.")
 	# 경작지는 유지하고 바로 재파종 가능하게 비운다(사용자 확정 - 다시 괭이질 불필요).
 	plot["crop_type"] = ""
 	plot["watered_count"] = 0
 	plot["display_watered_count"] = 0
 	_update_plot_sprites(cell)
 	AudioManager.play_sfx(AudioManager.SFX_ITEM_PICKING)
-	return "%s을(를) 수확했다." % String(definition.get("name", "작물"))
+	return tr("%s을(를) 수확했다.") % String(definition.get("name", tr("작물")))
 
 
 ## 매일 날씨가 정해질 때마다(비오는 날 포함, 09:00 취침/자정 기준) 발생하는
