@@ -7,6 +7,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/character_creation_screen.tscn" id="5_character_creation"]
 [ext_resource type="PackedScene" path="res://scenes/ui/language_settings_screen.tscn" id="6_language_settings"]
 [ext_resource type="PackedScene" path="res://scenes/ui/title_settings_screen.tscn" id="7_settings"]
+[ext_resource type="PackedScene" path="res://scenes/ui/content_warning_screen.tscn" id="8_content_warning"]
+[ext_resource type="PackedScene" path="res://scenes/ui/credits_screen.tscn" id="9_credits"]
 
 [node name="TitleScreen" type="Control" unique_id=607178369]
 layout_mode = 3
@@ -79,6 +81,19 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 5
 text = "종료"
 
+[node name="CreditsButton" type="Button" parent="."]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -44.0
+offset_top = -16.0
+offset_right = -4.0
+offset_bottom = -2.0
+custom_minimum_size = Vector2(40, 14)
+theme_override_font_sizes/font_size = 5
+text = "크레딧"
+
 [node name="SlotPickerScreen" parent="." unique_id=793385363 instance=ExtResource("4_slot_picker")]
 anchors_preset = 0
 
@@ -89,6 +104,12 @@ anchors_preset = 0
 anchors_preset = 0
 
 [node name="TitleSettingsScreen" parent="." unique_id=222760602 instance=ExtResource("7_settings")]
+anchors_preset = 0
+
+[node name="CreditsScreen" parent="." instance=ExtResource("9_credits")]
+anchors_preset = 0
+
+[node name="ContentWarningScreen" parent="." instance=ExtResource("8_content_warning")]
 anchors_preset = 0
 
 [node name="TransitionLayer" type="CanvasLayer" parent="." unique_id=126645051]

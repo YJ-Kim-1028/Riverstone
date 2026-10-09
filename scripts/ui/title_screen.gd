@@ -43,21 +43,26 @@ const INTRO_BUTTON_FADE_SECONDS := 0.4
 @onready var _continue_button: Button = $ButtonColumn/ContinueButton
 @onready var _language_button: Button = $ButtonColumn/LanguageButton
 @onready var _settings_button: Button = $ButtonColumn/SettingsButton
+@onready var _credits_button: Button = $CreditsButton
 @onready var _quit_button: Button = $ButtonColumn/QuitButton
 @onready var _slot_picker: Control = $SlotPickerScreen
 @onready var _character_creation: Control = $CharacterCreationScreen
 @onready var _language_screen: Control = $LanguageSettingsScreen
 @onready var _settings_screen: Control = $TitleSettingsScreen
+@onready var _credits_screen: Control = $CreditsScreen
+@onready var _content_warning_screen: Control = $ContentWarningScreen
 @onready var _fade: ColorRect = $TransitionLayer/Fade
 
 
 func _ready() -> void:
-	for button in [_start_button, _continue_button, _language_button, _settings_button, _quit_button]:
+	for button in [_start_button, _continue_button, _language_button, _settings_button, _quit_button, _credits_button]:
 		_style_button(button)
+	_content_warning_screen.open()
 	_start_button.pressed.connect(func() -> void: _slot_picker.open(MODE_NEW_GAME))
 	_continue_button.pressed.connect(func() -> void: _slot_picker.open(MODE_CONTINUE))
 	_language_button.pressed.connect(_language_screen.open)
 	_settings_button.pressed.connect(_settings_screen.open)
+	_credits_button.pressed.connect(_credits_screen.open)
 	_quit_button.pressed.connect(func() -> void: get_tree().quit())
 	_slot_picker.slot_confirmed.connect(_on_slot_confirmed)
 	_slot_picker.closed.connect(_refresh_continue_button)

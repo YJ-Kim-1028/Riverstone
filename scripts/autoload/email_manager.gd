@@ -187,12 +187,21 @@ func get_current_real_date_string() -> String:
 	return tr("%d년 %d월 %d일 %d일차") % [d.year, d.month, d.day, TimeManager.current_day]
 
 
+## 메일에 같이 저장해 두는 날짜 숫자 [년, 월, 일, 게임 일차] - 표시할 때 현재
+## 언어로 날짜 문자열을 다시 만들 수 있게 한다(MailLocalizer 참고).
+func get_current_date_parts() -> Array:
+	var d := Time.get_datetime_dict_from_system()
+	return [d.year, d.month, d.day, TimeManager.current_day]
+
+
+## 메일/발신함/초대 내역은 저장된 문자열이 아니라 "지금 설정된 언어"로 매번 다시
+## 만들어서 돌려준다(MailLocalizer 참고) - 언어를 바꿔도 예전 메일이 새 언어로 보인다.
 func get_inbox() -> Array:
-	return _inbox.duplicate(true)
+	return _inbox.map(func(entry: Dictionary) -> Dictionary: return MailLocalizer.localize_entry(entry, NPCManager.get_definition(String(entry.get("npc_id", "")))))
 
 
 func get_sent_mail() -> Array:
-	return _sent.duplicate(true)
+	return _sent.map(func(entry: Dictionary) -> Dictionary: return MailLocalizer.localize_dated(entry))
 
 
 ## 초대장은 발신함(안부 메일 전용, 사용자 지시)에는 안 남지만, 누구를
@@ -201,7 +210,7 @@ func get_sent_mail() -> Array:
 ## outcome은 초대 시점엔 아직 알 수 없어 "pending"으로 시작 - 그 다음날이
 ## 끝날 때 RestaurantManager가 mark_invite_outcome()으로 채운다.
 func log_invite(npc_id: String) -> void:
-	_invite_history.append({"npc_id": npc_id, "date": get_current_real_date_string(), "outcome": "pending"})
+	_invite_history.append({"npc_id": npc_id, "date": get_current_real_date_string(), "date_parts": get_current_date_parts(), "outcome": "pending"})
 
 
 ## RestaurantManager._on_day_changed()가 초대한 다음날이 끝나기 직전(그날의
@@ -233,7 +242,7 @@ func mark_invite_outcome(npc_id: String, visited: bool) -> void:
 
 
 func get_invite_history() -> Array:
-	return _invite_history.duplicate(true)
+	return _invite_history.map(func(entry: Dictionary) -> Dictionary: return MailLocalizer.localize_dated(entry))
 
 
 ## 아직 완료 보상을 안 받은 요청들 - mail_app.gd 요청함 목록용. 완료(claim)한
@@ -575,6 +584,7 @@ func compose_and_send(npc_id: String, title: String, content: String) -> bool:
 		"title": title,
 		"lines": [content],
 		"date": get_current_real_date_string(),
+		"date_parts": get_current_date_parts(),
 	})
 	_next_id += 1
 	inbox_updated.emit()
@@ -686,14 +696,27 @@ func _maybe_send_greeting_milestones(npc_id: String) -> void:
 
 func _send_greeting_stage(npc_id: String, stage: int) -> bool:
 	var emails: Dictionary = NPCManager.get_definition(npc_id).get("emails", {})
-	var pool: Array = (emails.get("greeting", []) as Array).filter(
-		func(entry): return NPCManager.requires_alive_met(entry.get("requires_alive", ""))
-	)
-	if stage >= pool.size():
+	var candidates := _eligible_pool_indices(emails.get("greeting", []))
+	if stage >= candidates.size():
 		return false
-	var entry: Dictionary = pool[stage]
-	_add_mail(npc_id, "greeting", String(entry.get("title", "")), (entry.get("lines", []) as Array).duplicate())
+	var pool_index := int(candidates[stage])
+	var entry: Dictionary = (emails.get("greeting", []) as Array)[pool_index]
+	_add_mail(npc_id, "greeting", String(entry.get("title", "")), (entry.get("lines", []) as Array).duplicate(), false, {"cat": "greeting", "idx": pool_index})
 	return true
+
+
+## 풀에서 지금 보낼 수 있는 항목(requires_alive 충족 + 선택적으로 선호 재료 요리
+## 조건)의 "원래 풀 안 번호" 목록 - 필터링 후 번호가 아니라 원래 번호를 저장해야
+## 언어를 바꿔도 같은 메일을 다시 찾을 수 있다(MailLocalizer 참고).
+func _eligible_pool_indices(pool: Array, favorite_food_served: bool = true) -> Array:
+	var result: Array = []
+	for i in pool.size():
+		var entry: Dictionary = pool[i]
+		if bool(entry.get("requires_favorite_food", false)) and not favorite_food_served:
+			continue
+		if NPCManager.requires_alive_met(entry.get("requires_alive", "")):
+			result.append(i)
+	return result
 
 
 ## favorite_food_served: event_invite 전용 - 오늘 이 NPC에게 실제로 선호 재료가
@@ -704,16 +727,16 @@ func _send_greeting_stage(npc_id: String, stage: int) -> bool:
 func _maybe_send_category(npc_id: String, category: String, chance: float, favorite_food_served: bool = false) -> bool:
 	var emails: Dictionary = NPCManager.get_definition(npc_id).get("emails", {})
 	var pool: Array = emails.get(category, [])
-	if category == "event_invite":
-		pool = pool.filter(func(entry): return not bool(entry.get("requires_favorite_food", false)) or favorite_food_served)
 	# 다른 NPC를 현재형으로 언급하는 메일(예: 셰퍼드의 "오늘 마린이 왔다
 	# 갔어")이 그 NPC 사망 후에도 계속 발송되는 문제(사용자 지시, 2026-08-26) -
 	# dialogue.daily와 같은 requires_alive 필드를 이메일 풀에도 재사용한다.
-	pool = pool.filter(func(entry): return NPCManager.requires_alive_met(entry.get("requires_alive", "")))
-	if pool.is_empty() or randf() > chance:
+	# requires_favorite_food 조건은 event_invite에만 적용된다.
+	var candidates := _eligible_pool_indices(pool, favorite_food_served or category != "event_invite")
+	if candidates.is_empty() or randf() > chance:
 		return false
-	var picked: Dictionary = pool.pick_random()
-	_add_mail(npc_id, category, String(picked.get("title", "")), (picked.get("lines", []) as Array).duplicate())
+	var pool_index := int(candidates.pick_random())
+	var picked: Dictionary = pool[pool_index]
+	_add_mail(npc_id, category, String(picked.get("title", "")), (picked.get("lines", []) as Array).duplicate(), false, {"cat": category, "idx": pool_index})
 	return true
 
 
@@ -729,7 +752,7 @@ func _maybe_send_story_progress(npc_id: String) -> void:
 		if sent.has(trigger_name) or not _is_story_trigger_active(String(trigger_name), npc_id):
 			continue
 		var entry: Dictionary = triggers[trigger_name]
-		_add_mail(npc_id, "story_progress", String(entry.get("title", "")), (entry.get("lines", []) as Array).duplicate())
+		_add_mail(npc_id, "story_progress", String(entry.get("title", "")), (entry.get("lines", []) as Array).duplicate(), false, {"cat": "story_progress", "trigger": String(trigger_name)})
 		sent[trigger_name] = true
 	_sent_story_triggers[npc_id] = sent
 
@@ -798,13 +821,13 @@ func _on_stalker_email_ready(sender_id: String, title: String, lines: Array, qui
 ## MurderManager._on_day_changed() - 2차 살인 알리바이 창이 열려 있는데 3일
 ## 넘게 대화를 못 나눈 NPC가 보내는 재촉 메일.
 func _on_alibi_reminder_ready(npc_id: String, title: String, lines: Array) -> void:
-	_add_mail(npc_id, "alibi_reminder", title, lines)
+	_add_mail(npc_id, "alibi_reminder", title, lines, false, {"cat": "alibi_reminder"})
 
 
 ## NPCManager.memento_reminder_ready 참고 - 추억의 물건 마일스톤이 며칠째
 ## 대화로 소비되지 않은 NPC가 보내는 안전장치 메일. 딱 한 번만 온다.
 func _on_memento_reminder_ready(npc_id: String, title: String, lines: Array) -> void:
-	_add_mail(npc_id, "memento_reminder", title, lines)
+	_add_mail(npc_id, "memento_reminder", title, lines, false, {"cat": "memento_reminder"})
 
 
 ## 반환값은 main.gd의 엔딩 컷신처럼 "이 메일이 실제로 읽힐 때까지 기다리기"가
@@ -814,17 +837,22 @@ func _on_memento_reminder_ready(npc_id: String, title: String, lines: Array) -> 
 ## 이 값을 보고 SFX_STALKER_MAIL 대신 평범한 메일 효과음을 쓴다. 다른 카테고리
 ## 메일들은 그냥 기본값(false)을 쓰면 되므로 새 인자 하나 늘었다고 기존 호출부를
 ## 다 고칠 필요는 없다.
-func _add_mail(npc_id: String, category: String, title: String, lines: Array, quiet: bool = false) -> Dictionary:
+## source는 MailLocalizer가 언어 변경 시 같은 메일을 현재 언어로 다시 찾는 데
+## 쓰는 출처 정보 - 비워두면(사칭/스토커 메일) 저장된 글을 그대로 보여준다.
+func _add_mail(npc_id: String, category: String, title: String, lines: Array, quiet: bool = false, source: Dictionary = {}) -> Dictionary:
 	var entry := {
 		"id": _next_id,
 		"npc_id": npc_id,
 		"category": category,
 		"title": title,
 		"date": get_current_real_date_string(),
+		"date_parts": get_current_date_parts(),
 		"read": false,
 		"lines": lines,
 		"quiet": quiet,
 	}
+	if not source.is_empty():
+		entry["src"] = source
 	_next_id += 1
 	_inbox.append(entry)
 	mail_received.emit(entry)

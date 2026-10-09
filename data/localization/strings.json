@@ -283,13 +283,13 @@
         "es": "E Abrir"
     },
     "E 영업 시작": {
-        "en": "E Open shop",
+        "en": "E Open restaurant",
         "ja": "E 開店する",
         "zh": "E 开始营业",
         "es": "E Abrir el restaurante"
     },
     "E 영업 종료": {
-        "en": "E Close shop",
+        "en": "E Close restaurant",
         "ja": "E 閉店する",
         "zh": "E 打烊",
         "es": "E Cerrar el restaurante"
@@ -1811,5 +1811,29 @@
         "ja": "[思い出の品]",
         "zh": "[回忆之物]",
         "es": "[Objetos de recuerdo]"
+    },
+    "주의": {
+        "en": "Warning",
+        "ja": "注意",
+        "zh": "注意",
+        "es": "Advertencia"
+    },
+    "크레딧": {
+        "en": "Credits",
+        "ja": "クレジット",
+        "zh": "制作名单",
+        "es": "Créditos"
+    },
+    "픽셀 폰트": {
+        "en": "Pixel Fonts",
+        "ja": "ピクセルフォント",
+        "zh": "像素字体",
+        "es": "Fuentes de píxeles"
+    },
+    "이 게임은 일부 이용자에게 불편할 수 있는\n폭력적이고 어두운 내용을 포함하고 있습니다.": {
+        "en": "This game contains violent and dark content\nthat may be uncomfortable for some players.",
+        "ja": "このゲームには一部のプレイヤーにとって\n不快に感じられる暴力的で暗い表現が含まれています。",
+        "zh": "本游戏包含部分玩家可能会\n感到不适的暴力及黑暗内容。",
+        "es": "Este juego contiene contenido violento y oscuro\nque puede resultar incómodo para algunos jugadores."
     }
 }
