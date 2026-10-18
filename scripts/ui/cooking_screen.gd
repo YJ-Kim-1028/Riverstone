@@ -5,6 +5,8 @@ extends Control
 ## RestaurantManager.cook_and_serve()를 호출한다. 창이 좁아 문구를 넣을 자리가 없어서
 ## 결과는 냄비 색상 플래시 + 효과음으로만 표현한다.
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 const READY_TINT_DIM := Color(0.95, 0.92, 0.75, 1.0)
 const READY_TINT_BRIGHT := Color(1.3, 1.25, 1.0, 1.0)
 const DIM_TINT := Color(0.55, 0.55, 0.55, 1.0)
@@ -142,14 +144,7 @@ func _set_open(is_open: bool) -> void:
 	mouse_filter = filter
 	# ConfirmPopup(쥐약 확인창)은 Background의 형제 노드라 여기 안 걸리고,
 	# _set_confirm_open()이 따로 독립적으로 관리한다.
-	_apply_mouse_filter_recursive($Background, filter)
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control and not node.is_in_group(_ALWAYS_IGNORE_MOUSE_GROUP):
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter($Background, filter, [], _ALWAYS_IGNORE_MOUSE_GROUP)
 
 
 func _clear_selected(slot: int) -> void:

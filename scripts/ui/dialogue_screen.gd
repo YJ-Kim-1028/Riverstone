@@ -1,5 +1,7 @@
 extends Control
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 ## NPC와의 일일 대화 화면. main.gd가 npc_talk_interacted 신호로
 ## open_dialogue(npc_id)를 호출한다. NPCManager.get_daily_dialogue()가 돌려주는
 ## 여러 줄을 한 줄씩 보여주다가 마지막 줄에서 E를 누르면 닫힌다.
@@ -529,11 +531,4 @@ func _set_open(is_open: bool) -> void:
 	## 없어서 기본값(STOP)인 채로 다음 선택지 대화 전까지 남아있을 수 있다
 	## (사용자 리포트, 2026-08-29 - 대화 이후 다른 화면 버튼이 안 눌림 조사).
 	## 다른 화면들과 동일하게 재귀로 통일한다.
-	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)

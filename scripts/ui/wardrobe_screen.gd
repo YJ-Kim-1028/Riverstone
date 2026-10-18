@@ -6,6 +6,8 @@ extends Control
 ## 저장 안 함). 색은 고정 스와치 대신 Godot 내장 ColorPicker(SV사각형+색상
 ## 슬라이더만, RGB/헥스/모드탭/샘플러/프리셋은 숨김 - 사용자 확정, 2026-08-30).
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 const FRAME_WIDTH := CharacterAppearance.FRAME_WIDTH
 const FRAME_HEIGHT := CharacterAppearance.FRAME_HEIGHT
 const NONE_LABEL := "없음"
@@ -373,18 +375,11 @@ func _set_open(is_open: bool) -> void:
 		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_is_open = is_open
 	modulate.a = 1.0 if is_open else 0.0
-	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
+	UIUtil.apply_mouse_filter(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
 	## ColorPicker는 드래그 상태를 자체적으로 들고 있어서 mouse_filter만으로는
 	## 안 끊긴다(CLAUDE.md "UI 모달 화면 체크리스트" 6번 참고) - visible도
 	## 같이 꺼야 Godot이 그 상태까지 확실히 놓아버린다.
 	visible = is_open
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
 
 
 func _load_sheets() -> void:

@@ -5,6 +5,8 @@ extends Control
 ## 사망으로 전환된 상점 - shop.md/email.md)만 모아서 상점 이름별로 묶어
 ## 보여준다. 구매는 그대로 ShopManager.buy()를 타므로 익일 09시 배송.
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 signal closed
 
 const ROW_FONT_SIZE := 6
@@ -717,14 +719,7 @@ func _close_color_picker() -> void:
 
 func _set_color_picker_open(is_open: bool) -> void:
 	_color_picker.modulate.a = 1.0 if is_open else 0.0
-	_apply_mouse_filter_recursive(_color_picker, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter(_color_picker, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
 
 
 ## computer_screen.gd가 ShopWindow(=이 화면)를 열고 닫을 때 서브트리 전체를

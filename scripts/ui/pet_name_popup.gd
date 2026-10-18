@@ -6,6 +6,8 @@ extends Control
 ## modulate.a + mouse_filter 재귀 적용)을 따르되, 버튼 두 개 대신 LineEdit
 ## 한 칸 + 확인 버튼 하나로 바꾼 형태.
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 signal name_confirmed(pet_name: String)
 
 const BUTTON_TEXTURE := preload("res://assets/ui/button.png")
@@ -78,14 +80,7 @@ func _set_open(is_open: bool) -> void:
 		_refresh_layout()
 	modulate.a = 1.0 if is_open else 0.0
 	var filter := Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE
-	_apply_mouse_filter_recursive(self, filter)
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter(self, filter)
 
 
 func _on_confirm_pressed() -> void:

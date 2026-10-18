@@ -49,6 +49,8 @@ extends Control
 ## 필드 자체는 SaveData 구조라 그대로 남아있지만 더 이상 이 화면에서 쓰지
 ## 않음).
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 signal confirmed
 
 const BODY_PATH := "res://assets/player/body/player_body.png"
@@ -296,14 +298,7 @@ func _set_open(is_open: bool) -> void:
 		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_is_open = is_open
 	modulate.a = 1.0 if is_open else 0.0
-	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
 
 
 func open(slot: int) -> void:

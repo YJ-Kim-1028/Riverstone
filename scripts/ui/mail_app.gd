@@ -7,6 +7,8 @@ extends Control
 ## 전환한다 (Godot이 ancestor.visible=false였던 적 있는 컨트롤의 폰트/테마를
 ## 잘못 그리는 문제 회피 - shop_screen.gd 참고).
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 signal closed
 
 enum View { INBOX_LIST, SENT_LIST, INVITE_HISTORY, REQUEST_LIST, DETAIL, COMPOSE }
@@ -280,11 +282,4 @@ func _update_portrait(npc_id: String) -> void:
 func _set_active(control: Control, active: bool) -> void:
 	control.modulate.a = 1.0 if active else 0.0
 	var filter := Control.MOUSE_FILTER_STOP if active else Control.MOUSE_FILTER_IGNORE
-	_apply_mouse_filter_recursive(control, filter)
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter(control, filter)

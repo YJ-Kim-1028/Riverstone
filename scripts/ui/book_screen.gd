@@ -13,6 +13,8 @@ extends Control
 ## 것과 동일한 그림)이라, 제목/저자 없이 pages 배열을 2개씩 묶어(왼쪽=짝수
 ## 인덱스, 오른쪽=홀수 인덱스) 한 번에 두 페이지를 보여준다(사용자 지시).
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 @onready var _left_page_label: Label = $ScaledContent/LeftPageLabel
 @onready var _right_page_label: Label = $ScaledContent/RightPageLabel
 @onready var _prev_button: TextureButton = $PrevButton
@@ -94,11 +96,4 @@ func _set_open(is_open: bool) -> void:
 	# collection_screen.gd와 동일한 이유 - 배경/라벨처럼 목록에서 빠뜨린 컨트롤이
 	# 기본값(STOP)으로 남아 닫아도 클릭을 계속 먹는 문제를 막기 위해 서브트리
 	# 전체를 재귀로 처리한다.
-	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)

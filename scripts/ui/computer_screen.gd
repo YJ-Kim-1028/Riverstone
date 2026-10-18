@@ -8,6 +8,8 @@ extends Control
 ## ancestor.visible=false였던 적 있는 컨트롤의 폰트/테마를 잘못 그리는 문제
 ## 회피용 - shop_screen.gd 주석 참고).
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 ## 공범 엔딩(사용자 지시, 2026-08-26 - "닫기나 뒤로가기 눌렀을 때 다음
 ## 노크소리 들리게 하는 게 맞으려나") - 메일 창을 X버튼으로 닫든 ESC로
 ## 나가든 결국 _show_desktop()을 거치므로 거기서 한 번만 신호를 쏜다.
@@ -141,9 +143,4 @@ func _set_active(control: Control, active: bool) -> void:
 ## _quit_confirm_popup 예외와 동일한 패턴. 안 건너뛰면 샵 창을 열고 닫을
 ## 때마다 색상 선택 창의 열림 상태가 덮어써진다.
 func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node == _shop_window.get_color_picker_node():
-		return
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter(node, filter, [_shop_window.get_color_picker_node()])

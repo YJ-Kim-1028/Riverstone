@@ -3,6 +3,8 @@ extends Control
 ## 미니맵 - M으로 열고 닫는다(ESC로도 닫힘). status_screen.gd의 모달 열기/닫기
 ## 패턴(CLAUDE.md UI 모달 mouse_filter 체크리스트)을 그대로 따른다.
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 @onready var _map_view: Control = $Background/Margin/MapView
 
 var _is_open := false
@@ -58,11 +60,4 @@ func close() -> void:
 func _set_open(is_open: bool) -> void:
 	_is_open = is_open
 	modulate.a = 1.0 if is_open else 0.0
-	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)

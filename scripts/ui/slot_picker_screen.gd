@@ -14,6 +14,8 @@ extends Control
 ## 글로벌 클래스 캐시가 오래돼도 항상 동작하도록), 여기서도 enum 대신
 ## 문자열을 그대로 쓴다.
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 signal slot_confirmed(slot: int, mode: String)
 signal closed
 
@@ -131,12 +133,7 @@ func _set_open(is_open: bool) -> void:
 ## 제외하는 것과 동일한 이유 - 이 팝업 하위는 건드리지 않고 자기 자신에게
 ## 맡긴다.
 func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node == _confirm_popup:
-		return
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter(node, filter, [_confirm_popup])
 
 
 func _refresh() -> void:

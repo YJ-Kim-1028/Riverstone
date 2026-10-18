@@ -4,6 +4,8 @@ extends Control
 ## 뜨는 확인창. cooking_screen.gd의 쥐약 확인 팝업과 동일한 스타일/패턴
 ## (button.png 9-슬라이스, modulate.a + mouse_filter로 열고 닫기)을 쓴다.
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 ## 예를 고르면 main.gd가 하루 전환 연출을 재생한다 - 실제 날짜 전환
 ## (TimeManager.sleep_now())은 그 연출 안에서 화면이 까매진 다음에 실행된다.
 signal slept
@@ -64,14 +66,7 @@ func _set_open(is_open: bool) -> void:
 		_refresh_layout()
 	modulate.a = 1.0 if is_open else 0.0
 	var filter := Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE
-	_apply_mouse_filter_recursive(self, filter)
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter(self, filter)
 
 
 func _on_yes_pressed() -> void:

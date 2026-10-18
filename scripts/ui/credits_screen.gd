@@ -6,6 +6,8 @@ extends Control
 ## 볼 수 있는 형태로 포함"을 지키기 위해 추가(사용자 지시, 2026-10-03).
 ## 열고/닫는 구조는 title_settings_screen.gd와 동일한 패턴.
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 const BUTTON_TEXTURE := preload("res://assets/ui/button.png")
 const BUTTON_HOVER_TEXTURE := preload("res://assets/ui/button_hover.png")
 const BUTTON_TEXT_COLOR := Color(0.25, 0.15, 0.08)
@@ -59,11 +61,4 @@ func _set_open(is_open: bool) -> void:
 		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_is_open = is_open
 	modulate.a = 1.0 if is_open else 0.0
-	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)

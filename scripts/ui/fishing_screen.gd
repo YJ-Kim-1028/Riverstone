@@ -8,6 +8,8 @@ extends Control
 ## 닫기는 버튼 없이 ESC 전용(사용자 확정 - 시간 지나면 알아서 닫히니 X 버튼은
 ## 필요 없다고 판단, collection_screen.gd와 같은 방식).
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 const RESULT_HOLD_SECONDS := 1.5
 
 @onready var _spawn_points: Node = $Background/SpawnPoints
@@ -143,7 +145,7 @@ func _set_open(is_open: bool) -> void:
 	if is_open:
 		_refresh_layout()
 	modulate.a = 1.0 if is_open else 0.0
-	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
+	UIUtil.apply_mouse_filter(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
 	# Fish/Icon은 물고기 버튼(Fish) 전체를 덮는 순전히 그림용 오버레이라
 	# 항상 클릭을 통과시켜야 한다(.tscn에 mouse_filter=IGNORE로 지정해둠) -
 	# 위 재귀 호출이 이걸 STOP으로 덮어써버리면 Icon이 클릭을 먼저 먹어서
@@ -151,10 +153,3 @@ func _set_open(is_open: bool) -> void:
 	# 리포트, 2026-08-27: "낚시 물고기 클릭이 아예 안돼") - 재귀 적용 후
 	# 다시 IGNORE로 되돌린다.
 	_fish.get_node("Icon").mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)

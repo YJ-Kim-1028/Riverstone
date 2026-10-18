@@ -8,6 +8,8 @@ extends Control
 ## 인벤토리 그리드는 kitchen_screen.gd와 동일하게 "전체 표시 + disabled"
 ## 방식(사용자 확정) - 옛 cooking_screen처럼 목록 자체를 필터링해서 숨기지 않는다.
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 const SlotScene := preload("res://scenes/ui/inventory_slot.tscn")
 const SCROLLBAR_WIDTH := 4
 const SELECTABLE_CATEGORY := "cooked_ingredient"
@@ -139,14 +141,7 @@ func _set_open(is_open: bool) -> void:
 	modulate.a = 1.0 if is_open else 0.0
 	var filter := Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE
 	mouse_filter = filter
-	_apply_mouse_filter_recursive($Background, filter)
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control and not node.is_in_group(_ALWAYS_IGNORE_MOUSE_GROUP):
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter($Background, filter, [], _ALWAYS_IGNORE_MOUSE_GROUP)
 
 
 ## 슬롯을 눌러서 비우면(SlotA/SlotB 클릭) 빼뒀던 재료를 인벤토리로 돌려준다.
@@ -184,7 +179,7 @@ func _refresh_grid() -> void:
 		var slot_instance := SlotScene.instantiate() as TextureButton
 		_grid.add_child(slot_instance)
 		slot_instance.call("setup", i, slots[i])
-		# _set_open()의 _apply_mouse_filter_recursive()가 열릴 때 $Background
+		# _set_open()의 UIUtil.apply_mouse_filter()가 열릴 때 $Background
 		# 밑의 모든 Control을 STOP으로 덮어써서, 이 그리드 슬롯의 Icon/CountLabel도
 		# (SlotA/SlotB와 달리 애초에 그룹 태그가 없어) 클릭을 가로채 슬롯 본체
 		# TextureButton까지 못 가게 막고 있었다 - 아이콘을 클릭하면 선택이

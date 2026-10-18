@@ -12,6 +12,8 @@ extends Control
 ## 판단). JukeboxManager.get_unlocked_song_ids()가 돌려주는 목록만 순환 대상 -
 ## 아직 해금 안 된 곡(음반을 안 산 곡)은 화살표로도 안 보인다.
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 @onready var _prev_button: TextureButton = $Background/Margin/HBox/PrevButton
 @onready var _next_button: TextureButton = $Background/Margin/HBox/NextButton
 @onready var _icon: TextureRect = $Background/Margin/HBox/Icon
@@ -78,11 +80,4 @@ func _set_open(is_open: bool) -> void:
 		_refresh_layout()
 	_is_open = is_open
 	modulate.a = 1.0 if is_open else 0.0
-	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)

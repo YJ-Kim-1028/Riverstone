@@ -237,8 +237,11 @@ shop_screen/slot_picker_screen/dialogue_screen에서 각각 발견·수정). 원
 `Control.mouse_filter`다 - 새 화면을 만들 때마다 아래를 지킬 것.
 
 1. 화면을 열고/닫을 때 자기 자신과 모든 자식의 `mouse_filter`를 재귀적으로
-   STOP(열림)/IGNORE(닫힘)로 맞춘다 - `_apply_mouse_filter_recursive(self, filter)`
-   패턴, 프로젝트 전역 화면 대부분이 이미 이렇게 되어 있으니 그대로 복사해서 쓴다.
+   STOP(열림)/IGNORE(닫힘)로 맞춘다 - 공통 함수 `UIUtil.apply_mouse_filter(self, filter)`
+   (`scripts/ui/ui_util.gd`)를 쓴다. 파일 맨 위에
+   `const UIUtil := preload("res://scripts/ui/ui_util.gd")`를 두고 호출한다.
+   **이 함수를 화면 스크립트에 복사하지 말 것** - 예전엔 28개 화면에 복사돼
+   있었고(2026-10 `UIUtil`로 통합), 한 곳만 빠뜨려도 같은 버그가 재발했다.
 2. **순서가 중요하다.** 동적으로 생성되는 자식(인벤토리 슬롯 등)이 있는 화면은,
    그 자식을 만들기 **전에** 먼저 연다(`_set_open(true)`로 STOP을 맞춘 뒤에
    자식을 생성). 반대로 하면(자식을 먼저 만들고 나중에 STOP을 덮어씌우면) 문제가
@@ -253,9 +256,14 @@ shop_screen/slot_picker_screen/dialogue_screen에서 각각 발견·수정). 원
    않는다 - 재귀 호출 **뒤에** 그 자식만 다시 IGNORE로 되돌려야 한다
    (kitchen_screen.gd의 StatusIcon/Icon, fishing_screen.gd의 Fish/Icon 사례).
 4. 팝업 안에 독립적으로 열고 닫히는 서브 팝업(색상 선택기 등)이 있으면, 부모
-   화면의 재귀 호출에서 그 서브 팝업 자신은 건너뛴다(`if child == _popup: continue`
-   를 자식 순회 안에 두고, 함수 진입부가 아니라) - 그래야 서브 팝업이 자기 상태를
-   스스로 관리할 수 있다(slot_picker_screen.gd 사례).
+   화면의 재귀 호출에서 그 서브 팝업 자신은 건너뛴다 -
+   `UIUtil.apply_mouse_filter(self, filter, [_popup])`처럼 세 번째 인자 `skip`에
+   넣는다(자식으로 만났을 때만 건너뛰고, 그 서브 팝업을 직접 `node`로 넘겨 호출하는
+   경로는 그대로 동작한다). 그래야 서브 팝업이 자기 상태를 스스로 관리할 수 있다
+   (slot_picker_screen.gd 사례). 화면별로 건너뛰기 대상이 다른 곳(slot_picker/
+   status/shop/computer)은 `_apply_mouse_filter_recursive()` 껍데기 함수에 그
+   화면의 `skip` 목록과 이유 주석을 남겨 뒀다. 클릭이 통과해야 하는 장식용
+   노드를 그룹으로 지키는 화면(cooking/serving)은 네 번째 인자 `keep_group`을 쓴다.
 5. 새 화면을 만들면 헤드리스로 열기/닫기를 검증한다 - 격리된 테스트 씬으로
    인스턴스화한 뒤 `open()`/`close()`를 호출하고 모든 자식의 `mouse_filter`를
    재귀로 덤프해서 닫힌 상태에 STOP이 하나도 안 남았는지 확인한다. `main.tscn`은

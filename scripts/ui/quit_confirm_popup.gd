@@ -4,6 +4,8 @@ extends Control
 ## sleep_confirm_popup.gd와 완전히 동일한 패턴(button.png 9-슬라이스,
 ## modulate.a + mouse_filter로 열고 닫기).
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 signal confirmed
 ## "아니오"/ESC로 취소했을 때만 쏜다 - status_screen.gd가 ESC 단독 오픈
 ## 경로(open_quit_confirm())에서 자신의 modulate를 임시로 되돌리는 데 쓴다.
@@ -73,14 +75,7 @@ func _set_open(is_open: bool) -> void:
 		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	modulate.a = 1.0 if is_open else 0.0
 	var filter := Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE
-	_apply_mouse_filter_recursive(self, filter)
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter(self, filter)
 
 
 func _on_yes_pressed() -> void:

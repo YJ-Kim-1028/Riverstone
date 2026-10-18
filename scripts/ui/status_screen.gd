@@ -9,6 +9,8 @@ extends Control
 ## 진행 상황이 날아간다 - 확인 팝업에서 "예"를 누르면 현재 슬롯에 한 번
 ## 저장한 뒤 종료한다.
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 @onready var _equipment_panel: Control = $Background/Margin/HBox/ContentArea/EquipmentPanel
 @onready var _affection_panel: Control = $Background/Margin/HBox/ContentArea/AffectionPanel
 @onready var _settings_panel: Control = $Background/Margin/HBox/ContentArea/SettingsPanel
@@ -182,12 +184,7 @@ func hide_tooltip() -> void:
 ## 2026-08-27 - "탭 열고 닫았다가 하면 탭에 있는 다른 버튼들이 안눌리잖아").
 ## 이 팝업 하위는 건드리지 않고 자기 자신에게 맡긴다.
 func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node == _quit_confirm_popup:
-		return
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter(node, filter, [_quit_confirm_popup])
 
 
 func _show_tab(index: int) -> void:

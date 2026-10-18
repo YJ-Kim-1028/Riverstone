@@ -6,6 +6,8 @@ extends Control
 ## 플레이테스트 피드백 1/15번). 열고/닫는 구조는 language_settings_screen.gd와
 ## 동일한 패턴.
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 signal closed
 
 const BUTTON_TEXTURE := preload("res://assets/ui/button.png")
@@ -65,11 +67,4 @@ func _set_open(is_open: bool) -> void:
 		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_is_open = is_open
 	modulate.a = 1.0 if is_open else 0.0
-	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)

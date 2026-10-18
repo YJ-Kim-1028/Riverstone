@@ -6,6 +6,8 @@ extends Control
 ## 프로젝트는 확인창마다 이런 작은 전용 스크립트를 각각 두는 관례라 그대로
 ## 따랐다(공용 팝업 하나를 여러 화면이 돌려쓰지 않음).
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 signal confirmed
 
 const BUTTON_TEXTURE := preload("res://assets/ui/button.png")
@@ -65,14 +67,7 @@ func _set_open(is_open: bool) -> void:
 		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	modulate.a = 1.0 if is_open else 0.0
 	var filter := Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE
-	_apply_mouse_filter_recursive(self, filter)
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter(self, filter)
 
 
 func _on_yes_pressed() -> void:

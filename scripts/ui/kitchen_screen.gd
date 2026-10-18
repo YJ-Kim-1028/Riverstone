@@ -11,6 +11,8 @@ extends Control
 ## 놓여서 "재료가 기구 위에 놓인" 느낌을 내고, 조리 중에는 살짝 흔들린다
 ## (사용자 피드백 - 슬롯에 넣는 느낌만 나고 요리하는 느낌이 안 난다고 함).
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 const SlotScene := preload("res://scenes/ui/inventory_slot.tscn")
 const SCROLLBAR_WIDTH := 4
 
@@ -210,7 +212,7 @@ func _set_open(is_open: bool) -> void:
 	if is_open:
 		_refresh_layout()
 	modulate.a = 1.0 if is_open else 0.0
-	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
+	UIUtil.apply_mouse_filter(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
 	# StatusIcon/Icon은 상태 아이콘 버튼 전체를 덮는 순전히 그림용 오버레이라
 	# 항상 클릭을 통과시켜야 한다(.tscn에 mouse_filter=IGNORE로 지정해둠) -
 	# 위 재귀 호출이 이걸 STOP으로 덮어써버리면 Icon이 클릭을 먼저 먹어서
@@ -223,13 +225,6 @@ func _set_open(is_open: bool) -> void:
 	## 체크리스트 3번과 동일한 패턴).
 	_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_tooltip_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
 
 
 func current_station_id() -> String:

@@ -10,6 +10,8 @@ extends Control
 ## 열고/닫는 구조는 quit_confirm_popup.gd와 동일한 패턴(9-슬라이스 패널,
 ## modulate.a + mouse_filter 재귀 적용).
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 const BUTTON_TEXTURE := preload("res://assets/ui/button.png")
 const BUTTON_HOVER_TEXTURE := preload("res://assets/ui/button_hover.png")
 const BUTTON_TEXT_COLOR := Color(0.25, 0.15, 0.08)
@@ -60,11 +62,4 @@ func _set_open(is_open: bool) -> void:
 	if is_open:
 		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	modulate.a = 1.0 if is_open else 0.0
-	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)

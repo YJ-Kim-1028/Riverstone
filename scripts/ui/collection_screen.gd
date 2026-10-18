@@ -14,6 +14,8 @@ extends Control
 ## 열고 닫기" 패턴을 쓴다 (Godot이 ancestor.visible=false였던 적 있는
 ## 컨트롤의 폰트/테마를 잘못 그리는 문제 회피용).
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 const SLOTS_PER_PAGE := 9
 const SLOT_SIZE := 6
 const TOOLTIP_FONT_SIZE := 5
@@ -130,7 +132,7 @@ func open() -> void:
 	_recipe_page = 0
 	_memento_page = 0
 	# 순서 중요: _set_open(true)를 먼저 호출해야 한다 - 그 안의
-	# _apply_mouse_filter_recursive()가 서브트리 전체를 재귀로 STOP으로
+	# UIUtil.apply_mouse_filter()가 서브트리 전체를 재귀로 STOP으로
 	# 덮어쓰는데, 이걸 그리드를 채운 "다음"에 하면 _build_slot()이 획득한
 	# 레시피 아이콘에 일부러 준 MOUSE_FILTER_IGNORE(슬롯 밑 툴팁이 보이게
 	# 하려고)까지 STOP으로 덮어써버려서, 아이콘이 슬롯 대신 마우스를 가로채
@@ -175,7 +177,7 @@ func _set_open(is_open: bool) -> void:
 	# 닫아도 그 배경이 계속 클릭을 먹어서 같은 자리의 컴퓨터 창이 하나도 안
 	# 눌리는 버그가 있었다. computer_screen.gd와 동일하게 전체 서브트리를
 	# 재귀적으로 순회해서 빠짐없이 처리한다.
-	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
+	UIUtil.apply_mouse_filter(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
 	# 위 재귀 호출이 툴팁 패널도 같이 STOP으로 덮어써버리므로(열려있는 동안
 	# 클릭을 가로채면 안 됨) 매번 다시 IGNORE로 되돌린다. 닫을 때는 _process()가
 	# 더 이상 안 돌아서 스스로 안 사라지니 여기서 직접 숨긴다(ESC로 닫아도
@@ -184,13 +186,6 @@ func _set_open(is_open: bool) -> void:
 	_tooltip_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if not is_open:
 		_tooltip_panel.visible = false
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
 
 
 func _change_recipe_page(direction: int) -> void:

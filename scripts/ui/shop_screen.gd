@@ -4,6 +4,8 @@ extends Control
 ## 신호로 open_shop(shop_id)를 호출한다. 판매 목록이 없는 상품은 shop.md 문서
 ## 그대로 planned_stock에만 있고 stock은 비어있을 수 있다 (data/shop/README.md).
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 const ROW_FONT_SIZE := 6
 const DESCRIPTION_FONT_SIZE := 4
 
@@ -626,9 +628,4 @@ func _set_stall_picker_open(is_open: bool) -> void:
 ## 기존 경로(_set_color_picker_open() 등)는 그대로 동작해야 하므로 진입점
 ## 자체는 걸러내지 않는다.
 func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		if child == _color_picker or child == _stall_picker:
-			continue
-		_apply_mouse_filter_recursive(child, filter)
+	UIUtil.apply_mouse_filter(node, filter, [_color_picker, _stall_picker])

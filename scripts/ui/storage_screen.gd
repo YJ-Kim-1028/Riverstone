@@ -16,6 +16,8 @@ extends Control
 ## 그 슬롯의 전체 스택을 옮긴다(부분 이동/분할 없음 - 이 프로젝트의 다른
 ## 드래그 상호작용과 동일).
 
+const UIUtil := preload("res://scripts/ui/ui_util.gd")
+
 const SlotScene := preload("res://scenes/ui/inventory_slot.tscn")
 const SCROLLBAR_WIDTH := 4
 const BAG_SOURCE := "bag"
@@ -109,19 +111,12 @@ func _set_open(is_open: bool) -> void:
 	else:
 		_hide_tooltip()
 	modulate.a = 1.0 if is_open else 0.0
-	_apply_mouse_filter_recursive(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
+	UIUtil.apply_mouse_filter(self, Control.MOUSE_FILTER_STOP if is_open else Control.MOUSE_FILTER_IGNORE)
 	## Tooltip은 장식용(클릭이 통과해야 함)이라 위 재귀 호출이 STOP으로
 	## 덮어쓴 걸 다시 IGNORE로 되돌린다 - CLAUDE.md UI 모달 mouse_filter
 	## 체크리스트 3번과 동일한 패턴(equipment_panel.gd _refresh_inventory() 참고).
 	_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_tooltip_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-
-func _apply_mouse_filter_recursive(node: Node, filter: int) -> void:
-	if node is Control:
-		(node as Control).mouse_filter = filter
-	for child in node.get_children():
-		_apply_mouse_filter_recursive(child, filter)
 
 
 func current_cell() -> Vector2i:
